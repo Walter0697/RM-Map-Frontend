@@ -1,26 +1,28 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import {
+  Switch,
+  Route,
+} from 'react-router-dom' 
+
+import '@tomtom-international/web-sdk-maps/dist/maps.css'
+
+import Login from './pages/Login'
+import Test from './pages/Test'
+import SearchPage from './pages/SearchPage'
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+      <Route render={({ location }) => (
+        <Switch>
+          <Route exact path="/" component={Login} />
+          <Route path="/search" component={SearchPage} />
+          <Route path="/test2" component={Test} />
+          <Route path="/test3" component={SearchPage} />
+          <Route path="/test4" component={Test} />
+          <Route path="/test5" component={Test} />
+        </Switch>
+      )} />
+  )
 }
 
-export default App;
+export default App

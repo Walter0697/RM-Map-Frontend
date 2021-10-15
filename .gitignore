@@ -4,9 +4,14 @@
 /node_modules
 /.pnp
 .pnp.js
+.env
 
 # testing
 /coverage
+
+# for myself
+/src/demo
+TODO.md
 
 # production
 /build
