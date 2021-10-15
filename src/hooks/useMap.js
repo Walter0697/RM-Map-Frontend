@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+
 import tt from '@tomtom-international/web-sdk-maps'
 import maphelper from '../components/map/maphelper'
 
@@ -9,6 +10,7 @@ function useMap(
     mapRef,
     defaultLocation,
     defaultZoom,
+    centerFailHandler,
 ) {
     // keep tracking on the location from the api
     const [ mapLocation, setMapLocation ] = useObject({
@@ -105,7 +107,7 @@ function useMap(
     }
 
     const failedCenter = () => {
-        console.log('failed to get center')
+        centerFailHandler && centerFailHandler()
     }
 
     // reset the markers from a list of location

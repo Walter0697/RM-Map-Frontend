@@ -9,15 +9,18 @@ import {
     config,
     animated,
 } from '@react-spring/web'
+import SearchBox from './searchbox/SearchBox'
+import AutoHideAlert from '../AutoHideAlert'
 
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 
 import useMap from '../../hooks/useMap'
-import useDebounce from '../../hooks/useDebounce'
+import useBoop from '../../hooks/useBoop'
 
 import maphelper from './maphelper'
 import apis from '../../apis'
 
+// TODO : add a fix center
 // TODO : add button to set center location as event location
 // TODO : add question mark?
 // TODO : when click on marker, set map to center
@@ -29,6 +32,7 @@ function SearchMap() {
     // searching related
     const [ searchText, setSearch ] = useState('') 
     const [ viewSearchContent, setViewContent ] = useState(false)
+    const [ hasSearchContent, setHasContent ] = useState(false)
     const { searchContentHeight, centerButtonBottom, mapSearchButtonBottom } = useSpring({
         //config: config.molasses,
         config: config.wobbly,
@@ -43,6 +47,9 @@ function SearchMap() {
             mapSearchButtonBottom: ( viewSearchContent ) ? '55%' : '20%',
         },
     })
+
+    const [ loading, setLoading ] = useState(false)
+    const [ gpsFail, setGPSFail ] = useBoop(3000)
 
     // if distance is long enough from the previous search location, then button will be shown
     const [ showMapSearchButton, setShowButton ] = useState(false)
@@ -64,11 +71,12 @@ function SearchMap() {
         resetMarkers,
      ] = useMap(
         mapElement,
-        { 
-            longitude: 0, 
-            latitude: 0, 
+        {       
+            longitude: 114.1375695502623, 
+            latitude: 22.33896093804016, 
         },
         13,
+        setGPSFail,
     )
 
     // function to run after initializing map
@@ -80,40 +88,22 @@ function SearchMap() {
 
     // keep track on map location to see if button should show
     useEffect(() => {
-        if (Math.abs(mapLocation.lon - searchingLocation.lon) > 0.05 ||
-            Math.abs(mapLocation.lat - searchingLocation.lat) > 0.05) {
+        if (Math.abs(mapLocation.lon - searchingLocation.lon) > 0.01 ||
+            Math.abs(mapLocation.lat - searchingLocation.lat) > 0.01) {
             setShowButton(true)
         } else {
-            setShowButton(true)
+            setShowButton(false)
         }
     }, [ mapLocation, searchingLocation ])
 
-    // text change handler
-    const onSearchTextChange = (e) => {
-        setSearch(e.target.value)
+    const onSearchTextSubmitHandler = async (text) => {
+        setLoading(true)
+        let result = await apis.maps.search(text, searchingLocation.lon, searchingLocation.lat, 10)
+        console.log(result)
+        setLoading(false)
     }
-
-    // debounce to fetch search result from place api
-    const fetchSearchResult = async () => {
-        if (searchText) {
-            let result = await apis.maps.search(searchText, searchingLocation.lon, searchingLocation.lat)
-            console.log(result)
-            if (result.status === 200) {
-                console.log(result.data.results)
-                resetMarkers(result.data.results)
-            }
-        } else {
-            console.log('search text is empty')
-        }
-    }
-    useDebounce(fetchSearchResult, 1000, [searchText])
 
     // set if search list should be shown
-    // TODO: when search click enter, then search -> right hand side from x to loading icon
-    // after fetch, show bar
-    // when user click map again, if click marker, show marker info
-    // if click empty, hide bar
-    // after first search, have a button to show list (some margin for that as well)
     const showSearchList = () => {
         setViewContent(true)
     }
@@ -133,22 +123,20 @@ function SearchMap() {
                     position: 'absolute',
                 }}
             />
-            <TextField
-                variant="outlined"
-                label="Search..."
-                onFocus={showSearchList}
-                onBlur={hideSearchList}
-                style={{ 
-                    position: 'absolute',
-                    width: '90%',
-                    background: 'white',
-                    marginTop: '30px',
-                    marginLeft: '5%',
-                    boxShadow: '2px 2px 6px',
-                }}
-                value={searchText}
-                onChange={onSearchTextChange}
-            />
+            <div style={{
+                position: 'absolute',
+                paddingTop: '30px',
+                paddingLeft: '5%',
+                width: '100%',
+            }}>
+                <SearchBox 
+                    searchText={searchText}
+                    setSearch={setSearch}
+                    location={searchingLocation}
+                    submitHandler={onSearchTextSubmitHandler}
+                    isLoading={loading}
+                />
+            </div>
 
             <animated.div
                 style={{
@@ -158,7 +146,7 @@ function SearchMap() {
                 }}
             >
                 <IconButton
-                    size="small"
+                    size="large"
                     style={{
                         backgroundColor: 'white',
                         boxShadow: '2px 2px 6px',
@@ -180,7 +168,7 @@ function SearchMap() {
             >
                 <Button
                     variant="contained"
-                    size="large"
+                    size="middle"
                     style={{
                         backgroundColor: '#c1fdd1',
                         color: '#002976',
@@ -192,6 +180,13 @@ function SearchMap() {
                     Search This Area
                 </Button>
             </animated.div>
+
+            <AutoHideAlert
+                open={gpsFail}
+                type={'warning'}
+                message={'Cannot retrieve GPS information'}
+                timing={3000}
+            />
         </>
     )
 }
