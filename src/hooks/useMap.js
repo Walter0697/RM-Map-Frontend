@@ -34,6 +34,7 @@ function useMap(
     // current markers on the map
     const [ locationList, setLocation ] = useState([])
     const [ markerList, setMarkers ] = useState([])
+    const [ clickedMarker, setClickedMarker ] = useState(-1) // for user to click on the marker and set message to the parent layout
     // the map object from the api
     const [ map, setMap ] = useState(null)
 
@@ -75,6 +76,7 @@ function useMap(
         let timer = null
         if (map) {
             map.on('move', getAPIMapLocation)
+            map.on('click', (e) => { console.log(e) })
             timer = window.setTimeout(() => {
                 setMapToCenter()
             }, 1000)
@@ -82,6 +84,7 @@ function useMap(
         return () => {
             if (map) {
                 map.off('move')
+                map.off('click')
             }
             if (timer) {
                 clearTimeout(timer)
@@ -89,6 +92,33 @@ function useMap(
         }
     }, [map])
 
+    const getAPIMapLocation = () => {
+        const center = map.getCenter()
+        setMapLocation('lat', center.lat)
+        setMapLocation('lon', center.lng)
+    }
+
+    // callback function for clicking marker
+    const onMarkerClick = (index) => {
+        if (index === -1) return
+        let selectedLocation = null
+        let list = []
+        locationList.forEach(item => {
+            if (item.id === index) {
+                item.selected = true
+                selectedLocation = item
+            } else {
+                item.selected = false
+            }
+            list.push(item)
+        })
+
+        setLocation(list)
+        setClickedMarker(selectedLocation)
+        updateMapLocation(selectedLocation.location)
+    }
+
+    // reset markers whenever location changes
     useEffect(() => {
         setLocationToMarker()
     }, [locationList])
@@ -108,24 +138,24 @@ function useMap(
             let marker = null
             if (item.selected) {
                 marker = maphelper.markers.getTesting(map, [
-                    item.location.lon,
-                    item.location.lat,
-                ])
+                        item.location.lon,
+                        item.location.lat,
+                    ],
+                    onMarkerClick,
+                    item.id,
+                )
             } else {
                 marker = maphelper.markers.getMarker(map, [
-                    item.location.lon,
-                    item.location.lat,
-                ])
+                        item.location.lon,
+                        item.location.lat,
+                    ],
+                    onMarkerClick,
+                    item.id,
+                )
             }
             markers.push(marker)
         })
         setMarkers(() => markers)
-    }
-
-    const getAPIMapLocation = () => {
-        const center = map.getCenter()
-        setMapLocation('lat', center.lat)
-        setMapLocation('lon', center.lng)
     }
 
     // get user location and set the map center
@@ -194,6 +224,8 @@ function useMap(
         setMapToCenter,
         setSearchingToViewing,
         setLocation,
+        clickedMarker,
+        setClickedMarker,
      ]
 }
 

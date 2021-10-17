@@ -90,13 +90,15 @@ function SearchMap() {
         setMapToCenter,
         setSearchingToViewing,
         setLocation,
+        clickedMarker,
+        setClickedMarker,
      ] = useMap(
         mapElement,
         {       
             longitude: 114.1375695502623, 
             latitude: 22.33896093804016, 
         },
-        13,
+        15,
         setGPSFail,
     )
 
@@ -110,12 +112,29 @@ function SearchMap() {
         }
     }, [ mapLocation, searchingLocation ])
 
+      // for handling user clicking map marker instead of bottom list
+    useEffect(() => {
+        if (!clickedMarker) return
+        setSelectedSearch(clickedMarker.id)
+    }, [clickedMarker])
+
     // select the location and set center to that location
     const setSelectedSearchItem = (selectedIndex) => {
+        setClickedMarker(null)
         setSelectedSearch(selectedIndex)
-        if (selectedIndex === -1) return
-        let selectedLocation = null
+
         let resultList = []
+        if (selectedIndex === -1) {
+            searchResults.forEach(item => {
+                item.selected = false
+                resultList.push(item)
+            })
+            setLocation(resultList)
+            return
+        }
+
+        let selectedLocation = null
+        
         searchResults.forEach(item => {
             if (item.id === selectedIndex) {
                 item.selected = true
@@ -124,7 +143,7 @@ function SearchMap() {
                 item.selected = false
             }
             resultList.push(item)
-        });
+        })
         
         setLocation(resultList)
         updateMapLocation(selectedLocation)
@@ -147,6 +166,10 @@ function SearchMap() {
                         location: item.position,
                         address: address,
                         category: item.poi.categories[0],
+                        details: {
+                            poi: item.poi,
+                            address: item.address,
+                        }
                     })
                     id++
                 })
@@ -159,7 +182,7 @@ function SearchMap() {
                 setViewContent(true)
 
                 // change color whenever markers are active
-        setHasContent(true)
+                setHasContent(true)
             } else {
                 // TODO: pop up an alert
             }
@@ -198,6 +221,7 @@ function SearchMap() {
                     hasContent={hasSearchContent}
                     shouldShowList={viewSearchContent}
                     setShowList={() => setViewContent(true)}
+                    setHideList={() => setViewContent(false)}
                     selectedIndex={selectedSearch}
                     setSelectedIndex={setSelectedSearchItem}
                 />
