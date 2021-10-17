@@ -9,7 +9,8 @@ import {
     config,
     animated,
 } from '@react-spring/web'
-import SearchBox from './searchbox/SearchBox'
+import SearchBox from './mappart/SearchBox'
+import LocationContent from './mappart/LocationContent'
 import AutoHideAlert from '../AutoHideAlert'
 
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
@@ -20,10 +21,9 @@ import useBoop from '../../hooks/useBoop'
 import maphelper from './maphelper'
 import apis from '../../apis'
 
-// TODO : add a fix center
+// TODO : add a fix center, maybe later
 // TODO : add button to set center location as event location
 // TODO : add question mark?
-// TODO : when click on marker, set map to center
 
 function SearchMap() {
     // reference of the div to render the map
@@ -31,24 +31,45 @@ function SearchMap() {
 
     // searching related
     const [ searchText, setSearch ] = useState('') 
+    // for controlling the size of the map and search content
     const [ viewSearchContent, setViewContent ] = useState(false)
-    const [ hasSearchContent, setHasContent ] = useState(false)
-    const { searchContentHeight, centerButtonBottom, mapSearchButtonBottom } = useSpring({
+    const [ hasSearchContent, setHasContent ] = useState(false)    
+    const { 
+        //mapContentHeight, 
+        mapContentTransform,
+        listContentHeight,
+        listContentOpacity,
+        centerButtonBottom, 
+        mapSearchButtonBottom,
+     } = useSpring({
         //config: config.molasses,
         config: config.wobbly,
         from: { 
-            searchContentHeight: '90%',
+            //mapContentHeight: '90%',
+            mapContentTransform: 'translate(0, 0)',
+            listContentHeight: '0%',
+            listContentOpacity: 0,
             centerButtonBottom: '15%',
             mapSearchButtonBottom: '20%',
         },
         to: {
-            searchContentHeight: ( viewSearchContent ) ? '50%' : '90%',
-            centerButtonBottom: ( viewSearchContent ) ? '55%' : '15%',
-            mapSearchButtonBottom: ( viewSearchContent ) ? '55%' : '20%',
+            //mapContentHeight: ( viewSearchContent ) ? '50%' : (hasSearchContent ? '85%' : '90%'),
+            mapContentTransform: ( viewSearchContent ) ? 'translate(0, -15%)' : 'translate(0, 0)',
+            listContentHeight: ( viewSearchContent ) ? '40%' : (hasSearchContent ? '7%' : '0%'),
+            listContentOpacity: ( viewSearchContent || hasSearchContent ) ? 1 : 0,
+            centerButtonBottom: ( viewSearchContent ) ? '55%' : (hasSearchContent ? '20%' : '15%'),
+            mapSearchButtonBottom: ( viewSearchContent ) ? '55%' : (hasSearchContent ? '25%' : '20%'),
         },
     })
 
+    // search content
+    const [ searchResults, setSearchResults ] = useState([])
+    const [ selectedSearch, setSelectedSearch ] = useState(-1)
+
+    // show loading icon for search box
     const [ loading, setLoading ] = useState(false)
+
+    // alert related
     const [ gpsFail, setGPSFail ] = useBoop(3000)
 
     // if distance is long enough from the previous search location, then button will be shown
@@ -64,11 +85,11 @@ function SearchMap() {
     const [ 
         map, 
         mapLocation,
-        currentLocation,
+        updateMapLocation,
         searchingLocation,
         setMapToCenter,
         setSearchingToViewing,
-        resetMarkers,
+        setLocation,
      ] = useMap(
         mapElement,
         {       
@@ -78,13 +99,6 @@ function SearchMap() {
         13,
         setGPSFail,
     )
-
-    // function to run after initializing map
-    useEffect(() => {
-       if (map) {
-           const marker = maphelper.markers.getMarker(map, [currentLocation.lon, currentLocation.lat])
-       }
-    }, [ map ])
 
     // keep track on map location to see if button should show
     useEffect(() => {
@@ -96,42 +110,112 @@ function SearchMap() {
         }
     }, [ mapLocation, searchingLocation ])
 
+    // select the location and set center to that location
+    const setSelectedSearchItem = (selectedIndex) => {
+        setSelectedSearch(selectedIndex)
+        if (selectedIndex === -1) return
+        let selectedLocation = null
+        let resultList = []
+        searchResults.forEach(item => {
+            if (item.id === selectedIndex) {
+                item.selected = true
+                selectedLocation = item.location
+            } else {
+                item.selected = false
+            }
+            resultList.push(item)
+        });
+        
+        setLocation(resultList)
+        updateMapLocation(selectedLocation)
+    }
+
+    // call api for requesting the nearby location
     const onSearchTextSubmitHandler = async (text) => {
         setLoading(true)
         let result = await apis.maps.search(text, searchingLocation.lon, searchingLocation.lat, 10)
+        if (result.status === 200) {
+            const list = result.data.results
+            if (list.length !== 0) {
+                let output = []
+                let id = 0
+                list.forEach(item => {
+                    const address = (item.address.streetNumber) ? `${item.address.streetNumber} ${item.address.streetName}` : item.address.streetName
+                    output.push({
+                        id: id,
+                        title: item.poi.name,
+                        location: item.position,
+                        address: address,
+                        category: item.poi.categories[0],
+                    })
+                    id++
+                })
+
+                // resetMarkers(output)
+                setLocation(output)
+                // set for bottom result list
+                setSearchResults(output)
+                setSelectedSearch(-1)
+                setViewContent(true)
+
+                // change color whenever markers are active
+        setHasContent(true)
+            } else {
+                // TODO: pop up an alert
+            }
+        } else {
+            // TODO: pop up an alert
+        }
         console.log(result)
         setLoading(false)
     }
 
-    // set if search list should be shown
-    const showSearchList = () => {
-        setViewContent(true)
-    }
-
-    const hideSearchList = () => {
-        setViewContent(false)
-    }
-
     return (
         <>
+            {/* main layout */}
             <animated.div 
                 ref={mapElement} 
                 className="mapDiv"
                 style={{ 
-                    height: searchContentHeight,
-                    width: '100%', 
                     position: 'absolute',
+                    height: '90%',
+                    transform: mapContentTransform,
+                    //height: mapContentHeight,
+                    width: '100%', 
                 }}
             />
+            <animated.div
+                style={{
+                    position: 'absolute',
+                    bottom: '10%',
+                    height: listContentHeight,
+                    opacity: listContentOpacity,
+                    width: '100%',
+                }}
+            >
+                <LocationContent 
+                    locationList={searchResults}
+                    hasContent={hasSearchContent}
+                    shouldShowList={viewSearchContent}
+                    setShowList={() => setViewContent(true)}
+                    selectedIndex={selectedSearch}
+                    setSelectedIndex={setSelectedSearchItem}
+                />
+            </animated.div>
+
+
+            {/* component inside map */}
             <div style={{
                 position: 'absolute',
-                paddingTop: '30px',
+                paddingTop: '50px',
                 paddingLeft: '5%',
                 width: '100%',
+                pointerEvents: 'none',
             }}>
                 <SearchBox 
                     searchText={searchText}
                     setSearch={setSearch}
+                    onFocusHandler={() => setViewContent(false)}
                     location={searchingLocation}
                     submitHandler={onSearchTextSubmitHandler}
                     isLoading={loading}
@@ -170,8 +254,8 @@ function SearchMap() {
                     variant="contained"
                     size="middle"
                     style={{
-                        backgroundColor: '#c1fdd1',
-                        color: '#002976',
+                        backgroundColor: '#c1fdd188',
+                        color: '#00297688',
                         width: '100%',
                         boxShadow: '2px 2px 6px',
                     }}
@@ -181,6 +265,7 @@ function SearchMap() {
                 </Button>
             </animated.div>
 
+            {/* alert */}
             <AutoHideAlert
                 open={gpsFail}
                 type={'warning'}

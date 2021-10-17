@@ -32,6 +32,7 @@ function useMap(
 
     const [ zoom, setZoom ] = useState(defaultZoom)
     // current markers on the map
+    const [ locationList, setLocation ] = useState([])
     const [ markerList, setMarkers ] = useState([])
     // the map object from the api
     const [ map, setMap ] = useState(null)
@@ -41,10 +42,11 @@ function useMap(
         let map = tt.map({
             key: process.env.REACT_APP_MAP_APIKEY,
             container: mapRef.current,
-            center: [defaultLocation.longitude, defaultLocation.latitude],
+            center: [mapLocation.lon, mapLocation.lat],
             zoom: zoom,
         })
         setMap(map)
+        setLocationToMarker()
 
         return () => map.remove()
     }, [])
@@ -60,9 +62,13 @@ function useMap(
 
             setCurrentLocation('lat', lat)
             setCurrentLocation('lon', lon)
-            updateMap()
         }
     }, [towardsLocation])
+
+    // update current location will directly update the map
+    useEffect(() => {
+        updateMap()
+    }, [currentLocation, map])
 
     // track the viewing location when user move
     useEffect(() => {
@@ -82,6 +88,39 @@ function useMap(
             }
         }
     }, [map])
+
+    useEffect(() => {
+        setLocationToMarker()
+    }, [locationList])
+
+    const setLocationToMarker = () => {
+        markerList.forEach(marker => {
+            marker.remove()
+        })
+
+        if (locationList.length === 0) {
+            setMarkers(() => [])
+            return
+        }
+
+        let markers = []
+        locationList.forEach(item => {
+            let marker = null
+            if (item.selected) {
+                marker = maphelper.markers.getTesting(map, [
+                    item.location.lon,
+                    item.location.lat,
+                ])
+            } else {
+                marker = maphelper.markers.getMarker(map, [
+                    item.location.lon,
+                    item.location.lat,
+                ])
+            }
+            markers.push(marker)
+        })
+        setMarkers(() => markers)
+    }
 
     const getAPIMapLocation = () => {
         const center = map.getCenter()
@@ -110,27 +149,6 @@ function useMap(
         centerFailHandler && centerFailHandler()
     }
 
-    // reset the markers from a list of location
-    // TODO: change it to be more generic
-    const resetMarkers = (list) => {
-        markerList.forEach(marker => {
-            marker.remove()
-        })
-
-        //TODO: check map is initialize or not
-        //if so, do this
-        //if not so, then put it in temp
-        let markers = []
-        list.forEach(location => {
-            const marker = maphelper.markers.getMarker(map, [
-                location.position.lon,
-                location.position.lat,
-            ])
-            markers.push(marker)
-        })
-        setMarkers(() => markers)
-    }
-
     // set searching location to viewing location
     const setSearchingToViewing = () => {
         const current = mapLocation
@@ -150,10 +168,20 @@ function useMap(
         }
     }
 
+    const updateMapLocation = (location) => {
+        setCurrentLocation('lat', location.lat)
+        setCurrentLocation('lon', location.lon)
+        //updateMap()
+        // setTowardsLocation('lat', location.lat)
+        // setTowardsLocation('lon', location.lon)
+    }
+
     // update the map according to the current location
     const updateMap = () => {
         if (map) {
             map.setCenter([parseFloat(currentLocation.lon), parseFloat(currentLocation.lat)])
+            // TODO: try to get animation working
+            //map.panTo([parseFloat(currentLocation.lon), parseFloat(currentLocation.lat)], { duration: 1 , animate: true, easing: (e) => { return e }, essential: true })
             map.setZoom(zoom)
         }
     }
@@ -161,11 +189,11 @@ function useMap(
     return [ 
         map, 
         mapLocation,
-        currentLocation,
+        updateMapLocation,
         searchingLocation,
         setMapToCenter,
         setSearchingToViewing,
-        resetMarkers,
+        setLocation,
      ]
 }
 

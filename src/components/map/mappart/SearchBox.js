@@ -31,6 +31,7 @@ function SearchResultItem({
                 height: '60px',
                 width: '88%',
                 marginLeft: '1%',
+                borderRadius: '0',
                 zIndex: '2',
                 background: 'white',
                 color: 'black',
@@ -43,24 +44,28 @@ function SearchResultItem({
     )
 }
 
+// TODO: use viewcontent to make memo of showing suggestion
+
 function SearchBox({
     searchText,
     setSearch,
+    onFocusHandler,
     location,
     submitHandler,
     isLoading,
 }) {
-    const manualInput = useRef(null)
+    const inputRef = useRef(null)
+    const manualInput = useRef(false)
     const [ shouldOpenList, setTyping ] = useState(false)
     const [ resultList, setList ] = useState([])
     const { listTransform, listOpacity } = useSpring({
         config: config.wobbly,
         from: {
-            listTransform: `scale(1, 0) translate(0, -100%)`,
+            listTransform: `scale(1, 0)`,
             listOpacity: 0,
         },
         to: {
-            listTransform: ( shouldOpenList ) ? `scale(1, 1) translate(0, 0%)` : `scale(1, 0) translate(0, -100%)`,
+            listTransform: ( shouldOpenList ) ? `scale(1, 1)` : `scale(1, 0)`,
             listOpacity: ( shouldOpenList ) ? 1 : 0,
         },
     })
@@ -74,6 +79,7 @@ function SearchBox({
             setSearch(e.target.value)
             setTyping(false)
             submitHandler(e.target.value)
+            inputRef.current.blur()
         }
     }
 
@@ -88,6 +94,7 @@ function SearchBox({
         setSearch(text)
         setTyping(false)
         submitHandler(text)
+        inputRef.current.blur()
     }
 
     const clearSearchText = () => {
@@ -135,6 +142,7 @@ function SearchBox({
     return (
         <>
             <TextField
+                inputRef={inputRef}
                 variant="outlined"
                 label="Search..."
                 style={{
@@ -142,8 +150,10 @@ function SearchBox({
                     background: 'white',
                     boxShadow: '2px 2px 6px',
                     zIndex: 5,
+                    pointerEvents: 'auto',
                 }}
                 value={searchText}
+                onFocus={onFocusHandler}
                 onChange={onSearchTextChange}
                 onKeyDown={onSearchTextKeyDown}
                 InputProps={{
@@ -165,6 +175,8 @@ function SearchBox({
                     width: '100%',
                     opacity: listOpacity,
                     transform: listTransform,
+                    transformOrigin: 'top',
+                    pointerEvents: 'auto',
                 }}
             >
                 {resultList.map((result) => (
