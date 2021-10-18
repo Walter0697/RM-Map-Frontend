@@ -1,13 +1,35 @@
-import React, { useCallback } from 'react'
-import SearchMap from '../components/map/SearchMap'
+import React, { useState, useCallback } from 'react'
 import Base from './Base'
 
+import SearchMap from '../components/map/SearchMap'
+import MarkerForm from '../components/form/MarkerForm'
+
 function SearchPage() {
-    const MemoMap = useCallback(<SearchMap />, [])
+    const [ isFormOpen, setFormOpen ] = useState(false)
+    const [ selectedLocation, setLocation ] = useState(null)
+
+    const setLocationToCreateForm = (location) => {
+        setLocation(location)
+        setFormOpen(true)
+    }
+
+    const closeForm = () => {
+        setLocation(null)
+        setFormOpen(false)
+    }
+
+    const MemoMap = useCallback(<SearchMap
+            openForm={setLocationToCreateForm}
+        />, [])
 
     return (
         <Base>
-           {MemoMap}
+            {MemoMap}
+            <MarkerForm 
+                open={isFormOpen}
+                handleClose={closeForm}
+                location={selectedLocation}
+            />
         </Base>
     )
 }

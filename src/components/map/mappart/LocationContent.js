@@ -17,6 +17,9 @@ import useBoop from '../../../hooks/useBoop'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import BookmarkIcon from '@mui/icons-material/Bookmark'
+
+import maphelper from '../maphelper'
 
 // children element for list view
 function SearchResultBox({
@@ -80,6 +83,7 @@ function SearchResultBox({
 function LocationDetail({
     location,
     onBackHandler,
+    openForm,
 }) {
     if (!location) return false
     return (
@@ -91,15 +95,15 @@ function LocationDetail({
                 background: '#c3c9c9',
                 overflow: 'auto',
                 paddingTop: '5px',
-                paddingLeft: '10px',
+                paddingLeft: '15px',
+                paddingRight: '15px',
                 display: 'flex',
                 alignItem: 'flex-start',
             }}
         >
             <Grid 
-                item xs={12}
+                item xs={6}
                 style={{
-                    width: '100%',
                     height: '15%',
                 }}
             >
@@ -107,10 +111,30 @@ function LocationDetail({
                     size="middle"
                     style={{
                         boxShadow: '2px 2px 6px',
+                        background: '#f5f5f5',
                     }}
                     onClick={onBackHandler}
                 >
                     <ArrowBackIcon />
+                </IconButton>
+            </Grid>
+            <Grid 
+                item xs={6}
+                style={{
+                    height: '15%',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                }}
+            >
+                <IconButton
+                    size="middle"
+                    style={{
+                        boxShadow: '2px 2px 6px',
+                        background: '#f5f5f5',
+                    }}
+                    onClick={() => openForm(location)}
+                >
+                    <BookmarkIcon />
                 </IconButton>
             </Grid>
             <Grid 
@@ -132,7 +156,7 @@ function LocationDetail({
                     height: '60%',
                 }}
             >
-                { location.details.address.freeformAddress ? location.details.address.freeformAddress : location.address }
+                { maphelper.generic.getAddress(location.details.address) }
                 <br/><br/>
                 { location.details.poi.categories.join(',') }
             </Grid>
@@ -186,6 +210,7 @@ function LocationContent({
     setHideList,
     selectedIndex,
     setSelectedIndex,
+    openForm,
 }) {
     const [ currentTab, setTab ] = useState('none')
     const [ blink, refresh ] = useBoop(300)
@@ -258,6 +283,7 @@ function LocationContent({
                     <LocationDetail
                         location={locationList.find(s => s.id === selectedIndex)}
                         onBackHandler={() => { setSelectedIndex(-1) }}
+                        openForm={openForm}
                     />
                 )
             case 'list':

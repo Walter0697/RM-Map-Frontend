@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import {
-    TextField,
     IconButton,
     Button,
 } from '@mui/material'
@@ -25,7 +24,9 @@ import apis from '../../apis'
 // TODO : add button to set center location as event location
 // TODO : add question mark?
 
-function SearchMap() {
+function SearchMap({
+    openForm,
+}) {
     // reference of the div to render the map
     const mapElement = useRef(null) 
 
@@ -71,6 +72,7 @@ function SearchMap() {
 
     // alert related
     const [ gpsFail, setGPSFail ] = useBoop(3000)
+    const [ retrieveFail, setRetrieveFail ] = useBoop(3000)
 
     // if distance is long enough from the previous search location, then button will be shown
     const [ showMapSearchButton, setShowButton ] = useState(false)
@@ -185,12 +187,11 @@ function SearchMap() {
                 // change color whenever markers are active
                 setHasContent(true)
             } else {
-                // TODO: pop up an alert
+                setRetrieveFail()
             }
         } else {
-            // TODO: pop up an alert
+            setRetrieveFail()
         }
-        console.log(result)
         setLoading(false)
     }
 
@@ -224,6 +225,7 @@ function SearchMap() {
                     setHideList={() => setViewContent(false)}
                     selectedIndex={selectedSearch}
                     setSelectedIndex={setSelectedSearchItem}
+                    openForm={openForm}
                 />
             </animated.div>
 
@@ -278,7 +280,7 @@ function SearchMap() {
                     variant="contained"
                     size="middle"
                     style={{
-                        backgroundColor: '#c1fdd188',
+                        backgroundColor: '#c1fdd1aa',
                         color: '#00297688',
                         width: '100%',
                         boxShadow: '2px 2px 6px',
@@ -294,6 +296,12 @@ function SearchMap() {
                 open={gpsFail}
                 type={'warning'}
                 message={'Cannot retrieve GPS information'}
+                timing={3000}
+            />
+            <AutoHideAlert
+                open={retrieveFail}
+                type={'warning'}
+                message={'Cannot find any result'}
                 timing={3000}
             />
         </>

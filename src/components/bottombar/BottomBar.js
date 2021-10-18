@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useRef } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
 import SearchIcon from '@mui/icons-material/Search'
@@ -20,18 +20,16 @@ function BottomBar({
 }) {
     const history = useHistory()
     const location = useLocation()
-    const [ activeTab, setActiveTab ] = useState(location.pathname)
+    const next = useRef(null)
 
-    useEffect(() => {
+    const changeTab = (tab) => {
+        if (next.current === tab) return
+        next.current = tab
         onChangeClick()
-        const timeoutId = window.setTimeout(() => {
-            history.replace(activeTab)
+        window.setTimeout(() => {
+            history.replace(next.current)
         }, 200)
-
-        return () => {
-            window.clearTimeout(timeoutId)
-        }
-    }, [activeTab, history])
+    }
 
     return (
         <div className={styles.bottomnav}>
@@ -41,7 +39,7 @@ function BottomBar({
                     path={location.pathname}
                     activeIcon={<SearchIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     inactiveIcon={<SearchIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                    setPath={setActiveTab}
+                    setPath={changeTab}
                 />
             </div>
             <div className={styles.bntab}>
@@ -50,7 +48,7 @@ function BottomBar({
                     path={location.pathname}
                     activeIcon={<MapIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     inactiveIcon={<MapIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                    setPath={setActiveTab}
+                    setPath={changeTab}
                 />
             </div>
             <div className={styles.bntab}>
@@ -59,7 +57,7 @@ function BottomBar({
                     path={location.pathname}
                     activeIcon={<HomeIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     inactiveIcon={<HomeIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                    setPath={setActiveTab}
+                    setPath={changeTab}
                 />
             </div>
             <div className={styles.bntab}>
@@ -68,7 +66,7 @@ function BottomBar({
                     path={location.pathname}
                     activeIcon={<StarIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     inactiveIcon={<StarIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                    setPath={setActiveTab}
+                    setPath={changeTab}
                 />
             </div>
             <div className={styles.bntab}>
@@ -77,7 +75,7 @@ function BottomBar({
                     path={location.pathname}
                     activeIcon={<SettingsIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     inactiveIcon={<SettingsIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                    setPath={setActiveTab}
+                    setPath={changeTab}
                 />
             </div>
         </div>

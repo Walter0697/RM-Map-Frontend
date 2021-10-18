@@ -168,9 +168,11 @@ function useMap(
         if (response.coords) {
             if (response.coords.latitude) {
                 setTowardsLocation('lat', response.coords.latitude)
+                setSearchingLocation('lat', response.coords.latitude)
             }
             if (response.coords.longitude) {
                 setTowardsLocation('lon', response.coords.longitude)
+                setSearchingLocation('lon', response.coords.longitude)
             }
         }
     }
