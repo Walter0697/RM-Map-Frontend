@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import {
+    useSpring,
+    config,
+    animated,
+} from '@react-spring/web'
+import {
     List,
     ListItem,
     ListItemButton,
     Grid,
     IconButton,
 } from '@mui/material'
+
+import useBoop from '../../../hooks/useBoop'
 
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
@@ -74,6 +81,7 @@ function LocationDetail({
     location,
     onBackHandler,
 }) {
+    if (!location) return false
     return (
         <Grid
             container
@@ -171,18 +179,47 @@ function CollapsedView({
     )
 }
 
-// TODO: make transition
-// TODO: when marker on click on map, open tab!
-
 function LocationContent({
     locationList,
     shouldShowList,
-    hasContent,
     setShowList,
     setHideList,
     selectedIndex,
     setSelectedIndex,
 }) {
+    const [ currentTab, setTab ] = useState('none')
+    const [ blink, refresh ] = useBoop(300)
+
+    const { x } = useSpring({
+        config: config.gentle,
+        from: { x: 0 },
+        x: blink ? 0 : 1, 
+    })
+
+    // use useeffect to detect state value changes
+    // for transition animation
+    useEffect(() => {
+        refresh()
+
+        const timer = window.setTimeout(() => {
+            if (!shouldShowList) {
+                setTab('collapsed')
+                return
+            }
+            if (shouldShowList) {
+                if (selectedIndex !== -1) {
+                    setTab('detail')
+                    return
+                }
+            }
+            setTab('list')
+        }, 200)
+
+        return () => {
+            window.clearTimeout(timer)
+        }
+    }, [locationList, shouldShowList, selectedIndex])
+    
     // if the tab is expanded, then close it
     // if not, open it
     const onIconClick = () => {
@@ -215,29 +252,31 @@ function LocationContent({
 
     // getting layout for different situation
     const getCurrentLayout = () => {
-        if (hasContent && locationList.length !== 0) {
-            if (shouldShowList) {
-                if (selectedIndex !== -1) {
-                    return (
-                        <LocationDetail
-                            location={locationList.find(s => s.id === selectedIndex)}
-                            onBackHandler={() => { setSelectedIndex(-1) }}
-                        />
-                    )
-                }
+        switch(currentTab) {
+            case 'detail':
+                return (
+                    <LocationDetail
+                        location={locationList.find(s => s.id === selectedIndex)}
+                        onBackHandler={() => { setSelectedIndex(-1) }}
+                    />
+                )
+            case 'list':
                 return (
                     <SearchResultList
                         locationList={locationList}
                         setSelectedIndex={setSelectedIndex}
                     />
                 )
-            }
+            case 'collapsed':
+                return (
+                    <CollapsedView
+                        count={locationList.length}
+                    />
+                )
+            default:
+                return (<></>)
         }
-        return (
-            <CollapsedView
-                count={locationList.length}
-            />
-        )
+        return (<></>)
     }
 
     // main layout
@@ -276,7 +315,20 @@ function LocationContent({
                 }}
                 onClick={setShowListIfNeeded}
             >
-                {getCurrentLayout()}
+                <animated.div
+                    style={{
+                        justifyContent: 'center',
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        opacity: x.to({
+                            range: [0, 1],
+                            output: [0, 1],
+                        }),
+                    }}
+                >
+                    {getCurrentLayout()}
+                </animated.div>
             </Grid>
         </Grid>
     )

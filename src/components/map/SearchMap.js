@@ -114,8 +114,9 @@ function SearchMap() {
 
       // for handling user clicking map marker instead of bottom list
     useEffect(() => {
-        if (!clickedMarker) return
+        if (!clickedMarker || clickedMarker === -1) return
         setSelectedSearch(clickedMarker.id)
+        setViewContent(true)
     }, [clickedMarker])
 
     // select the location and set center to that location
@@ -218,7 +219,6 @@ function SearchMap() {
             >
                 <LocationContent 
                     locationList={searchResults}
-                    hasContent={hasSearchContent}
                     shouldShowList={viewSearchContent}
                     setShowList={() => setViewContent(true)}
                     setHideList={() => setViewContent(false)}

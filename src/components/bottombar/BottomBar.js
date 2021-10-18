@@ -24,7 +24,7 @@ function BottomBar({
 
     useEffect(() => {
         onChangeClick()
-        const timeoutId = setTimeout(() => {
+        const timeoutId = window.setTimeout(() => {
             history.replace(activeTab)
         }, 200)
 
