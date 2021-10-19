@@ -61,11 +61,11 @@ function SearchBox({
     const { listTransform, listOpacity } = useSpring({
         config: config.wobbly,
         from: {
-            listTransform: `scale(1, 0)`,
+            listTransform: 'scale(1, 0)',
             listOpacity: 0,
         },
         to: {
-            listTransform: ( shouldOpenList ) ? `scale(1, 1)` : `scale(1, 0)`,
+            listTransform: ( shouldOpenList ) ? 'scale(1, 1)' : 'scale(1, 0)',
             listOpacity: ( shouldOpenList ) ? 1 : 0,
         },
     })
@@ -123,7 +123,7 @@ function SearchBox({
                         if (!output.includes(item.poi.name)) {
                             output.push(item.poi.name)
                         }
-                    });
+                    })
                     setList(output)
                     setTyping(true)
                 }

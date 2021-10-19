@@ -1,4 +1,4 @@
-import constants from "./constant"
+import constants from './constant'
 
 export const login = (jwt) => {
     return {

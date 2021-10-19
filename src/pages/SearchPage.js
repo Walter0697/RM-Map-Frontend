@@ -20,7 +20,7 @@ function SearchPage() {
 
     const MemoMap = useCallback(<SearchMap
             openForm={setLocationToCreateForm}
-        />, [])
+        />, [setLocationToCreateForm])
 
     return (
         <Base>

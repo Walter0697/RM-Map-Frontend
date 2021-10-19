@@ -302,7 +302,6 @@ function LocationContent({
             default:
                 return (<></>)
         }
-        return (<></>)
     }
 
     // main layout

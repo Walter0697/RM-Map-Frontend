@@ -1,4 +1,4 @@
-import constants from "../actions/constant";
+import constants from '../actions/constant'
 
 export default function authReducer(state = {
     jwt: '',
