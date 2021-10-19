@@ -8,16 +8,17 @@ import {
     config,
     animated,
 } from '@react-spring/web'
-import SearchBox from './mappart/SearchBox'
-import LocationContent from './mappart/LocationContent'
-import AutoHideAlert from '../AutoHideAlert'
 
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
 
-import maphelper from './maphelper'
+import SearchBox from './mappart/SearchBox'
+import LocationContent from './mappart/LocationContent'
+import AutoHideAlert from '../AutoHideAlert'
+
+import maphelper from '../../scripts/map'
 import apis from '../../apis'
 
 // TODO : add a fix center, maybe later

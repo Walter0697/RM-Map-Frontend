@@ -12,14 +12,14 @@ import {
     IconButton,
 } from '@mui/material'
 
-import useBoop from '../../../hooks/useBoop'
-
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 
-import maphelper from '../maphelper'
+import useBoop from '../../../hooks/useBoop'
+
+import maphelper from '../../../scripts/map'
 
 // children element for list view
 function SearchResultBox({

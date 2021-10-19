@@ -6,6 +6,7 @@ import {
 } from '@react-spring/web'
 
 import useBoop from '../hooks/useBoop'
+
 import BottomBar from '../components/bottombar/BottomBar'
  
 import styles from '../styles/bottom.module.css'

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
 import tt from '@tomtom-international/web-sdk-maps'
-import maphelper from '../components/map/maphelper'
+import maphelper from '../scripts/map'
 
 import useObject from '../hooks/useObject'
 import constants from '../constant'
