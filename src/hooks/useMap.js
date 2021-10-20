@@ -76,7 +76,7 @@ function useMap(
         let timer = null
         if (map) {
             map.on('move', getAPIMapLocation)
-            map.on('click', (e) => { console.log(e) })
+            //map.on('click', (e) => { console.log(e) })
             timer = window.setTimeout(() => {
                 setMapToCenter()
             }, 1000)
@@ -84,7 +84,7 @@ function useMap(
         return () => {
             if (map) {
                 map.off('move')
-                map.off('click')
+                //map.off('click')
             }
             if (timer) {
                 clearTimeout(timer)

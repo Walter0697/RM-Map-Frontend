@@ -1,12 +1,16 @@
 import React, { useState, useCallback } from 'react'
 import Base from './Base'
 
+import useBoop from '../hooks/useBoop'
+
 import SearchMap from '../components/map/SearchMap'
 import MarkerForm from '../components/form/MarkerForm'
+import AutoHideAlert from '../components/AutoHideAlert'
 
 function SearchPage() {
     const [ isFormOpen, setFormOpen ] = useState(false)
     const [ selectedLocation, setLocation ] = useState(null)
+    const [ createAlert, confirmCreated ] = useBoop(3000)
 
     const setLocationToCreateForm = (location) => {
         setLocation(location)
@@ -21,6 +25,7 @@ function SearchPage() {
     const onMarkerCreated = () => {
         setLocation(null)
         setFormOpen(false)
+        confirmCreated()
     }
 
     const MemoMap = useCallback(<SearchMap
@@ -35,6 +40,12 @@ function SearchPage() {
                 handleClose={closeForm}
                 location={selectedLocation}
                 onCreated={onMarkerCreated}
+            />
+            <AutoHideAlert 
+                open={createAlert}
+                type={'success'}
+                message={'Successfully create marker!'}
+                timing={3000}
             />
         </Base>
     )

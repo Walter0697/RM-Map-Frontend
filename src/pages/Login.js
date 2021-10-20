@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router'
+import { useMutation } from '@apollo/client'
 import {
     useSpring,
     config,
@@ -25,6 +26,7 @@ import useOpacityTransition from '../hooks/useOpacityTransition'
 
 import actions from '../store/actions'
 import apis from '../apis'
+import graphql from '../graphql'
 
 import styles from '../styles/login.module.css'
 
@@ -32,6 +34,7 @@ function Login({ jwt, dispatch }) {
     // for environment
     const detectMobile = useMobileDetect()
     const history = useHistory()
+    const [ loginGQL, { data, loading, error } ] = useMutation(graphql.auth.login, { errorPolicy: 'all' })
 
     // state variables
     const [ loginState, setLoginState ] = useState('prompt') // prompt, loading, success
@@ -39,7 +42,7 @@ function Login({ jwt, dispatch }) {
         username: '',
         password: '',
     })
-    const [ error, setError ] = useObject({})
+    const [ loginError, setError ] = useObject({})
 
     // to lock button from being pressed
     const [ sending, setSending ] = useState(false)
@@ -90,8 +93,22 @@ function Login({ jwt, dispatch }) {
         }
     }, [animationEnd, informationFetched])
 
+    // handling graphql request result
+    useEffect(() => {
+        if (error) {
+            setError('password', error.message)
+            setSending(false)
+        }
+
+        if (data) {
+            dispatch(actions.login(data.login))
+            setLoginState('loading')
+        }
+    }, [data, loading, error])
+
     // fetching animation related
     const onInformationFetch = async () => {
+        // TODO: change it to use apollo client
         const response = await apis.markers.list()
         console.log(response)
         setFetch(true)
@@ -138,19 +155,7 @@ function Login({ jwt, dispatch }) {
             return
         }
 
-        try {
-            const { data } = await apis.auth.login(loginInfo.username, loginInfo.password)
-            if (!data.errors) {
-                dispatch(actions.login(data.data.login))
-                setLoginState('loading')
-            } else {
-                setError('password', 'username or password error')
-            }
-            setSending(false)
-        } catch (e) {
-            setError('password', 'request failed')
-            setSending(false)
-        }
+        loginGQL({ variables: { username: loginInfo.username, password: loginInfo.password }})
     }
 
     // render layer for different shape of the input form
@@ -167,8 +172,8 @@ function Login({ jwt, dispatch }) {
                                     fullWidth
                                     value={loginInfo.username}
                                     onChange={onUsernameChangeHandler}
-                                    error={!!error.username}
-                                    helperText={error.username}
+                                    error={!!loginError.username}
+                                    helperText={loginError.username}
                                 />
                             </Box>
                         </Grid>
@@ -181,8 +186,8 @@ function Login({ jwt, dispatch }) {
                                     fullWidth
                                     value={loginInfo.password}
                                     onChange={onPasswordChangeHandler}
-                                    error={!!error.password}
-                                    helperText={error.password}
+                                    error={!!loginError.password}
+                                    helperText={loginError.password}
                                 />
                             </Box>
                         </Grid>
@@ -193,7 +198,7 @@ function Login({ jwt, dispatch }) {
                                     variant="outlined"
                                     type="submit"
                                     endIcon={<LockOpenIcon />}
-                                    loading={sending}
+                                    loading={sending || loading}
                                     loadingPosition="end"
                                     size="large"
                                 >

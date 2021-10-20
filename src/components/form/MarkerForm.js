@@ -48,9 +48,9 @@ function MarkerForm({
 
     useEffect(() => {
         if (!location) return
+        resetFormValue()
         const address = maphelper.generic.getAddress(location.details.address)
         setFormValue('address', address)
-        resetFormValue()
     }, [location])
 
     const onValueChangeHandler = (field, value) => {

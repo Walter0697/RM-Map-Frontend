@@ -1,7 +1,18 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+
 import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
+
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  HttpLink,
+  from,
+} from '@apollo/client'
+import { onError } from '@apollo/client/link/error'
+
 import './index.css'
 import App from './App'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration'
@@ -9,12 +20,34 @@ import reportWebVitals from './reportWebVitals'
 
 import store from './store'
 
+const httpLink = new HttpLink({
+  uri: process.env.REACT_APP_GRAPHQL_BACKEND,
+})
+
+const errorLink = onError(({ graphQLErrors, networkError }) => {
+  if (graphQLErrors)
+    graphQLErrors.forEach(({ message, locations, path }) =>
+      console.log(
+        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+      ),
+    )
+
+  if (networkError) console.log(`[Network error]: ${networkError}`)
+})
+
+const client = new ApolloClient({
+  link: from([errorLink, httpLink]),
+  cache: new InMemoryCache(),
+})
+
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <ApolloProvider client={client}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ApolloProvider>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')
