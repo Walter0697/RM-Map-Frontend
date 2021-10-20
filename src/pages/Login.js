@@ -141,7 +141,6 @@ function Login({ jwt, dispatch }) {
         try {
             const { data } = await apis.auth.login(loginInfo.username, loginInfo.password)
             if (!data.errors) {
-                console.log(data.data.login)
                 dispatch(actions.login(data.data.login))
                 setLoginState('loading')
             } else {

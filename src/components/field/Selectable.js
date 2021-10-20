@@ -10,6 +10,7 @@ import {
 function Selectable({
     label,
     value,
+    required,
     onValueChange,
     errorMessage,
     noDefault,
@@ -21,9 +22,10 @@ function Selectable({
 }) {
     return (
         <FormControl variant="outlined" fullWidth>
-            <InputLabel id={'select-' + label} error={!!errorMessage}>{label}</InputLabel>
+            <InputLabel id={'select-' + label} error={!!errorMessage}>{label + (required && ' *')}</InputLabel>
             <Select
-                label={label}
+                required={required}
+                label={label + (required && ' *')}
                 labelId={'select-' + label}
                 id={'selector-' + label}
                 value={value}

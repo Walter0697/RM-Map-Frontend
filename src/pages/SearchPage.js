@@ -18,6 +18,11 @@ function SearchPage() {
         setFormOpen(false)
     }
 
+    const onMarkerCreated = () => {
+        setLocation(null)
+        setFormOpen(false)
+    }
+
     const MemoMap = useCallback(<SearchMap
             openForm={setLocationToCreateForm}
         />, [setLocationToCreateForm])
@@ -29,6 +34,7 @@ function SearchPage() {
                 open={isFormOpen}
                 handleClose={closeForm}
                 location={selectedLocation}
+                onCreated={onMarkerCreated}
             />
         </Base>
     )

@@ -36,9 +36,17 @@ const authorized_request = (query) => {
     })
 }
 
+const nullable = (value) => {
+    if (value) {
+        return `"${value}"`
+    }
+    return null
+}
+
 const request = {
     public: public_request, 
     credential: authorized_request,
     get: get_request,
+    nullable,
 }
 export default request

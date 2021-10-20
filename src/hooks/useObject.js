@@ -10,7 +10,11 @@ function useObject(defaultValue) {
         }))
     }
 
-    return [ obj, updateField ]
+    const reset = () => {
+        setObj(defaultValue)
+    }
+
+    return [ obj, updateField, reset ]
 }
 
 export default useObject
