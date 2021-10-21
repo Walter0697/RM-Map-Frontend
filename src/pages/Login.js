@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router'
-import { useMutation } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import {
     useSpring,
     config,
@@ -25,7 +25,6 @@ import useObject from '../hooks/useObject'
 import useOpacityTransition from '../hooks/useOpacityTransition'
 
 import actions from '../store/actions'
-import apis from '../apis'
 import graphql from '../graphql'
 
 import styles from '../styles/login.module.css'
@@ -34,7 +33,8 @@ function Login({ jwt, dispatch }) {
     // for environment
     const detectMobile = useMobileDetect()
     const history = useHistory()
-    const [ loginGQL, { data, loading, error } ] = useMutation(graphql.auth.login, { errorPolicy: 'all' })
+    const [ loginGQL, { data: loginData, loading: loginLoading, error: loginError } ] = useMutation(graphql.auth.login, { errorPolicy: 'all' })
+    const [ listMarkerGQL, { data: infoData, loading: infoLoading, error: infoError } ] = useLazyQuery(graphql.markers.list)
 
     // state variables
     const [ loginState, setLoginState ] = useState('prompt') // prompt, loading, success
@@ -42,7 +42,7 @@ function Login({ jwt, dispatch }) {
         username: '',
         password: '',
     })
-    const [ loginError, setError ] = useObject({})
+    const [ error, setError ] = useObject({})
 
     // to lock button from being pressed
     const [ sending, setSending ] = useState(false)
@@ -95,23 +95,31 @@ function Login({ jwt, dispatch }) {
 
     // handling graphql request result
     useEffect(() => {
-        if (error) {
+        if (loginError) {
             setError('password', error.message)
             setSending(false)
         }
 
-        if (data) {
-            dispatch(actions.login(data.login))
+        if (loginData) {
+            dispatch(actions.login(loginData.login))
             setLoginState('loading')
         }
-    }, [data, loading, error])
+    }, [loginData, loginError])
+
+    useEffect(() => {
+        if (infoError) {
+            console.log(infoError)
+        }
+
+        if (infoData) {
+            console.log(infoData)
+            setFetch(true)
+        }
+    }, [infoData, infoError])
 
     // fetching animation related
     const onInformationFetch = async () => {
-        // TODO: change it to use apollo client
-        const response = await apis.markers.list()
-        console.log(response)
-        setFetch(true)
+        listMarkerGQL()
     }
 
     // fake an animation for user to make it seems like loading, if fetching time is fast enough, this will at least last for 2 seconds
@@ -172,8 +180,8 @@ function Login({ jwt, dispatch }) {
                                     fullWidth
                                     value={loginInfo.username}
                                     onChange={onUsernameChangeHandler}
-                                    error={!!loginError.username}
-                                    helperText={loginError.username}
+                                    error={!!error.username}
+                                    helperText={error.username}
                                 />
                             </Box>
                         </Grid>
@@ -186,8 +194,8 @@ function Login({ jwt, dispatch }) {
                                     fullWidth
                                     value={loginInfo.password}
                                     onChange={onPasswordChangeHandler}
-                                    error={!!loginError.password}
-                                    helperText={loginError.password}
+                                    error={!!error.password}
+                                    helperText={error.password}
                                 />
                             </Box>
                         </Grid>
@@ -198,7 +206,7 @@ function Login({ jwt, dispatch }) {
                                     variant="outlined"
                                     type="submit"
                                     endIcon={<LockOpenIcon />}
-                                    loading={sending || loading}
+                                    loading={sending || loginLoading}
                                     loadingPosition="end"
                                     size="large"
                                 >
@@ -222,7 +230,7 @@ function Login({ jwt, dispatch }) {
                         alignItems="center"
                         justify="center"
                     >
-                        <CheckCircleOutlineIcon sx={{ fontSize: 90, color: '#a6ffbd' }}/>
+                        <CheckCircleOutlineIcon sx={{ fontSize: 90, color: '#89fca8' }}/>
                     </Grid>
                 )
         }

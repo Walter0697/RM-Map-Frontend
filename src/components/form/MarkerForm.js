@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useMutation } from '@apollo/client'
 import {
     Grid,
     TextField,
@@ -20,7 +21,8 @@ import Selectable from '../field/Selectable'
 import NullableDatePicker from '../field/NullableDatePicker'
 
 import maphelper from '../../scripts/map'
-import apis from '../../apis'
+import generic from '../../scripts/generic'
+import graphql from '../../graphql'
 
 function MarkerForm({
     open,
@@ -28,6 +30,8 @@ function MarkerForm({
     onCreated,
     location,
 }) {
+    const [ CreateMarkerGQL, { data: createData, loading: createLoading, error: createError } ] = useMutation(graphql.markers.create, { errorPolicy: 'all' })
+
     const [ formValue, setFormValue, resetFormValue ] = useObject({
         label: '',
         address: '',
@@ -40,7 +44,7 @@ function MarkerForm({
     })
     const [ error, setError ] = useObject({})
 
-    const [ imageFormState , setImageState ] = useState('') // weblink, upload, preview
+    const [ imageFormState , setImageState ] = useState('') // weblink, preview
     const [ imageSubmitMessage, setImageMessage ] = useState('')
 
     const [ submitting, setSubmitting ] = useState(false)
@@ -48,10 +52,28 @@ function MarkerForm({
 
     useEffect(() => {
         if (!location) return
+
+        // if location updated, reset everything inside the form
+        setSubmitting(false)
         resetFormValue()
+        setImageMessage('')
+        setUnauthorized(false)
+
         const address = maphelper.generic.getAddress(location.details.address)
         setFormValue('address', address)
     }, [location])
+
+    useEffect(() => {
+        if (createError) {
+            console.log(createError)
+            setSubmitting(false)
+        }
+
+        if (createData) {
+            console.log(createData)
+            onCreated && onCreated()
+        }
+    }, [ createData, createError])
 
     const onValueChangeHandler = (field, value) => {
         setFormValue(field, value)
@@ -101,31 +123,47 @@ function MarkerForm({
             return
         }
 
-        try {
-            const response = await apis.markers.create(
-                formValue.label,
-                formValue.type,
-                location.location.lat,
-                location.location.lon,
-                formValue.address,
-                formValue.link,
-                '',
-                formValue.description,
-                formValue.to_time,
-                formValue.from_from,
-            )
+        const to = formValue.to_time ? generic.time.toRFC3339Format(formValue.to_time) : null
+        const from = formValue.from_time ? generic.time.toRFC3339Format(formValue.from_time) : null
 
-            if (!response) {
-                setUnauthorized(true)
-                return
-            }
+        CreateMarkerGQL({ variables: {
+            label: formValue.label,
+            type: formValue.type,
+            latitude: location.location.lat.toString(),
+            longitude: location.location.lon.toString(),
+            address: formValue.address,
+            link: formValue.link,
+            image_link: (formValue.imageLink && formValue.imageLink.type === 'weblink') ? formValue.imageLink.value : null,
+            image_upload: (formValue.imageLink && formValue.imageLink.type === 'upload') ? formValue.imageLink.value : null,
+            description: formValue.description,
+            to_time: to,
+            from_time: from,
+        }})
+        // try {
+        //     const response = await apis.markers.create(
+        //         formValue.label,
+        //         formValue.type,
+        //         location.location.lat,
+        //         location.location.lon,
+        //         formValue.address,
+        //         formValue.link,
+        //         '',
+        //         formValue.description,
+        //         formValue.to_time,
+        //         formValue.from_from,
+        //     )
 
-            onCreated && onCreated()
-        } catch (e) {
-            setUnauthorized(true)
-        } finally {
-            setSubmitting(false)
-        }    
+        //     if (!response) {
+        //         setUnauthorized(true)
+        //         return
+        //     }
+
+        //     onCreated && onCreated()
+        // } catch (e) {
+        //     setUnauthorized(true)
+        // } finally {
+        //     setSubmitting(false)
+        // }    
     }
 
     return (
@@ -187,6 +225,7 @@ function MarkerForm({
                             }}
                             variant='outlined'
                             fullWidth
+                            required
                             label='address'
                             value={formValue.address}
                             onChange={(e) => onValueChangeHandler('address', e.target.value)}
