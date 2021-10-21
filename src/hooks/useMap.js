@@ -137,12 +137,14 @@ function useMap(
         locationList.forEach(item => {
             let marker = null
             if (item.selected) {
-                marker = maphelper.markers.getTesting(map, [
+                marker = maphelper.markers.getMarker(map, [
                         item.location.lon,
                         item.location.lat,
                     ],
                     onMarkerClick,
                     item.id,
+                    'selected',
+                    '15',
                 )
             } else {
                 marker = maphelper.markers.getMarker(map, [
@@ -151,6 +153,8 @@ function useMap(
                     ],
                     onMarkerClick,
                     item.id,
+                    'search',
+                    '10',
                 )
             }
             markers.push(marker)

@@ -1,29 +1,19 @@
 import tt from '@tomtom-international/web-sdk-maps'
+import testing from '../../testing'
 
-const getMarker = (map, location, onMarkerClick, key) => {
+const getMarker = (map, location, onMarkerClick, key, type, zIndex) => {
+    let pin = testing.pins.searchPin
+    if (type === 'selected') {
+        pin = testing.pins.selectedPin
+    } else if (type === 'center') {
+        pin = testing.pins.centerPin
+    }
+
     var div = document.createElement('div')
-    div.style.backgroundImage = 'url(https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=pin%7cFC8056%7c000000&.png)'
-    div.style.width = '30px'
-    div.style.height = '50px'
-    div.style.zIndex = '10'
-    div.style.backgroundRepeat = 'no-repeat'
-    div.addEventListener('click', function(e) {
-        onMarkerClick(key)
-    })
-
-    var marker = new tt.Marker({
-        element: div,
-    }).setLngLat(location).addTo(map)
-
-    return marker
-}
-
-const getTesting = (map, location, onMarkerClick, key) => {
-    var div = document.createElement('div')
-    div.style.backgroundImage = 'url(https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=test%7c5680FC%7c000000&.png)'
-    div.style.width = '30px'
-    div.style.height = '50px'
-    div.style.zIndex = '15'
+    div.style.backgroundImage = `url(${pin.url})`
+    div.style.width = pin.width
+    div.style.height = pin.height
+    div.style.zIndex = zIndex
     div.style.backgroundRepeat = 'no-repeat'
     div.addEventListener('click', function(e) {
         onMarkerClick(key)
@@ -38,7 +28,6 @@ const getTesting = (map, location, onMarkerClick, key) => {
 
 const markers = {
     getMarker,
-    getTesting,
 }
 
 export default markers

@@ -1,7 +1,6 @@
 import {
     ApolloClient,
     InMemoryCache,
-    createHttpLink,
     from,
   } from '@apollo/client'
 import { createUploadLink } from 'apollo-upload-client'

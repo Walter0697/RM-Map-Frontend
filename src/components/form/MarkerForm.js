@@ -139,31 +139,6 @@ function MarkerForm({
             to_time: to,
             from_time: from,
         }})
-        // try {
-        //     const response = await apis.markers.create(
-        //         formValue.label,
-        //         formValue.type,
-        //         location.location.lat,
-        //         location.location.lon,
-        //         formValue.address,
-        //         formValue.link,
-        //         '',
-        //         formValue.description,
-        //         formValue.to_time,
-        //         formValue.from_from,
-        //     )
-
-        //     if (!response) {
-        //         setUnauthorized(true)
-        //         return
-        //     }
-
-        //     onCreated && onCreated()
-        // } catch (e) {
-        //     setUnauthorized(true)
-        // } finally {
-        //     setSubmitting(false)
-        // }    
     }
 
     return (
