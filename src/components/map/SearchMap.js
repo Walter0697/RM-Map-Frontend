@@ -10,10 +10,13 @@ import {
 } from '@react-spring/web'
 
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
+import RoomIcon from '@mui/icons-material/Room'
+import AddLocationIcon from '@mui/icons-material/AddLocation'
 
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
 
+import FadableComponent from '../wrapper/FadableComponent'
 import SearchBox from './mappart/SearchBox'
 import LocationContent from './mappart/LocationContent'
 import AutoHideAlert from '../AutoHideAlert'
@@ -21,8 +24,6 @@ import AutoHideAlert from '../AutoHideAlert'
 import maphelper from '../../scripts/map'
 import apis from '../../apis'
 
-// TODO : add a fix center, maybe later
-// TODO : add button to set center location as event location
 // TODO : add question mark?
 
 function SearchMap({
@@ -41,6 +42,7 @@ function SearchMap({
         mapContentTransform,
         listContentHeight,
         listContentOpacity,
+        pinButtonBottom,
         centerButtonBottom, 
         mapSearchButtonBottom,
      } = useSpring({
@@ -51,6 +53,7 @@ function SearchMap({
             mapContentTransform: 'translate(0, 0)',
             listContentHeight: '0%',
             listContentOpacity: 0,
+            pinButtonBottom: '25%',
             centerButtonBottom: '15%',
             mapSearchButtonBottom: '20%',
         },
@@ -59,6 +62,7 @@ function SearchMap({
             mapContentTransform: ( viewSearchContent ) ? 'translate(0, -15%)' : 'translate(0, 0)',
             listContentHeight: ( viewSearchContent ) ? '40%' : (hasSearchContent ? '7%' : '0%'),
             listContentOpacity: ( viewSearchContent || hasSearchContent ) ? 1 : 0,
+            pinButtonBottom: ( viewSearchContent ) ? '65%' : ( hasSearchContent ? '30%' : '25%'),
             centerButtonBottom: ( viewSearchContent ) ? '55%' : (hasSearchContent ? '20%' : '15%'),
             mapSearchButtonBottom: ( viewSearchContent ) ? '55%' : (hasSearchContent ? '25%' : '20%'),
         },
@@ -77,13 +81,8 @@ function SearchMap({
 
     // if distance is long enough from the previous search location, then button will be shown
     const [ showMapSearchButton, setShowButton ] = useState(false)
-    const { buttonOpacity } = useSpring({
-        config: config.slow,
-        from: { buttonOpacity: 0 },
-        to: {
-            buttonOpacity: ( showMapSearchButton ) ? 1 : 0
-        },
-    })
+    // if center marker is set, show the button
+    const [ showCenterPinButton, setCenterPinButton ] = useState(false)
 
     const [ 
         map, 
@@ -95,6 +94,9 @@ function SearchMap({
         setLocation,
         clickedMarker,
         setClickedMarker,
+        resetCenterMarker,
+        centerLocation,
+        centerStreetName,
      ] = useMap(
         mapElement,
         {       
@@ -115,12 +117,21 @@ function SearchMap({
         }
     }, [ mapLocation, searchingLocation ])
 
-      // for handling user clicking map marker instead of bottom list
+    // for handling user clicking map marker instead of bottom list
     useEffect(() => {
         if (!clickedMarker || clickedMarker === -1) return
         setSelectedSearch(clickedMarker.id)
         setViewContent(true)
     }, [clickedMarker])
+
+    // for handling user set the center button and get the marker in the map
+    useEffect(() => {
+        if (centerLocation) {
+            setCenterPinButton(true)
+        } else {
+            setCenterPinButton(false)
+        }
+    }, [centerLocation])
 
     // select the location and set center to that location
     const setSelectedSearchItem = (selectedIndex) => {
@@ -196,6 +207,16 @@ function SearchMap({
         setLoading(false)
     }
 
+    // set center pin as create marker location
+    const openFormByCenterMarker = () => {
+        const markerReference = maphelper.converts.centerToMarkerForm(
+            centerLocation,
+            centerStreetName,
+        )
+        openForm(markerReference)
+
+    }
+
     return (
         <>
             {/* main layout */}
@@ -246,8 +267,51 @@ function SearchMap({
                     location={searchingLocation}
                     submitHandler={onSearchTextSubmitHandler}
                     isLoading={loading}
+                    isBottomOpen={viewSearchContent}
                 />
             </div>
+            
+            <FadableComponent
+                active={showCenterPinButton}
+            >
+                <animated.div
+                    style={{
+                        position: 'absolute',
+                        bottom: pinButtonBottom,
+                        left: '20px'
+                    }}
+                >
+                    <IconButton
+                        size="large"
+                        style={{
+                            backgroundColor: 'white',
+                            boxShadow: '2px 2px 6px',
+                        }}
+                        onClick={openFormByCenterMarker}
+                    >
+                        <AddLocationIcon />
+                    </IconButton>
+                </animated.div>
+            </FadableComponent>
+
+            <animated.div
+                style={{
+                    position: 'absolute',
+                    bottom: centerButtonBottom,
+                    left: '20px',
+                }}
+            >
+                <IconButton
+                    size="large"
+                    style={{
+                        backgroundColor: 'white',
+                        boxShadow: '2px 2px 6px',
+                    }}
+                    onClick={resetCenterMarker}
+                >
+                    <RoomIcon />
+                </IconButton>
+            </animated.div>
 
             <animated.div
                 style={{
@@ -267,31 +331,34 @@ function SearchMap({
                     <CenterFocusStrongIcon />
                 </IconButton>
             </animated.div>
-            
-            <animated.div
-                style={{
-                    position: 'absolute',
-                    left: '25%',
-                    width: '50%',
-                    opacity: buttonOpacity.to({ range: [0.0, 1.0], output: [0, 1]}),
-                    bottom: mapSearchButtonBottom,
-                }}
-            >
-                <Button
-                    variant="contained"
-                    size="middle"
-                    style={{
-                        backgroundColor: '#c1fdd1aa',
-                        color: '#00297688',
-                        width: '100%',
-                        boxShadow: '2px 2px 6px',
-                    }}
-                    onClick={setSearchingToViewing}
-                >
-                    Search This Area
-                </Button>
-            </animated.div>
 
+            <FadableComponent
+                active={showMapSearchButton}
+            >
+                <animated.div
+                    style={{
+                        position: 'absolute',
+                        left: '25%',
+                        width: '50%',
+                        bottom: mapSearchButtonBottom,
+                    }}
+                >
+                    <Button
+                        variant="contained"
+                        size="middle"
+                        style={{
+                            backgroundColor: '#c1fdd1ee',
+                            color: '#00297688',
+                            width: '100%',
+                            boxShadow: '2px 2px 6px',
+                        }}
+                        onClick={setSearchingToViewing}
+                    >
+                        Search This Area
+                    </Button>
+                </animated.div>
+            </FadableComponent>
+            
             {/* alert */}
             <AutoHideAlert
                 open={gpsFail}

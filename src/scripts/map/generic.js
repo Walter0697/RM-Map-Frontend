@@ -7,11 +7,11 @@ const getCenter = (callback, fail_callback) => {
 }
 
 const getAddress = (addressObj) => {
-    const availableDetails = addressObj.freeformAddress ? addressObj.freeformAddress : addressObj.streetName
-    if (addressObj.streetNumber) {
-        return `${addressObj.streetNumber} ${availableDetails}`
+    if (addressObj.freeformAddress) {
+        return addressObj.freeformAddress
     }
-    return availableDetails
+    const simpleStreetName = addressObj.streetNumber ? `${addressObj.streetNumber} ${addressObj.streetName}` : addressObj.streetName
+    return simpleStreetName
 }
 
 const generic = {

@@ -6,6 +6,8 @@ import maphelper from '../scripts/map'
 import useObject from '../hooks/useObject'
 import constants from '../constant'
 
+import apis from '../apis'
+
 function useMap(
     mapRef,
     defaultLocation,
@@ -35,6 +37,10 @@ function useMap(
     const [ locationList, setLocation ] = useState([])
     const [ markerList, setMarkers ] = useState([])
     const [ clickedMarker, setClickedMarker ] = useState(-1) // for user to click on the marker and set message to the parent layout
+    // for center marker
+    const [ centerMarker, setCenterMarker ] = useState(null)
+    const [ centerLocation, setCenterLocation ] = useObject(null)
+    const [ centerStreetName, setCenterStreetName ] = useState(null)
     // the map object from the api
     const [ map, setMap ] = useState(null)
 
@@ -192,16 +198,39 @@ function useMap(
         setSearchingLocation('lon', current.lon)
     }
 
-    const increaseZoom = () => {
-        if ( zoom < 20 ) {
-            setZoom(zoom + 1)
+    // function to create or reset the center marker
+    const resetCenterMarker = async () => {
+        //mapLocation
+        centerMarker?.remove()
+        setCenterMarker(null)
+        setCenterStreetName(null)
+
+        let marker = maphelper.markers.getMarker(map, [
+                mapLocation.lon,
+                mapLocation.lat,
+            ],
+            onCenterMarkerClick,
+            0,
+            'center',
+            '20',
+        )
+        
+        setCenterMarker(marker)
+
+        setCenterLocation('lat', mapLocation.lat)
+        setCenterLocation('lon', mapLocation.lon)
+
+        let result = await apis.maps.streetname(mapLocation.lon, mapLocation.lat)
+        if (result.status === 200) {
+            if (result.data?.addresses.length !== 0) {
+                const address = maphelper.generic.getAddress(result.data.addresses[0].address)
+                setCenterStreetName(address)
+            }
         }
     }
 
-    const decreaseZoom = () => {
-        if ( zoom > 1 ) {
-            setZoom(zoom - 1)
-        }
+    const onCenterMarkerClick = () => {
+
     }
 
     const updateMapLocation = (location) => {
@@ -232,6 +261,9 @@ function useMap(
         setLocation,
         clickedMarker,
         setClickedMarker,
+        resetCenterMarker,
+        centerLocation,
+        centerStreetName,
      ]
 }
 

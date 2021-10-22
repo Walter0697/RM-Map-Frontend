@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
     TextField,
     InputAdornment,
@@ -53,6 +53,7 @@ function SearchBox({
     location,
     submitHandler,
     isLoading,
+    isBottomOpen,
 }) {
     const inputRef = useRef(null)
     const manualInput = useRef(false)
@@ -69,6 +70,12 @@ function SearchBox({
             listOpacity: ( shouldOpenList ) ? 1 : 0,
         },
     })
+
+    useEffect(() => {
+        if (isBottomOpen) {
+            setTyping(false)
+        }
+    }, [isBottomOpen])
     
     const onSearchTextKeyDown = (e) => {
         if (e.key === 'Enter') {

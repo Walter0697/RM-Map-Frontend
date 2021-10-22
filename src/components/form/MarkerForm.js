@@ -59,8 +59,14 @@ function MarkerForm({
         setImageMessage('')
         setUnauthorized(false)
 
-        const address = maphelper.generic.getAddress(location.details.address)
-        setFormValue('address', address)
+        if (location.address) {
+            setFormValue('address', location.address)
+        }
+
+        if (location.name) {
+            setFormValue('label', location.name)
+        }
+        
     }, [location])
 
     useEffect(() => {
@@ -70,7 +76,6 @@ function MarkerForm({
         }
 
         if (createData) {
-            console.log(createData)
             onCreated && onCreated()
         }
     }, [ createData, createError])
@@ -96,7 +101,6 @@ function MarkerForm({
                 value: e.target.files[0],
                 name: e.target.files[0].name,
             })
-            console.log(e.target.files[0])
             setImageMessage('image from user upload')
         }
     }
@@ -129,8 +133,8 @@ function MarkerForm({
         CreateMarkerGQL({ variables: {
             label: formValue.label,
             type: formValue.type,
-            latitude: location.location.lat.toString(),
-            longitude: location.location.lon.toString(),
+            latitude: location.latlon.lat.toString(),
+            longitude: location.latlon.lon.toString(),
             address: formValue.address,
             link: formValue.link,
             image_link: (formValue.imageLink && formValue.imageLink.type === 'weblink') ? formValue.imageLink.value : null,
@@ -176,7 +180,7 @@ function MarkerForm({
                             size='small'
                             fullWidth
                             label="longitude"
-                            value={location ? location.location.lon : ''}
+                            value={location ? location.latlon.lon : ''}
                             disabled
                         />
                     </Grid>
@@ -189,7 +193,7 @@ function MarkerForm({
                             size='small'
                             fullWidth
                             label="latitude"
-                            value={location ? location.location.lat : ''}
+                            value={location ? location.latlon.lat : ''}
                             disabled
                         />
                     </Grid>

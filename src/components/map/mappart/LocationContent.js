@@ -86,6 +86,12 @@ function LocationDetail({
     openForm,
 }) {
     if (!location) return false
+
+    const setLocationToCreateForm = () => {
+        const markerReference = maphelper.converts.poiToMarkerForm(location)
+        openForm(markerReference)
+    }
+
     return (
         <Grid
             container
@@ -132,7 +138,7 @@ function LocationDetail({
                         boxShadow: '2px 2px 6px',
                         background: '#f5f5f5',
                     }}
-                    onClick={() => openForm(location)}
+                    onClick={setLocationToCreateForm}
                 >
                     <BookmarkIcon />
                 </IconButton>
