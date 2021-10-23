@@ -9,7 +9,7 @@ const list = gql`
 `
 
 const create = gql`
-    mutation CreateMarkerGQL($label: String!, 
+    mutation createMarkerGQL($label: String!, 
                           $type: String!,
                           $latitude: String!, 
                           $longitude: String!, 

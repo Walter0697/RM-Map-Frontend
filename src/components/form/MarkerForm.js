@@ -20,7 +20,6 @@ import ImagePreview from './image/ImagePreview'
 import Selectable from '../field/Selectable'
 import NullableDatePicker from '../field/NullableDatePicker'
 
-import maphelper from '../../scripts/map'
 import generic from '../../scripts/generic'
 import graphql from '../../graphql'
 
@@ -30,7 +29,7 @@ function MarkerForm({
     onCreated,
     location,
 }) {
-    const [ CreateMarkerGQL, { data: createData, loading: createLoading, error: createError } ] = useMutation(graphql.markers.create, { errorPolicy: 'all' })
+    const [ createMarkerGQL, { data: createData, loading: createLoading, error: createError } ] = useMutation(graphql.markers.create, { errorPolicy: 'all' })
 
     const [ formValue, setFormValue, resetFormValue ] = useObject({
         label: '',
@@ -130,7 +129,7 @@ function MarkerForm({
         const to = formValue.to_time ? generic.time.toRFC3339Format(formValue.to_time) : null
         const from = formValue.from_time ? generic.time.toRFC3339Format(formValue.from_time) : null
 
-        CreateMarkerGQL({ variables: {
+        createMarkerGQL({ variables: {
             label: formValue.label,
             type: formValue.type,
             latitude: location.latlon.lat.toString(),

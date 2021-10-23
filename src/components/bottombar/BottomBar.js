@@ -71,7 +71,7 @@ function BottomBar({
             </div>
             <div className={styles.bntab}>
                 <BarIcon
-                    route={'/test5'}
+                    route={'/setting'}
                     path={location.pathname}
                     activeIcon={<SettingsIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     inactiveIcon={<SettingsIcon sx={{ color: inactiveColor }} fontSize='inherit' />}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router'
 import { useLazyQuery, useMutation } from '@apollo/client'
@@ -50,6 +50,11 @@ function Login({ jwt, dispatch }) {
     // for loading screen
     const [ animationEnd, setEnd ] = useState(false)
     const [ informationFetched, setFetch ] = useState(false)
+    const animationNext = useMemo(() => {
+        if (!animationEnd) return false
+        if (!informationFetched) return false
+        return true
+    }, [animationEnd, informationFetched])
 
     const formWidth = detectMobile.isMobile() ? '90%' : '30%'
     const iconWidth = detectMobile.isMobile() ? '35%' : '15%'
@@ -88,10 +93,10 @@ function Login({ jwt, dispatch }) {
 
     // make sure that animation and information both ended before going to successful page
     useEffect(() => {
-        if (animationEnd && informationFetched) {
+        if (animationNext) {
             setLoginState('success')
         }
-    }, [animationEnd, informationFetched])
+    }, [animationNext])
 
     // handling graphql request result
     useEffect(() => {

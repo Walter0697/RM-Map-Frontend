@@ -9,6 +9,7 @@ import '@tomtom-international/web-sdk-maps/dist/maps.css'
 import Login from './pages/Login'
 import Test from './pages/Test'
 import SearchPage from './pages/SearchPage'
+import SettingPage from './pages/SettingPage'
 
 function App() {
   return (
@@ -19,7 +20,7 @@ function App() {
           <Route path="/test2" component={Test} />
           <Route path="/test3" component={SearchPage} />
           <Route path="/test4" component={Test} />
-          <Route path="/test5" component={Test} />
+          <Route path="/setting" component={SettingPage} />
         </Switch>
       )} />
   )
