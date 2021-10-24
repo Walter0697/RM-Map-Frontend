@@ -3,12 +3,12 @@ import Base from './Base'
 
 import { useQuery } from '@apollo/client'
 
+import TopBar from '../components/topbar/TopBar'
 import SettingList from '../components/setting/SettingList'
 import RelationSearchForm from '../components/form/RelationSearchForm'
 
 import graphql from '../graphql'
 
-// TODO : add top bar
 // TODO : add preference info into cachable local storage
 
 function SettingPage() {
@@ -48,6 +48,9 @@ function SettingPage() {
 
     return (
         <Base>
+            <TopBar 
+                label='Settings'
+            />
             <SettingList 
                 relationUser={relationUser}
                 openRelationChange={openRelationForm}

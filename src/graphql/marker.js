@@ -4,6 +4,26 @@ const list = gql`
     query listMarkerGQL{
         markers{
             label
+            address
+            image_link
+            type
+            estimate_time
+            price
+            status
+            to_time
+            from_time
+        }
+    }
+`
+
+const listmap = gql`
+    query listMapMarkerGQL{
+        markers{
+            id
+            type
+            latitude
+            longitude
+            to_time
         }
     }
 `
@@ -42,6 +62,7 @@ const create = gql`
 
 const markers = {
     list,
+    listmap,
     create,
 }
 

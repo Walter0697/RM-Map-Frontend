@@ -8,6 +8,7 @@ import MarkerForm from '../components/form/MarkerForm'
 import AutoHideAlert from '../components/AutoHideAlert'
 
 function SearchPage() {
+    // create form variable
     const [ isFormOpen, setFormOpen ] = useState(false)
     const [ selectedLocation, setLocation ] = useState(null)
     const [ createAlert, confirmCreated ] = useBoop(3000)

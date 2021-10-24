@@ -53,7 +53,7 @@ function BottomBar({
             </div>
             <div className={styles.bntab}>
                 <BarIcon
-                    route={'/test3'}
+                    route={'/home'}
                     path={location.pathname}
                     activeIcon={<HomeIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     inactiveIcon={<HomeIcon sx={{ color: inactiveColor }} fontSize='inherit' />}

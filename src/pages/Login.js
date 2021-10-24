@@ -33,6 +33,8 @@ function Login({ jwt, dispatch }) {
     // for environment
     const detectMobile = useMobileDetect()
     const history = useHistory()
+
+    // graphql request
     const [ loginGQL, { data: loginData, loading: loginLoading, error: loginError } ] = useMutation(graphql.auth.login, { errorPolicy: 'all' })
     const [ listMarkerGQL, { data: infoData, loading: infoLoading, error: infoError } ] = useLazyQuery(graphql.markers.list)
 
@@ -86,7 +88,7 @@ function Login({ jwt, dispatch }) {
         } else if (loginState === 'redirecting') {
             // set time out for switching page
             window.setTimeout(() => {
-                history.replace('/search')
+                history.replace('/home')
             }, 500)
         }
     }, [loginState])
