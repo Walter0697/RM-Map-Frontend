@@ -38,6 +38,8 @@ function MarkerForm({
         link: '',
         type: '',  
         description: '', 
+        estimate_time: '',
+        price: '',
         from_time: null,
         to_time: null,    
     })
@@ -48,6 +50,8 @@ function MarkerForm({
 
     const [ submitting, setSubmitting ] = useState(false)
     const [ isUnauthorized, setUnauthorized ] = useState(false)
+
+    const [ alertMessage, setAlertMessage ] = useState(null)
 
     useEffect(() => {
         if (!location) return
@@ -70,7 +74,10 @@ function MarkerForm({
 
     useEffect(() => {
         if (createError) {
-            console.log(createError)
+            setAlertMessage({
+                type: 'error',
+                message: createError.message,
+            })
             setSubmitting(false)
         }
 
@@ -139,6 +146,8 @@ function MarkerForm({
             image_link: (formValue.imageLink && formValue.imageLink.type === 'weblink') ? formValue.imageLink.value : null,
             image_upload: (formValue.imageLink && formValue.imageLink.type === 'upload') ? formValue.imageLink.value : null,
             description: formValue.description,
+            estimate_time: formValue.estimate_time,
+            price: formValue.price,
             to_time: to,
             from_time: from,
         }})
@@ -156,6 +165,8 @@ function MarkerForm({
                 createText={'Create'}
                 loading={submitting}
                 isSubmitUnauthorized={isUnauthorized}
+                alertMessage={alertMessage}
+                clearAlertMessage={() => setAlertMessage(null)}
             >
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={12} lg={12}>
@@ -292,6 +303,41 @@ function MarkerForm({
                             onChange={(e) => onValueChangeHandler('description', e.target.value)}
                             error={!!error.description}
                             helperText={error.description}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Selectable
+                            label='estimate time'
+                            value={formValue.estimate_time}
+                            onValueChange={(e) => onValueChangeHandler('estimate_time', e.target.value)}
+                            defaultSelectaValue={''}
+                            defaultSelectText={''}
+                            errorMessage={''}
+                            list={[
+                                { value: 'short', label: 'Short' },
+                                { value: 'medium', label: 'Medium' },
+                                { value: 'long', label: 'Long' },
+                            ]}
+                            valueKey={'value'}
+                            textKey={'label'}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Selectable
+                            label='pricing'
+                            value={formValue.price}
+                            onValueChange={(e) => onValueChangeHandler('price', e.target.value)}
+                            defaultSelectaValue={''}
+                            defaultSelectText={''}
+                            errorMessage={''}
+                            list={[
+                                { value: 'free', label: 'Free' },
+                                { value: 'cheap', label: 'Cheap $' },
+                                { value: 'middle', label: 'Middle $$' },
+                                { value: 'expensive', label: 'Expensive $$$'},
+                            ]}
+                            valueKey={'value'}
+                            textKey={'label'}
                         />
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>

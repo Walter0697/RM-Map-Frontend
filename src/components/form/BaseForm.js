@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import {
     Button,
@@ -29,8 +29,26 @@ function BaseForm({
     createText,
     loading,
     isSubmitUnauthorized,
+    alertMessage,
+    clearAlertMessage,
 }) {
     const history = useHistory()
+
+    const [ currentMessage, setMessage ] = useState(null)
+    const [ messageDisplay, activateMessage ] = useBoop(3000)
+
+    useEffect(() => {
+        if (alertMessage) {
+            setMessage(alertMessage)
+            activateMessage()
+            clearAlertMessage()
+        }
+    }, [alertMessage])
+
+    useEffect(() => {
+        if (messageDisplay) return
+        setMessage(null)
+    }, [messageDisplay])
 
     useEffect(() => {
         if (isSubmitUnauthorized) {
@@ -70,6 +88,12 @@ function BaseForm({
                 open={isSubmitUnauthorized}
                 type={'error'}
                 message={'Unauthorized, now redirecting to login screen...'}
+                timing={2000}
+            />
+            <AutoHideAlert
+                open={messageDisplay}
+                type={currentMessage ? currentMessage.type : ''}
+                message={currentMessage ? currentMessage.message: ''}
                 timing={2000}
             />
         </>

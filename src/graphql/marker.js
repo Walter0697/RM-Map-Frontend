@@ -11,13 +11,15 @@ const list = gql`
 const create = gql`
     mutation createMarkerGQL($label: String!, 
                           $type: String!,
-                          $latitude: String!, 
-                          $longitude: String!, 
+                          $latitude: Float!, 
+                          $longitude: Float!, 
                           $address: String!, 
                           $link: String, 
                           $image_link: String, 
                           $image_upload: Upload,
                           $description: String, 
+                          $estimate_time: String,
+                          $price: String,
                           $to_time: String, 
                           $from_time: String) {
         createMarker(input: {
@@ -30,6 +32,8 @@ const create = gql`
             image_link: $image_link,
             image_upload: $image_upload,
             description: $description,
+            estimate_time: $estimate_time,
+            price: $price,
             to_time: $to_time,
             from_time: $from_time,
         })

@@ -20,7 +20,7 @@ function FadableComponent({
     return (
         <animated.div
             style={{
-                visibility: opacity.interpolate(o => o === 0 ? 'hidden' : 'visible'),
+                visibility: opacity.to(o => o === 0 ? 'hidden' : 'visible'),
                 opacity: opacity.to({ range: [0.0, 1.0], output: [0, 1] }),
             }}
         >

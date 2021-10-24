@@ -77,10 +77,13 @@ function RelationSearchForm({
 
     useEffect(() => {
         if (relationData) {
-            console.log(relationData)
+            if (relationData.updateRelation === 'ok') {
+                onCreated && onCreated(username)
+            } 
         }
 
         if (relationError) {
+            // TODO: handle error to pop up alert
             console.log(relationError)
         }
     }, [relationData, relationError])

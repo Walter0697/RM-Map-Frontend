@@ -41,6 +41,11 @@ function SettingPage() {
         setRelationFormOpen(false)
     }
 
+    const onChangeRelation = (username) => {
+        setRelation(username)
+        setRelationFormOpen(false)
+    }
+
     return (
         <Base>
             <SettingList 
@@ -50,7 +55,7 @@ function SettingPage() {
             <RelationSearchForm
                 open={isRelationFormOpen}
                 handleClose={closeRelationForm}
-                onCreated={closeRelationForm}
+                onCreated={onChangeRelation}
             />
         </Base>
     )
