@@ -43,7 +43,7 @@ function BarIcon({
                     }),
                 }}
             >
-                <IconButton size="large">
+                <IconButton size='large'>
                     {activeIcon}
                 </IconButton>
             </animated.div>
@@ -57,7 +57,7 @@ function BarIcon({
                     }),
                 }}
             >
-                <IconButton size="large"
+                <IconButton size='large'
                     onClick={() => redirectTo()}>
                         {inactiveIcon}
                 </IconButton>

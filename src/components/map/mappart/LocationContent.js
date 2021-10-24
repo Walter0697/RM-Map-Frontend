@@ -133,7 +133,7 @@ function LocationDetail({
                 }}
             >
                 <IconButton
-                    size="middle"
+                    size='middle'
                     style={{
                         boxShadow: '2px 2px 6px',
                         background: '#f5f5f5',
@@ -323,8 +323,8 @@ function LocationContent({
         >
             <Grid
                 item xs={12}
-                alignItems="center"
-                justifyContent="center"
+                alignItems='center'
+                justifyContent='center'
                 style={{
                     display: 'flex',
                     height: (shouldShowList) ? '10%' : '40%',
@@ -337,8 +337,8 @@ function LocationContent({
             </Grid>
             <Grid 
                 item xs={12}
-                alignItems="center"
-                justifyContent="center"
+                alignItems='center'
+                justifyContent='center'
                 style={{
                     display: 'flex',
                     height: (shouldShowList) ? '90%' : '60%',

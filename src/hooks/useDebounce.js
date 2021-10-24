@@ -6,7 +6,7 @@ function useDebounce(callback, time, watchValues) {
             callback()
         }, time)
 
-        return () => clearTimeout(timer)
+        return () => window.clearTimeout(timer)
     }, watchValues)
 }
 

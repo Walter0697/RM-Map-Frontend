@@ -1,9 +1,10 @@
 import constants from './constant'
 
-export const login = (jwt) => {
+export const login = (jwt, username) => {
     return {
         type: constants.LOGIN,
         jwt,
+        username,
     }
 }
 

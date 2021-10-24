@@ -106,7 +106,7 @@ function Login({ jwt, dispatch }) {
         }
 
         if (loginData) {
-            dispatch(actions.login(loginData.login))
+            dispatch(actions.login(loginData.login.jwt, loginData.login.username))
             setLoginState('loading')
         }
     }, [loginData, loginError])

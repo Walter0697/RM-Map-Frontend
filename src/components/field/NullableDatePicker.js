@@ -34,10 +34,10 @@ function NullableDatePicker({
                         helperText={errorMessage}
                         InputProps={{
                             endAdornment: (value && (
-                                <InputAdornment position="end">
+                                <InputAdornment position='end'>
                                     <IconButton
                                         onClick={clearDate}
-                                        edge="end"
+                                        edge='end'
                                     >
                                         <ClearIcon />
                                     </IconButton>

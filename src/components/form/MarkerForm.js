@@ -178,7 +178,7 @@ function MarkerForm({
                             variant='outlined'
                             size='small'
                             fullWidth
-                            label="longitude"
+                            label='longitude'
                             value={location ? location.latlon.lon : ''}
                             disabled
                         />
@@ -191,7 +191,7 @@ function MarkerForm({
                             variant='outlined'
                             size='small'
                             fullWidth
-                            label="latitude"
+                            label='latitude'
                             value={location ? location.latlon.lat : ''}
                             disabled
                         />
@@ -223,27 +223,27 @@ function MarkerForm({
                         />
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
-                        <FormControl component="image" fullWidth>
+                        <FormControl component='image' fullWidth>
                             <FormLabel 
-                                component="legend"
+                                component='legend'
                             >
                                 Preview
                             </FormLabel>
                             <Grid container spacing={0} fullWidth>
                                 <Grid item xs={4} md={4} lg={4}>
                                     <Button 
-                                        variant="outlined"
+                                        variant='outlined'
                                         fullWidth
                                         onClick={() => setImageState('weblink')}>
                                         <AddLinkIcon />
                                     </Button>
                                 </Grid>
                                 <Grid item xs={4} md={4} lg={4}>
-                                    <input type="file" id="upload-image" style={{ display: 'none' }} onChange={handleImageChange} />
-                                    <label htmlFor="upload-image">
+                                    <input type='file' id='upload-image' style={{ display: 'none' }} onChange={handleImageChange} />
+                                    <label htmlFor='upload-image'>
                                         <Button 
-                                            variant="outlined"
-                                            component="span"
+                                            variant='outlined'
+                                            component='span'
                                             fullWidth>
                                             <InsertDriveFileIcon />
                                         </Button>
@@ -251,7 +251,7 @@ function MarkerForm({
                                 </Grid>
                                 <Grid item xs={4} md={4} lg={4}>
                                     <Button 
-                                        variant="outlined"
+                                        variant='outlined'
                                         fullWidth
                                         disabled={!formValue.imageLink}
                                         onClick={() => setImageState('preview')}
@@ -267,7 +267,7 @@ function MarkerForm({
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
                         <Selectable
-                            label="type"
+                            label='type'
                             required
                             value={formValue.type}
                             onValueChange={(e) => onValueChangeHandler('type', e.target.value)}

@@ -11,7 +11,7 @@ import {
 } from '@mui/material'
 
 const TransitionFromLeft = (props) => {
-    return <Slide {...props} direction="right" />
+    return <Slide {...props} direction='right' />
 }
 
 function ImagePreview({

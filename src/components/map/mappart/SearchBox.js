@@ -44,8 +44,6 @@ function SearchResultItem({
     )
 }
 
-// TODO: use viewcontent to make memo of showing suggestion
-
 function SearchBox({
     searchText,
     setSearch,

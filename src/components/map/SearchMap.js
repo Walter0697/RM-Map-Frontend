@@ -222,7 +222,7 @@ function SearchMap({
             {/* main layout */}
             <animated.div 
                 ref={mapElement} 
-                className="mapDiv"
+                className='mapDiv'
                 style={{ 
                     position: 'absolute',
                     height: '90%',
@@ -282,7 +282,7 @@ function SearchMap({
                     }}
                 >
                     <IconButton
-                        size="large"
+                        size='large'
                         style={{
                             backgroundColor: 'white',
                             boxShadow: '2px 2px 6px',
@@ -302,7 +302,7 @@ function SearchMap({
                 }}
             >
                 <IconButton
-                    size="large"
+                    size='large'
                     style={{
                         backgroundColor: 'white',
                         boxShadow: '2px 2px 6px',
@@ -321,7 +321,7 @@ function SearchMap({
                 }}
             >
                 <IconButton
-                    size="large"
+                    size='large'
                     style={{
                         backgroundColor: 'white',
                         boxShadow: '2px 2px 6px',
@@ -344,8 +344,8 @@ function SearchMap({
                     }}
                 >
                     <Button
-                        variant="contained"
-                        size="middle"
+                        variant='contained'
+                        size='middle'
                         style={{
                             backgroundColor: '#c1fdd1ee',
                             color: '#00297688',

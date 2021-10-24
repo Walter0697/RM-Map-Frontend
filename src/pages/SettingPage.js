@@ -12,14 +12,21 @@ import graphql from '../graphql'
 // TODO : add preference info into cachable local storage
 
 function SettingPage() {
+    // form open state
     const [ isRelationFormOpen, setRelationFormOpen ] = useState(false)
 
+    // user information
+    const [ relationUser, setRelation ] = useState(null) // TODO: default value would be from localstorage
+
+    // graphql request
     const { data: preferenceData, loading: preferenceLoading, error: preferenceError } = useQuery(graphql.users.preference, { errorPolicy: 'all' })
 
     useEffect(() => {
         if (preferenceData) {
-            console.log(preferenceData)
-        }
+            if (preferenceData.preference?.relation?.username) {
+                setRelation(preferenceData.preference.relation.username)
+            } 
+        } 
 
         if (preferenceError) {
             console.log(preferenceError)
@@ -37,6 +44,7 @@ function SettingPage() {
     return (
         <Base>
             <SettingList 
+                relationUser={relationUser}
                 openRelationChange={openRelationForm}
             />
             <RelationSearchForm

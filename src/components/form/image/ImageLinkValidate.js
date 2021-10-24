@@ -41,7 +41,12 @@ function ImageLinkValidate({
         }
         setValid(false)
         setMessage('checking...')
-        imagehelper.generic.validate(link, onValidateCallback)
+
+        const timer = window.setTimeout(() => {
+            imagehelper.generic.validate(link, onValidateCallback)
+        }, 500)
+        
+        return () => window.clearTimeout(timer)
     }, [link])
 
     const onValidateCallback = (valid) => {

@@ -21,7 +21,7 @@ function Selectable({
     textKey,
 }) {
     return (
-        <FormControl variant="outlined" fullWidth>
+        <FormControl variant='outlined' fullWidth>
             <InputLabel id={'select-' + label} error={!!errorMessage}>{label + (required && ' *')}</InputLabel>
             <Select
                 required={required}

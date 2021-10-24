@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import { useLazyQuery } from '@apollo/client'
+import React, { useState, useEffect, useMemo } from 'react'
+import { connect } from 'react-redux'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import { 
     Grid,
     TextField,
@@ -7,27 +8,85 @@ import {
 
 import BaseForm from './BaseForm'
 
+import useDebounce from '../../hooks/useDebounce'
+
+import actions from '../../store/actions'
 import graphql from '../../graphql'
 
 function RelationSearchForm({
+    selfname,
     open,
     handleClose,
     onCreated,
 }) {
     const [ userSearchGQL, { data: searchData, loading: searchLoading, error: searchError } ] = useLazyQuery(graphql.users.search, { errorPolicy: 'all' })
+    const [ updateRelationGQL, { data: relationData, loading: relationLoading, error: relationError }] = useMutation(graphql.users.update_relation, { errorPolicy: 'all' })
 
     const [ username, setUsername ] = useState('')
+    const [ helperText, setHelperText ] = useState('')
+    const [ error, setError ] = useState(false)
+    const [ canConfirm, setConfirm ] = useState(false)  // if there is no error and user is not typing
+
+    const confirmClickable = useMemo(() => {
+        if (!canConfirm) return false
+        if (relationLoading) return false
+        return true
+    }, [canConfirm, relationLoading])
+
+    const fetchUserWithUsername = () => {
+        if (username === '') return
+        userSearchGQL({ variables: { username } })
+    }
 
     useEffect(() => {
+        setConfirm(false)
+        if (username === '') return
 
+        setError(false)
+        setHelperText('searching...')
     }, [username])
 
-    useEffect(() => {
+    useDebounce(fetchUserWithUsername, 1000, [ username ])
 
-    }, [ searchData, searchError ])
+    useEffect(() => {
+        if (username === '') return
+
+        if (searchData) {
+            if (searchData.usersearch) {
+                if (searchData.usersearch.username === selfname) {
+                    setError(true)
+                    setConfirm(false)
+                    setHelperText('you cannot share marker with yourself!')
+                } else {
+                    setError(false)
+                    setConfirm(true)
+                    setHelperText('you can share markers with this user!')
+                }
+            } else {
+                setError(true)
+                setConfirm(false)
+                setHelperText('user not found')
+            }
+        }
+
+        if (searchError) {
+            setError(true)
+            setHelperText(searchError)
+        }
+    }, [searchData, searchError])
+
+    useEffect(() => {
+        if (relationData) {
+            console.log(relationData)
+        }
+
+        if (relationError) {
+            console.log(relationError)
+        }
+    }, [relationData, relationError])
 
     const onSubmitHandler = () => {
-
+        updateRelationGQL({ variables: { username }})
     }
 
     return (
@@ -40,10 +99,20 @@ function RelationSearchForm({
                 handleSubmit={onSubmitHandler}
                 cancelText={'Cancel'}
                 createText={'Confirm'}
+                loading={!confirmClickable}
             >
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={12} lg={12}>
-                        
+                        <TextField
+                            variable='outlined'
+                            size='medium'
+                            fullWidth
+                            label='searching'
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            error={error}
+                            helperText={helperText}
+                        />
                     </Grid>
                 </Grid>
             </BaseForm>
@@ -51,4 +120,6 @@ function RelationSearchForm({
     )
 }
 
-export default RelationSearchForm
+export default connect(state => ({
+    selfname: state.auth.username,
+})) (RelationSearchForm)

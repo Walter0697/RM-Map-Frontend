@@ -44,6 +44,7 @@ function ButtonBox({
 }
 
 function SettingList({
+  relationUser,
   openRelationChange,
 }) {
   return (
@@ -61,8 +62,8 @@ function SettingList({
           height={90}
         >
             <Button
-                variant="contained"
-                size="large"
+                variant='contained'
+                size='large'
                 style={{
                     backgroundColor: '#48acdb',
                     height: '100%',
@@ -76,7 +77,7 @@ function SettingList({
                 fullWidth
               >
                 <Grid item xs={12}>Sharing markers with:</Grid>
-                <Grid item xs={12}>Me!</Grid>
+                <Grid item xs={12}>{relationUser ?? '<nobody>'}</Grid>
               </Grid>
             </Button>
         </ButtonBox>
