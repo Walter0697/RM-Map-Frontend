@@ -4,6 +4,7 @@ import Base from './Base'
 import { useQuery } from '@apollo/client'
 
 import TopBar from '../components/topbar/TopBar'
+import MarkerList from '../components/list/MarkerList'
 
 import graphql from '../graphql'
 
@@ -12,11 +13,11 @@ function HomePage() {
     const [ list, setList ] = useState([])
 
     // graphql request
-    const { data: markerData, loading: markerLoading, error: markerError } = useQuery(graphql.markers.listmap)
+    const { data: markerData, loading: markerLoading, error: markerError } = useQuery(graphql.markers.list)
 
     useEffect(() => {
         if (markerData) {
-            console.log(markerData)
+            setList(markerData.markers)
         }
 
         if (markerError) {
@@ -28,6 +29,9 @@ function HomePage() {
         <Base>
             <TopBar
                 label='Home'
+            />
+            <MarkerList
+                markers={list}
             />
         </Base>
     )

@@ -4,7 +4,7 @@ import Base from './Base'
 import { useQuery } from '@apollo/client'
 
 import TopBar from '../components/topbar/TopBar'
-import SettingList from '../components/setting/SettingList'
+import SettingList from '../components/list/SettingList'
 import RelationSearchForm from '../components/form/RelationSearchForm'
 
 import graphql from '../graphql'

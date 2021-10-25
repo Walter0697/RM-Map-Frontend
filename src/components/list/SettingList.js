@@ -3,31 +3,7 @@ import {
     Grid,
     Button,
 } from '@mui/material'
-import { 
-    useTrail, 
-    animated, 
-} from '@react-spring/web'
-
-function SettingTrail({ 
-  children,
-}) {
-  const items = React.Children.toArray(children)
-  const trail = useTrail(items.length, {
-    config: { mass: 5, tension: 2000, friction: 200 },
-    opacity: 1,
-    y: 0,
-    from: { opacity: 0, y: 500 },
-  })
-  return (
-    <div>
-      {trail.map(({ ...style }, index) => (
-        <animated.div key={index} style={style}>
-            {items[index]}
-        </animated.div>
-      ))}
-    </div>
-  )
-}
+import BottomUpTrail from '../animatein/BottomUpTrail'
 
 function ButtonBox({
   height,
@@ -51,13 +27,14 @@ function SettingList({
     <div 
         style={{
             position: 'absolute',
-            height: '90%',
+            height: '80%',
             width: '95%',
             paddingLeft: '5%',
             paddingTop: '20px',
+            overflow: 'auto',
         }}
     >
-      <SettingTrail>
+      <BottomUpTrail>
         <ButtonBox
           height={90}
         >
@@ -81,7 +58,7 @@ function SettingList({
               </Grid>
             </Button>
         </ButtonBox>
-      </SettingTrail>
+      </BottomUpTrail>
     </div>
   )
 }
