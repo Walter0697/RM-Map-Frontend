@@ -1,4 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import Base from './Base'
+
+import { useQuery } from '@apollo/client'
+
 import {
     IconButton,
 } from '@mui/material'
@@ -7,46 +11,48 @@ import {
     config,
     animated,
 } from '@react-spring/web'
-import Base from './Base'
 
 import ExploreIcon from '@mui/icons-material/Explore'
 
 import MarkerMap from '../components/map/MarkerMap'
 import MarkerList from '../components/list/MarkerList'
+import MarkerView from '../components/marker/MarkerView'
+
+import graphql from '../graphql'
 
 import styles from '../styles/list.module.css'
 
-const items = [
-    {
-        label: '123123',
-    },
-    {
-        label: '234234',
-    },
-    {
-        label: '565656',
-    },
-    {
-        label: '123123',
-    },
-    {
-        label: '234234',
-    },
-    {
-        label: '565656',
-    },
-    {
-        label: '123123',
-    },
-    {
-        label: '234234',
-    },
-    {
-        label: '565656',
-    },
-]
-
 function MarkerPage() {
+    // marker list
+    const [ markers, setMarkers ] = useState([])
+    const [ selectedMarker, setSelected ] = useState(null)
+
+    // graphql request 
+    const { data: markerData, loading: markerLoading, error: markerError } = useQuery(graphql.markers.list)
+
+    useEffect(() => {
+        if (markerData) {
+            setMarkers(markerData.markers)
+        }
+
+        if (markerError) {
+            console.log(markerError)
+        }
+    }, [markerData, markerError])
+
+    const setSelectedById = (id) => {
+        let selected = null
+        markers.forEach(m => {
+            if (m.id === id) {
+                selected = m
+                return
+            }
+        })
+        if (selected) {
+            setSelected(selected)
+        }
+    }
+
     const [ showingList, setShowingList ] = useState(false)
     const { transform } = useSpring({
         config: config.gentle,
@@ -56,6 +62,7 @@ function MarkerPage() {
 
     return (
         <Base>
+            {/* flipping card logic */}
             <animated.div 
                 style={{
                     width: '100%',
@@ -70,6 +77,8 @@ function MarkerPage() {
                 >
                     <MarkerMap 
                         toListView={() => setShowingList(true)}
+                        markers={markers}
+                        setSelectedById={setSelectedById}
                     />
                 </div>
                 <div
@@ -82,9 +91,12 @@ function MarkerPage() {
                     <MarkerList
                         height={'100%'}
                         toMapView={() => setShowingList(false)}
-                        markers={items}
+                        markers={markers}
+                        setSelectedById={setSelectedById}
                     />
                 </div>
+
+                {/* place button outside since button cannot be clicked with the rotate transform */}
                 { showingList && (
                     <div 
                         style={{
@@ -107,6 +119,11 @@ function MarkerPage() {
                     </div>
                 )}
             </animated.div>
+            <MarkerView
+                open={!!selectedMarker}
+                handleClose={() => setSelected(null)}
+                marker={selectedMarker}
+            />
         </Base>
     )
 }

@@ -9,7 +9,7 @@ import MarkerList from '../components/list/MarkerList'
 import graphql from '../graphql'
 
 function HomePage() {
-    // marker lists
+    // marker list
     const [ list, setList ] = useState([])
 
     // graphql request

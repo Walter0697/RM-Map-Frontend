@@ -3,6 +3,10 @@ import { gql } from '@apollo/client'
 const list = gql`
     query listMarkerGQL{
         markers{
+            id
+            type
+            latitude
+            longitude
             label
             address
             image_link
@@ -12,18 +16,6 @@ const list = gql`
             status
             to_time
             from_time
-        }
-    }
-`
-
-const listmap = gql`
-    query listMapMarkerGQL{
-        markers{
-            id
-            type
-            latitude
-            longitude
-            to_time
         }
     }
 `
@@ -62,7 +54,6 @@ const create = gql`
 
 const markers = {
     list,
-    listmap,
     create,
 }
 

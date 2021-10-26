@@ -20,6 +20,7 @@ import maphelper from '../../scripts/map'
 
 function MarkerMap({
     toListView,
+    markers,
 }) {
     // reference of the div to render the map
     const mapElement = useRef(null)
@@ -67,6 +68,22 @@ function MarkerMap({
         15,
         setGPSFail,
     )
+
+    useEffect(() => {
+        let output = []
+        markers.forEach(item => {
+            output.push({
+                id: item.id,
+                type: item.type,
+                location: {
+                    lon: item.longitude,
+                    lat: item.latitude,
+                }
+            })
+        })
+
+        setLocation(output)
+    }, [markers])
 
     return (
         <>

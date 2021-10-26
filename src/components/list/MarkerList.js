@@ -5,8 +5,6 @@ import {
     Button,
 } from '@mui/material'
 
-import ExploreIcon from '@mui/icons-material/Explore'
-
 import BottomUpTrail from '../animatein/BottomUpTrail'
 
 function ButtonBox({
@@ -25,8 +23,8 @@ function ButtonBox({
 
 function MarkerList({
   height,
-  toMapView,
   markers,
+  setSelectedById,
 }) {
     return (
         <>
@@ -56,7 +54,7 @@ function MarkerList({
                         width: '100%',
                         boxShadow: '2px 2px 6px',
                       }}
-                      onClick={() => { console.log('can click on button')}}
+                      onClick={() => { setSelectedById(item.id) }}
                     >
                       <Grid
                         container
