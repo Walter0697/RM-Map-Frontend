@@ -44,7 +44,7 @@ function BottomBar({
             </div>
             <div className={styles.bntab}>
                 <BarIcon
-                    route={'/test2'}
+                    route={'/markers'}
                     path={location.pathname}
                     activeIcon={<MapIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     inactiveIcon={<MapIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
@@ -62,7 +62,7 @@ function BottomBar({
             </div>
             <div className={styles.bntab}>
                 <BarIcon
-                    route={'/test4'}
+                    route={'/schedule'}
                     path={location.pathname}
                     activeIcon={<StarIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     inactiveIcon={<StarIcon sx={{ color: inactiveColor }} fontSize='inherit' />}

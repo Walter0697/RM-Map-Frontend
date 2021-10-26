@@ -30,9 +30,6 @@ function HomePage() {
             <TopBar
                 label='Home'
             />
-            <MarkerList
-                markers={list}
-            />
         </Base>
     )
 }

@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
 import {
     Grid,
+    IconButton,
     Button,
 } from '@mui/material'
 
-import RandomFadeIn from '../wrapper/RandomFadeIn'
+import ExploreIcon from '@mui/icons-material/Explore'
+
+import BottomUpTrail from '../animatein/BottomUpTrail'
 
 function ButtonBox({
     height,
@@ -21,54 +24,58 @@ function ButtonBox({
   }
 
 function MarkerList({
+  height,
+  toMapView,
   markers,
 }) {
     return (
-        <div 
-            style={{
-                position: 'absolute',
-                height: '80%',
-                width: '95%',
-                paddingLeft: '5%',
-                paddingTop: '20px',
-                overflow: 'auto',
-            }}
-        >
-            <RandomFadeIn>
-              {markers.map((item, index) => (
-                <ButtonBox
-                  key={index}
-                  height='150px'
-                >
-                  <Button
-                    variant='contained'
-                    size='large'
-                    style={{
-                      backgroundColor: '#48acdb',
-                      borderRadius: '5px',
-                      height: '100%',
-                      width: '100%',
-                      boxShadow: '2px 2px 6px',
-                    }}
-                    onClick={() => {}}
+        <>
+          <div 
+              style={{
+                  position: 'absolute',
+                  height: height,
+                  width: '95%',
+                  paddingLeft: '5%',
+                  paddingTop: '20px',
+                  overflow: 'auto',
+              }}
+          >
+              <BottomUpTrail>
+                {markers.map((item, index) => (
+                  <ButtonBox
+                    key={index}
+                    height='150px'
                   >
-                    <Grid
-                      container
-                      fullWidth
+                    <Button
+                      variant='contained'
+                      size='large'
+                      style={{
+                        backgroundColor: '#48acdb',
+                        borderRadius: '5px',
+                        height: '100%',
+                        width: '100%',
+                        boxShadow: '2px 2px 6px',
+                      }}
+                      onClick={() => { console.log('can click on button')}}
                     >
-                      <Grid item xs={3}>
-                        <img
-                          width={'100px'}
-                          src={process.env.REACT_APP_IMAGE_LINK + '/' + item.image_link}
-                        />
+                      <Grid
+                        container
+                        fullWidth
+                      >
+                        <Grid item xs={3}>
+                          <img
+                            width={'100px'}
+                            src={process.env.REACT_APP_IMAGE_LINK + '/' + item.image_link}
+                          />
+                        </Grid>
+                        <Grid item xs={9}>{item.label}</Grid>
                       </Grid>
-                      <Grid item xs={9}>{item.label}</Grid>
-                    </Grid>
-                  </Button>
-                </ButtonBox>
-              ))}
-            </RandomFadeIn>
-        </div>
+                    </Button>
+                  </ButtonBox>
+                ))}
+              </BottomUpTrail>
+          </div>
+        </>
     )
 }
 

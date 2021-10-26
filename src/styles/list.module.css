@@ -1,0 +1,8 @@
+.flip {
+    position: absolute;
+    -webkit-backface-visibility: hidden; /* Safari */
+    backface-visibility: hidden;
+    height: 100%;
+    width: 100%;
+}
+  

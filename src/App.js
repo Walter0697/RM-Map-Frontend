@@ -9,7 +9,9 @@ import '@tomtom-international/web-sdk-maps/dist/maps.css'
 import Login from './pages/Login'
 import Test from './pages/Test'
 import SearchPage from './pages/SearchPage'
+import MarkerPage from './pages/MarkerPage'
 import HomePage from './pages/HomePage'
+import SchedulePage from './pages/SchedulePage'
 import SettingPage from './pages/SettingPage'
 
 function App() {
@@ -18,9 +20,9 @@ function App() {
         <Switch>
           <Route exact path="/" component={Login} />
           <Route path="/search" component={SearchPage} />
-          <Route path="/test2" component={Test} />
+          <Route path="/markers" component={MarkerPage} />
           <Route path="/home" component={HomePage} />
-          <Route path="/test4" component={Test} />
+          <Route path="/schedule" component={SchedulePage} />
           <Route path="/setting" component={SettingPage} />
         </Switch>
       )} />
