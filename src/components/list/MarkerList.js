@@ -1,7 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     Grid,
-    IconButton,
     Button,
 } from '@mui/material'
 
@@ -11,19 +10,75 @@ function ButtonBox({
     height,
     children,
   }) {
-    return (
-      <div style={{
-        height,
-        marginBottom: '10px',
-      }}>
-        {children}
-      </div>
-    )
+  return (
+    <div style={{
+      height,
+      marginBottom: '10px',
+    }}>
+      {children}
+    </div>
+  )
+}
+
+function MarkerItem({
+  item,
+  onClickHandler,
+}) {
+  const [ imageExist, setImageExist ] = useState(false)
+  
+  useEffect(() => {
+    if (item?.image_link) {
+      setImageExist(true)
+    } else {
+      setImageExist(false)
+    }
+  }, [item])
+
+  const onImageFailedToLoad = () => {
+    setImageExist(false)
   }
+
+  return (
+    <Button
+      variant='contained'
+      size='large'
+      style={{
+        backgroundColor: '#48acdb',
+        borderRaduis: '5px',
+        height: '100%',
+        width: '100%',
+        boxShadow: '2px 2px 6px',
+      }}
+      onClick={onClickHandler}
+    >
+      <Grid
+        container
+        fullWidth
+      >
+        { imageExist && (
+          <Grid item xs={3}>
+            <img
+              width={'100%'}
+              src={process.env.REACT_APP_IMAGE_LINK + item.image_link}
+              onError={onImageFailedToLoad}
+            />
+          </Grid>
+        )}
+        <Grid 
+          item 
+          xs={imageExist ? 9 : 12}
+        >
+          {item.label}
+        </Grid>
+      </Grid>
+    </Button>
+  )
+}
 
 function MarkerList({
   height,
   markers,
+  toMapView,
   setSelectedById,
 }) {
     return (
@@ -44,31 +99,10 @@ function MarkerList({
                     key={index}
                     height='150px'
                   >
-                    <Button
-                      variant='contained'
-                      size='large'
-                      style={{
-                        backgroundColor: '#48acdb',
-                        borderRadius: '5px',
-                        height: '100%',
-                        width: '100%',
-                        boxShadow: '2px 2px 6px',
-                      }}
-                      onClick={() => { setSelectedById(item.id) }}
-                    >
-                      <Grid
-                        container
-                        fullWidth
-                      >
-                        <Grid item xs={3}>
-                          <img
-                            width={'100px'}
-                            src={process.env.REACT_APP_IMAGE_LINK + item.image_link}
-                          />
-                        </Grid>
-                        <Grid item xs={9}>{item.label}</Grid>
-                      </Grid>
-                    </Button>
+                    <MarkerItem
+                      item={item}
+                      onClickHandler={() => setSelectedById(item.id)}
+                    />
                   </ButtonBox>
                 ))}
               </BottomUpTrail>

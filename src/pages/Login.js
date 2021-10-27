@@ -66,7 +66,7 @@ function Login({ jwt, dispatch }) {
         config: config.stiff,
         from: { height: '10%', width: '10%', opacity: 1 },
         to: {
-            height: (loginState === 'prompt') ? '60%' : (loginState === 'success' || loginState === 'redirecting' ? '20%' : '5%'),
+            height: (loginState === 'prompt') ? '80%' : (loginState === 'success' || loginState === 'redirecting' ? '20%' : '5%'),
             width: (loginState === 'success' || loginState === 'redirecting') ? iconWidth : formWidth,
             opacity: (loginState === 'redirecting') ? 0 : 1,
         },

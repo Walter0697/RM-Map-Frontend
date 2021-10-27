@@ -20,6 +20,7 @@ import AutoHideAlert from '../AutoHideAlert'
 import maphelper from '../../scripts/map'
 
 function MarkerMap({
+    showingList,
     toListView,
     markers,
     setSelectedById,
@@ -32,6 +33,7 @@ function MarkerMap({
     const [ hasPreviewContent, setPreviewContent ] = useState(false)
 
     const { 
+        mapOpacity,
         mapContentTransform, 
         previewContentHeight,
         previewContentOpacity,
@@ -39,12 +41,14 @@ function MarkerMap({
      } = useSpring({
         config: config.wobbly,
         from: { 
+            mapOpacity: 1,
             mapContentTransform: 'translate(0, 0)',
             previewContentHeight: '0%',
             previewContentOpacity: 0,
             backButtonBottom: '5%',
         },
         to: {
+            mapOpacity: (showingList) ? 0 : 1,
             mapContentTransform: ( viewPreviewContent ) ? 'translate(0, -5%)' : 'translate(0, 0)',
             previewContentHeight: ( viewPreviewContent ) ? '20%' : (hasPreviewContent ? '5%' : '0%'),
             previewContentOpacity: ( viewPreviewContent || hasPreviewContent ) ? 1 : 0,
@@ -115,6 +119,8 @@ function MarkerMap({
                 ref={mapElement} 
                 className='mapDiv'
                 style={{ 
+                    visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
+                    opacity: mapOpacity,
                     position: 'absolute',
                     height: '100%',
                     transform: mapContentTransform,
@@ -125,6 +131,7 @@ function MarkerMap({
                 style={{
                     position: 'absolute',
                     height: previewContentHeight,
+                    visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
                     opacity: previewContentOpacity,
                     width: '100%',
                     bottom: '0',
@@ -143,6 +150,8 @@ function MarkerMap({
             <animated.div
                 style={{ 
                     position: 'absolute',
+                    visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
+                    opacity: mapOpacity,
                     bottom: backButtonBottom,
                     left: '20px',
                 }}

@@ -76,6 +76,7 @@ function MarkerPage() {
                     className={styles.flip}
                 >
                     <MarkerMap 
+                        showingList={showingList}
                         toListView={() => setShowingList(true)}
                         markers={markers}
                         setSelectedById={setSelectedById}
@@ -90,6 +91,7 @@ function MarkerPage() {
                 >
                     <MarkerList
                         height={'100%'}
+                        showingList={showingList}
                         toMapView={() => setShowingList(false)}
                         markers={markers}
                         setSelectedById={setSelectedById}
