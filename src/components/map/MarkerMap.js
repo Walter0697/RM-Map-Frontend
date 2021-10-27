@@ -14,6 +14,7 @@ import ViewListIcon from '@mui/icons-material/ViewList'
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
 
+import LocationPreview from './mappart/LocationPreview'
 import AutoHideAlert from '../AutoHideAlert'
 
 import maphelper from '../../scripts/map'
@@ -21,27 +22,38 @@ import maphelper from '../../scripts/map'
 function MarkerMap({
     toListView,
     markers,
+    setSelectedById,
 }) {
     // reference of the div to render the map
     const mapElement = useRef(null)
 
     // for controlling the size of the map and search content
-    const [ viewSearchContent, setViewContent ] = useState(false)
+    const [ viewPreviewContent, setViewContent ] = useState(false)
+    const [ hasPreviewContent, setPreviewContent ] = useState(false)
 
     const { 
         mapContentTransform, 
+        previewContentHeight,
+        previewContentOpacity,
         backButtonBottom,
      } = useSpring({
         config: config.wobbly,
         from: { 
             mapContentTransform: 'translate(0, 0)',
+            previewContentHeight: '0%',
+            previewContentOpacity: 0,
             backButtonBottom: '5%',
         },
         to: {
-            mapContentTransform: ( viewSearchContent ) ? 'translate(0, -15%)' : 'translate(0, 0)',
-            backButtonBottom: ( viewSearchContent ) ? '45%' : '5%',
+            mapContentTransform: ( viewPreviewContent ) ? 'translate(0, -5%)' : 'translate(0, 0)',
+            previewContentHeight: ( viewPreviewContent ) ? '20%' : (hasPreviewContent ? '5%' : '0%'),
+            previewContentOpacity: ( viewPreviewContent || hasPreviewContent ) ? 1 : 0,
+            backButtonBottom: ( viewPreviewContent ) ? '25%' : (hasPreviewContent ? '10%' : '5%'),
         },
     })
+
+    // selected item
+    const [ currentViewMarker, setViewMarker ] = useState(null)
 
     // alert related
     const [ gpsFail, setGPSFail ] = useBoop(3000)
@@ -85,6 +97,17 @@ function MarkerMap({
         setLocation(output)
     }, [markers])
 
+    useEffect(() => {
+        if (clickedMarker) {
+            const marker = markers.find(s => s.id === clickedMarker.id)
+            if (marker) {
+                setViewMarker(marker)
+                setViewContent(true)
+                setPreviewContent(true)
+            }
+        } 
+    }, [clickedMarker])
+
     return (
         <>
             {/* main layout */}
@@ -98,7 +121,25 @@ function MarkerMap({
                     width: '100%', 
                 }}
             />
+            <animated.div
+                style={{
+                    position: 'absolute',
+                    height: previewContentHeight,
+                    opacity: previewContentOpacity,
+                    width: '100%',
+                    bottom: '0',
+                }}
+            >
+                <LocationPreview
+                    marker={currentViewMarker}
+                    onOpen={() => setViewContent(true)}
+                    onClose={() => setViewContent(false)}
+                    shouldViewContent={viewPreviewContent}
+                    setSelectedById={setSelectedById}
+                />
+            </animated.div>
 
+            {/* buttons */}
             <animated.div
                 style={{ 
                     position: 'absolute',

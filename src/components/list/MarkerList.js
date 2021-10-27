@@ -63,7 +63,7 @@ function MarkerList({
                         <Grid item xs={3}>
                           <img
                             width={'100px'}
-                            src={process.env.REACT_APP_IMAGE_LINK + '/' + item.image_link}
+                            src={process.env.REACT_APP_IMAGE_LINK + item.image_link}
                           />
                         </Grid>
                         <Grid item xs={9}>{item.label}</Grid>
