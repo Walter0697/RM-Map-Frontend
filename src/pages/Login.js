@@ -119,7 +119,7 @@ function Login({ jwt, dispatch }) {
         }
 
         if (infoData) {
-            console.log(infoData)
+            dispatch(actions.resetMarkers(infoData.markers))
             setFetch(true)
         }
     }, [infoData, infoError])

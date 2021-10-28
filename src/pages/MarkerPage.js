@@ -1,11 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
+import { connect } from 'react-redux'
 import Base from './Base'
 
-import { useQuery } from '@apollo/client'
-
-import {
-    IconButton,
-} from '@mui/material'
 import {
     useSpring,
     config,
@@ -19,27 +15,11 @@ import MarkerList from '../components/list/MarkerList'
 import MarkerView from '../components/marker/MarkerView'
 import CircleIconButton from '../components/field/CircleIconButton'
 
-import graphql from '../graphql'
-
 import styles from '../styles/list.module.css'
 
-function MarkerPage() {
-    // marker list
-    const [ markers, setMarkers ] = useState([])
+function MarkerPage({ markers }) {
+    // selected marker
     const [ selectedMarker, setSelected ] = useState(null)
-
-    // graphql request 
-    const { data: markerData, loading: markerLoading, error: markerError } = useQuery(graphql.markers.list)
-
-    useEffect(() => {
-        if (markerData) {
-            setMarkers(markerData.markers)
-        }
-
-        if (markerError) {
-            console.log(markerError)
-        }
-    }, [markerData, markerError])
 
     const setSelectedById = (id) => {
         let selected = null
@@ -79,7 +59,7 @@ function MarkerPage() {
                     <MarkerMap 
                         showingList={showingList}
                         toListView={() => setShowingList(true)}
-                        markers={markers}
+                        markers={markers || []}
                         setSelectedById={setSelectedById}
                     />
                 </div>
@@ -94,7 +74,7 @@ function MarkerPage() {
                         height={'100%'}
                         showingList={showingList}
                         toMapView={() => setShowingList(false)}
-                        markers={markers}
+                        markers={markers || []}
                         setSelectedById={setSelectedById}
                     />
                 </div>
@@ -126,4 +106,6 @@ function MarkerPage() {
     )
 }
 
-export default MarkerPage
+export default connect(state => ({
+    markers: state.marker.markers
+})) (MarkerPage)

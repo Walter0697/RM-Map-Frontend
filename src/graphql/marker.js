@@ -49,17 +49,47 @@ const create = gql`
             price: $price,
             to_time: $to_time,
             from_time: $from_time,
-        })
+        }) {
+            id
+            type
+            latitude
+            longitude
+            label
+            address
+            image_link
+            type
+            estimate_time
+            price
+            status
+            to_time
+            from_time
+            is_fav
+        }
     }
 `
 
 const update_fav = gql`
-    mutation updateMarkerFavourite($id: Int!,
+    mutation updateMarkerFavouriteGQL($id: Int!,
                                     $is_fav: Boolean!) {
         updateMarkerFav(input: {
             id: $id,
             is_fav: $is_fav,
-        })
+        }) {
+            id
+            type
+            latitude
+            longitude
+            label
+            address
+            image_link
+            type
+            estimate_time
+            price
+            status
+            to_time
+            from_time
+            is_fav
+        }
     }
 `
 

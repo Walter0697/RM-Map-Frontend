@@ -121,6 +121,7 @@ function LocationDetail({
                 item xs={6} fullWidth
             >
                 <CircleIconButton
+                    float='right'
                     onClickHandler={setLocationToCreateForm}
                 >
                     <BookmarkIcon />

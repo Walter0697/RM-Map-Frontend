@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
 import {
     Grid,
@@ -21,6 +22,7 @@ import Selectable from '../field/Selectable'
 import NullableDatePicker from '../field/NullableDatePicker'
 
 import generic from '../../scripts/generic'
+import actions from '../../store/actions'
 import graphql from '../../graphql'
 
 function MarkerForm({
@@ -28,6 +30,7 @@ function MarkerForm({
     handleClose,
     onCreated,
     location,
+    dispatch,
 }) {
     const [ createMarkerGQL, { data: createData, loading: createLoading, error: createError } ] = useMutation(graphql.markers.create, { errorPolicy: 'all' })
 
@@ -82,6 +85,7 @@ function MarkerForm({
         }
 
         if (createData) {
+            dispatch(actions.addMarker(createData.createMarker))
             onCreated && onCreated()
         }
     }, [ createData, createError])
@@ -373,4 +377,4 @@ function MarkerForm({
     )
 }
 
-export default MarkerForm
+export default connect(() => {})(MarkerForm)

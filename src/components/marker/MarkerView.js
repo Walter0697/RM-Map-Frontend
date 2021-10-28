@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
+import { useMutation } from '@apollo/client'
 import {
     Button,
     Dialog,
@@ -15,6 +17,9 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import CircleIconButton from '../field/CircleIconButton'
 import FavouriteIcon from './FavouriteIcon'
 
+import actions from '../../store/actions'
+import graphql from '../../graphql'
+
 const TransitionUp = (props) => {
     return <Slide {...props} direction="up" />
 }
@@ -23,7 +28,10 @@ function MarkerView({
     open,
     handleClose,
     marker,
+    dispatch,
 }) {
+    const [ updateMarkerFavouriteGQL, { data: updateData, loading: updateLoading, error: updateError } ] = useMutation(graphql.markers.update_fav, { errorPolicy: 'all' }) 
+
     const [ isFav, setFav ] = useState(false)
 
     useEffect(() => {
@@ -33,6 +41,24 @@ function MarkerView({
             setFav(false)
         }
     }, [marker])
+
+    useEffect(() => {
+        if (updateData) {
+            dispatch(actions.updateMarkerFav(updateData.updateMarkerFav))
+        }
+
+        if (updateError) {
+            console.log(updateError)
+        }
+    }, [updateData, updateError])
+
+    const toggleMarkerFavourite = () => {
+        if (!updateLoading) {
+            const nextFav = !isFav
+            updateMarkerFavouriteGQL({ variables: { id: marker.id, is_fav: nextFav }})
+            setFav(nextFav)
+        }
+    }
 
     return (
         <Dialog
@@ -59,8 +85,8 @@ function MarkerView({
                             </Grid>
                             <Grid item xs={2} md={2} lg={2}>
                                 <FavouriteIcon 
-                                    active={true}
-                                    onClickHandler={() => {}}
+                                    active={isFav}
+                                    onClickHandler={toggleMarkerFavourite}
                                 />
                             </Grid>
                             <Grid item xs={12} md={12} lg={12}>
@@ -92,4 +118,4 @@ function MarkerView({
     )
 }
 
-export default MarkerView
+export default connect(() => {})(MarkerView)
