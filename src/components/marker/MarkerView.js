@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-    IconButton,
     Button,
     Dialog,
     DialogContent,
@@ -11,6 +10,10 @@ import {
 } from '@mui/material'
 
 import ExploreIcon from '@mui/icons-material/Explore'
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
+
+import CircleIconButton from '../field/CircleIconButton'
+import FavouriteIcon from './FavouriteIcon'
 
 const TransitionUp = (props) => {
     return <Slide {...props} direction="up" />
@@ -33,12 +36,25 @@ function MarkerView({
             { marker && (
                 <>
                     <DialogTitle>
-                        <Grid container space={0}>
+                        <Grid container space={1}>
                             <Grid item xs={2} md={2} lg={2}>
-                                <ExploreIcon />
+                                <CircleIconButton
+                                    onClick={() => {}}
+                                >
+                                    <CalendarTodayIcon />
+                                </CircleIconButton>
                             </Grid>
-                            <Grid item xs={10} md={10} lg={10}>
-                                {marker.label}
+                            <Grid item xs={8} md={8} lg={8}>
+                                
+                            </Grid>
+                            <Grid item xs={2} md={2} lg={2}>
+                                <FavouriteIcon 
+                                    active={true}
+                                    onClickHandler={() => {}}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={12} lg={12}>
+                                <ExploreIcon /> {marker.label}
                             </Grid>
                         </Grid>
                     </DialogTitle>

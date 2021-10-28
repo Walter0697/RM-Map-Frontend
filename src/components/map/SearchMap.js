@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import {
-    IconButton,
     Button,
 } from '@mui/material'
 import {
@@ -20,6 +19,7 @@ import FadableComponent from '../wrapper/FadableComponent'
 import SearchBox from './mappart/SearchBox'
 import LocationContent from './mappart/LocationContent'
 import AutoHideAlert from '../AutoHideAlert'
+import CircleIconButton from '../field/CircleIconButton'
 
 import maphelper from '../../scripts/map'
 import apis from '../../apis'
@@ -281,16 +281,11 @@ function SearchMap({
                         left: '20px'
                     }}
                 >
-                    <IconButton
-                        size='large'
-                        style={{
-                            backgroundColor: 'white',
-                            boxShadow: '2px 2px 6px',
-                        }}
+                    <CircleIconButton
                         onClick={openFormByCenterMarker}
                     >
                         <AddLocationIcon />
-                    </IconButton>
+                    </CircleIconButton>
                 </animated.div>
             </FadableComponent>
 
@@ -301,16 +296,11 @@ function SearchMap({
                     left: '20px',
                 }}
             >
-                <IconButton
-                    size='large'
-                    style={{
-                        backgroundColor: 'white',
-                        boxShadow: '2px 2px 6px',
-                    }}
+                <CircleIconButton
                     onClick={resetCenterMarker}
                 >
                     <RoomIcon />
-                </IconButton>
+                </CircleIconButton>
             </animated.div>
 
             <animated.div
@@ -320,16 +310,11 @@ function SearchMap({
                     right: '20px',
                 }}
             >
-                <IconButton
-                    size='large'
-                    style={{
-                        backgroundColor: 'white',
-                        boxShadow: '2px 2px 6px',
-                    }}
+                <CircleIconButton
                     onClick={setMapToCenter}
                 >
                     <CenterFocusStrongIcon />
-                </IconButton>
+                </CircleIconButton>
             </animated.div>
 
             <FadableComponent

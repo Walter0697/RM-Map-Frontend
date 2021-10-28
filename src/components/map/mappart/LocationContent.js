@@ -9,13 +9,14 @@ import {
     ListItem,
     ListItemButton,
     Grid,
-    IconButton,
 } from '@mui/material'
 
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
+
+import CircleIconButton from '../../field/CircleIconButton'
 
 import useBoop from '../../../hooks/useBoop'
 
@@ -104,50 +105,31 @@ function LocationDetail({
                 paddingLeft: '15px',
                 paddingRight: '15px',
                 display: 'flex',
-                alignItem: 'flex-start',
+                //alignItem: 'flex-start',
             }}
         >
             <Grid 
                 item xs={6}
-                style={{
-                    height: '15%',
-                }}
             >
-                <IconButton
-                    size="middle"
-                    style={{
-                        boxShadow: '2px 2px 6px',
-                        background: '#f5f5f5',
-                    }}
+                <CircleIconButton
                     onClick={onBackHandler}
                 >
                     <ArrowBackIcon />
-                </IconButton>
+                </CircleIconButton>
             </Grid>
             <Grid 
-                item xs={6}
-                style={{
-                    height: '15%',
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                }}
+                item xs={6} fullWidth
             >
-                <IconButton
-                    size='middle'
-                    style={{
-                        boxShadow: '2px 2px 6px',
-                        background: '#f5f5f5',
-                    }}
+                <CircleIconButton
                     onClick={setLocationToCreateForm}
                 >
                     <BookmarkIcon />
-                </IconButton>
+                </CircleIconButton>
             </Grid>
             <Grid 
                 item xs={12}
                 style={{
                     width: '100%',
-                    height: '10%',
                     fontSize: '20px',
                     fontWeight: 'bold',
                     color: '#002a89',
@@ -159,7 +141,6 @@ function LocationDetail({
                 item xs={12}
                 style={{
                     width: '100%',
-                    height: '60%',
                 }}
             >
                 { maphelper.generic.getAddress(location.details.address) }

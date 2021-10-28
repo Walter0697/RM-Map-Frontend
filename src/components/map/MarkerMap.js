@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import {
-    IconButton,
-    Button,
-} from '@mui/material'
-import {
     useSpring,
     config,
     animated,
@@ -16,6 +12,7 @@ import useBoop from '../../hooks/useBoop'
 
 import LocationPreview from './mappart/LocationPreview'
 import AutoHideAlert from '../AutoHideAlert'
+import CircleIconButton from '../field/CircleIconButton'
 
 import maphelper from '../../scripts/map'
 
@@ -156,16 +153,11 @@ function MarkerMap({
                     left: '20px',
                 }}
             >
-                <IconButton
-                    size='large'
-                    style={{
-                        backgroundColor: 'white',
-                        boxShadow: '2px 2px 6px',
-                    }}
+                <CircleIconButton
                     onClick={toListView}
                 >
                     <ViewListIcon />
-                </IconButton>
+                </CircleIconButton>
             </animated.div>
 
             {/* alert */}

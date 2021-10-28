@@ -17,6 +17,7 @@ import ExploreIcon from '@mui/icons-material/Explore'
 import MarkerMap from '../components/map/MarkerMap'
 import MarkerList from '../components/list/MarkerList'
 import MarkerView from '../components/marker/MarkerView'
+import CircleIconButton from '../components/field/CircleIconButton'
 
 import graphql from '../graphql'
 
@@ -108,16 +109,11 @@ function MarkerPage() {
                             right: '20px',
                         }}
                     >
-                        <IconButton
-                            size='large'
-                            style={{
-                                backgroundColor: 'white',
-                                boxShadow: '2px 2px 6px',
-                            }}
+                        <CircleIconButton
                             onClick={() => setShowingList(false)}
                         >
                             <ExploreIcon />
-                        </IconButton>
+                        </CircleIconButton>
                     </div>
                 )}
             </animated.div>

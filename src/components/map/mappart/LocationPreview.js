@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import {
     Grid,
-    IconButton,
 } from '@mui/material'
 import {
     useSpring,
@@ -12,6 +11,8 @@ import {
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
+
+import CircleIconButton from '../../field/CircleIconButton'
 
 function LocationPreview({
     marker,
@@ -166,16 +167,11 @@ function LocationPreview({
                     opacity: buttonOpacity,
                 }}
             >
-                <IconButton
-                    size='large'
-                    style={{
-                        backgroundColor: 'white',
-                        boxShadow: '2px 2px 6px',
-                    }}
+                <CircleIconButton
                     onClick={showMarkerView}
                 >
                     <OpenInFullIcon />
-                </IconButton>
+                </CircleIconButton>
             </animated.div>
         </Grid>
     )

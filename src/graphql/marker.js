@@ -16,6 +16,7 @@ const list = gql`
             status
             to_time
             from_time
+            is_fav
         }
     }
 `
@@ -52,9 +53,20 @@ const create = gql`
     }
 `
 
+const update_fav = gql`
+    mutation updateMarkerFavourite($id: Int!,
+                                    $is_fav: Boolean!) {
+        updateMarkerFav(input: {
+            id: $id,
+            is_fav: $is_fav,
+        })
+    }
+`
+
 const markers = {
     list,
     create,
+    update_fav,
 }
 
 export default markers
