@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     Button,
     Dialog,
@@ -24,6 +24,16 @@ function MarkerView({
     handleClose,
     marker,
 }) {
+    const [ isFav, setFav ] = useState(false)
+
+    useEffect(() => {
+        if (marker?.is_fav) {
+            setFav(true)
+        } else {
+            setFav(false)
+        }
+    }, [marker])
+
     return (
         <Dialog
             fullWidth
@@ -39,7 +49,7 @@ function MarkerView({
                         <Grid container space={1}>
                             <Grid item xs={2} md={2} lg={2}>
                                 <CircleIconButton
-                                    onClick={() => {}}
+                                    onClickHandler={() => {}}
                                 >
                                     <CalendarTodayIcon />
                                 </CircleIconButton>

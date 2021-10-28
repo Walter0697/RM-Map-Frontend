@@ -154,7 +154,7 @@ function MarkerMap({
                 }}
             >
                 <CircleIconButton
-                    onClick={toListView}
+                    onClickHandler={toListView}
                 >
                     <ViewListIcon />
                 </CircleIconButton>

@@ -110,7 +110,7 @@ function MarkerPage() {
                         }}
                     >
                         <CircleIconButton
-                            onClick={() => setShowingList(false)}
+                            onClickHandler={() => setShowingList(false)}
                         >
                             <ExploreIcon />
                         </CircleIconButton>

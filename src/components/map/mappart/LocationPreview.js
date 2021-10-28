@@ -168,7 +168,7 @@ function LocationPreview({
                 }}
             >
                 <CircleIconButton
-                    onClick={showMarkerView}
+                    onClickHandler={showMarkerView}
                 >
                     <OpenInFullIcon />
                 </CircleIconButton>

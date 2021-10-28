@@ -282,7 +282,7 @@ function SearchMap({
                     }}
                 >
                     <CircleIconButton
-                        onClick={openFormByCenterMarker}
+                        onClickHandler={openFormByCenterMarker}
                     >
                         <AddLocationIcon />
                     </CircleIconButton>
@@ -297,7 +297,7 @@ function SearchMap({
                 }}
             >
                 <CircleIconButton
-                    onClick={resetCenterMarker}
+                    onClickHandler={resetCenterMarker}
                 >
                     <RoomIcon />
                 </CircleIconButton>
@@ -311,7 +311,7 @@ function SearchMap({
                 }}
             >
                 <CircleIconButton
-                    onClick={setMapToCenter}
+                    onClickHandler={setMapToCenter}
                 >
                     <CenterFocusStrongIcon />
                 </CircleIconButton>

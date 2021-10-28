@@ -112,7 +112,7 @@ function LocationDetail({
                 item xs={6}
             >
                 <CircleIconButton
-                    onClick={onBackHandler}
+                    onClickHandler={onBackHandler}
                 >
                     <ArrowBackIcon />
                 </CircleIconButton>
@@ -121,7 +121,7 @@ function LocationDetail({
                 item xs={6} fullWidth
             >
                 <CircleIconButton
-                    onClick={setLocationToCreateForm}
+                    onClickHandler={setLocationToCreateForm}
                 >
                     <BookmarkIcon />
                 </CircleIconButton>
