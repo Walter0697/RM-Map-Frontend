@@ -44,7 +44,7 @@ function MarkerView({
 
     useEffect(() => {
         if (updateData) {
-            dispatch(actions.updateMarkerFav(updateData.updateMarkerFav))
+            dispatch(actions.updateMarkerFav(updateData.updateMarkerFav.id, updateData.updateMarkerFav.is_fav))
         }
 
         if (updateError) {
@@ -72,18 +72,18 @@ function MarkerView({
             { marker && (
                 <>
                     <DialogTitle>
-                        <Grid container space={1}>
-                            <Grid item xs={2} md={2} lg={2}>
+                        <Grid container spacing={3}>
+                            <Grid item xs={3} md={3} lg={3}>
                                 <CircleIconButton
                                     onClickHandler={() => {}}
                                 >
                                     <CalendarTodayIcon />
                                 </CircleIconButton>
                             </Grid>
-                            <Grid item xs={8} md={8} lg={8}>
+                            <Grid item xs={6} md={6} lg={6}>
                                 
                             </Grid>
-                            <Grid item xs={2} md={2} lg={2}>
+                            <Grid item xs={3} md={3} lg={3}>
                                 <FavouriteIcon 
                                     active={isFav}
                                     onClickHandler={toggleMarkerFavourite}
@@ -96,7 +96,7 @@ function MarkerView({
                     </DialogTitle>
                     <DialogContent dividers>
                         <DialogContentText>
-                            <Grid container space={10}>
+                            <Grid container spacing={2}>
                                 { marker.image_link && (
                                     <Grid item xs={12} md={12} lg={12}>
                                         <img
@@ -106,7 +106,8 @@ function MarkerView({
                                     </Grid>
                                 )}
                                 <Grid item xs={12} md={12} lg={12}>
-                                    Testing
+                                    { marker.address} 
+                                    {/* TODO: make it so that you can copy */}
                                 </Grid>
                             </Grid>
                         </DialogContentText>
@@ -118,4 +119,6 @@ function MarkerView({
     )
 }
 
-export default connect(() => {})(MarkerView)
+export default connect(state => ({
+    username: state.auth.username,
+}))(MarkerView)

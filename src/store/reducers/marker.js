@@ -17,8 +17,8 @@ export default function markerReducer(state = {
         }
         case constants.UPDATE_MARKER_FAV: {
             const result = state.markers
-            let item = result.find(s => s.id === action.marker.id)
-            item.is_fav = action.marker.is_fav
+            let item = result.find(s => s.id === action.id)
+            item.is_fav = action.is_fav
             return {
                 markers: result,
             }

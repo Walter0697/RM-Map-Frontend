@@ -377,4 +377,6 @@ function MarkerForm({
     )
 }
 
-export default connect(() => {})(MarkerForm)
+export default connect(state => ({
+    username: state.auth.username,
+}))(MarkerForm)

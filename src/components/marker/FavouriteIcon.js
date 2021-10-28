@@ -13,7 +13,7 @@ function FavouriteIcon({
         <CircleIconButton
             onClickHandler={onClickHandler}
         >
-            { active ? <StarIcon /> : <StarBorderIcon /> }
+            { active ? <StarIcon sx={{ color: 'yellow' }} /> : <StarBorderIcon /> }
         </CircleIconButton>
     )
 }

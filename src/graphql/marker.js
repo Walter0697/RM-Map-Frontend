@@ -5,6 +5,7 @@ const list = gql`
         markers{
             id
             type
+            description
             latitude
             longitude
             label
@@ -52,6 +53,7 @@ const create = gql`
         }) {
             id
             type
+            description
             latitude
             longitude
             label
@@ -76,18 +78,6 @@ const update_fav = gql`
             is_fav: $is_fav,
         }) {
             id
-            type
-            latitude
-            longitude
-            label
-            address
-            image_link
-            type
-            estimate_time
-            price
-            status
-            to_time
-            from_time
             is_fav
         }
     }

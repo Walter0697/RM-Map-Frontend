@@ -4,6 +4,8 @@ import {
     Button,
 } from '@mui/material'
 
+import StarIcon from '@mui/icons-material/Star'
+
 import BottomUpTrail from '../animatein/BottomUpTrail'
 
 function ButtonBox({
@@ -43,11 +45,13 @@ function MarkerItem({
       variant='contained'
       size='large'
       style={{
+        position: 'relative',
         backgroundColor: '#48acdb',
         borderRaduis: '5px',
         height: '100%',
         width: '100%',
         boxShadow: '2px 2px 6px',
+        alignItems: 'flex-start',
       }}
       onClick={onClickHandler}
     >
@@ -56,7 +60,10 @@ function MarkerItem({
         fullWidth
       >
         { imageExist && (
-          <Grid item xs={3}>
+          <Grid 
+            item xs={3}
+            style={{ marginTop: '15px' }}
+          >
             <img
               width={'100%'}
               src={process.env.REACT_APP_IMAGE_LINK + item.image_link}
@@ -67,10 +74,25 @@ function MarkerItem({
         <Grid 
           item 
           xs={imageExist ? 9 : 12}
+          style={{
+            marginTop: '15px',
+          }}
         >
           {item.label}
         </Grid>
       </Grid>
+      {item.is_fav && (
+         <div
+            style={{ 
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+            }}
+          >
+          <StarIcon sx={{ color: 'yellow' }}/>
+        </div>
+      )}
+     
     </Button>
   )
 }

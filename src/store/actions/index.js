@@ -22,10 +22,11 @@ export const addMarker = (marker) => {
     }
 }
 
-export const updateMarkerFav = (marker) => {
+export const updateMarkerFav = (id, is_fav) => {
     return {
         type: constants.UPDATE_MARKER_FAV,
-        marker,
+        id,
+        is_fav,
     }
 }
 
