@@ -15,7 +15,7 @@ import useBoop from '../../hooks/useBoop'
 import AutoHideAlert from '../AutoHideAlert'
 
 const TransitionUp = (props) => {
-    return <Slide {...props} direction="up" />
+    return <Slide {...props} direction='up' />
 }
 
 function BaseForm({

@@ -7,12 +7,13 @@ import {
 import '@tomtom-international/web-sdk-maps/dist/maps.css'
 
 import Login from './pages/Login'
-import Test from './pages/Test'
 import SearchPage from './pages/SearchPage'
 import MarkerPage from './pages/MarkerPage'
 import HomePage from './pages/HomePage'
 import SchedulePage from './pages/SchedulePage'
 import SettingPage from './pages/SettingPage'
+
+import TypeManage from './pages/admin/TypeManage'
 
 import InitData from './InitData'
 
@@ -27,6 +28,8 @@ function App() {
             <Route path="/home" component={HomePage} />
             <Route path="/schedule" component={SchedulePage} />
             <Route path="/setting" component={SettingPage} />
+
+            <Route path="/admin/type" component={TypeManage} />
           </Switch>
         )} />
         <InitData />

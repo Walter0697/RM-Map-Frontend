@@ -14,7 +14,7 @@ import {
 import imagehelper from '../../../scripts/image'
 
 const TransitionFromLeft = (props) => {
-    return <Slide {...props} direction="right" />
+    return <Slide {...props} direction='right' />
 }
 
 function ImageLinkValidate({

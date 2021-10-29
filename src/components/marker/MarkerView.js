@@ -21,7 +21,7 @@ import actions from '../../store/actions'
 import graphql from '../../graphql'
 
 const TransitionUp = (props) => {
-    return <Slide {...props} direction="up" />
+    return <Slide {...props} direction='up' />
 }
 
 function MarkerView({

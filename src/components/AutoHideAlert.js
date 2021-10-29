@@ -7,7 +7,7 @@ import {
 import useMobileDetect from 'use-mobile-detect-hook'
 
 const TransitionUp = (props) => {
-    return <Slide {...props} direction="up" />
+    return <Slide {...props} direction='up' />
 }
 
 function AutoHideAlert({

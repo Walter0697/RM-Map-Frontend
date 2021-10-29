@@ -9,7 +9,7 @@ export default function markerReducer(state = {
                 markers: action.markers,
             }
         case constants.ADD_MARKER: {
-            const result = state.markers
+            const result = state.markers || []
             result.push(action.marker)
             return {
                 markers: result,
