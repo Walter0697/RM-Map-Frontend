@@ -65,7 +65,7 @@ function MarkerItem({
             style={{ marginTop: '15px' }}
           >
             <img
-              width={'100%'}
+              height='100px'
               src={process.env.REACT_APP_IMAGE_LINK + item.image_link}
               onError={onImageFailedToLoad}
             />
