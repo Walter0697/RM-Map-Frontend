@@ -7,10 +7,12 @@ import graphql from './graphql'
 
 function InitData({ jwt, dispatch }) {
     const [ listMarkerGQL, { data: markerData } ] = useLazyQuery(graphql.markers.list, { fetchPolicy: 'no-cache' })
+    const [ listEventTypeGQL, { data: eventTypeData } ] = useLazyQuery(graphql.markertypes.select, { fetchPolicy: 'no-cache' })
 
     useEffect(() => {
         if (jwt) {
             listMarkerGQL()
+            listEventTypeGQL()
         }
     }, [])  
     // this only runs once on purpose, 
@@ -22,6 +24,12 @@ function InitData({ jwt, dispatch }) {
             dispatch(actions.resetMarkers(markerData.markers))
         }
     }, [markerData]) // we dont care about the error, we just update if we got data
+
+    useEffect(() => {
+        if (eventTypeData) {
+            dispatch(actions.resetEventTypes(eventTypeData.eventtypes))
+        }
+    }, [eventTypeData]) // we dont care about the error, we just update if we got data
 
     return false    // do not return any view for this component
 }

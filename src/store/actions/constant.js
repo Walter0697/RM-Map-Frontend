@@ -3,6 +3,7 @@ const constants = {
     RESET_MARKERS: 'RESET_MARKERS',
     ADD_MARKER: 'ADD_MARKER',
     UPDATE_MARKER_FAV: 'UPDATE_MARKER_FAV',
+    RESET_EVENTTYPES: 'RESET_EVENTTYPES',
 }
 
 export default constants

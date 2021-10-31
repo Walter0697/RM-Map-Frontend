@@ -30,6 +30,7 @@ function MarkerForm({
     handleClose,
     onCreated,
     location,
+    eventtypes,
     dispatch,
 }) {
     const [ createMarkerGQL, { data: createData, loading: createLoading, error: createError } ] = useMutation(graphql.markers.create, { errorPolicy: 'all' })
@@ -289,11 +290,7 @@ function MarkerForm({
                             defaultSelectaValue={''}
                             defaultSelectText={''}
                             errorMessage={error.type}
-                            list={[
-                                { value: 'restaurant', label: 'Restaurant' },
-                                { value: 'fun', label: 'For Fun' },
-                                { value: 'event', label: 'Event' },
-                            ]}
+                            list={eventtypes}
                             valueKey={'value'}
                             textKey={'label'}
                         />
@@ -378,5 +375,5 @@ function MarkerForm({
 }
 
 export default connect(state => ({
-    username: state.auth.username,
+    eventtypes: state.marker.eventtypes,
 }))(MarkerForm)

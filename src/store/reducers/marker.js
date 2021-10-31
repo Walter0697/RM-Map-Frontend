@@ -2,6 +2,7 @@ import constants from '../actions/constant'
 
 export default function markerReducer(state = {
     markers: [],
+    eventtypes: [],
 }, action) {
     switch(action.type) {
         case constants.RESET_MARKERS:
@@ -21,6 +22,11 @@ export default function markerReducer(state = {
             item.is_fav = action.is_fav
             return {
                 markers: result,
+            }
+        }
+        case constants.RESET_EVENTTYPES: {
+            return {
+                eventtypes: action.eventtypes,
             }
         }
         default:

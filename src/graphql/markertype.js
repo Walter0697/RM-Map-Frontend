@@ -1,5 +1,16 @@
 import { gql } from '@apollo/client'
 
+const select = gql`
+    query listEventTypeGQL {
+        eventtypes {
+            label
+            value
+            priority
+            icon_path
+        }
+    }
+`
+
 const list = gql`
     query listMarkerTypeGQL{
         markertypes {
@@ -65,6 +76,7 @@ const remove = gql`
 `
 
 const markertypes = {
+    select,
     list,
     create,
     edit,

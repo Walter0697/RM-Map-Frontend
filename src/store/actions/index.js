@@ -30,11 +30,19 @@ export const updateMarkerFav = (id, is_fav) => {
     }
 }
 
+export const resetEventTypes = (eventtypes) => {
+    return {
+        type: constants.RESET_EVENTTYPES,
+        eventtypes,
+    }
+}
+
 const actions = {
     login,
     resetMarkers,
     updateMarkerFav,
     addMarker,
+    resetEventTypes,
 }
 
 export default actions
