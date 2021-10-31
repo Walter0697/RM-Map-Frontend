@@ -27,7 +27,10 @@ function InitData({ jwt, dispatch }) {
 
     useEffect(() => {
         if (eventTypeData) {
-            dispatch(actions.resetEventTypes(eventTypeData.eventtypes))
+            const sortedList = eventTypeData.eventtypes
+            sortedList.sort((a,b ) => a.priority - b.priority)
+
+            dispatch(actions.resetEventTypes(sortedList))
         }
     }, [eventTypeData]) // we dont care about the error, we just update if we got data
 

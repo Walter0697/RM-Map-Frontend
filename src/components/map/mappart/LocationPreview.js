@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import {
     Grid,
 } from '@mui/material'
@@ -13,6 +14,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 
 import CircleIconButton from '../../field/CircleIconButton'
+import ImageHeadText from '../../wrapper/ImageHeadText'
 
 function LocationPreview({
     marker,
@@ -20,7 +22,9 @@ function LocationPreview({
     onClose,
     shouldViewContent,
     setSelectedById,
+    eventtypes,
 }) {
+    const [ typeIcon, setIcon ] = useState(null)
     const [ imageExist, setImageExist ] = useState(false)
     const {
         buttonOpacity,
@@ -35,6 +39,13 @@ function LocationPreview({
     })
 
     useEffect(() => {
+        if (!marker) return
+
+        // find the type icon from the list to get the icon path
+        const currentType = eventtypes.find(s => s.value === marker.type)
+        setIcon(process.env.REACT_APP_IMAGE_LINK + currentType.icon_path)
+
+        // see if marker has a preview image
         if (marker?.image_link) {
             setImageExist(true)
         } else {
@@ -138,13 +149,15 @@ function LocationPreview({
                         <Grid container>
                             <Grid 
                                 item xs={12}
-                                style={{
-                                    fontSize: '18px',
-                                    color: '#002a89',
-                                    fontWeight: '500',
-                                }}    
                             >
-                                {marker.label}
+                                <ImageHeadText
+                                    iconPath={typeIcon}
+                                    iconSize='25px'
+                                    label={marker.label}
+                                    labelSize='18px'
+                                    labelColor='#002a89'
+                                    labelBold
+                                />
                             </Grid>
                             <Grid 
                                 item xs={12}
@@ -177,4 +190,6 @@ function LocationPreview({
     )
 }
 
-export default LocationPreview
+export default connect(state => ({
+    eventtypes: state.marker.eventtypes,
+}))(LocationPreview)

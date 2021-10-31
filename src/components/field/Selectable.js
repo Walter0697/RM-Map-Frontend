@@ -36,7 +36,7 @@ function Selectable({
                 { !noDefault && 
                     <MenuItem value={defaultSelectValue}>{defaultSelectText}</MenuItem>
                 }
-                {list.map((item, index) => (
+                { list && list.map((item, index) => (
                     <MenuItem value={item[valueKey]} key={index}>{item[textKey]}</MenuItem>
                 ))}
             </Select>

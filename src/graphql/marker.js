@@ -10,6 +10,7 @@ const list = gql`
             longitude
             label
             address
+            link
             image_link
             type
             estimate_time

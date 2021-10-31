@@ -7,6 +7,7 @@ export default function authReducer(state = {
     switch (action.type) {
         case constants.LOGIN:
             return {
+                ...state,
                 jwt: action.jwt,
                 username: action.username,
             }
