@@ -5,7 +5,7 @@ import {
     IconButton,
 } from '@mui/material'
 
-import { useQuery, useMutation } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -15,16 +15,17 @@ import DeleteIcon from '@mui/icons-material/Delete'
 
 import AdminTopBar from '../../components/topbar/AdminTopBar'
 import MarkerTypeForm from '../../components/form/admin/MarkerTypeForm'
-import BottomUpTrail from '../../components/animatein/BottomUpTrail'
 
 import graphql from '../../graphql'
 
 function TypeManage() {
-    const { data: typeData, loading: typeLoading, error: typeError } = useQuery(graphql.markertypes.list, { fetchPolicy: 'no-cache' })
+    const [ listMarkerTypeGQL, { data: typeData, loading: typeLoading, error: typeError } ]= useLazyQuery(graphql.markertypes.list, { fetchPolicy: 'no-cache' })
+    const [ removeMarkerTypeGQL, { data: removeData, loading: removeLoading, error: removeError } ] = useMutation(graphql.markertypes.remove, { errorPolicy: 'all' })
 
     const [ typeList, setList ] = useState([])
 
     const [ createFormOpen, setFormOpen ] = useState(false)
+    const [ selectedMarker, setSelected ] = useState(null)
     const [ createAlert, confirmCreated ] = useBoop(3000)
     const [ createMessage, setMessage ] = useState('')
 
@@ -35,7 +36,12 @@ function TypeManage() {
     }, [typeList])
 
     useEffect(() => {
+        listMarkerTypeGQL()
+    }, [])
+
+    useEffect(() => {
         if (typeData) {
+            console.log(typeData)
             setList(typeData.markertypes)
         }
 
@@ -43,11 +49,45 @@ function TypeManage() {
             console.log(typeError)
         }
     }, [typeData, typeError])
+    
+    useEffect(() => {
+        if (removeData) {
+            listMarkerTypeGQL()
+        }
+
+        if (removeError) {
+            console.log(removeError)
+            listMarkerTypeGQL()
+        }
+    }, [removeData, removeError])
+
+    const onCreateFormOpen = () => {
+        setSelected(null)
+        setFormOpen(true)
+    }
+
+    const onUpdateFormOpen = (item) => {
+        setSelected(item)
+        setFormOpen(true)
+    }
+
+    const onRemoveButtonClick = (item) => {
+        if (!window.confirm(`confirm to delete ${item.label}?`)) return
+        removeMarkerTypeGQL({ variables: { id: item.id }})
+    }
 
     const onTypeCreated = () => {
         setMessage('successfully created type')
         setFormOpen(false)
         confirmCreated()
+        listMarkerTypeGQL()
+    }
+
+    const onTypeUpdated = () => {
+        setMessage('successfully updated type')
+        setFormOpen(false)
+        confirmCreated()
+        listMarkerTypeGQL()
     }
 
     return (
@@ -75,7 +115,7 @@ function TypeManage() {
                     <Button 
                         variant="outlined" 
                         startIcon={<AddCircleIcon />}
-                        onClick={() => setFormOpen(true)}    
+                        onClick={onCreateFormOpen}    
                     >
                         Add New
                     </Button>
@@ -96,8 +136,6 @@ function TypeManage() {
                         <Grid container fullWidth>
                             <Grid 
                                 item xs={4} md={4} lg={4}
-                                style={{
-                                }}
                             >
                                 <img
                                     height='70px'
@@ -135,12 +173,12 @@ function TypeManage() {
                             </Grid>
                             <Grid item xs={2} md={2} lg={2}>
                                 <IconButton
-                                    onClick={() => {}}
+                                    onClick={() => onUpdateFormOpen(item)}
                                 >
                                     <EditIcon /> 
                                 </IconButton>
                                 <IconButton
-                                    onClick={() => {}}
+                                    onClick={() => onRemoveButtonClick(item)}
                                 >
                                     <DeleteIcon sx={{ color: 'red' }}/> 
                                 </IconButton>
@@ -153,6 +191,8 @@ function TypeManage() {
                 open={createFormOpen}
                 handleClose={() => setFormOpen(false)}
                 onCreated={onTypeCreated}
+                onUpdated={onTypeUpdated}
+                markerType={selectedMarker}
             />
         </>
     )

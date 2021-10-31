@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import {
     Grid,
@@ -17,13 +17,20 @@ import BaseForm from '../BaseForm'
 import imagehelper from '../../../scripts/image'
 import graphql from '../../../graphql'
 
+import dayjs from 'dayjs'
+import dayjsPluginUTC from 'dayjs-plugin-utc'
+ 
+dayjs.extend(dayjsPluginUTC)
+
 function MarkerTypeForm({
     open,
     handleClose,
     onCreated,
     onUpdated,
+    markerType,
 }) {
     const [ createMarkerTypeGQL, { data: createData, loading: createLoading, error: createError }] = useMutation(graphql.markertypes.create, { errorPolicy: 'all' })
+    const [ editMarkerTypeGQL, { data: editData, loading: editLoading, error: editError }] = useMutation(graphql.markertypes.edit, { errorPolicy: 'all' })
 
     // handling form value
     const [ formValue, setFormValue, resetFormValue ] = useObject({
@@ -47,11 +54,15 @@ function MarkerTypeForm({
     useEffect(() => {
         setSubmitting(false)
         resetFormValue()
-    }, [])
+        if (markerType) {
+            setFormValue('label', markerType.label)
+            setFormValue('value', markerType.value)
+            setFormValue('priority', markerType.priority)
+        }
+    }, [markerType])
 
     useEffect(() => {
         if (createData) {
-            console.log(createData)
             onCreated && onCreated()
         }
 
@@ -63,6 +74,20 @@ function MarkerTypeForm({
             setSubmitting(false)
         }
     }, [ createData, createError])
+
+    useEffect(() => {
+        if (editData) {
+            onUpdated && onUpdated()
+        }
+
+        if (editError) {
+            setAlertMessage({
+                type: 'error',
+                message: editError.message,
+            })
+            setSubmitting(false)
+        }
+    }, [ editData, editError ])
 
     const onValueChangeHandler = (field, value) => {
         setFormValue(field, value)
@@ -104,10 +129,18 @@ function MarkerTypeForm({
         }
     }
 
-    const onSubmitHandler = async (e) => {
+    const onSubmitHandler = (e) => {
         e.preventDefault()
         setSubmitting(true)
 
+       if (markerType?.id) {
+           return onUpdateHandler()
+       } 
+       
+       onCreateHandler()
+    }
+
+    const onCreateHandler = () => {
         let hasError = false
 
         if (imageLoading) {
@@ -154,17 +187,34 @@ function MarkerTypeForm({
         }})
     }
 
+    const onUpdateHandler = () => {
+        if (imageLoading) {
+            setError('iconUpload', true)
+            setImageMessage('your image is still loading, please wait')
+            setSubmitting(false)
+            return
+        }
+
+        editMarkerTypeGQL({ variables: {
+            id: markerType.id,
+            label: formValue.label,
+            value: formValue.value,
+            priority: formValue.priority,
+            icon_upload: formValue.iconUpload ? formValue.iconUpload.upload : null,
+        }})
+    }
+
     return (
         <>
             <BaseForm
                 open={open}
                 handleClose={handleClose}
-                title={'Create Marker Type'}
+                title={markerType?.label ? `Updating ${markerType.label}` : 'Create Marker Type'}
                 maxWidth={'lg'}
                 handleSubmit={onSubmitHandler}
                 cancelText={'Cancel'}
-                createText={'Create'}
-                loading={submitting}
+                createText={markerType?.id ? 'Update' : 'Create'}
+                loading={submitting || createLoading || editLoading}
                 alertMessage={alertMessage}
                 clearAlertMessage={() => setAlertMessage(null)}
             >
@@ -224,6 +274,18 @@ function MarkerTypeForm({
                             </FormControl>
                         </label>
                     </Grid>
+                    { markerType && (
+                        <Grid item xs={12} md={6} lg={6}
+                            style={{
+                                fontSize: '10px',
+                                color: 'grey',
+                            }}
+                        >
+                            <span style={{ display: 'block' }}>Created By {markerType.created_by.username} at {dayjs.utc(markerType.created_at).format('YYYY-MM-DD HH:mm')}</span>
+                            <span style={{ display: 'block' }}>Updated By {markerType.updated_by.username} at {dayjs.utc(markerType.updated_at).format('YYYY-MM-DD HH:mm')}</span>
+                        </Grid>
+                    )}
+                    
                 </Grid>
             </BaseForm>
         </>
