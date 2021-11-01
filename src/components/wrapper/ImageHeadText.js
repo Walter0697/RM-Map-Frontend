@@ -28,6 +28,9 @@ function ImageHeadText({
                     display: 'inline-block',
                     color: labelColor,
                     fontWeight: labelBold ? '500' : '',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                 }}
             >
                 {label}

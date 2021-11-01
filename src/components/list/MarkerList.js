@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import {
     Grid,
     Button,
@@ -7,6 +8,7 @@ import {
 import StarIcon from '@mui/icons-material/Star'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
+import ImageHeadText from '../wrapper/ImageHeadText'
 
 function ButtonBox({
     height,
@@ -24,6 +26,7 @@ function ButtonBox({
 
 function MarkerItem({
   item,
+  typeIcon,
   onClickHandler,
 }) {
   const [ imageExist, setImageExist ] = useState(false)
@@ -52,6 +55,8 @@ function MarkerItem({
         width: '100%',
         boxShadow: '2px 2px 6px',
         alignItems: 'flex-start',
+        textTransform: 'none',
+        padding: '0',
       }}
       onClick={onClickHandler}
     >
@@ -59,26 +64,79 @@ function MarkerItem({
         container
         fullWidth
       >
-        { imageExist && (
+        { imageExist ? (
           <Grid 
-            item xs={3}
+            item xs={5}
             style={{ marginTop: '15px' }}
           >
             <img
-              height='100px'
+              height='90px'
               src={process.env.REACT_APP_IMAGE_LINK + item.image_link}
               onError={onImageFailedToLoad}
             />
           </Grid>
+        ) : (
+          <Grid 
+            item xs={5}
+            style={{ marginTop: '15px' }}
+          >
+            {/* <img
+              height='90px'
+              src={process.env.REACT_APP_IMAGE_LINK + item.image_link}
+              onError={onImageFailedToLoad}
+            /> */}
+            {/* make a temp image */}
+          </Grid>
         )}
         <Grid 
           item 
-          xs={imageExist ? 9 : 12}
+          xs={7}
           style={{
             marginTop: '15px',
           }}
         >
-          {item.label}
+          <Grid container fullWidth>
+            <Grid 
+              item xs={12} md={12} lg={12} fullWidth
+              style={{
+                display: 'flex',
+                alignItems: 'baseline',
+              }}
+            >
+              <ImageHeadText
+                iconPath={process.env.REACT_APP_IMAGE_LINK + typeIcon}
+                iconSize='20px'
+                label={item.label}
+                labelSize='20px'
+                labelColor='black'
+              />
+            </Grid>
+            <Grid item xs={12} md={12} lg={12} fullWidth>
+              <div
+                style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  color: '#455295',
+                }}
+              >
+                {item.address}
+              </div>
+            </Grid>
+            <Grid item xs={12} md={12} lg={12} fullWidth>
+              <div
+                style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  marginTop: '5px',
+                  color: '#071c8d',
+                }}
+              >
+                {item.description}
+              </div>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
       {item.is_fav && (
@@ -102,6 +160,7 @@ function MarkerList({
   markers,
   toMapView,
   setSelectedById,
+  eventtypes,
 }) {
     return (
         <>
@@ -119,10 +178,11 @@ function MarkerList({
                 {markers.map((item, index) => (
                   <ButtonBox
                     key={index}
-                    height='150px'
+                    height='120px'
                   >
                     <MarkerItem
                       item={item}
+                      typeIcon={eventtypes.find(s => s.value === item.type).icon_path}
                       onClickHandler={() => setSelectedById(item.id)}
                     />
                   </ButtonBox>
@@ -133,4 +193,6 @@ function MarkerList({
     )
 }
 
-export default MarkerList
+export default connect(state => ({
+  eventtypes: state.marker.eventtypes,
+}))(MarkerList)
