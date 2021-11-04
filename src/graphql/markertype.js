@@ -33,6 +33,15 @@ const list = gql`
     }
 `
 
+const previewList = gql`
+    query listTypePreviewGQL{
+        markertypes{
+            id
+            label
+        }
+    }
+`
+
 const create = gql`
     mutation createMarkerTypeGQL($label: String!,
                             $value: String!,
@@ -81,7 +90,7 @@ const markertypes = {
     create,
     edit,
     remove,
-
+    preview_list: previewList,
 }
 
 export default markertypes

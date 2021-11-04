@@ -22,9 +22,24 @@ const isImageSquare = (file, callback) => {
     }
 }
 
+const getImageDimension = (file, callback) => {
+    const imageUrl = URL.createObjectURL(file)
+    var img = new Image()
+    img.src = imageUrl
+
+    img.onload = function() {
+        callback(true, this.width, this.height)
+    }
+
+    img.onerror = function() {
+        callback(false)
+    }
+}
+
 const generic = {
     validate: validateImage,
     is_square: isImageSquare,
+    get_dimension: getImageDimension,
 }
 
 export default generic

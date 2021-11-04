@@ -41,7 +41,6 @@ function TypeManage() {
 
     useEffect(() => {
         if (typeData) {
-            console.log(typeData)
             setList(typeData.markertypes)
         }
 

@@ -14,6 +14,7 @@ import SchedulePage from './pages/SchedulePage'
 import SettingPage from './pages/SettingPage'
 
 import TypeManage from './pages/admin/TypeManage'
+import PinManage from './pages/admin/PinManage'
 
 import InitData from './InitData'
 
@@ -22,14 +23,15 @@ function App() {
       <>
         <Route render={({ location }) => (
           <Switch>
-            <Route exact path="/" component={Login} />
-            <Route path="/search" component={SearchPage} />
-            <Route path="/markers" component={MarkerPage} />
-            <Route path="/home" component={HomePage} />
-            <Route path="/schedule" component={SchedulePage} />
-            <Route path="/setting" component={SettingPage} />
+            <Route exact path='/' component={Login} />
+            <Route path='/search' component={SearchPage} />
+            <Route path='/markers' component={MarkerPage} />
+            <Route path='/home' component={HomePage} />
+            <Route path='/schedule' component={SchedulePage} />
+            <Route path='/setting' component={SettingPage} />
 
-            <Route path="/admin/type" component={TypeManage} />
+            <Route path='/admin/type' component={TypeManage} />
+            <Route path='/admin/pin' component={PinManage} />
           </Switch>
         )} />
         <InitData />

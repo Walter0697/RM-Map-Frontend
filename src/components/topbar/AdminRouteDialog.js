@@ -13,6 +13,21 @@ const TransitionRight = (props) => {
     return <Slide {...props} direction='right' />
 }
 
+function RouteBox({
+    label,
+    route,
+    directTo,
+}) {
+    return (
+        <Button
+            fullWidth
+            onClick={() => directTo(route)}
+        >
+            {label}
+        </Button>
+    )
+}
+
 function AdminRouteDialog({
     open,
     handleClose,
@@ -35,12 +50,8 @@ function AdminRouteDialog({
             <DialogTitle>Admin Route</DialogTitle>
             <DialogContent>
                 <DialogContentText>
-                    <Button
-                        fullWidth
-                        onClick={() => directTo('/admin/type')}
-                    >
-                        Testing
-                    </Button>
+                    <RouteBox label='type' route='/admin/type' directTo={directTo}/>
+                    <RouteBox label='pin' route='/admin/pin' directTo={directTo}/>
                 </DialogContentText>
             </DialogContent>
         </Dialog>

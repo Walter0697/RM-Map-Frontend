@@ -209,7 +209,7 @@ function MarkerTypeForm({
             <BaseForm
                 open={open}
                 handleClose={handleClose}
-                title={markerType?.label ? `Updating ${markerType.label}` : 'Create Marker Type'}
+                title={markerType?.label ? `Updating ${markerType.label}` : 'Creating Marker Type'}
                 maxWidth={'lg'}
                 handleSubmit={onSubmitHandler}
                 cancelText={'Cancel'}
