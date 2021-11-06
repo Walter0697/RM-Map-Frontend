@@ -61,26 +61,31 @@ function PinForm({
     const canPreview = useMemo(() => {
         if (!formValue.imageUpload) return false
         if (!selectedTypeId) return false
-        if (formValue.top_left_x >= formValue.bottom_right_x) return false
-        if (formValue.top_left_y >= formValue.bottom_right_y) return false
         return true
     }, [ formValue, selectedTypeId ])
 
     const previewMessage = useMemo(() => {
         if (!formValue.imageUpload) return 'cannot preview, no image uploaded'
         if (!selectedTypeId) return 'cannot preview, marker type not selected'
-        if (formValue.top_left_x >= formValue.bottom_right_x) return 'cannot preview, x value invalid'
-        if (formValue.top_left_y >= formValue.bottom_right_y) return 'cannot preview, y value invalid'
-        return 'can preview!'
+        if (formValue.top_left_x >= formValue.bottom_right_x) return 'x value invalid'
+        if (formValue.top_left_y >= formValue.bottom_right_y) return 'y value invalid'
+        return ''
     }, [ formValue, selectedTypeId ])
 
     useEffect(() => {
         setSubmitting(false)
+        setTypeId('')
+        setPreview('')
         resetFormValue()
+        setImageMessage('please upload an image first')
         if (pin) {
-            console.log(pin)
+            setFormValue('label', pin.label)
+            setFormValue('top_left_x', pin.top_left_x)
+            setFormValue('top_left_y', pin.top_left_y)
+            setFormValue('bottom_right_x', pin.bottom_right_x)
+            setFormValue('bottom_right_y', pin.bottom_right_y)
         }
-    }, [pin])
+    }, [pin, open])
 
     useEffect(() => {
         if (previewData) {
@@ -148,7 +153,6 @@ function PinForm({
     }
 
     const onPreviewGenerate = () => {
-        console.log('this button clicked!')
         if (!canPreview) return
         previewPinGQL({ variables: {
             top_left_x: formValue.top_left_x,
@@ -236,7 +240,15 @@ function PinForm({
     }
 
     const onUpdateHandler = () => {
-
+        editPinGQL({ variables: {
+            id: pin.id,
+            label: formValue.label,
+            top_left_x: formValue.top_left_x,
+            top_left_y: formValue.top_left_y,
+            bottom_right_x: formValue.bottom_right_x,
+            bottom_right_y: formValue.bottom_right_y,
+            image_upload: formValue.imageUpload? formValue.imageUpload.upload : null,
+        }})
     }
 
     return (

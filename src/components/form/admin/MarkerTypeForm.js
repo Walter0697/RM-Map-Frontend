@@ -59,7 +59,7 @@ function MarkerTypeForm({
             setFormValue('value', markerType.value)
             setFormValue('priority', markerType.priority)
         }
-    }, [markerType])
+    }, [markerType, open])
 
     useEffect(() => {
         if (createData) {
