@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { useLazyQuery, useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client'
 import {
     Grid,
     TextField,
@@ -396,6 +396,17 @@ function PinForm({
                                     width: '100%',
                                 }}
                             />
+                        </Grid>
+                    )}
+                    { pin && (
+                        <Grid item xs={12} md={6} lg={6}
+                            style={{
+                                fontSize: '10px',
+                                color: 'grey',
+                            }}
+                        >
+                            <span style={{ display: 'block' }}>Created By {pin.created_by.username} at {dayjs.utc(pin.created_at).format('YYYY-MM-DD HH:mm')}</span>
+                            <span style={{ display: 'block' }}>Updated By {pin.updated_by.username} at {dayjs.utc(pin.updated_at).format('YYYY-MM-DD HH:mm')}</span>
                         </Grid>
                     )}
                 </Grid>

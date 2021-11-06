@@ -52,6 +52,7 @@ function AdminRouteDialog({
                 <DialogContentText>
                     <RouteBox label='type' route='/admin/type' directTo={directTo}/>
                     <RouteBox label='pin' route='/admin/pin' directTo={directTo}/>
+                    <RouteBox label='default pin' route='/admin/defaultpin' directTo={directTo} />
                 </DialogContentText>
             </DialogContent>
         </Dialog>

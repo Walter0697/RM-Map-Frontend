@@ -15,6 +15,7 @@ import SettingPage from './pages/SettingPage'
 
 import TypeManage from './pages/admin/TypeManage'
 import PinManage from './pages/admin/PinManage'
+import DefaultPinManage from './pages/admin/DefaultPinManage'
 
 import InitData from './InitData'
 
@@ -32,6 +33,7 @@ function App() {
 
             <Route path='/admin/type' component={TypeManage} />
             <Route path='/admin/pin' component={PinManage} />
+            <Route path='/admin/defaultpin' component={DefaultPinManage} />
           </Switch>
         )} />
         <InitData />

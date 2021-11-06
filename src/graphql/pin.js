@@ -18,6 +18,16 @@ const preview = gql`
     }
 `
 
+const select = gql`
+    query listSelectPinGQL{
+        pins {
+            id
+            label
+            display_path
+        }
+    }
+`
+
 const list = gql`
     query listPinGQL{
         pins {
@@ -95,6 +105,7 @@ const remove = gql`
 const pins = {
     preview,
     list,
+    select,
     create,
     edit,
     remove,

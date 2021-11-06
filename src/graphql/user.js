@@ -19,6 +19,22 @@ const preference = gql`
             relation {
                 username
             }
+            regular_pin {
+                label
+                display_path
+            }
+            favourite_pin {
+                label
+                display_path
+            }
+            schedule_pin {
+                label
+                display_path
+            }
+            hurry_pin {
+                label
+                display_path
+            }
         }
     }
 `
