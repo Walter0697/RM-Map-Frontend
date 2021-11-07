@@ -6,12 +6,11 @@ import {
     TextField,
 } from '@mui/material'
 
-import BaseForm from './BaseForm'
+import BaseForm from '../BaseForm'
 
-import useDebounce from '../../hooks/useDebounce'
+import useDebounce from '../../../hooks/useDebounce'
 
-import actions from '../../store/actions'
-import graphql from '../../graphql'
+import graphql from '../../../graphql'
 
 function RelationSearchForm({
     selfname,
@@ -20,7 +19,7 @@ function RelationSearchForm({
     onCreated,
 }) {
     const [ userSearchGQL, { data: searchData, loading: searchLoading, error: searchError } ] = useLazyQuery(graphql.users.search, { errorPolicy: 'all' })
-    const [ updateRelationGQL, { data: relationData, loading: relationLoading, error: relationError }] = useMutation(graphql.users.update_relation, { errorPolicy: 'all' })
+    const [ updateRelationGQL, { data: relationData, loading: relationLoading, error: relationError } ] = useMutation(graphql.users.update_relation, { errorPolicy: 'all' })
 
     const [ username, setUsername ] = useState('')
     const [ helperText, setHelperText ] = useState('')

@@ -1,9 +1,8 @@
-import React, { useState } from 'react'
-import {
-    Grid,
-    Button,
-} from '@mui/material'
+import React from 'react'
 import BottomUpTrail from '../animatein/BottomUpTrail'
+
+import MarkerRelation from './settings/MarkerRelation'
+import PreferredPin from './settings/PreferredPin'
 
 function ButtonBox({
   height,
@@ -22,6 +21,8 @@ function ButtonBox({
 function SettingList({
   relationUser,
   openRelationChange,
+  pinPreference,
+  openPreferredPinForm,
 }) {
   return (
     <div 
@@ -38,25 +39,18 @@ function SettingList({
         <ButtonBox
           height={90}
         >
-            <Button
-                variant='contained'
-                size='large'
-                style={{
-                    backgroundColor: '#48acdb',
-                    height: '100%',
-                    width: '100%',
-                    boxShadow: '2px 2px 6px'
-                }}
-                onClick={openRelationChange}
-            >
-              <Grid 
-                container 
-                fullWidth
-              >
-                <Grid item xs={12}>Sharing markers with:</Grid>
-                <Grid item xs={12}>{relationUser ?? '<nobody>'}</Grid>
-              </Grid>
-            </Button>
+          <MarkerRelation
+            relationUser={relationUser}
+            openRelationChange={openRelationChange}
+          />
+        </ButtonBox>
+        <ButtonBox
+          height={400}
+        >
+          <PreferredPin
+            preferredPinList={pinPreference}
+            openPreferredPinChange={openPreferredPinForm}
+          />
         </ButtonBox>
       </BottomUpTrail>
     </div>

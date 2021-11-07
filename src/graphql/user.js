@@ -20,18 +20,22 @@ const preference = gql`
                 username
             }
             regular_pin {
+                id
                 label
                 display_path
             }
             favourite_pin {
+                id
                 label
                 display_path
             }
-            schedule_pin {
+            selected_pin {
+                id
                 label
                 display_path
             }
             hurry_pin {
+                id
                 label
                 display_path
             }
@@ -47,10 +51,42 @@ const update_relation = gql`
     }
 ` 
 
+const update_pin = gql`
+    mutation updatePreferredPinGQL($label: String!,
+                                $pin_id: Int!) {
+        updatePreferredPin(input: {
+            label: $label,
+            pin_id: $pin_id,
+        }) {
+            regular_pin {
+                id
+                label
+                display_path
+            }
+            favourite_pin {
+                id
+                label
+                display_path
+            }
+            selected_pin {
+                id
+                label
+                display_path
+            }
+            hurry_pin {
+                id
+                label
+                display_path
+            }
+        }
+    }
+`
+
 const users = {
     search,
     preference,
     update_relation,
+    update_pin,
 }
 
 export default users
