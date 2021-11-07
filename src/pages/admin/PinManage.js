@@ -128,7 +128,7 @@ function PinManage() {
                         Add New
                     </Button>
                 </Grid>
-                { pinList.map(( item, index) => (
+                { pinList.map(( item, index ) => (
                     <Grid
                         item xs={12} md={12} lg={12}
                         style={{
