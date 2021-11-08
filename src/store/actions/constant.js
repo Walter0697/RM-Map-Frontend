@@ -4,6 +4,7 @@ const constants = {
     ADD_MARKER: 'ADD_MARKER',
     UPDATE_MARKER_FAV: 'UPDATE_MARKER_FAV',
     RESET_EVENTTYPES: 'RESET_EVENTTYPES',
+    RESET_MAPPINS: 'RESET_MAPPINS',
 }
 
 export default constants

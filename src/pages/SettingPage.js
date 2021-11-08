@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import Base from './Base'
 
-import { useQuery } from '@apollo/client'
+import { useQuery, useLazyQuery } from '@apollo/client'
 
 import TopBar from '../components/topbar/TopBar'
 import SettingList from '../components/list/SettingList'
@@ -9,11 +10,12 @@ import RelationSearchForm from '../components/form/settings/RelationSearchForm'
 import PreferredPinForm from '../components/form/settings/PreferredPinForm'
 
 import constants from '../constant'
+import actions from '../store/actions'
 import graphql from '../graphql'
 
 // TODO : add preference info into cachable local storage
 
-function SettingPage() {
+function SettingPage({ dispatch }) {
     // form open state
     const [ isRelationFormOpen, setRelationFormOpen ] = useState(false)
     const [ isPreferredPinFormOpen, setPreferredPinFormOpen ] = useState(false)
@@ -26,7 +28,9 @@ function SettingPage() {
     const [ pinPreference, setPinPreference ] = useState(null)
 
     // graphql request
-    const { data: preferenceData, loading: preferenceLoading, error: preferenceError } = useQuery(graphql.users.preference, { errorPolicy: 'all' })
+    const { data: preferenceData, loading: preferenceLoading, error: preferenceError } = useQuery(graphql.users.preference, { errorPolicy: 'all', fetchPolicy: 'no-cache' })
+    // for updating the map pins after changing the preferred pin
+    const [ listMappinsGQL, { data: mappinsData } ] = useLazyQuery(graphql.pins.mappins, { fetchPolicy: 'no-cache' })
 
     useEffect(() => {
         if (preferenceData) {
@@ -61,6 +65,12 @@ function SettingPage() {
         }
     }, [preferenceData, preferenceError])
 
+    useEffect(() => {
+        if (mappinsData) {
+            dispatch(actions.resetMappins(mappinsData.mappins))
+        }
+    }, [mappinsData])
+
     const openPreferredPinForm = (pin) => {
         setPreferredPin(pin)
         setPreferredPinFormOpen(true)
@@ -74,6 +84,7 @@ function SettingPage() {
     const onChangePreferredPin = (pin) => {
         setPreferredPin(null)
         setPreferredPinFormOpen(false)
+
         let pinList = []
         constants.pins.pinTypes.forEach(( item, index) => {
             if (pin.updatePreferredPin && pin.updatePreferredPin[item.identifier]) {
@@ -94,6 +105,7 @@ function SettingPage() {
             }
         })
         setPinPreference(pinList)
+        listMappinsGQL()
     }
 
     const openRelationForm = () => {
@@ -135,4 +147,6 @@ function SettingPage() {
     )
 }
 
-export default SettingPage
+export default connect(state => ({
+    jwt: state.auth.jwt
+})) (SettingPage)

@@ -3,6 +3,7 @@ import constants from '../actions/constant'
 export default function markerReducer(state = {
     markers: [],
     eventtypes: [],
+    mappins: [],
 }, action) {
     switch(action.type) {
         case constants.RESET_MARKERS:
@@ -31,6 +32,12 @@ export default function markerReducer(state = {
             return {
                 ...state,
                 eventtypes: action.eventtypes,
+            }
+        }
+        case constants.RESET_MAPPINS: {
+            return {
+                ...state,
+                mappins: action.mappins,
             }
         }
         default:

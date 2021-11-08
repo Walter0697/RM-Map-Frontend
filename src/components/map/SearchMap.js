@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { connect } from 'react-redux'
 import {
     Button,
 } from '@mui/material'
@@ -28,6 +29,7 @@ import apis from '../../apis'
 
 function SearchMap({
     openForm,
+    mappins,
 }) {
     // reference of the div to render the map
     const mapElement = useRef(null) 
@@ -105,6 +107,7 @@ function SearchMap({
         },
         15,
         setGPSFail,
+        mappins,
     )
 
     // keep track on map location to see if button should show
@@ -184,7 +187,8 @@ function SearchMap({
                         details: {
                             poi: item.poi,
                             address: item.address,
-                        }
+                        },
+                        pin: 'regular',
                     })
                     id++
                 })
@@ -361,4 +365,6 @@ function SearchMap({
     )
 }
 
-export default SearchMap
+export default connect(state => ({
+    mappins: state.marker.mappins,
+}))(SearchMap)

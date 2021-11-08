@@ -102,6 +102,17 @@ const remove = gql`
     }
 `
 
+const mappins = gql`
+    query listMappinsGQL {
+        mappins {
+            pinlabel
+            typelabel
+            image_path
+        }
+    }
+`
+  
+
 const pins = {
     preview,
     list,
@@ -109,6 +120,7 @@ const pins = {
     create,
     edit,
     remove,
+    mappins,
 }
 
 export default pins

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { connect } from 'react-redux'
 import {
     useSpring,
     config,
@@ -21,6 +22,7 @@ function MarkerMap({
     toListView,
     markers,
     setSelectedById,
+    mappins,
 }) {
     // reference of the div to render the map
     const mapElement = useRef(null)
@@ -80,14 +82,17 @@ function MarkerMap({
         },
         15,
         setGPSFail,
+        mappins,
     )
 
     useEffect(() => {
         let output = []
         markers.forEach(item => {
+            const pinType = maphelper.pins.getPinType(item)
             output.push({
                 id: item.id,
                 type: item.type,
+                pin: pinType,
                 location: {
                     lon: item.longitude,
                     lat: item.latitude,
@@ -96,7 +101,7 @@ function MarkerMap({
         })
 
         setLocation(output)
-    }, [markers])
+    }, [markers, showingList])
 
     useEffect(() => {
         if (clickedMarker) {
@@ -171,4 +176,6 @@ function MarkerMap({
     )
 }
 
-export default MarkerMap
+export default connect(state => ({
+    mappins: state.marker.mappins,
+}))(MarkerMap)

@@ -37,12 +37,20 @@ export const resetEventTypes = (eventtypes) => {
     }
 }
 
+export const resetMappins = (mappins) => {
+    return {
+        type: constants.RESET_MAPPINS,
+        mappins,
+    }
+}
+
 const actions = {
     login,
     resetMarkers,
     updateMarkerFav,
     addMarker,
     resetEventTypes,
+    resetMappins,
 }
 
 export default actions

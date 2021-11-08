@@ -13,6 +13,7 @@ function useMap(
     defaultLocation,
     defaultZoom,
     centerFailHandler,
+    mappins,
 ) {
     // keep tracking on the location from the api
     const [ mapLocation, setMapLocation ] = useObject({
@@ -138,31 +139,44 @@ function useMap(
             setMarkers(() => [])
             return
         }
+        //mappins
 
         let markers = []
         locationList.forEach(item => {
-            let marker = null
-            if (item.selected) {
-                marker = maphelper.markers.getMarker(map, [
-                        item.location.lon,
-                        item.location.lat,
-                    ],
-                    onMarkerClick,
-                    item.id,
-                    'selected',
-                    '15',
-                )
-            } else {
-                marker = maphelper.markers.getMarker(map, [
-                        item.location.lon,
-                        item.location.lat,
-                    ],
-                    onMarkerClick,
-                    item.id,
-                    'search',
-                    '10',
-                )
-            }
+            let marker = maphelper.markers.getMapPin(
+                map,
+                [
+                    item.location.lon,
+                    item.location.lat,
+                ],
+                onMarkerClick,
+                item.selected,
+                item.id,
+                item.type,
+                item.pin,
+                mappins,
+            )
+            // if (item.selected) {
+            //     marker = maphelper.markers.getMarker(map, [
+            //             item.location.lon,
+            //             item.location.lat,
+            //         ],
+            //         onMarkerClick,
+            //         item.id,
+            //         'selected',
+            //         '15',
+            //     )
+            // } else {
+            //     marker = maphelper.markers.getMarker(map, [
+            //             item.location.lon,
+            //             item.location.lat,
+            //         ],
+            //         onMarkerClick,
+            //         item.id,
+            //         item.pin,
+            //         '10',
+            //     )
+            // }
             markers.push(marker)
         })
         setMarkers(() => markers)
