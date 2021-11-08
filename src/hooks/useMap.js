@@ -219,15 +219,28 @@ function useMap(
         setCenterMarker(null)
         setCenterStreetName(null)
 
-        let marker = maphelper.markers.getMarker(map, [
+        let marker = maphelper.markers.getMapPin(
+            map,
+            [
                 mapLocation.lon,
                 mapLocation.lat,
             ],
             onCenterMarkerClick,
+            false,
             0,
-            'center',
-            '20',
+            '',
+            'favourite',
+            mappins,
         )
+        // let marker = maphelper.markers.getMarker(map, [
+        //         mapLocation.lon,
+        //         mapLocation.lat,
+        //     ],
+        //     onCenterMarkerClick,
+        //     0,
+        //     'center',
+        //     '20',
+        // )
         
         setCenterMarker(marker)
 
