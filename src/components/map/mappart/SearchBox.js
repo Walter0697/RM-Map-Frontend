@@ -29,7 +29,7 @@ function SearchResultItem({
             style={{
                 position: 'relative',
                 height: '60px',
-                width: '88%',
+                width: '99%',
                 marginLeft: '1%',
                 borderRadius: '0',
                 zIndex: '2',
@@ -151,7 +151,7 @@ function SearchBox({
                 variant="outlined"
                 label="Search..."
                 style={{
-                    width: '90%',
+                    width: '95%',
                     background: 'white',
                     boxShadow: '2px 2px 6px',
                     zIndex: 5,
@@ -177,7 +177,7 @@ function SearchBox({
 
             <animated.div
                 style={{
-                    width: '100%',
+                    width: '95%',
                     opacity: listOpacity,
                     transform: listTransform,
                     transformOrigin: 'top',

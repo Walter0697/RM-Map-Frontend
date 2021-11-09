@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import Base from './Base'
 
@@ -17,7 +17,10 @@ import CircleIconButton from '../components/field/CircleIconButton'
 
 import styles from '../styles/list.module.css'
 
-function MarkerPage({ markers }) {
+function MarkerPage({ 
+    markers,
+    eventtypes,
+}) {
     // selected marker
     const [ selectedMarker, setSelected ] = useState(null)
 
@@ -32,7 +35,7 @@ function MarkerPage({ markers }) {
         if (selected) {
             setSelected(selected)
         }
-    }
+    } 
 
     const [ showingList, setShowingList ] = useState(false)
     const { transform } = useSpring({
@@ -40,6 +43,46 @@ function MarkerPage({ markers }) {
         from: { transform: 'rotateY(0deg)' },
         transform: showingList ? 'rotateY(180deg)' : 'rotateY(0deg)',
     })
+
+    const [ filterOption, setFilterOption ] = useState({})
+    const [ filterValue, setFilterValue ] = useState({})
+    const [ isFilterExpanded, setExpandFilter ] = useState(false)
+
+    useEffect(() => {
+        let options = []
+        let typefilter = []
+        eventtypes.forEach(et => {
+            typefilter.push({
+                label: et.label,
+                value: et.value,
+                icon: process.env.REACT_APP_IMAGE_LINK + et.icon_path,
+                size: 'small'
+            })
+        })
+        options.push({
+            title: 'Event Types',
+            label: 'eventtypes',
+            options: typefilter,
+            type: 'multiple',
+        })
+
+
+
+        // options.push({
+        //     title: 'Marker Types',
+        //     options: [{
+        //         label: 'favourite',
+        //         value: 'favourite',
+        //         icon: false,
+        //     }, {
+        //         label: 'hurry',
+        //         value: 'hurry',
+        //         icon: false,
+        //     }],
+        //     type: 'multiple',
+        // })
+        setFilterOption(options)
+    }, [eventtypes])
 
     return (
         <Base>
@@ -61,6 +104,11 @@ function MarkerPage({ markers }) {
                         toListView={() => setShowingList(true)}
                         markers={markers || []}
                         setSelectedById={setSelectedById}
+                        filterOption={filterOption}
+                        filterValue={filterValue}
+                        setFilterValue={setFilterValue}
+                        isFilterExpanded={isFilterExpanded}
+                        setExpandFilter={setExpandFilter}
                     />
                 </div>
                 <div
@@ -73,9 +121,13 @@ function MarkerPage({ markers }) {
                     <MarkerList
                         height={'100%'}
                         showingList={showingList}
-                        toMapView={() => setShowingList(false)}
                         markers={markers || []}
                         setSelectedById={setSelectedById}
+                        filterOption={filterOption}
+                        filterValue={filterValue}
+                        setFilterValue={setFilterValue}
+                        isFilterExpanded={isFilterExpanded}
+                        setExpandFilter={setExpandFilter}
                     />
                 </div>
 
@@ -107,5 +159,6 @@ function MarkerPage({ markers }) {
 }
 
 export default connect(state => ({
-    markers: state.marker.markers
+    markers: state.marker.markers,
+    eventtypes: state.marker.eventtypes,
 })) (MarkerPage)

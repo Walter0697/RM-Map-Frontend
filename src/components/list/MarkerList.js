@@ -158,7 +158,6 @@ function MarkerItem({
 function MarkerList({
   height,
   markers,
-  toMapView,
   setSelectedById,
   eventtypes,
 }) {

@@ -14,6 +14,7 @@ import useBoop from '../../hooks/useBoop'
 import LocationPreview from './mappart/LocationPreview'
 import AutoHideAlert from '../AutoHideAlert'
 import CircleIconButton from '../field/CircleIconButton'
+import FilterBox from '../filterbox/FilterBox'
 
 import maphelper from '../../scripts/map'
 
@@ -22,6 +23,11 @@ function MarkerMap({
     toListView,
     markers,
     setSelectedById,
+    filterOption,
+    filterValue,
+    setFilterValue,
+    isFilterExpanded,
+    setExpandFilter,
     mappins,
 }) {
     // reference of the div to render the map
@@ -148,7 +154,23 @@ function MarkerMap({
                 />
             </animated.div>
 
-            {/* buttons */}
+            {/* component inside map */}
+            <div style={{
+                position: 'absolute',
+                paddingTop: '50px',
+                paddingLeft: '5%',
+                width: '100%',
+                pointerEvents: 'none'
+            }}>
+                <FilterBox 
+                    filterOption={filterOption}
+                    filterValue={filterValue}
+                    setFilterValue={setFilterValue}
+                    isExpanded={isFilterExpanded}
+                    setExpand={setExpandFilter}
+                />
+            </div>
+
             <animated.div
                 style={{ 
                     position: 'absolute',
