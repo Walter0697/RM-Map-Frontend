@@ -15,6 +15,8 @@ import MarkerList from '../components/list/MarkerList'
 import MarkerView from '../components/marker/MarkerView'
 import CircleIconButton from '../components/field/CircleIconButton'
 
+import filters from '../scripts/filter'
+
 import styles from '../styles/list.module.css'
 
 function MarkerPage({ 
@@ -45,7 +47,8 @@ function MarkerPage({
     })
 
     const [ filterOption, setFilterOption ] = useState({})
-    const [ filterValue, setFilterValue ] = useState({})
+    const [ filterValue, setFilterValue ] = useState('')
+    const [ finalFilterValue, setFinalFilterValue ] = useState('')
     const [ isFilterExpanded, setExpandFilter ] = useState(false)
 
     useEffect(() => {
@@ -60,29 +63,63 @@ function MarkerPage({
             })
         })
         options.push({
-            title: 'Event Types',
-            label: 'eventtypes',
-            options: typefilter,
-            type: 'multiple',
+            title: 'Range',
+            label: 'range',
+            options: [{
+                label: '< 100m',
+                value: '100m',
+                icon: false,
+                size: 'small'
+            }, {
+                label: '< 250m',
+                value: '250m',
+                icon: false,
+                size: 'small'
+            }, {
+                label: '< 500m',
+                value: '500m',
+                icon: false,
+                size: 'small'
+            }, {
+                label: '< 1000m',
+                value: '1000m',
+                icon: false,
+                size: 'small'
+            }],
+            type: filters.types.single,
         })
 
+        options.push({
+            title: 'Event Types',
+            label: 'eventtype',
+            options: typefilter,
+            type: filters.types.multiple,
+        })
 
+        options.push({
+            title: 'Attribute',
+            label: 'attribute',
+            options: [{
+                label: 'favourite',
+                value: 'favourite',
+                icon: false,
+                size: 'small',
+            }, {
+                label: 'hurry',
+                value: 'hurry',
+                icon: false,
+                size: 'small',
+            }],
+            type: filters.types.multiple,
+        })
 
-        // options.push({
-        //     title: 'Marker Types',
-        //     options: [{
-        //         label: 'favourite',
-        //         value: 'favourite',
-        //         icon: false,
-        //     }, {
-        //         label: 'hurry',
-        //         value: 'hurry',
-        //         icon: false,
-        //     }],
-        //     type: 'multiple',
-        // })
         setFilterOption(options)
     }, [eventtypes])
+
+    const confirmFilterValue = () => {
+        setFinalFilterValue(filterValue)
+        setExpandFilter(false)
+    }
 
     return (
         <Base>
@@ -104,11 +141,13 @@ function MarkerPage({
                         toListView={() => setShowingList(true)}
                         markers={markers || []}
                         setSelectedById={setSelectedById}
-                        filterOption={filterOption}
-                        filterValue={filterValue}
-                        setFilterValue={setFilterValue}
-                        isFilterExpanded={isFilterExpanded}
+                        filterOption={filterOption} // for filter option
+                        filterValue={filterValue}   // for filter temporary value setter and getter
+                        setFilterValue={setFilterValue}  
+                        isFilterExpanded={isFilterExpanded} // for viewing filter
                         setExpandFilter={setExpandFilter}
+                        confirmFilterValue={confirmFilterValue} // for confirming filter values
+                        finalFilterValue={finalFilterValue} // for filter options
                     />
                 </div>
                 <div

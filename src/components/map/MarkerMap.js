@@ -28,6 +28,7 @@ function MarkerMap({
     setFilterValue,
     isFilterExpanded,
     setExpandFilter,
+    confirmFilterValue,
     mappins,
 }) {
     // reference of the div to render the map
@@ -168,6 +169,7 @@ function MarkerMap({
                     setFilterValue={setFilterValue}
                     isExpanded={isFilterExpanded}
                     setExpand={setExpandFilter}
+                    confirmFilterValue={confirmFilterValue}
                 />
             </div>
 

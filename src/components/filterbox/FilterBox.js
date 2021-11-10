@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import {
     Grid,
     Button,
+    TextField,
 } from '@mui/material'
 import {
     useSpring,
@@ -9,9 +10,13 @@ import {
     animated,
 } from '@react-spring/web'
 
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+
 import useBoop from '../../hooks/useBoop'
 
 import ImageHeadText from '../wrapper/ImageHeadText'
+
+import filters from '../../scripts/filter'
 
 function FilterView({
     expandFilterView,
@@ -30,13 +35,13 @@ function FilterView({
 }
 
 function FilterPick({
-    closeFilterView,
+    confirmFilterValue,
     filterOption,
     filterValue,
     setFilterValue,
 }) {
 
-    const [ isBlinking, setBlink ] = useBoop(500)
+    const [ isBlinking, setBlink ] = useBoop(50)
 
     const { x } = useSpring({
         config: config.gentle,
@@ -44,30 +49,41 @@ function FilterPick({
         x: isBlinking ? 0 : 1,
     })
 
-    const toggleOption = (label, value) => {
-        const identifier = `${label}-${value}`
-        const currentValue = filterValue ?? {}
-        if (currentValue[identifier]) {
-            currentValue[identifier] = false
-        } else {
-            currentValue[identifier] = true
-        }
-        console.log(currentValue)
-        setFilterValue(() => currentValue)
+    const toggleOption = (option_type, value) => {
+        const next = filters.button.onButtonClick(filterValue, option_type.type, option_type.label, value)
+        setFilterValue(() => next)
+
         setBlink()
     }
 
     const isSelected = (label, value) => {
-        const identifier = `${label}-${value}`
-        if (filterValue[identifier]) return true
-        return false
+        const identifier = `${label}=${value}`
+        return filterValue.includes(identifier)
     }
 
     return (
         <>
+            <div
+                style={{
+                    height: '15%',
+                    width: '100%',
+                }}
+            >
+                <TextField
+                    variant="filled"
+                    label="Search..."
+                    style={{
+                        marginTop: '15px',
+                        width: '90%',
+                        marginLeft: '5%',
+                    }}
+                    value={filterValue}
+                    onChange={() => {}}
+                />
+            </div>
             <animated.div
                 style={{
-                    height: '100%',
+                    height: '80%',
                     width: '100%',
                     padding: '10px',
                     overflow: 'auto',
@@ -79,6 +95,7 @@ function FilterPick({
                         <div
                             style={{
                                 fontSize: '20px',
+                                marginBottom: '5px',
                                 width: '100%',
                                 fontWeight: 'bold',
                                 display: 'flex',
@@ -111,53 +128,52 @@ function FilterPick({
                                         height: '45px',
                                     }}
                                 >
-                                    {isSelected(item.label, option.value) ? (
-                                        <div
-                                            style={{
-                                                height: '100%',
-                                                width: '100%',
-                                                backgroundColor: '#21cebd',
-                                                border: 'thin solid #1ca4ff',
-                                                borderRadius: '5px',
-                                                paddingTop: '5px',
-                                                paddingLeft: '5px',
-                                            }}
-                                            onClick={() => toggleOption(item.label, option.value)}
-                                        >
-                                            <ImageHeadText
-                                                iconPath={option.icon}
-                                                iconSize='25px'
-                                                label={option.label}
-                                                labelSize='20px'
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div
-                                            style={{
-                                                height: '100%',
-                                                width: '100%',
-                                                backgroundColor: '#bcddda',
-                                                border: 'thin solid black',
-                                                borderRadius: '5px',
-                                                paddingTop: '5px',
-                                                paddingLeft: '5px',
-                                            }}
-                                            onClick={() => toggleOption(item.label, option.value)}
-                                        >
-                                            <ImageHeadText
-                                                iconPath={option.icon}
-                                                iconSize='25px'
-                                                label={option.label}
-                                                labelSize='20px'
-                                            />
-                                        </div>
-                                    )}
+                                    <div
+                                        style={{
+                                            height: '100%',
+                                            width: '100%',
+                                            backgroundColor: isSelected(item.label, option.value) ? '#21cebd' : '#bcddda',
+                                            border: isSelected(item.label, option.value) ? 'thin solid #1ca4ff' : 'thin solid black',
+                                            borderRadius: '5px',
+                                            paddingTop: '5px',
+                                            paddingLeft: '5px',
+                                        }}
+                                        onClick={() => toggleOption(item, option.value)}
+                                    >
+                                        <ImageHeadText
+                                            iconPath={option.icon}
+                                            iconSize='25px'
+                                            label={option.label}
+                                            labelSize='20px'
+                                        />
+                                    </div>
                                 </Grid>
                             ))}
                         </Grid>
                     </>
                 ))}
             </animated.div>
+            <Grid
+                container
+                style={{
+                    height: '5%',
+                    width: '100%',
+                }}
+            >
+                <Grid
+                    item xs={12}
+                    alignItems='center'
+                    justifyContent='center'
+                    style={{
+                        display: 'flex',
+                        height: '100%',
+                        width: '100%',
+                    }}
+                    onClick={confirmFilterValue}
+                >
+                    <ArrowDropUpIcon style={{ color: '#808080' }}/>
+                </Grid>
+            </Grid>
         </>
     )
 }
@@ -168,6 +184,7 @@ function FilterBox({
     setFilterValue,
     isExpanded,
     setExpand,
+    confirmFilterValue,
 }) {
     const [ internalExpand, setInternalExpand ] = useState(false)
     const [ blink, refresh ] = useBoop(300)
@@ -178,7 +195,7 @@ function FilterBox({
             boxHeight: '50px',
         },
         to: {
-            boxHeight: internalExpand ? '300px' : '50px',
+            boxHeight: internalExpand ? '500px' : '50px',
         }
     })
 
@@ -215,7 +232,7 @@ function FilterBox({
                             filterOption={filterOption}
                             filterValue={filterValue}
                             setFilterValue={setFilterValue}
-                            blink={refresh}
+                            confirmFilterValue={confirmFilterValue}
                         />
                     ) : (
                         <FilterView
