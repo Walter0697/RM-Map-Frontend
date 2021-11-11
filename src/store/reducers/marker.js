@@ -1,4 +1,5 @@
 import constants from '../actions/constant'
+import maphelper from '../../scripts/map'
 
 export default function markerReducer(state = {
     markers: [],
@@ -6,14 +7,17 @@ export default function markerReducer(state = {
     mappins: [],
 }, action) {
     switch(action.type) {
-        case constants.RESET_MARKERS:
+        case constants.RESET_MARKERS: {
+            const markers = action.markers.map(s => maphelper.converts.fillVariableForMarker(s))
             return {
                 ...state,
-                markers: action.markers,
+                markers: markers,
             }
+        }
         case constants.ADD_MARKER: {
             const result = state.markers || []
-            result.push(action.marker)
+            let marker = maphelper.converts.fillVariableForMarker(action.marker)
+            result.push(marker)
             return {
                 ...state,
                 markers: result,

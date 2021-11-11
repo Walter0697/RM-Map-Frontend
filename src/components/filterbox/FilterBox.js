@@ -20,16 +20,52 @@ import filters from '../../scripts/filter'
 
 function FilterView({
     expandFilterView,
+    finalFilterValue,
 }) {
-    return (
-        <Button 
+    if (!finalFilterValue) {
+        return (
+            <Button 
                 style={{
+                    marginTop: '10px',
+                    marginBottom: '10px',
                     height: '100%',
                     width: '100%',
                 }}
                 onClick={expandFilterView}
             >
-                click here for filter
+                    click here for filter
+            </Button>
+        )
+    }
+    return (
+        <Button 
+                style={{
+                    marginTop: '10px',
+                    width: '100%',
+                    display: 'inline-block',
+                    textTransform: 'none',
+                }}
+                onClick={expandFilterView}
+            >
+            
+            {finalFilterValue.map(( item, index) => (
+                <div
+                    key={index}
+                    style={{
+                        height: 'auto',
+                        width: 'auto',
+                        marginRight: '5px',
+                        marginLeft: '5px',
+                        marginBottom: '10px',
+                        padding: '6px',
+                        borderRadius: '10px',
+                        backgroundColor: '#0baabf',
+                        float: 'left',
+                    }}
+                >
+                    {item}
+                </div>
+            ))}
         </Button>
     )
 }
@@ -185,19 +221,10 @@ function FilterBox({
     isExpanded,
     setExpand,
     confirmFilterValue,
+    finalFilterValue,
 }) {
     const [ internalExpand, setInternalExpand ] = useState(false)
     const [ blink, refresh ] = useBoop(300)
-
-    const { boxHeight } = useSpring({
-        config: config.wobbly,
-        from: {
-            boxHeight: '50px',
-        },
-        to: {
-            boxHeight: internalExpand ? '500px' : '50px',
-        }
-    })
 
     const { x } = useSpring({
         config: config.gentle,
@@ -215,7 +242,7 @@ function FilterBox({
     return (
         <animated.div
             style={{
-                height: boxHeight,
+                height: 'auto',
                 width: '95%',
                 backgroundColor: '#c1fdd1',
                 color: '#002976',
@@ -237,6 +264,7 @@ function FilterBox({
                     ) : (
                         <FilterView
                             expandFilterView={() => setExpand(true)}
+                            finalFilterValue={finalFilterValue}
                         />
                     )
                 }

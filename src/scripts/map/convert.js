@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import generic from './generic'
 
 // this script is to convert different object into the expected json
@@ -55,9 +56,24 @@ const centerToMarkerForm = (latlon, address) => {
     }
 }
 
+// for filling in the variables of markers
+const fillVariableForMarker = (marker) => {
+    // for determine if it is hurry
+    marker.is_hurry = false
+    if (marker.to_time) {
+        const fivedays = dayjs(marker.to_time).add(5, 'day')
+        if (fivedays.isAfter(dayjs(), 'day')) {
+            marker.is_hurry = true
+        }
+    }
+
+    return marker
+}
+
 const converts = {
     poiToMarkerForm,
     centerToMarkerForm,
+    fillVariableForMarker,
 }
 
 export default converts

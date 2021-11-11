@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { connect } from 'react-redux'
 import Base from './Base'
 
@@ -26,19 +26,7 @@ function MarkerPage({
     // selected marker
     const [ selectedMarker, setSelected ] = useState(null)
 
-    const setSelectedById = (id) => {
-        let selected = null
-        markers.forEach(m => {
-            if (m.id === id) {
-                selected = m
-                return
-            }
-        })
-        if (selected) {
-            setSelected(selected)
-        }
-    } 
-
+    // if it is showing list or map
     const [ showingList, setShowingList ] = useState(false)
     const { transform } = useSpring({
         config: config.gentle,
@@ -46,10 +34,22 @@ function MarkerPage({
         transform: showingList ? 'rotateY(180deg)' : 'rotateY(0deg)',
     })
 
+    // filter option
     const [ filterOption, setFilterOption ] = useState({})
     const [ filterValue, setFilterValue ] = useState('')
     const [ finalFilterValue, setFinalFilterValue ] = useState('')
     const [ isFilterExpanded, setExpandFilter ] = useState(false)
+    const finalFilterDisplay = useMemo(() => {
+        if (finalFilterValue === '') return null
+        let list = filters.parser.parseStringToDisplayArr(filterOption, finalFilterValue)
+        return list
+    }, [finalFilterValue])
+
+    const displayMarker = useMemo(() => {
+        if (finalFilterValue === '') return markers
+        const list = filters.map.mapMarkerWithFilter(markers, finalFilterValue, filterOption)
+        return list
+    }, [markers, finalFilterValue, filterOption])
 
     useEffect(() => {
         let options = []
@@ -86,14 +86,14 @@ function MarkerPage({
                 icon: false,
                 size: 'small'
             }],
-            type: filters.types.single,
+            type: filters.types.chooseType.single,
         })
 
         options.push({
             title: 'Event Types',
             label: 'eventtype',
             options: typefilter,
-            type: filters.types.multiple,
+            type: filters.types.chooseType.multiple,
         })
 
         options.push({
@@ -110,11 +110,24 @@ function MarkerPage({
                 icon: false,
                 size: 'small',
             }],
-            type: filters.types.multiple,
+            type: filters.types.chooseType.multiple,
         })
 
         setFilterOption(options)
     }, [eventtypes])
+
+    const setSelectedById = (id) => {
+        let selected = null
+        markers.forEach(m => {
+            if (m.id === id) {
+                selected = m
+                return
+            }
+        })
+        if (selected) {
+            setSelected(selected)
+        }
+    } 
 
     const confirmFilterValue = () => {
         setFinalFilterValue(filterValue)
@@ -139,7 +152,7 @@ function MarkerPage({
                     <MarkerMap 
                         showingList={showingList}
                         toListView={() => setShowingList(true)}
-                        markers={markers || []}
+                        markers={displayMarker || []}
                         setSelectedById={setSelectedById}
                         filterOption={filterOption} // for filter option
                         filterValue={filterValue}   // for filter temporary value setter and getter
@@ -147,7 +160,7 @@ function MarkerPage({
                         isFilterExpanded={isFilterExpanded} // for viewing filter
                         setExpandFilter={setExpandFilter}
                         confirmFilterValue={confirmFilterValue} // for confirming filter values
-                        finalFilterValue={finalFilterValue} // for filter options
+                        finalFilterValue={finalFilterDisplay} // for filter options
                     />
                 </div>
                 <div
@@ -160,7 +173,7 @@ function MarkerPage({
                     <MarkerList
                         height={'100%'}
                         showingList={showingList}
-                        markers={markers || []}
+                        markers={displayMarker || []}
                         setSelectedById={setSelectedById}
                         filterOption={filterOption}
                         filterValue={filterValue}

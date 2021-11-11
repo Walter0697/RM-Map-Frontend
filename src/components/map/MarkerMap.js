@@ -23,13 +23,14 @@ function MarkerMap({
     toListView,
     markers,
     setSelectedById,
-    filterOption,
+    filterOption,   // below filter related
     filterValue,
     setFilterValue,
     isFilterExpanded,
     setExpandFilter,
     confirmFilterValue,
-    mappins,
+    finalFilterValue,
+    mappins,    // for displaying pins
 }) {
     // reference of the div to render the map
     const mapElement = useRef(null)
@@ -156,7 +157,8 @@ function MarkerMap({
             </animated.div>
 
             {/* component inside map */}
-            <div style={{
+            <animated.div style={{
+                visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
                 position: 'absolute',
                 paddingTop: '50px',
                 paddingLeft: '5%',
@@ -170,8 +172,9 @@ function MarkerMap({
                     isExpanded={isFilterExpanded}
                     setExpand={setExpandFilter}
                     confirmFilterValue={confirmFilterValue}
+                    finalFilterValue={finalFilterValue}
                 />
-            </div>
+            </animated.div>
 
             <animated.div
                 style={{ 

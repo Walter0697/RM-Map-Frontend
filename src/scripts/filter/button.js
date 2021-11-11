@@ -2,9 +2,9 @@ import types from './type'
 
 const onButtonClick = (current, option_type, label, value) => {
     let result
-    if (option_type === types.multiple) {
+    if (option_type === types.chooseType.multiple) {
         result = onMultipleClick(current, label, value)
-    } else if (option_type === types.single) {
+    } else if (option_type === types.chooseType.single) {
         result = onSingleClick(current, label, value)
     }
 
