@@ -49,69 +49,17 @@ function MarkerPage({
         if (finalFilterValue === '') return markers
         const list = filters.map.mapMarkerWithFilter(markers, finalFilterValue, filterOption)
         return list
-    }, [markers, finalFilterValue, filterOption])
+    }, [markers, finalFilterValue, filterOption, showingList, selectedMarker])
 
     useEffect(() => {
         let options = []
-        let typefilter = []
-        eventtypes.forEach(et => {
-            typefilter.push({
-                label: et.label,
-                value: et.value,
-                icon: process.env.REACT_APP_IMAGE_LINK + et.icon_path,
-                size: 'small'
-            })
-        })
-        options.push({
-            title: 'Range',
-            label: 'range',
-            options: [{
-                label: '< 100m',
-                value: '100m',
-                icon: false,
-                size: 'small'
-            }, {
-                label: '< 250m',
-                value: '250m',
-                icon: false,
-                size: 'small'
-            }, {
-                label: '< 500m',
-                value: '500m',
-                icon: false,
-                size: 'small'
-            }, {
-                label: '< 1000m',
-                value: '1000m',
-                icon: false,
-                size: 'small'
-            }],
-            type: filters.types.chooseType.single,
-        })
-
-        options.push({
-            title: 'Event Types',
-            label: 'eventtype',
-            options: typefilter,
-            type: filters.types.chooseType.multiple,
-        })
-
-        options.push({
-            title: 'Attribute',
-            label: 'attribute',
-            options: [{
-                label: 'favourite',
-                value: 'favourite',
-                icon: false,
-                size: 'small',
-            }, {
-                label: 'hurry',
-                value: 'hurry',
-                icon: false,
-                size: 'small',
-            }],
-            type: filters.types.chooseType.multiple,
-        })
+        
+        options.push(filters.generate.rangeFilter())
+        options.push(filters.generate.eventTypeFilter(eventtypes))
+        options.push(filters.generate.attributeFilter())
+        options.push(filters.generate.estimateTimeFilter())
+        options.push(filters.generate.pricingFilter())
+        options.push(filters.generate.labelFilter())
 
         setFilterOption(options)
     }, [eventtypes])

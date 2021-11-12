@@ -157,25 +157,6 @@ function MarkerMap({
             </animated.div>
 
             {/* component inside map */}
-            <animated.div style={{
-                visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
-                position: 'absolute',
-                paddingTop: '50px',
-                paddingLeft: '5%',
-                width: '100%',
-                pointerEvents: 'none'
-            }}>
-                <FilterBox 
-                    filterOption={filterOption}
-                    filterValue={filterValue}
-                    setFilterValue={setFilterValue}
-                    isExpanded={isFilterExpanded}
-                    setExpand={setExpandFilter}
-                    confirmFilterValue={confirmFilterValue}
-                    finalFilterValue={finalFilterValue}
-                />
-            </animated.div>
-
             <animated.div
                 style={{ 
                     position: 'absolute',
@@ -190,6 +171,24 @@ function MarkerMap({
                 >
                     <ViewListIcon />
                 </CircleIconButton>
+            </animated.div>
+
+            <animated.div style={{
+                visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
+                position: 'absolute',
+                paddingTop: '20px',
+                paddingLeft: '5%',
+                width: '100%',
+            }}>
+                <FilterBox 
+                    filterOption={filterOption}
+                    filterValue={filterValue}
+                    setFilterValue={setFilterValue}
+                    isExpanded={isFilterExpanded}
+                    setExpand={setExpandFilter}
+                    confirmFilterValue={confirmFilterValue}
+                    finalFilterValue={finalFilterValue}
+                />
             </animated.div>
 
             {/* alert */}

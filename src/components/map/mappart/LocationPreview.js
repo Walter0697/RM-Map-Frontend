@@ -149,6 +149,9 @@ function LocationPreview({
                         <Grid container>
                             <Grid 
                                 item xs={12}
+                                style={{
+                                    display: 'flex',
+                                }}
                             >
                                 <ImageHeadText
                                     iconPath={typeIcon}

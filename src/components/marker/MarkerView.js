@@ -119,7 +119,12 @@ function MarkerView({
                                         onClickHandler={toggleMarkerFavourite}
                                     />
                                 </Grid>
-                                <Grid item xs={12} md={12} lg={12}>
+                                <Grid item xs={12} md={12} lg={12}
+                                    style={{
+                                        width: '100%',
+                                        overflowX: 'auto',
+                                    }}
+                                >
                                     <ImageHeadText
                                         iconPath={typeIcon}
                                         iconSize='35px'

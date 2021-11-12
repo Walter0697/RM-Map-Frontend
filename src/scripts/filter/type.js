@@ -4,17 +4,21 @@ const chooseType = {
 }
 
 const options = {
-    name: 'name',
+    label: 'label',
     range: 'range',
     eventtype: 'eventtype',
     attribute: 'attribute',
+    estimatetime: 'estimatetime',
+    pricing: 'pricing',
 }
 
 const allow_options = [ 
-    options.name,
+    options.label,
     options.range,
     options.eventtype,
     options.attribute,
+    options.estimatetime,
+    options.pricing,
 ]
 
 const types = {

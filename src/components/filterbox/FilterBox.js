@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
     Grid,
     Button,
@@ -78,6 +78,9 @@ function FilterPick({
 }) {
 
     const [ isBlinking, setBlink ] = useBoop(50)
+    const displayOption = useMemo(() => {
+        return filterOption.filter(s => !s.hidden)
+    }, [filterOption])
 
     const { x } = useSpring({
         config: config.gentle,
@@ -101,7 +104,7 @@ function FilterPick({
         <>
             <div
                 style={{
-                    height: '15%',
+                    height: '80px',
                     width: '100%',
                 }}
             >
@@ -119,25 +122,24 @@ function FilterPick({
             </div>
             <animated.div
                 style={{
-                    height: '80%',
+                    height: 'auto',
                     width: '100%',
-                    padding: '10px',
-                    overflow: 'auto',
+                    padding: '5px',
                     opacity: x,
                 }}
             >
-                {filterOption.map((item, index) => (
+                {displayOption.map((item, index) => (
                     <>
                         <div
                             style={{
-                                fontSize: '20px',
+                                fontSize: '15px',
                                 marginBottom: '5px',
                                 width: '100%',
                                 fontWeight: 'bold',
                                 display: 'flex',
                                 justifyContent: 'center',
                             }}
-                            key={index}
+                            key={'display' + index}
                         >
                             {item.title}
                         </div>
@@ -160,8 +162,8 @@ function FilterPick({
                                     fullWidth
                                     xs={option.size === 'small' ? 4 : (option.size === 'large' ? 12 : 6)}
                                     style={{
-                                        padding: '5px',
-                                        height: '45px',
+                                        padding: '4px',
+                                        height: '40px',
                                     }}
                                 >
                                     <div
@@ -171,16 +173,16 @@ function FilterPick({
                                             backgroundColor: isSelected(item.label, option.value) ? '#21cebd' : '#bcddda',
                                             border: isSelected(item.label, option.value) ? 'thin solid #1ca4ff' : 'thin solid black',
                                             borderRadius: '5px',
-                                            paddingTop: '5px',
-                                            paddingLeft: '5px',
+                                            paddingTop: '2px',
+                                            paddingLeft: '2px',
                                         }}
                                         onClick={() => toggleOption(item, option.value)}
                                     >
                                         <ImageHeadText
                                             iconPath={option.icon}
-                                            iconSize='25px'
+                                            iconSize='20px'
                                             label={option.label}
-                                            labelSize='20px'
+                                            labelSize='15px'
                                         />
                                     </div>
                                 </Grid>
@@ -192,7 +194,7 @@ function FilterPick({
             <Grid
                 container
                 style={{
-                    height: '5%',
+                    height: '30px',
                     width: '100%',
                 }}
             >
@@ -247,9 +249,8 @@ function FilterBox({
                 backgroundColor: '#c1fdd1',
                 color: '#002976',
                 boxShadow: '2px 2px 6px',
-                zIndex: 5,
-                pointerEvents: 'auto',
                 opacity: x,
+
             }}
         >
                 {
