@@ -3,6 +3,8 @@ import {
     Grid,
     Button,
     TextField,
+    InputAdornment,
+    IconButton,
 } from '@mui/material'
 import {
     useSpring,
@@ -11,6 +13,7 @@ import {
 } from '@react-spring/web'
 
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import ClearIcon from '@mui/icons-material/Clear'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -101,6 +104,11 @@ function FilterPick({
         return filterValue.includes(identifier)
     }
 
+    const clearFilterValue = () => {
+        setError('')
+        setFilterValue('')
+    }
+
     const onFilterValueChange = (e) => {
         setError('')
         setFilterValue(e.target.value)
@@ -139,6 +147,18 @@ function FilterPick({
                     onChange={onFilterValueChange}
                     error={!!error}
                     helperText={error}
+                    InputProps={{
+                        endAdornment: (filterValue && (
+                            <InputAdornment position='end'>
+                                <IconButton
+                                    onClick={clearFilterValue}
+                                    edge='end'
+                                >
+                                    <ClearIcon />
+                                </IconButton>
+                            </InputAdornment>
+                        ))
+                    }}
                 />
             </div>
             <animated.div

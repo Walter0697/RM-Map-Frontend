@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import {
+  useSpring,
+  config,
+  animated,
+} from '@react-spring/web'
+import {
     Grid,
     Button,
 } from '@mui/material'
@@ -9,6 +14,7 @@ import StarIcon from '@mui/icons-material/Star'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import ImageHeadText from '../wrapper/ImageHeadText'
+import FilterBox from '../filterbox/FilterBox'
 
 function ButtonBox({
     height,
@@ -160,7 +166,29 @@ function MarkerList({
   markers,
   setSelectedById,
   eventtypes,
+  filterOption,   // below filter related
+  filterValue,
+  setFilterValue,
+  isFilterExpanded,
+  setExpandFilter,
+  confirmFilterValue,
+  finalFilterValue,
+  filterOpen,
 }) {
+    const {
+      filterBoxTransform,
+      filterBoxOpacity,
+    } = useSpring({
+      config: config.slow,
+      from: {
+        filterBoxOpacity: 0,
+        filterBoxTransform: 'scale(0, 0) translate(-100%, 3000%)',
+      },
+      to: {
+        filterBoxOpacity: filterOpen ? 1 : 0,
+        filterBoxTransform: filterOpen ? 'scale(1, 1) translate(0%, 0%)' : 'scale(0, 0) translate(-100%, 3000%)',
+      }
+    })
     return (
         <>
           <div 
@@ -188,6 +216,26 @@ function MarkerList({
                 ))}
               </BottomUpTrail>
           </div>
+
+          <animated.div style={{
+            transform: filterBoxTransform,
+            position: 'absolute',
+            paddingTop: '20px',
+            paddingLeft: '5%',
+            width: '100%',
+            transformOrigin: 'bottom left',
+            visibility: filterBoxOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
+          }}>
+            <FilterBox 
+                filterOption={filterOption}
+                filterValue={filterValue}
+                setFilterValue={setFilterValue}
+                isExpanded={isFilterExpanded}
+                setExpand={setExpandFilter}
+                confirmFilterValue={confirmFilterValue}
+                finalFilterValue={finalFilterValue}
+            />
+          </animated.div>
         </>
     )
 }

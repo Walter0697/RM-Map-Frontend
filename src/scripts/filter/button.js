@@ -12,6 +12,7 @@ const onButtonClick = (current, option_type, label, value) => {
 }
 
 const appendLabel = (current) => {
+    if (current === '') return current
     if (current.indexOf('&') === -1 && current.indexOf('=') === -1) {
         return `label=${current}`
     }

@@ -9,6 +9,7 @@ import {
 } from '@react-spring/web'
 
 import ExploreIcon from '@mui/icons-material/Explore'
+import FilterAltIcon from '@mui/icons-material/FilterAlt'
 
 import MarkerMap from '../components/map/MarkerMap'
 import MarkerList from '../components/list/MarkerList'
@@ -50,6 +51,8 @@ function MarkerPage({
         const list = filters.map.mapMarkerWithFilter(markers, finalFilterValue, filterOption)
         return list
     }, [markers, finalFilterValue, filterOption, showingList, selectedMarker])
+
+    const [ showFilterInListView, showFilter ] = useState(false)
 
     useEffect(() => {
         let options = []
@@ -123,30 +126,49 @@ function MarkerPage({
                         showingList={showingList}
                         markers={displayMarker || []}
                         setSelectedById={setSelectedById}
-                        filterOption={filterOption}
-                        filterValue={filterValue}
-                        setFilterValue={setFilterValue}
-                        isFilterExpanded={isFilterExpanded}
+                        filterOption={filterOption} // for filter option
+                        filterValue={filterValue}   // for filter temporary value setter and getter
+                        setFilterValue={setFilterValue}  
+                        isFilterExpanded={isFilterExpanded} // for viewing filter
                         setExpandFilter={setExpandFilter}
+                        confirmFilterValue={confirmFilterValue} // for confirming filter values
+                        finalFilterValue={finalFilterDisplay} // for filter options
+                        filterOpen={showFilterInListView}
                     />
                 </div>
 
                 {/* place button outside since button cannot be clicked with the rotate transform */}
                 { showingList && (
-                    <div 
-                        style={{
-                            position: 'absolute',
-                            transform: 'rotateY(180deg)',
-                            bottom: '5%',
-                            right: '20px',
-                        }}
-                    >
-                        <CircleIconButton
-                            onClickHandler={() => setShowingList(false)}
+                    <>
+                        <div 
+                            style={{
+                                position: 'absolute',
+                                transform: 'rotateY(180deg)',
+                                bottom: '5%',
+                                right: '20px',
+                            }}
                         >
-                            <ExploreIcon />
-                        </CircleIconButton>
-                    </div>
+                            <CircleIconButton
+                                onClickHandler={() => setShowingList(false)}
+                            >
+                                <ExploreIcon />
+                            </CircleIconButton>
+                        </div>
+                        <div 
+                            style={{
+                                position: 'absolute',
+                                transform: 'rotateY(180deg)',
+                                bottom: '15%',
+                                right: '20px',
+                            }}
+                        >
+                            <CircleIconButton
+                                onClickHandler={() => showFilter(s => !s)}
+                            >
+                                <FilterAltIcon />
+                            </CircleIconButton>
+                        </div>
+                    </>
                 )}
             </animated.div>
             <MarkerView
