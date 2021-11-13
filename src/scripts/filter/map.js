@@ -18,20 +18,25 @@ const mapMarkerWithFilter = (markers, filter, options) => {
                 case types.options.range:
                     filterFunc = filterByRange
                     break
-                // case types.options.label:
-                //     filterFunc = filterByLabel
-                //     break
+                case types.options.label:
+                    filterFunc = filterByLabel
+                    break
                 default:
                     break
             }
 
             if (filterFunc) {
-                filteredList = filterByRange(filteredList, filterObj.value)
+                filteredList = filterFunc(filteredList, filterObj.value)
             }
         }
     })
 
     const multipleFilter = options.filter(s => s.type === types.chooseType.multiple)
+
+    // if there is no multiple filters, you shouldn't just return the array
+    // since the initial one is emoty
+    let hasMultiFilter = false
+
     let finalOutput = []
     multipleFilter.forEach(fil => {
         const filterArr = filterList.filter(s => s.label === fil.label)
@@ -54,11 +59,16 @@ const mapMarkerWithFilter = (markers, filter, options) => {
         }
         if (filterFunc) {
             for (let i = 0; i < filterArr.length; i++) {
+                hasMultiFilter = true
                 const list = filterFunc(filteredList, filterArr[i].value)
                 finalOutput = appendToList(finalOutput, list)
             }
         }
     })
+
+    if (!hasMultiFilter) {
+        return filteredList
+    }
 
     return finalOutput
 }
@@ -67,8 +77,8 @@ const filterByRange = (markers, rangeValue) => {
     return markers
 }
 
-const filterByLabel = (markers, label) => {
-    return markers.filter( s => s.label.includes(label))
+const filterByLabel = (markers, searching) => {
+    return markers.filter(s => s.label.includes(searching))
 }
 
 const filterByAttribute = (markers, attr) => {

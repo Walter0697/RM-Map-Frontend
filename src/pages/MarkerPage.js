@@ -54,7 +54,7 @@ function MarkerPage({
     useEffect(() => {
         let options = []
         
-        options.push(filters.generate.rangeFilter())
+        //options.push(filters.generate.rangeFilter())
         options.push(filters.generate.eventTypeFilter(eventtypes))
         options.push(filters.generate.attributeFilter())
         options.push(filters.generate.estimateTimeFilter())
@@ -77,8 +77,8 @@ function MarkerPage({
         }
     } 
 
-    const confirmFilterValue = () => {
-        setFinalFilterValue(filterValue)
+    const confirmFilterValue = (finalValue) => {
+        setFinalFilterValue(finalValue)
         setExpandFilter(false)
     }
 

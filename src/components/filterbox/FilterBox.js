@@ -78,6 +78,7 @@ function FilterPick({
 }) {
 
     const [ isBlinking, setBlink ] = useBoop(50)
+    const [ error, setError ] = useState('')
     const displayOption = useMemo(() => {
         return filterOption.filter(s => !s.hidden)
     }, [filterOption])
@@ -100,6 +101,23 @@ function FilterPick({
         return filterValue.includes(identifier)
     }
 
+    const onFilterValueChange = (e) => {
+        setError('')
+        setFilterValue(e.target.value)
+    }
+
+    const validateFilterValue = () => {
+        const { error: filterError, value: finalValue } = filters.parser.validateCustomFilterValue(filterOption, filterValue)
+
+        if (filterError) {
+            setError(filterError)
+            return
+        }
+
+        setFilterValue(finalValue)
+        confirmFilterValue(finalValue)
+    }
+
     return (
         <>
             <div
@@ -109,6 +127,7 @@ function FilterPick({
                 }}
             >
                 <TextField
+                    inputProps={{ spellCheck: 'false' }}
                     variant="filled"
                     label="Search..."
                     style={{
@@ -117,7 +136,9 @@ function FilterPick({
                         marginLeft: '5%',
                     }}
                     value={filterValue}
-                    onChange={() => {}}
+                    onChange={onFilterValueChange}
+                    error={!!error}
+                    helperText={error}
                 />
             </div>
             <animated.div
@@ -207,7 +228,7 @@ function FilterPick({
                         height: '100%',
                         width: '100%',
                     }}
-                    onClick={confirmFilterValue}
+                    onClick={validateFilterValue}
                 >
                     <ArrowDropUpIcon style={{ color: '#808080' }}/>
                 </Grid>

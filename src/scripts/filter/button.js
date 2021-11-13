@@ -1,14 +1,22 @@
 import types from './type'
 
 const onButtonClick = (current, option_type, label, value) => {
-    let result
+    let result = appendLabel(current)
     if (option_type === types.chooseType.multiple) {
-        result = onMultipleClick(current, label, value)
+        result = onMultipleClick(result, label, value)
     } else if (option_type === types.chooseType.single) {
-        result = onSingleClick(current, label, value)
+        result = onSingleClick(result, label, value)
     }
 
     return removeDuplicateSpecial(removeEdgeSpecial(result))
+}
+
+const appendLabel = (current) => {
+    if (current.indexOf('&') === -1 && current.indexOf('=') === -1) {
+        return `label=${current}`
+    }
+    
+    return current
 }
 
 const onMultipleClick = (current, label, value) => {
