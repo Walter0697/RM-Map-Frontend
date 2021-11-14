@@ -57,7 +57,8 @@ const centerToMarkerForm = (latlon, address) => {
 }
 
 // for filling in the variables of markers
-const fillVariableForMarker = (marker) => {
+const fillVariableForMarker = (m) => {
+    const marker = Object.assign({}, m)
     // for determine if it is hurry
     marker.is_hurry = false
     if (marker.to_time) {

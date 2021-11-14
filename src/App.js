@@ -25,6 +25,7 @@ function App() {
         <Route render={({ location }) => (
           <Switch>
             <Route exact path='/' component={Login} />
+            <Route path='/login' component={Login} />
             <Route path='/search' component={SearchPage} />
             <Route path='/markers' component={MarkerPage} />
             <Route path='/home' component={HomePage} />

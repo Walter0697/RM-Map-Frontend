@@ -11,6 +11,12 @@ export default function authReducer(state = {
                 jwt: action.jwt,
                 username: action.username,
             }
+        case constants.LOGOUT:
+            return {
+                ...state,
+                jwt: '',
+                username: '',
+            }
         default:
             return state
     }

@@ -3,6 +3,7 @@ import BottomUpTrail from '../animatein/BottomUpTrail'
 
 import MarkerRelation from './settings/MarkerRelation'
 import PreferredPin from './settings/PreferredPin'
+import LogoutButton from './settings/LogoutButton'
 
 function ButtonBox({
   height,
@@ -11,7 +12,7 @@ function ButtonBox({
   return (
     <div style={{
       height,
-      marginBottom: '10px',
+      marginBottom: '15px',
     }}>
       {children}
     </div>
@@ -50,6 +51,13 @@ function SettingList({
           <PreferredPin
             preferredPinList={pinPreference}
             openPreferredPinChange={openPreferredPinForm}
+          />
+        </ButtonBox>
+        <ButtonBox
+          height={50}
+        >
+          <LogoutButton
+            setLoading={() => {}}
           />
         </ButtonBox>
       </BottomUpTrail>

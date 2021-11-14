@@ -8,6 +8,12 @@ export const login = (jwt, username) => {
     }
 }
 
+export const logout = () => {
+    return {
+        type: constants.LOGOUT,
+    }
+}
+
 export const resetMarkers = (markers) => {
     return {
         type: constants.RESET_MARKERS,
@@ -46,6 +52,7 @@ export const resetMappins = (mappins) => {
 
 const actions = {
     login,
+    logout,
     resetMarkers,
     updateMarkerFav,
     addMarker,
