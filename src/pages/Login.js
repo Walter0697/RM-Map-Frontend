@@ -36,7 +36,6 @@ function Login({ jwt, dispatch }) {
 
     // graphql request
     const [ loginGQL, { data: loginData, loading: loginLoading, error: loginError } ] = useMutation(graphql.auth.login, { errorPolicy: 'all' })
-    const [ listMarkerGQL, { data: infoData, loading: infoLoading, error: infoError } ] = useLazyQuery(graphql.markers.list)
 
     // state variables
     const [ loginState, setLoginState ] = useState('prompt') // prompt, loading, success
@@ -113,20 +112,9 @@ function Login({ jwt, dispatch }) {
         }
     }, [loginData, loginError])
 
-    useEffect(() => {
-        if (infoError) {
-            console.log(infoError)
-        }
-
-        if (infoData) {
-            dispatch(actions.resetMarkers(infoData.markers))
-            setFetch(true)
-        }
-    }, [infoData, infoError])
-
     // fetching animation related
     const onInformationFetch = async () => {
-        listMarkerGQL()
+        setFetch(true)
     }
 
     // fake an animation for user to make it seems like loading, if fetching time is fast enough, this will at least last for 2 seconds
