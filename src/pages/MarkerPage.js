@@ -11,10 +11,14 @@ import {
 import ExploreIcon from '@mui/icons-material/Explore'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 
+import useBoop from '../hooks/useBoop'
+
 import MarkerMap from '../components/map/MarkerMap'
 import MarkerList from '../components/list/MarkerList'
 import MarkerView from '../components/marker/MarkerView'
 import CircleIconButton from '../components/field/CircleIconButton'
+import ScheduleForm from '../components/form/ScheduleForm'
+import AutoHideAlert from '../components/AutoHideAlert'
 
 import filters from '../scripts/filter'
 
@@ -26,6 +30,9 @@ function MarkerPage({
 }) {
     // selected marker
     const [ selectedMarker, setSelected ] = useState(null)
+    // if the selected marker is set to be schedule
+    const [ scheduleFormOpen, setScheduleFormOpen ] = useState(false)
+    const [ createAlert, confirmCreated ] = useBoop(3000)
 
     // if it is showing list or map
     const [ showingList, setShowingList ] = useState(false)
@@ -83,6 +90,12 @@ function MarkerPage({
     const confirmFilterValue = (finalValue) => {
         setFinalFilterValue(finalValue)
         setExpandFilter(false)
+    }
+
+    const onScheduleCreated = () => {
+        setSelected(null)
+        setScheduleFormOpen(false)
+        confirmCreated()
     }
 
     return (
@@ -174,7 +187,20 @@ function MarkerPage({
             <MarkerView
                 open={!!selectedMarker}
                 handleClose={() => setSelected(null)}
+                openSchedule={() => setScheduleFormOpen(true)}
                 marker={selectedMarker}
+            />
+            <ScheduleForm
+                open={scheduleFormOpen}
+                handleClose={() => setScheduleFormOpen(false)}
+                onCreated={onScheduleCreated}
+                marker={selectedMarker}
+            />
+            <AutoHideAlert 
+                open={createAlert}
+                type={'success'}
+                message={'Successfully create marker!'}
+                timing={3000}
             />
         </Base>
     )

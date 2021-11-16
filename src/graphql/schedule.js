@@ -1,0 +1,61 @@
+import { gql } from '@apollo/client'
+
+const list = gql`
+    query listScheduleGQL{
+        schedules{
+            id
+            label
+            description
+            status
+            selected_date
+            marker {
+                id
+                label
+                latitude
+                longitude
+                address
+                image_link
+                link
+                type
+            }
+        }
+    }
+`
+
+const create = gql`
+    mutation createScheduleGQL( $label: String!,
+                        $description: String!,
+                        $selected_time: String!
+                        $marker_id: Int!
+                        ) {
+        createSchedule(input: {
+            label: $label,
+            description: $description,
+            selected_time: $selected_time,
+            marker_id: $marker_id,
+        }) {
+            id
+            label
+            description
+            status
+            selected_date
+            marker {
+                id
+                label
+                latitude
+                longitude
+                address
+                image_link
+                link
+                type
+            }
+        }
+    }
+`
+
+const schedules = {
+    list,
+    create,
+}
+
+export default schedules

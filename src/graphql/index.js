@@ -4,6 +4,7 @@ import markers from './marker'
 import markertypes from './markertype'
 import pins from './pin'
 import defaults from './default'
+import schedules from './schedule'
 
 const graphql = {
     auth,
@@ -12,6 +13,7 @@ const graphql = {
     markertypes,
     pins,
     defaults,
+    schedules,
 }
 
 export default graphql

@@ -50,6 +50,20 @@ export const resetMappins = (mappins) => {
     }
 }
 
+export const resetSchedules = (schedules) => {
+    return {
+        type: constants.RESET_SCHEDULES,
+        schedules,
+    }
+}
+
+export const addSchedule = (schedule) => {
+    return {
+        type: constants.ADD_SCHEDULE,
+        schedule,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -58,6 +72,8 @@ const actions = {
     addMarker,
     resetEventTypes,
     resetMappins,
+    resetSchedules,
+    addSchedule,
 }
 
 export default actions

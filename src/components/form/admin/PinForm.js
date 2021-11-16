@@ -67,8 +67,8 @@ function PinForm({
     const previewMessage = useMemo(() => {
         if (!formValue.imageUpload) return 'cannot preview, no image uploaded'
         if (!selectedTypeId) return 'cannot preview, marker type not selected'
-        if (formValue.top_left_x >= formValue.bottom_right_x) return 'x value invalid'
-        if (formValue.top_left_y >= formValue.bottom_right_y) return 'y value invalid'
+        // if (formValue.top_left_x >= formValue.bottom_right_x) return 'x value invalid'
+        // if (formValue.top_left_y >= formValue.bottom_right_y) return 'y value invalid'
         return ''
     }, [ formValue, selectedTypeId ])
 
@@ -190,7 +190,7 @@ function PinForm({
         }
 
         if (formValue.top_left_x && formValue.bottom_right_x) {
-            if (formValue.top_left_x >= formValue.bottom_right_x) {
+            if (formValue.top_left_x <= formValue.bottom_right_x) {
                 setError('top_left_x', 'invalid')
                 setError('bottom_right_x', 'invalid')
                 hasError = true
@@ -207,7 +207,7 @@ function PinForm({
         }
 
         if (formValue.top_left_y && formValue.bottom_right_y) {
-            if (formValue.top_left_y >= formValue.bottom_right_y) {
+            if (formValue.top_left_y <= formValue.bottom_right_y) {
                 setError('top_left_y', 'invalid')
                 setError('bottom_right_y', 'invalid')
                 hasError = true

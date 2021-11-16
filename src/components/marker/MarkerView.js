@@ -36,6 +36,7 @@ const TransitionUp = (props) => {
 function MarkerView({
     open,
     handleClose,
+    openSchedule,
     marker,
     eventtypes,
     dispatch,
@@ -105,7 +106,7 @@ function MarkerView({
                             <Grid container spacing={3}>
                                 <Grid item xs={3} md={3} lg={3}>
                                     <CircleIconButton
-                                        onClickHandler={() => {}}
+                                        onClickHandler={openSchedule}
                                     >
                                         <CalendarTodayIcon />
                                     </CircleIconButton>
