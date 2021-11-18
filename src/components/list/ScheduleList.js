@@ -17,20 +17,7 @@ import useBoop from '../../hooks/useBoop'
 import generic from '../../scripts/generic'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
-
-function ButtonBox({
-    height,
-    children,
-  }) {
-  return (
-    <div style={{
-      height,
-      marginBottom: '10px',
-    }}>
-      {children}
-    </div>
-  )
-}
+import WrapperBox from '../wrapper/WrapperBox'
 
 function ScheduleItem({
     item,
@@ -41,6 +28,7 @@ function ScheduleItem({
 
 function TodayList({
     list,
+    onClickHandler,
 }) {
     const [ isBlinking, setBlink ] = useBoop(500)
     const [ bigImageMarkers, setBigMarkers ] = useState([]) // select two markers to display it big
@@ -188,6 +176,12 @@ function TodayList({
         )
     }
 
+    const todayListOnClick = () => {
+        if (!list || (list && list.length === 0)) return
+
+        onClickHandler(list, dayjs().format('YYYY-MM-DD'))
+    }
+
     return (
         <Button 
             variant='contained'
@@ -199,7 +193,7 @@ function TodayList({
                 boxShadow: '2px 2px 6px',
                 textTransform: 'none',
             }}
-            onClick={() => {}}
+            onClick={todayListOnClick}
         >
             <Grid 
                 container
@@ -226,6 +220,7 @@ function TodayList({
 }
 
 function ScheduleList({
+    openScheduleView,
     schedules,
 }) {
     const today_schedules = useMemo(() => {
@@ -247,13 +242,15 @@ function ScheduleList({
                 }}
             >
                 <BottomUpTrail>
-                    <ButtonBox
+                    <WrapperBox
                         height={350}
+                        marginBottom={'10px'}
                     >
                         <TodayList
                             list={today_schedules}
+                            onClickHandler={openScheduleView}
                         />
-                    </ButtonBox>
+                    </WrapperBox>
                 </BottomUpTrail>
             </div>
         </>

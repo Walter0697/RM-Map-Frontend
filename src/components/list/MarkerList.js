@@ -14,21 +14,8 @@ import StarIcon from '@mui/icons-material/Star'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import ImageHeadText from '../wrapper/ImageHeadText'
+import WrapperBox from '../wrapper/WrapperBox'
 import FilterBox from '../filterbox/FilterBox'
-
-function ButtonBox({
-    height,
-    children,
-  }) {
-  return (
-    <div style={{
-      height,
-      marginBottom: '10px',
-    }}>
-      {children}
-    </div>
-  )
-}
 
 function MarkerItem({
   item,
@@ -203,16 +190,17 @@ function MarkerList({
           >
               <BottomUpTrail>
                 {markers.map((item, index) => (
-                  <ButtonBox
+                  <WrapperBox
                     key={index}
                     height='120px'
+                    marginBottom='10px'
                   >
                     <MarkerItem
                       item={item}
                       typeIcon={eventtypes.find(s => s.value === item.type).icon_path}
                       onClickHandler={() => setSelectedById(item.id)}
                     />
-                  </ButtonBox>
+                  </WrapperBox>
                 ))}
               </BottomUpTrail>
           </div>

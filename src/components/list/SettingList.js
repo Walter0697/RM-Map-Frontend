@@ -4,20 +4,7 @@ import BottomUpTrail from '../animatein/BottomUpTrail'
 import MarkerRelation from './settings/MarkerRelation'
 import PreferredPin from './settings/PreferredPin'
 import LogoutButton from './settings/LogoutButton'
-
-function ButtonBox({
-  height,
-  children,
-}) {
-  return (
-    <div style={{
-      height,
-      marginBottom: '15px',
-    }}>
-      {children}
-    </div>
-  )
-}
+import WrapperBox from '../wrapper/WrapperBox'
 
 function SettingList({
   relationUser,
@@ -37,29 +24,32 @@ function SettingList({
         }}
     >
       <BottomUpTrail>
-        <ButtonBox
+        <WrapperBox
           height={90}
+          marginBottom={'15px'}
         >
           <MarkerRelation
             relationUser={relationUser}
             openRelationChange={openRelationChange}
           />
-        </ButtonBox>
-        <ButtonBox
-          height={400}
+        </WrapperBox>
+        <WrapperBox
+          height={90}
+          marginBottom={'15px'}
         >
           <PreferredPin
             preferredPinList={pinPreference}
             openPreferredPinChange={openPreferredPinForm}
           />
-        </ButtonBox>
-        <ButtonBox
-          height={50}
+        </WrapperBox>
+        <WrapperBox
+          height={90}
+          marginBottom={'15px'}
         >
           <LogoutButton
             setLoading={() => {}}
           />
-        </ButtonBox>
+        </WrapperBox>
       </BottomUpTrail>
     </div>
   )
