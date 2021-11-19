@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { connect } from 'react-redux'
 import {
     Button,
     IconButton,
@@ -6,6 +7,7 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    DialogActions,
     Grid,
     Slide,
 } from '@mui/material'
@@ -27,16 +29,28 @@ const TransitionUp = (props) => {
 
 function ScheduleItem({
     item,
+    eventtypes,
     triggerCopyMessage,
 }) {
     const imageLink = useMemo(() => {
+        if (item?.marker?.image_link) {
+            return item.marker.image_link
+        }
+
+        if (item?.marker?.type) {
+            const typeObj = eventtypes.find(s => s.value === item.marker.type)
+            if (typeObj) {
+                return typeObj.icon_path
+            }
+        }
         
+        return ''
     }, [item])  // if marker has image, use this, if not, use the type image
 
     const [ imageExist, setImageExist ] = useState(false)
 
     useEffect(() => {
-        if (item?.marker?.image_link) {
+        if (imageLink) {
             setImageExist(true)
         } else {
             setImageExist(false)
@@ -80,7 +94,7 @@ function ScheduleItem({
                     {imageExist ? (
                         <img 
                             width='90%'
-                            src={process.env.REACT_APP_IMAGE_LINK + item?.marker?.image_link}
+                            src={process.env.REACT_APP_IMAGE_LINK + imageLink}
                             onError={onImageFailedToLoad}
                         /> 
                     ) : (
@@ -170,22 +184,27 @@ function ScheduleView({
     handleClose,
     schedules,
     selected_date,
+    eventtypes,
 }) {
+    const todayString = dayjs().format('YYYY-MM-DD')
+
     const sortedList = useMemo(() => {
         if (!schedules) return []
         if (schedules.length === 0) return []
 
         const sorted = schedules.sort((a, b) => {
-            //selected_date
             if (dayjs(a.selected_date).isAfter(dayjs(b.selected_date))) {
                 return 1
             }
             return -1
         })
 
-        console.log(sorted)
         return sorted
     }, [schedules])
+
+    const isToday = useMemo(() => {
+        return todayString === selected_date
+    })
 
     const [ copyMessage, triggerCopyMessage ] = useBoop(3000)
 
@@ -204,7 +223,7 @@ function ScheduleView({
                         <DialogTitle>
                             <Grid container spacing={3}>
                                 <Grid item xs={12} md={12} lg={12} fullWidth>
-                                    {selected_date}
+                                    {isToday ? 'Today\'s schdedule' : selected_date}
                                 </Grid>
                             </Grid>
                         </DialogTitle>
@@ -214,6 +233,7 @@ function ScheduleView({
                                     <Grid item xs={12} key={index} fullWidth>
                                         <ScheduleItem 
                                             item={schedule}
+                                            eventtypes={eventtypes}
                                             triggerCopyMessage={triggerCopyMessage}
                                         />
                                     </Grid>
@@ -222,6 +242,12 @@ function ScheduleView({
                         </DialogContent>
                     </>
                 )}
+                {isToday && (
+                    <DialogActions>
+                        <Button onClick={() => {}}>Arrived</Button>
+                    </DialogActions>
+                )}
+                
             </Dialog>
             <AutoHideAlert 
                 open={copyMessage}
@@ -233,4 +259,6 @@ function ScheduleView({
     )
 }
 
-export default ScheduleView
+export default connect(state => ({
+    eventtypes: state.marker.eventtypes,
+})) (ScheduleView)

@@ -34,7 +34,7 @@ function SettingList({
           />
         </WrapperBox>
         <WrapperBox
-          height={90}
+          height={400}
           marginBottom={'15px'}
         >
           <PreferredPin
@@ -43,7 +43,7 @@ function SettingList({
           />
         </WrapperBox>
         <WrapperBox
-          height={90}
+          height={50}
           marginBottom={'15px'}
         >
           <LogoutButton

@@ -21,9 +21,75 @@ import WrapperBox from '../wrapper/WrapperBox'
 
 function ScheduleItem({
     item,
+    selected_date,
     onClickHandler,
 }) {
-    return false
+    const imageMarkers = useMemo(() => {
+        if (!item) return []
+        return item.filter(s => s.marker?.image_link)
+    }, [item])
+
+    const scheduleItemOnClick = () => {
+        if (!item || (item && item.length === 0)) return
+    
+        onClickHandler(item, selected_date)
+    }
+
+    return (
+        <Button 
+            variant='contained'
+            size='large'
+            style={{
+                backgroundColor: '#48acdb',
+                height: '100%',
+                width: '100%',
+                boxShadow: '2px 2px 6px',
+                textTransform: 'none',
+            }}
+            onClick={scheduleItemOnClick}
+        >
+            <Grid 
+                container
+                fullWidth
+            >
+                <Grid
+                    item xs={12} 
+                    style={{
+                        height: '50px',
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        paddingTop: '10px',
+                        fontSize: '20px',
+                        color: '#455295',
+                    }}
+                >
+                     {selected_date}
+                </Grid>
+                <Grid
+                    item xs={12}
+                    style={{
+                        height: '100px',
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        paddingTop: '10px',
+                        fontSize: '20px',
+                        color: '#455295',
+                    }}
+                >
+                    {imageMarkers.map((sche, index) => (
+                        <div key={index}>
+                            <img
+                                height='80px'
+                                src={process.env.REACT_APP_IMAGE_LINK + sche.marker.image_link}
+                            />
+                        </div>
+                    ))}
+                </Grid>
+            </Grid>
+        </Button>
+    )
 }
 
 function TodayList({
@@ -123,10 +189,10 @@ function TodayList({
                         >
                             {bigImageMarkers.length >= 1 ? (
                                 <>
-                                <img 
-                                    src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[0].marker.image_link}
-                                    width='100%'
-                                />
+                                    <img 
+                                        src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[0].marker.image_link}
+                                        width='100%'
+                                    />
                                     {bigImageMarkers[0].label}
                                 </>
                             ) : (
@@ -229,6 +295,38 @@ function ScheduleList({
         return schedules.filter(s => dayjs(s.selected_date).format('YYYY-MM-DD') === now)
     }, [schedules])
 
+    const upcoming_schedules = useMemo(() => {
+        if (!schedules) return []
+        const now = dayjs()
+        const nowStr = now.format('YYYY-MM-DD')
+        // filter out today and previous schedules
+        const upcoming_list = schedules.filter(s => dayjs(s.selected_date).format('YYYY-MM-DD') !== nowStr && dayjs(s.selected_date).isAfter(now))
+
+        // use dictionary for grouping the schedules into each day
+        let result = {}
+        upcoming_list.forEach((sd) => {
+            const date = dayjs(sd.selected_date).format('YYYY-MM-DD')
+            if (date in result) {
+                result[date].push(sd)
+            } else {
+                result[date] = [sd]
+            }
+        })
+
+        // create an array with dictionary
+        const result_arr = Object.entries(result)
+
+        // sorted the array according to date
+        const sorted = result_arr.sort((a, b) => {
+            if (dayjs(a[0]).isAfter(dayjs[b[0]])) {
+                return 1
+            }
+            return -1
+        })
+
+        return sorted
+    }, [schedules])
+
     return (
         <>
             <div
@@ -244,13 +342,40 @@ function ScheduleList({
                 <BottomUpTrail>
                     <WrapperBox
                         height={350}
-                        marginBottom={'10px'}
+                        marginBottom={'20px'}
                     >
                         <TodayList
                             list={today_schedules}
                             onClickHandler={openScheduleView}
                         />
                     </WrapperBox>
+
+                    {upcoming_schedules.length !== 0 && (
+                        <div style={{
+                            height: '50px',
+                            width: '100%',
+                            color: '#455295',
+                            fontWeight: '500',
+                            fontSize: '20px',
+                            paddingLeft: '5%',
+                        }}> 
+                            Upcoming schedule...
+                        </div>
+                    )}
+                    
+                    {upcoming_schedules.map((item, index) => (
+                        <WrapperBox
+                            key={index}
+                            height={150}
+                            marginBottom={'10px'}
+                        >
+                            <ScheduleItem 
+                                item={item[1]}
+                                selected_date={item[0]}
+                                onClickHandler={openScheduleView}   
+                            />
+                        </WrapperBox>
+                    ))}
                 </BottomUpTrail>
             </div>
         </>
