@@ -3,7 +3,7 @@ const rand = (num) => {
 }
 
 const nonRepeatNumber = (num, max) => {
-    if (num >= max) return []
+    if (num >= max) return false
     let set = new Set()
 
     while (set.size < num) {

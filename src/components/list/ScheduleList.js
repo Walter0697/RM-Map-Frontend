@@ -76,6 +76,8 @@ function ScheduleItem({
                         paddingTop: '10px',
                         fontSize: '20px',
                         color: '#455295',
+                        overflowX: 'auto',
+                        overflowY: 'hidden',
                     }}
                 >
                     {imageMarkers.map((sche, index) => (
@@ -125,29 +127,31 @@ function TodayList({
     }, [list])
 
     const setRandomBigImageMarker = (filteredList) => {
-        if (filteredList <= 2) {
+        if (filteredList.length <= 2) {
             setBigMarkers(filteredList)
             setSmallMarkers(filteredList)
         }
 
         let displayList = []
         const randList = generic.math.nonRepeatNumber(2, filteredList.length)
-        randList.forEach((index) => {
-            displayList.push(filteredList[index])
-        })
+        if (randList) {
+            randList.forEach((index) => {
+                displayList.push(filteredList[index])
+            })
+    
+            let smallList = []
+            filteredList.forEach((item, index) => {
+                if (!randList.has(index)) {
+                    smallList.push(item)
+                }
+            })
 
-        let smallList = []
-        filteredList.forEach((item, index) => {
-            if (!randList.has(index)) {
-                smallList.push(item)
-            }
-        })
-
-        setBlink()
-        setTimeout(() => {
-            setBigMarkers(displayList)
-            setSmallMarkers(smallList)
-        }, 500)
+            setBlink()
+            setTimeout(() => {
+                setBigMarkers(displayList)
+                setSmallMarkers(smallList)
+            }, 500)
+        }  
     }
 
     const getTodayInformation = () => {

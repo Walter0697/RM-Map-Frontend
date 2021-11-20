@@ -45,7 +45,7 @@ export default function markerReducer(state = {
             }
         }
         case constants.UPDATE_MARKER_STATUS: {
-            const result = state.markers
+            const result = state.markers || []
             let item = result.find(s => s.id === action.marker.id)
             item.status = action.marker.status
             return {
@@ -54,10 +54,15 @@ export default function markerReducer(state = {
             }
         }
         case constants.UPDATE_MARKERS_STATUS: {
-            const result = state.markers
+            const result = state.markers || []
             for (let i = 0; i < action.markers.length; i++) {
                 let item = result.find(s => s.id === action.markers[i].id)
-                item.status = action.markers[i].status
+                if (item) {
+                    item.status = action.markers[i].status
+                } else {
+                    result.push(action.markers[i])
+                }
+                
             }
             return {
                 ...state,
