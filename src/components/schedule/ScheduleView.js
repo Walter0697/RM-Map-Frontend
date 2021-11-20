@@ -13,6 +13,8 @@ import {
 } from '@mui/material'
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn'
+import CancelIcon from '@mui/icons-material/Cancel'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -69,17 +71,36 @@ function ScheduleItem({
         window.open(url, '_blank')
     }
 
+    const title = (item) => {
+        let color = '#0e0eb7'
+        let display_time = dayjs.utc(item.selected_date).format('HH:mm')
+        let display_icon = false
+        if (item.status === 'arrived') {
+            color = '#27c31e'
+            display_icon = (<AssignmentTurnedInIcon />)
+        } 
+        if (item.status === 'cancelled') {
+            color = '#af8d90'
+            display_icon = (<CancelIcon />)
+            display_time = '--:--'
+        }
+
+        return (
+            <div style={{
+                fontSize: '28px',
+                fontWeight: '500',
+                color: color,
+            }}>
+                {display_icon} {display_time}
+            </div>
+        )
+    }
+
     return (
         <>
             <Grid container spacing={1}>
                 <Grid item xs={12}>
-                    <div style={{
-                        fontSize: '28px',
-                        fontWeight: '500',
-                        color: '#0e0eb7',
-                    }}>
-                        {dayjs.utc(item.selected_date).format('HH:mm')}
-                    </div>
+                    {title(item)}
                     {/* for bottom border */}
                     <div
                         style={{
@@ -184,6 +205,7 @@ function ScheduleView({
     handleClose,
     schedules,
     selected_date,
+    openArriveForm,
     eventtypes,
 }) {
     const todayString = dayjs().format('YYYY-MM-DD')
@@ -244,7 +266,7 @@ function ScheduleView({
                 )}
                 {isToday && (
                     <DialogActions>
-                        <Button onClick={() => {}}>Arrived</Button>
+                        <Button onClick={openArriveForm}>Arrived</Button>
                     </DialogActions>
                 )}
                 

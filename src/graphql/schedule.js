@@ -53,9 +53,34 @@ const create = gql`
     }
 `
 
+const update_status = gql`
+    mutation updateScheduleStatusGQL($input: [ScheduleStatus]!) {
+        updateScheduleStatus(input: {
+            ids: $input,
+        }) {
+            id
+            label
+            description
+            status
+            selected_date
+            marker {
+                id
+                label
+                latitude
+                longitude
+                address
+                image_link
+                link
+                type
+            }
+        }
+    }
+`
+
 const schedules = {
     list,
     create,
+    update_status,
 }
 
 export default schedules

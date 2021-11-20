@@ -89,7 +89,7 @@ function MarkerForm({
             dispatch(actions.addMarker(createData.createMarker))
             onCreated && onCreated()
         }
-    }, [ createData, createError])
+    }, [createData, createError])
 
     const onValueChangeHandler = (field, value) => {
         setFormValue(field, value)
