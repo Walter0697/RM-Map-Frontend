@@ -64,6 +64,27 @@ export const addSchedule = (schedule) => {
     }
 }
 
+export const updateMarkerStatus = (marker) => {
+    return {
+        type: constants.UPDATE_MARKER_STATUS,
+        marker,
+    }
+}
+
+export const updateMarkersStatus = (markers) => {
+    return {
+        type: constants.UPDATE_MARKERS_STATUS,
+        markers,
+    }
+}
+
+export const updateSchedulesStatus = (schedules) => {
+    return {
+        type: constants.UPDATE_SCHEDULES_STATUS,
+        schedules,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -74,6 +95,9 @@ const actions = {
     resetMappins,
     resetSchedules,
     addSchedule,
+    updateMarkerStatus,
+    updateMarkersStatus,
+    updateSchedulesStatus,
 }
 
 export default actions

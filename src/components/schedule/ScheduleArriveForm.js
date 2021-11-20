@@ -8,12 +8,12 @@ import {
     IconButton,
 } from '@mui/material'
 
-
 import GolfCourseIcon from '@mui/icons-material/GolfCourse'
 import CancelIcon from '@mui/icons-material/Cancel'
 
 import BaseForm from '../form/BaseForm'
 
+import constants from '../../constant'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
 
@@ -49,8 +49,14 @@ function ScheduleArriveForm({
         }
 
         if (updateData) {
-            // do something for the current state value
-            //dispatch()
+            // update current state value
+            let markers = []
+            updateData.updateScheduleStatus.forEach(s => {
+                markers.push(s.marker)
+            })
+            
+            dispatch(actions.updateSchedulesStatus(updateData.updateScheduleStatus))
+            dispatch(actions.updateMarkersStatus(markers))
             onUpdated && onUpdated()
         }
     }, [updateData, updateError])
@@ -58,27 +64,26 @@ function ScheduleArriveForm({
     // on button click handler
     const setStatusArrival = (index) => {
         const s = [...schedules]
-        if (s[index].status === 'arrived') {
+        if (s[index].status === constants.status.arrived) {
             s[index].status = ''
         } else {
-            s[index].status = 'arrived'
+            s[index].status = constants.status.arrived
         }
         setSchedules(() => s)
     }
 
     const setStatusCancel = (index) => {
         const s = [...schedules]
-        if (s[index].status === 'cancelled') {
+        if (s[index].status === constants.status.cancelled) {
             s[index].status = ''
         } else {
-            s[index].status = 'cancelled'
+            s[index].status = constants.status.cancelled
         }
         setSchedules(() => s)
     }
 
     const onSubmitHandler = async (e) => {
         let result = []
-        console.log(schedules)
         schedules.forEach((s) => {
             result.push({
                 id: s.id,
@@ -114,7 +119,7 @@ function ScheduleArriveForm({
                                     size='small'
                                     onClick={() => setStatusArrival(index)}
                                 >
-                                    { item.status === 'arrived' ? (
+                                    { item.status === constants.status.arrived ? (
                                         <GolfCourseIcon 
                                             sx={{ color: '#2c6cff'}}
                                         />
@@ -131,7 +136,7 @@ function ScheduleArriveForm({
                                     size='small'
                                     onClick={() => setStatusCancel(index)}
                                 >
-                                    { item.status === 'cancelled' ? (
+                                    { item.status === constants.status.cancelled ? (
                                         <CancelIcon 
                                             sx={{ color: '#de155d'}}
                                         />
@@ -159,4 +164,6 @@ function ScheduleArriveForm({
     )
 }
 
-export default ScheduleArriveForm
+export default connect(state => ({
+    jwt: state.auth.jwt,
+}))(ScheduleArriveForm)

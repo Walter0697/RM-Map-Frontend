@@ -21,6 +21,8 @@ import useBoop from '../../hooks/useBoop'
 import CircleIconButton from '../field/CircleIconButton'
 import AutoHideAlert from '../AutoHideAlert'
 
+import constants from '../../constant'
+
 import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
 dayjs.extend(dayjsPluginUTC)
@@ -75,11 +77,11 @@ function ScheduleItem({
         let color = '#0e0eb7'
         let display_time = dayjs.utc(item.selected_date).format('HH:mm')
         let display_icon = false
-        if (item.status === 'arrived') {
+        if (item.status === constants.status.arrived) {
             color = '#27c31e'
             display_icon = (<AssignmentTurnedInIcon />)
         } 
-        if (item.status === 'cancelled') {
+        if (item.status === constants.status.cancelled) {
             color = '#af8d90'
             display_icon = (<CancelIcon />)
             display_time = '--:--'

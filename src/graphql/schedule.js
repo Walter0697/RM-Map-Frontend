@@ -46,6 +46,7 @@ const create = gql`
                 longitude
                 address
                 image_link
+                status
                 link
                 type
             }
@@ -70,6 +71,7 @@ const update_status = gql`
                 longitude
                 address
                 image_link
+                status
                 link
                 type
             }

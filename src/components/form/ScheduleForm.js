@@ -57,7 +57,9 @@ function ScheduleForm({
         }
 
         if (createData) {
+            dispatch(actions.updateMarkerStatus(createData.createSchedule.marker))
             dispatch(actions.addSchedule(createData.createSchedule))
+            
             onCreated && onCreated()
         }
     }, [createData, createError])

@@ -30,7 +30,9 @@ function MarkerMap({
     setExpandFilter,
     confirmFilterValue,
     finalFilterValue,
+    scheduleCreated, // for triggering the event that center marker can be erased
     mappins,    // for displaying pins
+    
 }) {
     // reference of the div to render the map
     const mapElement = useRef(null)
@@ -121,6 +123,14 @@ function MarkerMap({
             }
         } 
     }, [clickedMarker])
+
+    useEffect(() => {
+        if (!scheduleCreated) return
+        setClickedMarker(null)
+        setViewMarker(null)
+        setViewContent(false)
+        setPreviewContent(false)
+    }, [scheduleCreated])
 
     return (
         <>

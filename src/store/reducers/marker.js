@@ -44,6 +44,26 @@ export default function markerReducer(state = {
                 mappins: action.mappins,
             }
         }
+        case constants.UPDATE_MARKER_STATUS: {
+            const result = state.markers
+            let item = result.find(s => s.id === action.marker.id)
+            item.status = action.marker.status
+            return {
+                ...state,
+                markers: result,
+            }
+        }
+        case constants.UPDATE_MARKERS_STATUS: {
+            const result = state.markers
+            for (let i = 0; i < action.markers.length; i++) {
+                let item = result.find(s => s.id === action.markers[i].id)
+                item.status = action.markers[i].status
+            }
+            return {
+                ...state,
+                markers: result,
+            }
+        }
         default:
             return state
     }

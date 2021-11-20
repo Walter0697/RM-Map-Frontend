@@ -170,10 +170,12 @@ function TodayList({
             <animated.div
                 style={{
                     opacity: x,
+                    width: '100%',
                 }}
             >
                 <Grid 
                     item xs={12}
+                    fullWidth
                     style={{
                         height: '230px',
                         width: '100%',
@@ -189,10 +191,15 @@ function TodayList({
                         >
                             {bigImageMarkers.length >= 1 ? (
                                 <>
-                                    <img 
-                                        src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[0].marker.image_link}
-                                        width='100%'
-                                    />
+                                    <div style={{ width: '100%'}}>
+                                        <img 
+                                            src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[0].marker.image_link}
+                                            style={{
+                                                maxHeight: '150px',
+                                                width: '90%',
+                                            }}
+                                        />
+                                    </div>
                                     {bigImageMarkers[0].label}
                                 </>
                             ) : (
@@ -207,10 +214,15 @@ function TodayList({
                         >
                             {bigImageMarkers.length >= 2 ? (
                                 <>
-                                <img 
-                                    src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[1].marker.image_link}
-                                    width='100%'
-                                />
+                                    <div style={{ width: '100%'}}>
+                                        <img 
+                                            src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[1].marker.image_link}
+                                            style={{
+                                                maxHeight: '150px',
+                                                width: '90%',
+                                            }}
+                                        />
+                                    </div>
                                     {bigImageMarkers[1].label}
                                 </>
                             ) : (

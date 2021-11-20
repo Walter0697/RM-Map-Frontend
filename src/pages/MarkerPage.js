@@ -21,6 +21,7 @@ import ScheduleForm from '../components/form/ScheduleForm'
 import AutoHideAlert from '../components/AutoHideAlert'
 
 import filters from '../scripts/filter'
+import constants from '../constant'
 
 import styles from '../styles/list.module.css'
 
@@ -54,8 +55,10 @@ function MarkerPage({
     }, [finalFilterValue])
 
     const displayMarker = useMemo(() => {
-        if (finalFilterValue === '') return markers
-        const list = filters.map.mapMarkerWithFilter(markers, finalFilterValue, filterOption)
+        const filteredMarkers = markers.filter(s => s.status !== constants.status.arrived && s.status !== constants.status.scheduled)
+
+        if (finalFilterValue === '') return filteredMarkers
+        const list = filters.map.mapMarkerWithFilter(filteredMarkers, finalFilterValue, filterOption)
         return list
     }, [markers, finalFilterValue, filterOption, showingList, selectedMarker])
 
@@ -125,6 +128,7 @@ function MarkerPage({
                         setExpandFilter={setExpandFilter}
                         confirmFilterValue={confirmFilterValue} // for confirming filter values
                         finalFilterValue={finalFilterDisplay} // for filter options
+                        scheduleCreated={confirmCreated}
                     />
                 </div>
                 <div
