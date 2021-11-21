@@ -29,7 +29,7 @@ function BarIcon({
     }
 
     return transitions(({ size, opacity }, item) => 
-        (item === route) ? (
+        (item.includes(route)) ? (
             <animated.div
                 style={{
                     position: 'absolute',

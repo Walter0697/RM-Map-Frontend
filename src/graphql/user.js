@@ -82,11 +82,36 @@ const update_pin = gql`
     }
 `
 
+const today = gql`
+    query getTodayGQL{
+        today {
+            yesterday_event {
+                id
+                label
+                description
+                status
+                selected_date
+                marker {
+                    id
+                    label
+                    latitude
+                    longitude
+                    address
+                    image_link
+                    link
+                    type
+                }
+            }
+        }
+    }
+`
+
 const users = {
     search,
     preference,
     update_relation,
     update_pin,
+    today,
 }
 
 export default users

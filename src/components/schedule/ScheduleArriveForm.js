@@ -22,6 +22,7 @@ function ScheduleArriveForm({
     handleClose,
     onUpdated,
     schedule_list,
+    setYesterday,
     dispatch,
 }) {
     // graphql request
@@ -83,14 +84,27 @@ function ScheduleArriveForm({
     }
 
     const onSubmitHandler = async (e) => {
+        let missingStatus = false
+
         let result = []
         schedules.forEach((s) => {
+            if (!s.status) {
+                missingStatus = true
+            }
             result.push({
                 id: s.id,
                 status: s.status,
             })
         })
         
+        if (setYesterday && missingStatus) {
+            setAlertMessage({
+                type: 'error',
+                message: 'please set all schedules status',
+            })
+            return
+        }
+
         updateScheduleStatusGQL({ variables: {
             input: result,
         }})
@@ -100,7 +114,7 @@ function ScheduleArriveForm({
         <BaseForm
             open={open}
             handleClose={handleClose}
-            title={'Where did you go~?'}
+            title={setYesterday ? 'Where did you go yesterday~?' : 'Where did you go~?'}
             maxWidth={'lg'}
             handleSubmit={onSubmitHandler}
             cancelText={'Cancel'}

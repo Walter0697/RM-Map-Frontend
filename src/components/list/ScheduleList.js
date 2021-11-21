@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { useLocation } from 'react-router-dom'
 import { connect } from 'react-redux'
 import {
     useSpring,
@@ -155,7 +156,7 @@ function TodayList({
     }
 
     const getTodayInformation = () => {
-        if (!list || (list && list.length === 0)) {
+        if ((list && list.length === 0) || !list) {
             <Grid 
                 item xs={12}
                 style={{
@@ -305,6 +306,9 @@ function ScheduleList({
     openScheduleView,
     schedules,
 }) {
+    // generic utility
+    const location = useLocation()
+
     const today_schedules = useMemo(() => {
         if (!schedules) return []
         const now = dayjs().format('YYYY-MM-DD')
@@ -342,6 +346,18 @@ function ScheduleList({
 
         return sorted
     }, [schedules])
+
+    useEffect(() => {
+        let timeout = null
+        if (location.pathname === '/schedule/open') {
+            timeout = window.setTimeout(() => {
+                openScheduleView(today_schedules, dayjs().format('YYYY-MM-DD'))
+            }, 800)
+            
+        }
+
+        return () => timeout && window.clearTimeout(timeout)
+    }, [])
 
     return (
         <>

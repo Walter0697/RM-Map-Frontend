@@ -19,6 +19,7 @@ const list = gql`
             to_time
             from_time
             is_fav
+            created_at
         }
     }
 `

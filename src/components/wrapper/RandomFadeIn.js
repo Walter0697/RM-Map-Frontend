@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import SizeUpTrail from '../animatein/SizeUpTrail'
@@ -9,7 +9,13 @@ import generic from '../../scripts/generic'
 function RandomFadeIn({
     children,
 }) {
-    const index = generic.math.rand(3)
+    
+    const [ index, setIndex ] = useState(-1)
+    useEffect(() => {
+        const i = generic.math.rand(3)
+        setIndex(i)
+    }, [])
+    
 
     if (index === 2) {
         return (

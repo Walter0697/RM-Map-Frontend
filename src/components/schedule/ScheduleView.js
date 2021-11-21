@@ -49,7 +49,7 @@ function ScheduleItem({
         }
         
         return ''
-    }, [item])  // if marker has image, use this, if not, use the type image
+    }, [item, eventtypes])  // if marker has image, use this, if not, use the type image
 
     const [ imageExist, setImageExist ] = useState(false)
 
