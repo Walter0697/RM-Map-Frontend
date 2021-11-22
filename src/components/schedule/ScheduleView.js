@@ -5,7 +5,6 @@ import {
     IconButton,
     Dialog,
     DialogContent,
-    DialogContentText,
     DialogTitle,
     DialogActions,
     Grid,
@@ -18,10 +17,10 @@ import CancelIcon from '@mui/icons-material/Cancel'
 
 import useBoop from '../../hooks/useBoop'
 
-import CircleIconButton from '../field/CircleIconButton'
 import AutoHideAlert from '../AutoHideAlert'
 
 import constants from '../../constant'
+import markerhelper from '../../scripts/marker'
 
 import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
@@ -37,18 +36,9 @@ function ScheduleItem({
     triggerCopyMessage,
 }) {
     const imageLink = useMemo(() => {
-        if (item?.marker?.image_link) {
-            return item.marker.image_link
-        }
-
-        if (item?.marker?.type) {
-            const typeObj = eventtypes.find(s => s.value === item.marker.type)
-            if (typeObj) {
-                return typeObj.icon_path
-            }
-        }
+        if (!item || !item.marker) return ''
         
-        return ''
+        return markerhelper.image.marker_image(item.marker, eventtypes)
     }, [item, eventtypes])  // if marker has image, use this, if not, use the type image
 
     const [ imageExist, setImageExist ] = useState(false)

@@ -4,6 +4,8 @@ import {
     Button,
 } from '@mui/material'
 
+import markerhelper from '../../../scripts/marker'
+
 function FeaturedMarker({
     item,
     onClickHandler,
@@ -11,18 +13,9 @@ function FeaturedMarker({
 }) {
 
     const imageLink = useMemo(() => {
-        if (item?.marker?.image_link) {
-            return item.marker.image_link
-        }
+        if (!item || !item.marker) return ''
 
-        if (item?.marker?.type) {
-            const typeObj = eventtypes.find(s => s.value === item.marker.type)
-            if (typeObj) {
-                return typeObj.icon_path
-            }
-        }
-        
-        return ''
+        return markerhelper.image.marker_image(item.marker, eventtypes)
     }, [item, eventtypes])
 
     return (

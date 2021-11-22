@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux'
 import {
@@ -19,11 +19,13 @@ import {
 
   import RandomFadeIn from '../wrapper/RandomFadeIn'
   import WrapperBox from '../wrapper/WrapperBox'
+  import TodaySchedule from './home/TodaySchedule'
   import FeaturedMarkerRow from './home/FeaturedMarkerRow'
   import YesterdayUncheckList from './home/YesterdayUncheckList'
 
   import markerhelper from '../../scripts/marker'
   import generic from '../../scripts/generic'
+  import filters from '../../scripts/filter'
   import graphql from '../../graphql'
 
   function HomeList({
@@ -32,6 +34,7 @@ import {
     openYesterdayStatusForm,
     setSelectedMarker,
     markers,
+    schedules,
     eventtypes,
     dispatch,
   }) {
@@ -41,6 +44,13 @@ import {
     const { data: todayData, loading: todayLoading, error: todayError } = useQuery(graphql.users.today, { fetchPolicy: 'no-cache' })
     // TODO: feature list can be in redux
     const [ featuredMarkers, setFeatured ] = useState([])
+
+    const todayMarkersImage = useMemo(() => {
+        if (!schedules) return []
+        console.log(filters.schedules.get_today_image(schedules, eventtypes))
+        return filters.schedules.get_today_image(schedules, eventtypes)
+
+    }, [schedules, eventtypes])
     
     useEffect(() => {
         const featured = getFeaturedMarkers(markers)
@@ -152,18 +162,10 @@ import {
                         height={100}
                         marginBottom={'15px'}
                     >
-                        <Button 
-                            variant='contained'
-                            size='large'
-                            style={{
-                                backgroundColor: '#48acdb',
-                                height: '100%',
-                                width: '100%',
-                                boxShadow: '2px 2px 6px',
-                                textTransform: 'none',
-                            }}
-                            onClick={onTodayScheduleClick}
-                        ></Button>
+                        <TodaySchedule 
+                            list={todayMarkersImage}
+                            onClickHandler={onTodayScheduleClick}
+                        />
                     </WrapperBox>
                     {featuredMarkers.map((item, index) => (
                         <WrapperBox
@@ -187,4 +189,5 @@ import {
   export default connect(state => ({
     markers: state.marker.markers,
     eventtypes: state.marker.eventtypes,
+    schedules: state.schedule.schedules,
 })) (HomeList)

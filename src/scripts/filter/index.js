@@ -3,6 +3,7 @@ import types from './type'
 import parser from './parser'
 import map from './map'
 import generate from './generate'
+import schedules from './schedule'
 
 const filters = {
     button,
@@ -10,6 +11,7 @@ const filters = {
     parser,
     map,
     generate,
+    schedules,
 }
 
 export default filters

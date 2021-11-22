@@ -16,6 +16,7 @@ import dayjs from 'dayjs'
 import useBoop from '../../hooks/useBoop'
 
 import generic from '../../scripts/generic'
+import filters from '../../scripts/filter'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
@@ -311,17 +312,14 @@ function ScheduleList({
 
     const today_schedules = useMemo(() => {
         if (!schedules) return []
-        const now = dayjs().format('YYYY-MM-DD')
-        return schedules.filter(s => dayjs(s.selected_date).format('YYYY-MM-DD') === now)
+        return filters.schedules.get_today_image(schedules)
     }, [schedules])
 
     const upcoming_schedules = useMemo(() => {
         if (!schedules) return []
-        const now = dayjs()
-        const nowStr = now.format('YYYY-MM-DD')
-        // filter out today and previous schedules
-        const upcoming_list = schedules.filter(s => dayjs(s.selected_date).format('YYYY-MM-DD') !== nowStr && dayjs(s.selected_date).isAfter(now))
-
+        
+        const upcoming_list = filters.schedules.get_upcoming(schedules)
+        
         // use dictionary for grouping the schedules into each day
         let result = {}
         upcoming_list.forEach((sd) => {
