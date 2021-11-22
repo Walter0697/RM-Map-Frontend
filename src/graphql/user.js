@@ -83,8 +83,10 @@ const update_pin = gql`
 `
 
 const today = gql`
-    query getTodayGQL{
-        today {
+    query getTodayGQL($time: String!) {
+        today(params: {
+            time: $time,
+        }) {
             yesterday_event {
                 id
                 label

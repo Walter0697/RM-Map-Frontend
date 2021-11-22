@@ -85,6 +85,13 @@ export const updateSchedulesStatus = (schedules) => {
     }
 }
 
+export const resetHomeFeatured = (featured) => {
+    return {
+        type: constants.RESET_HOME,
+        featured,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -98,6 +105,7 @@ const actions = {
     updateMarkerStatus,
     updateMarkersStatus,
     updateSchedulesStatus,
+    resetHomeFeatured,
 }
 
 export default actions

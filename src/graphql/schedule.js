@@ -1,8 +1,10 @@
 import { gql } from '@apollo/client'
 
 const list = gql`
-    query listScheduleGQL{
-        schedules{
+    query listScheduleGQL($time: String!) {
+        schedules(params: {
+            time: $time,
+        }) {
             id
             label
             description

@@ -2,6 +2,8 @@ import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useLazyQuery } from '@apollo/client'
 
+import dayjs from 'dayjs'
+
 import actions from './store/actions'
 import graphql from './graphql'
 
@@ -16,9 +18,9 @@ function InitData({ jwt, dispatch }) {
             listMarkerGQL()
             listEventTypeGQL()
             listMappinsGQL()
-            listScheduleGQL()
+            listScheduleGQL({ variables: { time: dayjs().format('YYYY-MM-DD') } })
         }
-    }, [])  
+    }, [jwt])  
     // this only runs once on purpose, 
     // there the user already login, fetch all information
     // on app open

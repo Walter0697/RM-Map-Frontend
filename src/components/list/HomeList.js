@@ -1,34 +1,23 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux'
-import {
-    useSpring,
-    config,
-    animated,
-  } from '@react-spring/web'
-  import {
-      Grid,
-      Button,
-  } from '@mui/material'
 
-  import { useQuery } from '@apollo/client'
- 
-  import dayjs from 'dayjs'
+import { useLazyQuery } from '@apollo/client'
 
-  import useBoop from '../../hooks/useBoop'
+import dayjs from 'dayjs'
 
-  import RandomFadeIn from '../wrapper/RandomFadeIn'
-  import WrapperBox from '../wrapper/WrapperBox'
-  import TodaySchedule from './home/TodaySchedule'
-  import FeaturedMarkerRow from './home/FeaturedMarkerRow'
-  import YesterdayUncheckList from './home/YesterdayUncheckList'
+import RandomFadeIn from '../wrapper/RandomFadeIn'
+import WrapperBox from '../wrapper/WrapperBox'
+import TodaySchedule from './home/TodaySchedule'
+import FeaturedMarkerRow from './home/FeaturedMarkerRow'
+import YesterdayUncheckList from './home/YesterdayUncheckList'
 
-  import markerhelper from '../../scripts/marker'
-  import generic from '../../scripts/generic'
-  import filters from '../../scripts/filter'
-  import graphql from '../../graphql'
+import markerhelper from '../../scripts/marker'
+import filters from '../../scripts/filter'
+import actions from '../../store/actions'
+import graphql from '../../graphql'
 
-  function HomeList({
+function HomeList({
     yesterdaySchedules,
     setYesterdaySchedules,
     openYesterdayStatusForm,
@@ -36,27 +25,63 @@ import {
     markers,
     schedules,
     eventtypes,
+    featured,
+    updated_date,
     dispatch,
-  }) {
+}) {
     const history = useHistory()
 
     // graphql request
-    const { data: todayData, loading: todayLoading, error: todayError } = useQuery(graphql.users.today, { fetchPolicy: 'no-cache' })
-    // TODO: feature list can be in redux
-    const [ featuredMarkers, setFeatured ] = useState([])
+    const [ getTodayGQL, { data: todayData, loading: todayLoading, error: todayError } ] = useLazyQuery(graphql.users.today, { fetchPolicy: 'no-cache' })
 
+    const getFeaturedMarkers = (markers) => {
+        const featured_list = markerhelper.find.feature_list(markers, [])
+
+        const shuffle = featured_list.sort(() => Math.random() - 0.5)
+
+        let featured = []
+        let row = { left: null, right: null }
+
+        const itemLength = shuffle.length >= 4 ? 4 : shuffle.length
+        
+        for (let i = 0; i < itemLength; i++) {
+            if (!row.left) {
+                row.left = shuffle[i]
+            } else {
+                row.right = shuffle[i]
+                featured.push(row)
+                row = { left: null, right: null }
+            }
+        }
+        
+        if (row.left) {
+            featured.push(row)
+        }
+        
+        return featured
+    }
+
+    // use memo
     const todayMarkersImage = useMemo(() => {
         if (!schedules) return []
-        console.log(filters.schedules.get_today_image(schedules, eventtypes))
         return filters.schedules.get_today_image(schedules, eventtypes)
-
     }, [schedules, eventtypes])
-    
-    useEffect(() => {
-        const featured = getFeaturedMarkers(markers)
 
-        setFeatured(featured)
-    }, [markers])
+    const featuredMarkers = useMemo(() => {
+        if (featured && dayjs().format('YYYY-MM-DD') === updated_date) {
+            return featured
+        } 
+
+        if (!markers || (markers && markers.length === 0)) return []
+        const list = getFeaturedMarkers(markers)
+        dispatch(actions.resetHomeFeatured(list))
+        return list
+
+    }, [featured, markers])
+
+    useEffect(() => {
+        getTodayGQL({ variables: { time: dayjs().format('YYYY-MM-DD') } })
+    }, [])
 
     useEffect(() => {
         if (todayData) {
@@ -73,64 +98,6 @@ import {
             console.log(todayError)
         }
     }, [todayData, todayError])
-
-    const getFeaturedMarkers = (markers) => {
-        let featured = []
-        let row = { left: null, right: null }
-        const ue = markerhelper.find.upcomingEnd(markers)
-        if (ue) {
-            const item = {
-                label: generic.text.feature_text('upcoming'),
-                marker: ue,
-            }
-            
-            if (!row.left) {
-                row.left = item
-            } else {
-                row.right = item
-                featured.push(row)
-                row = { left: null, right: null }
-            }
-        }
-
-        const lt = markerhelper.find.longTimeCreated(markers)
-        if (lt) {
-            const item = {
-                label: generic.text.feature_text('longtime'),
-                marker: lt,
-            }
-            
-            if (!row.left) {
-                row.left = item
-            } else {
-                row.right = item
-                featured.push(row)
-                row = { left: null, right: null }
-            }
-        }
-
-        const fl = markerhelper.find.feelingLucky(markers)
-        if (fl) {
-            const item = {
-                label: generic.text.feature_text('lucky'),
-                marker: fl,
-            }
-            
-            if (!row.left) {
-                row.left = item
-            } else {
-                row.right = item
-                featured.push(row)
-                row = { left: null, right: null }
-            }
-        }
-
-        if (row.left) {
-            featured.push(row)
-        }
-        
-        return featured
-    }
 
     const onTodayScheduleClick = () => {
         history.replace('/schedule/open')
@@ -158,15 +125,18 @@ import {
                         </WrapperBox>
                     )}
                     
-                    <WrapperBox
-                        height={100}
-                        marginBottom={'15px'}
-                    >
-                        <TodaySchedule 
-                            list={todayMarkersImage}
-                            onClickHandler={onTodayScheduleClick}
-                        />
-                    </WrapperBox>
+                    {todayMarkersImage.length !== 0 && (
+                        <WrapperBox
+                            height={100}
+                            marginBottom={'15px'}
+                        >
+                            <TodaySchedule 
+                                list={todayMarkersImage}
+                                onClickHandler={onTodayScheduleClick}
+                            />
+                        </WrapperBox>
+                    )}
+                    
                     {featuredMarkers.map((item, index) => (
                         <WrapperBox
                             height={250}
@@ -190,4 +160,6 @@ import {
     markers: state.marker.markers,
     eventtypes: state.marker.eventtypes,
     schedules: state.schedule.schedules,
+    featured: state.home.featured,
+    updated_date: state.home.updated_date,
 })) (HomeList)

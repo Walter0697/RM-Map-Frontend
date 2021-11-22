@@ -15,21 +15,22 @@ import dayjs from 'dayjs'
 
 import useBoop from '../../hooks/useBoop'
 
-import generic from '../../scripts/generic'
-import filters from '../../scripts/filter'
-
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
+
+import generic from '../../scripts/generic'
+import filters from '../../scripts/filter'
 
 function ScheduleItem({
     item,
     selected_date,
+    eventtypes,
     onClickHandler,
 }) {
     const imageMarkers = useMemo(() => {
         if (!item) return []
-        return item.filter(s => s.marker?.image_link)
-    }, [item])
+        return filters.schedules.get_schedule_image(item, eventtypes)
+    }, [item, eventtypes])
 
     const scheduleItemOnClick = () => {
         if (!item || (item && item.length === 0)) return
@@ -157,20 +158,22 @@ function TodayList({
     }
 
     const getTodayInformation = () => {
-        if ((list && list.length === 0) || !list) {
-            <Grid 
-                item xs={12}
-                style={{
-                    height: '300px',
-                    display: 'flex',
-                    width: '100%',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    color: '#445295',
-                }}
-            >
-                There is no plan today...
-            </Grid>
+        if (!list || (list && list.length === 0)) {
+            return (
+                <Grid 
+                    item xs={12}
+                    style={{
+                        height: '300px',
+                        display: 'flex',
+                        width: '100%',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        color: '#445295',
+                    }}
+                >
+                    There is no plan today...
+                </Grid>
+            )
         }
         return (
             <animated.div
@@ -305,6 +308,7 @@ function TodayList({
 
 function ScheduleList({
     openScheduleView,
+    eventtypes,
     schedules,
 }) {
     // generic utility
@@ -312,8 +316,8 @@ function ScheduleList({
 
     const today_schedules = useMemo(() => {
         if (!schedules) return []
-        return filters.schedules.get_today_image(schedules)
-    }, [schedules])
+        return filters.schedules.get_today_image(schedules, eventtypes)
+    }, [schedules, eventtypes])
 
     const upcoming_schedules = useMemo(() => {
         if (!schedules) return []
@@ -402,6 +406,7 @@ function ScheduleList({
                             <ScheduleItem 
                                 item={item[1]}
                                 selected_date={item[0]}
+                                eventtypes={eventtypes}
                                 onClickHandler={openScheduleView}   
                             />
                         </WrapperBox>
@@ -414,4 +419,5 @@ function ScheduleList({
 
 export default connect(state => ({
     schedules: state.schedule.schedules,
+    eventtypes: state.marker.eventtypes,
 })) (ScheduleList)
