@@ -92,6 +92,13 @@ export const resetHomeFeatured = (featured) => {
     }
 }
 
+export const revokeMarker = (marker) => {
+    return {
+        type: constants.REVOKE_MARKER,
+        marker,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -106,6 +113,7 @@ const actions = {
     updateMarkersStatus,
     updateSchedulesStatus,
     resetHomeFeatured,
+    revokeMarker,
 }
 
 export default actions

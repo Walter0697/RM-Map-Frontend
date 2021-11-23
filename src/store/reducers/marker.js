@@ -69,6 +69,20 @@ export default function markerReducer(state = {
                 markers: result,
             }
         }
+        case constants.REVOKE_MARKER: {
+            const result = state.markers || []
+            let item = result.find(s => s.id === action.marker.id)
+            if (item) {
+                item.status = ''
+            } else {
+                result.push(action.marker)
+            }
+
+            return {
+                ...state,
+                markers: result,
+            }
+        }
         default:
             return state
     }

@@ -73,7 +73,9 @@ function PreviousMarkerView({
     useEffect(() => {
         if (revokeData) {
             // making dispatch for updating marker
-            console.log(revokeData)
+            // then remove it from marker list, or just update the marker list
+            dispatch(actions.revokeMarker(revokeData.revokeMarker))
+            onUpdated && onUpdated(revokeData.revokeMarker)
         }
 
         if (revokeError) {

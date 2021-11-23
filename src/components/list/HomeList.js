@@ -11,6 +11,7 @@ import WrapperBox from '../wrapper/WrapperBox'
 import TodaySchedule from './home/TodaySchedule'
 import FeaturedMarkerRow from './home/FeaturedMarkerRow'
 import YesterdayUncheckList from './home/YesterdayUncheckList'
+import PreviousMarkerButton from './home/PreviousMarkerButton'
 
 import markerhelper from '../../scripts/marker'
 import filters from '../../scripts/filter'
@@ -103,6 +104,10 @@ function HomeList({
         history.replace('/schedule/open')
     }
 
+    const onPreviousMarkerClick = () => {
+        history.replace('/previous')
+    }
+
     return (
         <>
             <div style={{
@@ -150,6 +155,14 @@ function HomeList({
                             />
                         </WrapperBox>
                     ))}
+                    <WrapperBox
+                        height={40}
+                        marginBottom={'20px'}
+                    >
+                        <PreviousMarkerButton
+                            onClickHandler={onPreviousMarkerClick}
+                        />
+                    </WrapperBox>
                 </RandomFadeIn>
             </div>
         </>

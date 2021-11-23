@@ -1,15 +1,13 @@
 import React from 'react'
 import {
-    Button,
+    Button
 } from '@mui/material'
 
-import NotificationImportantIcon from '@mui/icons-material/NotificationImportant'
-
-function YesterdayUncheckList({
+function PreviousMarkerButton({
     onClickHandler,
 }) {
-  return (
-      <Button 
+    return (
+        <Button 
           variant='contained'
           size='large'
           style={{
@@ -18,14 +16,12 @@ function YesterdayUncheckList({
               width: '100%',
               boxShadow: '2px 2px 6px',
               textTransform: 'none',
-              color: 'yellow',
           }}
           onClick={onClickHandler}
       >
-          <NotificationImportantIcon style={{ marginRight: '10px' }}/> 
-          Fill in status for yesterday!  
+         Previous Markers
       </Button>
-  )
+    )
 }
 
-export default YesterdayUncheckList
+export default PreviousMarkerButton
