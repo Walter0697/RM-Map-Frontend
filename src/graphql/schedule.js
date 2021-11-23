@@ -81,10 +81,25 @@ const update_status = gql`
     }
 `
 
+const by_marker = gql`
+    query listMarkerScheduleGQL($id: Int!) {
+        markerschedules(params: {
+            id: $id,
+        }) {
+            id
+            label
+            description
+            status
+            selected_date
+        }
+    }
+`
+
 const schedules = {
     list,
     create,
     update_status,
+    by_marker,
 }
 
 export default schedules

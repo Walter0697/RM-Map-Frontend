@@ -85,10 +85,62 @@ const update_fav = gql`
     }
 `
 
+const previous = gql`
+    query previousMarkerGQL{
+        previousmarkers{
+            id
+            type
+            description
+            latitude
+            longitude
+            label
+            address
+            link
+            image_link
+            type
+            estimate_time
+            price
+            status
+            to_time
+            from_time
+            is_fav
+            created_at
+        }
+    }
+`
+
+const revoke = gql`
+    mutation revokeMarkerGQL($id: Int!) {
+        revokeMarker(input: {
+            id: $id,
+        }) {
+            id
+            type
+            description
+            latitude
+            longitude
+            label
+            address
+            link
+            image_link
+            type
+            estimate_time
+            price
+            status
+            to_time
+            from_time
+            is_fav
+            created_at
+        }
+    }
+`
+
 const markers = {
     list,
     create,
     update_fav,
+    previous,
+    revoke,
 }
 
 export default markers

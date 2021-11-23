@@ -73,12 +73,10 @@ function MarkerItem({
             item xs={5}
             style={{ marginTop: '15px' }}
           >
-            {/* <img
+            <img
               height='90px'
-              src={process.env.REACT_APP_IMAGE_LINK + item.image_link}
-              onError={onImageFailedToLoad}
-            /> */}
-            {/* make a temp image */}
+              src={process.env.REACT_APP_IMAGE_LINK + typeIcon}
+            />
           </Grid>
         )}
         <Grid 

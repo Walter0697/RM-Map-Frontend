@@ -12,6 +12,7 @@ import MarkerPage from './pages/MarkerPage'
 import HomePage from './pages/HomePage'
 import SchedulePage from './pages/SchedulePage'
 import SettingPage from './pages/SettingPage'
+import PreviousMarkerPage from './pages/PreviousMarkerPage'
 
 import TypeManage from './pages/admin/TypeManage'
 import PinManage from './pages/admin/PinManage'
@@ -31,6 +32,7 @@ function App() {
             <Route path='/home' component={HomePage} />
             <Route path='/schedule' component={SchedulePage} />
             <Route path='/setting' component={SettingPage} />
+            <Route path='/previous' component={PreviousMarkerPage} />
 
             <Route path='/admin/type' component={TypeManage} />
             <Route path='/admin/pin' component={PinManage} />
