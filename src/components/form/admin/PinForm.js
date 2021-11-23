@@ -189,42 +189,41 @@ function PinForm({
             hasError = true
         }
 
-        if (formValue.top_left_x && formValue.bottom_right_x) {
-            if (formValue.top_left_x <= formValue.bottom_right_x) {
-                setError('top_left_x', 'invalid')
-                setError('bottom_right_x', 'invalid')
-                hasError = true
-            }
-        } else {
-            if (!formValue.top_left_x) {
-                setError('top_left_x', 'missing')
-                hasError = true
-            }
-            if (!formValue.bottom_right_x) {
-                setError('bottom_right_x', 'missing')
-                hasError = true
-            }
-        }
+        // if (formValue.top_left_x && formValue.bottom_right_x) {
+        //     if (formValue.top_left_x <= formValue.bottom_right_x) {
+        //         setError('top_left_x', 'invalid')
+        //         setError('bottom_right_x', 'invalid')
+        //         hasError = true
+        //     }
+        // } else {
+        //     if (!formValue.top_left_x) {
+        //         setError('top_left_x', 'missing')
+        //         hasError = true
+        //     }
+        //     if (!formValue.bottom_right_x) {
+        //         setError('bottom_right_x', 'missing')
+        //         hasError = true
+        //     }
+        // }
 
-        if (formValue.top_left_y && formValue.bottom_right_y) {
-            if (formValue.top_left_y <= formValue.bottom_right_y) {
-                setError('top_left_y', 'invalid')
-                setError('bottom_right_y', 'invalid')
-                hasError = true
-            }
-        } else {
-            if (!formValue.top_left_y) {
-                setError('top_left_y', 'missing')
-                hasError = true
-            }
-            if (!formValue.bottom_right_y) {
-                setError('bottom_right_y', 'missing')
-                hasError = true
-            }
-        }
+        // if (formValue.top_left_y && formValue.bottom_right_y) {
+        //     if (formValue.top_left_y <= formValue.bottom_right_y) {
+        //         setError('top_left_y', 'invalid')
+        //         setError('bottom_right_y', 'invalid')
+        //         hasError = true
+        //     }
+        // } else {
+        //     if (!formValue.top_left_y) {
+        //         setError('top_left_y', 'missing')
+        //         hasError = true
+        //     }
+        //     if (!formValue.bottom_right_y) {
+        //         setError('bottom_right_y', 'missing')
+        //         hasError = true
+        //     }
+        // }
 
         if (hasError) {
-            console.log(error)
             setSubmitting(false)
             return
         }

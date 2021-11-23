@@ -26,8 +26,8 @@ const getMapPin = (map, location, onMarkerClick, selected, key, markertype, pinS
     
     var div = document.createElement('div')
     div.style.zIndex = selected ? '30' : '20'
-    div.style.width = '50px'
-    div.style.height = '50px'
+    div.style.width = '65px'
+    div.style.height = '65px'
     div.style.backgroundImage = `url(${pinImageLink})`
     div.style.backgroundSize = 'contain'
     div.style.backgroundRepeat = 'no-repeat'
