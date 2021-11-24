@@ -6,6 +6,7 @@ import {
 
 import '@tomtom-international/web-sdk-maps/dist/maps.css'
 
+import Start from './pages/Start'
 import Login from './pages/Login'
 import SearchPage from './pages/SearchPage'
 import MarkerPage from './pages/MarkerPage'
@@ -25,7 +26,7 @@ function App() {
       <>
         <Route render={({ location }) => (
           <Switch>
-            <Route exact path='/' component={Login} />
+            <Route exact path='/' component={Start} />
             <Route path='/login' component={Login} />
             <Route path='/search' component={SearchPage} />
             <Route path='/markers' component={MarkerPage} />

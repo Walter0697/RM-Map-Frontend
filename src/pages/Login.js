@@ -74,6 +74,13 @@ function Login({ jwt, dispatch }) {
     // transition animation for the form
     const transition = useOpacityTransition(loginState)
 
+    // if jwt exists, just redirect to home screen
+    useEffect(() => {
+        if (jwt) {
+            history.replace('/home')
+        }
+    }, [jwt])
+
     // check login state to perform different action
     useEffect(() => {
         if (loginState === 'loading') {

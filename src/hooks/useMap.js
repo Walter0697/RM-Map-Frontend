@@ -139,7 +139,6 @@ function useMap(
             setMarkers(() => [])
             return
         }
-        //mappins
 
         let markers = []
         locationList.forEach(item => {
@@ -156,27 +155,6 @@ function useMap(
                 item.pin,
                 mappins,
             )
-            // if (item.selected) {
-            //     marker = maphelper.markers.getMarker(map, [
-            //             item.location.lon,
-            //             item.location.lat,
-            //         ],
-            //         onMarkerClick,
-            //         item.id,
-            //         'selected',
-            //         '15',
-            //     )
-            // } else {
-            //     marker = maphelper.markers.getMarker(map, [
-            //             item.location.lon,
-            //             item.location.lat,
-            //         ],
-            //         onMarkerClick,
-            //         item.id,
-            //         item.pin,
-            //         '10',
-            //     )
-            // }
             markers.push(marker)
         })
         setMarkers(() => markers)
@@ -274,7 +252,7 @@ function useMap(
             map.setCenter([parseFloat(currentLocation.lon), parseFloat(currentLocation.lat)])
             // TODO: try to get animation working
             //map.panTo([parseFloat(currentLocation.lon), parseFloat(currentLocation.lat)], { duration: 1 , animate: true, easing: (e) => { return e }, essential: true })
-            map.setZoom(zoom)
+            //map.setZoom(zoom)
         }
     }
 

@@ -114,6 +114,7 @@ function MarkerMap({
     }, [markers, showingList])
 
     useEffect(() => {
+        if (!clickedMarker || clickedMarker === -1) return
         if (clickedMarker) {
             const marker = markers.find(s => s.id === clickedMarker.id)
             if (marker) {
