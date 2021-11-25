@@ -16,6 +16,7 @@ function PreviousMarkerButton({
               width: '100%',
               boxShadow: '2px 2px 6px',
               textTransform: 'none',
+              color: '#1c76d2',
           }}
           onClick={onClickHandler}
       >

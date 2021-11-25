@@ -1,7 +1,7 @@
 # RM-Map
 
 ### Introduction
-- RoMarker Map, an application to store location that we want to visit. Hopefully using PWA for offline usage, still investigating the possibilities of these technologies. Just a personal project for myself to have practical usage
+- RoMarker Map, an application to store location that we want to visit. Hopefully using PWA for offline usage, still investigating the possibilities of these technologies. Just a personal project for myself to have practical usage. Please do't judge my drawing skill
 
 ### Technologies
 - React

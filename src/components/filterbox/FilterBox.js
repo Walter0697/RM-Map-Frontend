@@ -223,7 +223,7 @@ function FilterPick({
                                             iconPath={option.icon}
                                             iconSize='20px'
                                             label={option.label}
-                                            labelSize='15px'
+                                            labelSize='12px'
                                         />
                                     </div>
                                 </Grid>

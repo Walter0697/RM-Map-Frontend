@@ -170,7 +170,7 @@ function SearchMap({
     // call api for requesting the nearby location
     const onSearchTextSubmitHandler = async (text) => {
         setLoading(true)
-        let result = await apis.maps.search(text, searchingLocation.lon, searchingLocation.lat, 10)
+        let result = await apis.maps.search(text, searchingLocation.lon, searchingLocation.lat, 30)
         if (result.status === 200) {
             const list = result.data.results
             if (list.length !== 0) {

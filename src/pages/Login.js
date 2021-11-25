@@ -36,6 +36,7 @@ function Login({ jwt, dispatch }) {
 
     // graphql request
     const [ loginGQL, { data: loginData, loading: loginLoading, error: loginError } ] = useMutation(graphql.auth.login, { errorPolicy: 'all' })
+    const [ loginResult, setLoginResult ] = useState(null)
 
     // state variables
     const [ loginState, setLoginState ] = useState('prompt') // prompt, loading, success
@@ -83,21 +84,24 @@ function Login({ jwt, dispatch }) {
 
     // check login state to perform different action
     useEffect(() => {
+        let timer = null
         if (loginState === 'loading') {
             onInformationFetch()
             onAnimationRun()
         } else if (loginState === 'success') {
             // set time out for changing form shape
-            window.setTimeout(() => {
+            timer = window.setTimeout(() => {
                 setLoginState('redirecting')
             }, 1000)
         } else if (loginState === 'redirecting') {
             // set time out for switching page
-            window.setTimeout(() => {
-                history.replace('/home')
+            timer = window.setTimeout(() => {
+                //history.replace('/home')
+                dispatch(actions.login(loginResult.jwt, loginResult.username))
             }, 500)
         }
-    }, [loginState])
+        return () => { timer && window.clearTimeout(timer) }
+    }, [loginState, loginResult])
 
     // make sure that animation and information both ended before going to successful page
     useEffect(() => {
@@ -114,7 +118,8 @@ function Login({ jwt, dispatch }) {
         }
 
         if (loginData) {
-            dispatch(actions.login(loginData.login.jwt, loginData.login.username))
+            //dispatch(actions.login(loginData.login.jwt, loginData.login.username))
+            setLoginResult(loginData.login)
             setLoginState('loading')
         }
     }, [loginData, loginError])
