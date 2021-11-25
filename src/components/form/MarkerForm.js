@@ -138,8 +138,8 @@ function MarkerForm({
             return
         }
 
-        const to = formValue.to_time ? generic.time.toRFC3339Format(formValue.to_time) : null
-        const from = formValue.from_time ? generic.time.toRFC3339Format(formValue.from_time) : null
+        const to = formValue.to_time ? generic.time.toServerFormat(formValue.to_time) : null
+        const from = formValue.from_time ? generic.time.toServerFormat(formValue.from_time) : null
 
         createMarkerGQL({ variables: {
             label: formValue.label,

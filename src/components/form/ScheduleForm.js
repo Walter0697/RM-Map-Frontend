@@ -90,7 +90,7 @@ function ScheduleForm({
             return
         }
 
-        const selected_time = generic.time.toRFC3339Format(formValue.selected_time)
+        const selected_time = generic.time.toServerFormat(formValue.selected_time)
 
         createScheduleGQL({ variables: {
             label: formValue.label,

@@ -8,6 +8,11 @@ const toRFC3339Format = (date) => {
     return dateOnly
 }
 
+const toServerFormat = (date) => {
+    const dateOnly = dayjs(date).format('YYYY-MM-DD HH:mm:ss+00')
+    return dateOnly
+}
+
 const displayDateRange = (from_time, to_time) => {
     if (from_time && to_time) {
         const from_text = toLocalTime(from_time)
@@ -32,6 +37,7 @@ const toLocalTime = (input, format = 'YYYY-MM-DD HH:mm') => {
 const time = {
     toRFC3339Format,
     displayDateRange,
+    toServerFormat,
 }
 
 export default time
