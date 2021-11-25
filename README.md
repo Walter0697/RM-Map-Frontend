@@ -18,6 +18,3 @@
 
 ### Environment
 - Get API Key from TomTom Site and enter in `REACT_APP_MAP_APIKEY` in `.env`
-
-### Notes to self
-run `go run github.com/99designs/gqlgen generate` if schema changed
