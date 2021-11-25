@@ -1,5 +1,6 @@
 import types from './type'
 
+// TODO: maybe need the current location for options as well, but, we might implement that later idk
 const mapMarkerWithFilter = (markers, filter, options) => {
     if (filter === '') return markers
     const filterList = filter.split('&').map((item) => {
@@ -37,7 +38,6 @@ const mapMarkerWithFilter = (markers, filter, options) => {
     // since the initial one is emoty
     let hasMultiFilter = false
 
-    let finalOutput = []
     multipleFilter.forEach(fil => {
         const filterArr = filterList.filter(s => s.label === fil.label)
         let filterFunc = null
@@ -57,20 +57,18 @@ const mapMarkerWithFilter = (markers, filter, options) => {
             default:
                 break
         }
-        if (filterFunc) {
+        if (filterFunc && filterArr.length !== 0) {
+            let multiResult = []
             for (let i = 0; i < filterArr.length; i++) {
                 hasMultiFilter = true
                 const list = filterFunc(filteredList, filterArr[i].value)
-                finalOutput = appendToList(finalOutput, list)
+                multiResult = appendToList(multiResult, list)
             }
+            filteredList = multiResult
         }
     })
 
-    if (!hasMultiFilter) {
-        return filteredList
-    }
-
-    return finalOutput
+    return filteredList
 }
 
 const filterByRange = (markers, rangeValue) => {
