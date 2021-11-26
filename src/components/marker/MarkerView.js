@@ -38,13 +38,20 @@ function MarkerView({
     handleClose,
     openSchedule,
     marker,
+    editMarker,
     eventtypes,
     dispatch,
 }) {
     const [ updateMarkerFavouriteGQL, { data: updateData, loading: updateLoading, error: updateError } ] = useMutation(graphql.markers.update_fav, { errorPolicy: 'all' }) 
+    const [ removeMarkerGQL, { data: removeData, loading: removeLoading, error: removeError } ] = useMutation(graphql.markers.remove, { errorPolicy: 'all' })
 
     const [ typeIcon, setIcon ] = useState(null)
     const [ isFav, setFav ] = useState(false)
+    const [ deletingId, setDeleting ] = useState(-1)
+
+    // if request failed
+    const [ failedAlert, fail ] = useBoop(3000)
+    const [ failMessage, setFailMessage ] = useState('')
 
     const [ copyMessage, triggerCopyMessage ] = useBoop(3000)
 
@@ -54,6 +61,8 @@ function MarkerView({
         // find the type icon from the list to get the icon path
         const currentType = eventtypes.find(s => s.value === marker.type)
         setIcon(process.env.REACT_APP_IMAGE_LINK + currentType.icon_path)
+
+        setDeleting(-1)
 
         // see if it is a favourite marker
         if (marker?.is_fav) {
@@ -69,9 +78,24 @@ function MarkerView({
         }
 
         if (updateError) {
-            console.log(updateError)
+            setFailMessage(updateError.message)
+            fail()
         }
     }, [updateData, updateError])
+
+    useEffect(() => {
+        if (removeData) {
+            if (deletingId !== -1) {
+                dispatch(actions.removeMarker(deletingId))
+                handleClose()
+            }
+        }
+
+        if (removeError) {
+            setFailMessage(removeError.message)
+            fail()
+        }
+    }, [removeData, removeError, deletingId])
 
     const toggleMarkerFavourite = () => {
         if (!updateLoading) {
@@ -90,6 +114,16 @@ function MarkerView({
         window.open(url, '_blank')
     }
 
+    const onEditClick = () => {
+        editMarker()
+    }
+
+    const onRemoveClick = () => {
+        if (!window.confirm(`Do you want to remove ${marker.label}`)) return
+        setDeleting(marker.id)
+        removeMarkerGQL({ variables: { id: marker.id } })
+    }
+
     return (
         <>
             <Dialog
@@ -103,7 +137,7 @@ function MarkerView({
                 { marker && (
                     <>
                         <DialogTitle>
-                            <Grid container spacing={3}>
+                            <Grid container spacing={1}>
                                 <Grid item xs={3} md={3} lg={3}>
                                     <CircleIconButton
                                         onClickHandler={openSchedule}
@@ -112,7 +146,6 @@ function MarkerView({
                                     </CircleIconButton>
                                 </Grid>
                                 <Grid item xs={6} md={6} lg={6}>
-                                    
                                 </Grid>
                                 <Grid item xs={3} md={3} lg={3}>
                                     <FavouriteIcon 
@@ -222,12 +255,46 @@ function MarkerView({
                                             </Grid>
                                         </>
                                     )}
+                                    <Grid item xs={12} md={12} lg={12}>
+                                        <Button 
+                                            variant='contained'
+                                            size='middle'
+                                            color='primary'
+                                            style={{
+                                                color: 'white',
+                                                marginLeft: '10%',
+                                                width: '80%',
+                                                boxShadow: '2px 2px 6px'
+                                            }}
+                                            onClick={onEditClick}
+                                        >Edit</Button>
+                                    </Grid>
+                                    <Grid item xs={12} md={12} lg={12}>
+                                        <Button 
+                                            variant='contained'
+                                            size='middle'
+                                            color='error'
+                                            style={{
+                                                color: 'white',
+                                                marginLeft: '10%',
+                                                width: '80%',
+                                                boxShadow: '2px 2px 6px'
+                                            }}
+                                            onClick={onRemoveClick}
+                                        >Delete</Button>
+                                    </Grid>
                                 </Grid>
                             </DialogContentText>
                         </DialogContent>
                     </>
                 )}
             </Dialog>
+            <AutoHideAlert 
+                open={failedAlert}
+                type={'error'}
+                message={failMessage}
+                timing={3000}
+            />
             <AutoHideAlert 
                 open={copyMessage}
                 type={'success'}

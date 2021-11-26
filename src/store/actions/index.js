@@ -99,6 +99,34 @@ export const revokeMarker = (marker) => {
     }
 }
 
+export const editMarker = (marker) => {
+    return {
+        type: constants.EDIT_MARKER,
+        marker,
+    }
+}
+
+export const removeMarker = (id) => {
+    return {
+        type: constants.REMOVE_MARKER,
+        id,
+    }
+}
+
+export const editSchedule = (schedule) => {
+    return {
+        type: constants.EDIT_SCHEDULE,
+        schedule,
+    }
+}
+
+export const removeSchedule = (id) => {
+    return {
+        type: constants.REMOVE_SCHEDULE,
+        id,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -114,6 +142,10 @@ const actions = {
     updateSchedulesStatus,
     resetHomeFeatured,
     revokeMarker,
+    editMarker,
+    removeMarker,
+    editSchedule,
+    removeSchedule,
 }
 
 export default actions

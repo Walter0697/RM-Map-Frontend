@@ -18,10 +18,10 @@ import MarkerList from '../components/list/MarkerList'
 import MarkerView from '../components/marker/MarkerView'
 import CircleIconButton from '../components/field/CircleIconButton'
 import ScheduleForm from '../components/form/ScheduleForm'
+import MarkerEditForm from '../components/form/MarkerEditForm'
 import AutoHideAlert from '../components/AutoHideAlert'
 
 import filters from '../scripts/filter'
-import constants from '../constant'
 
 import styles from '../styles/list.module.css'
 
@@ -34,6 +34,9 @@ function MarkerPage({
     // if the selected marker is set to be schedule
     const [ scheduleFormOpen, setScheduleFormOpen ] = useState(false)
     const [ createAlert, confirmCreated ] = useBoop(3000)
+    // if the selected marker is set to be editing
+    const [ editingMarker, setEditing ] = useState(false)
+    const [ editAlert, confirmEdited ] = useBoop(3000)
 
     // if it is showing list or map
     const [ showingList, setShowingList ] = useState(false)
@@ -55,7 +58,7 @@ function MarkerPage({
     }, [finalFilterValue])
 
     const displayMarker = useMemo(() => {
-        const filteredMarkers = markers.filter(s => s.status !== constants.status.arrived && s.status !== constants.status.scheduled)
+        const filteredMarkers = markers.filter(s => s.status === '')
 
         if (finalFilterValue === '') return filteredMarkers
         const list = filters.map.mapMarkerWithFilter(filteredMarkers, finalFilterValue, filterOption)
@@ -93,6 +96,12 @@ function MarkerPage({
     const confirmFilterValue = (finalValue) => {
         setFinalFilterValue(finalValue)
         setExpandFilter(false)
+    }
+
+    const onMarkerUpdated = () => {
+        setSelected(null)
+        setEditing(false)
+        confirmEdited()
     }
 
     const onScheduleCreated = () => {
@@ -192,6 +201,7 @@ function MarkerPage({
                 open={!!selectedMarker}
                 handleClose={() => setSelected(null)}
                 openSchedule={() => setScheduleFormOpen(true)}
+                editMarker={() => setEditing(true)}
                 marker={selectedMarker}
             />
             <ScheduleForm
@@ -200,10 +210,22 @@ function MarkerPage({
                 onCreated={onScheduleCreated}
                 marker={selectedMarker}
             />
+            <MarkerEditForm
+                open={editingMarker}
+                handleClose={() => setEditing(false)}
+                onUpdated={onMarkerUpdated}
+                marker={selectedMarker}
+            />
             <AutoHideAlert 
                 open={createAlert}
                 type={'success'}
-                message={'Successfully create marker!'}
+                message={'Successfully create schedule!'}
+                timing={3000}
+            />
+            <AutoHideAlert 
+                open={editAlert}
+                type={'success'}
+                message={'Successfully edit marker!'}
                 timing={3000}
             />
         </Base>

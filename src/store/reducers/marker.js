@@ -24,9 +24,27 @@ export default function markerReducer(state = {
             }
         }
         case constants.UPDATE_MARKER_FAV: {
-            const result = state.markers
+            const result = state.markers || []
             let item = result.find(s => s.id === action.id)
             item.is_fav = action.is_fav
+            return {
+                ...state,
+                markers: result,
+            }
+        }
+        case constants.EDIT_MARKER: {
+            const result = state.markers || []
+            let index = result.findIndex(s => s.id === action.marker.id)
+            result[index] = action.marker
+            return {
+                ...state,
+                markers: result
+            }
+        }
+        case constants.REMOVE_MARKER: {
+            const result = state.markers || []
+            let item = result.find(s => s.id === action.id)
+            item.status = 'cancelled'
             return {
                 ...state,
                 markers: result,
@@ -47,7 +65,12 @@ export default function markerReducer(state = {
         case constants.UPDATE_MARKER_STATUS: {
             const result = state.markers || []
             let item = result.find(s => s.id === action.marker.id)
-            item.status = action.marker.status
+            if (item) {
+                item.status = action.marker.status
+            } else {
+                result.push(action.marker)
+            }
+            
             return {
                 ...state,
                 markers: result,

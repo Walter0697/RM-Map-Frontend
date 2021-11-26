@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { connect } from 'react-redux'
+import { useMutation } from '@apollo/client'
 import {
     Button,
     IconButton,
@@ -14,6 +15,8 @@ import {
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn'
 import CancelIcon from '@mui/icons-material/Cancel'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -21,6 +24,8 @@ import AutoHideAlert from '../AutoHideAlert'
 
 import constants from '../../constant'
 import markerhelper from '../../scripts/marker'
+import actions from '../../store/actions'
+import graphql from '../../graphql'
 
 import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
@@ -34,6 +39,9 @@ function ScheduleItem({
     item,
     eventtypes,
     triggerCopyMessage,
+    isToday,
+    onEditClick,
+    onDeleteClick,
 }) {
     const imageLink = useMemo(() => {
         if (!item || !item.marker) return ''
@@ -91,8 +99,20 @@ function ScheduleItem({
     return (
         <>
             <Grid container spacing={1}>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                     {title(item)}
+                </Grid>
+                <Grid item xs={6}>
+                    {!isToday && (
+                        <div style={{
+                            float: 'right',
+                        }}>
+                            <EditIcon sx={{ color: '#88b7ff' }} onClick={() => onEditClick(item)} />
+                            <DeleteIcon sx={{ color: '#ff8888' }} onClick={() => onDeleteClick(item)} />
+                        </div>
+                    )}
+                </Grid>
+                <Grid item xs={12}>
                     {/* for bottom border */}
                     <div
                         style={{
@@ -198,8 +218,18 @@ function ScheduleView({
     schedules,
     selected_date,
     openArriveForm,
+    editSchedule,
     eventtypes,
+    dispatch,
 }) {
+    const [ removeScheduleGQL, { data: removeData, loading: removeLoading, error: removeError } ] = useMutation(graphql.schedules.remove, { errorPolicy: 'all' })
+
+    const [ deletingId, setDeleting ] = useState(-1)
+
+    // if request failed
+    const [ failedAlert, fail ] = useBoop(3000)
+    const [ failMessage, setFailMessage ] = useState('')
+
     const todayString = dayjs().format('YYYY-MM-DD')
 
     const sortedList = useMemo(() => {
@@ -216,11 +246,36 @@ function ScheduleView({
         return sorted
     }, [schedules])
 
+    useEffect(() => {
+        if (removeData) {
+            if (deletingId !== -1) {
+                dispatch(actions.updateMarkerStatus(removeData.removeSchedule))
+                dispatch(actions.removeSchedule(deletingId))
+                handleClose()
+            }
+        }
+
+        if (removeError) {
+            setFailMessage(removeError.message)
+            fail()
+        }
+    }, [removeData, removeError, deletingId])
+
     const isToday = useMemo(() => {
         return todayString === selected_date
     })
 
     const [ copyMessage, triggerCopyMessage ] = useBoop(3000)
+
+    const onEditClickHandler = () => {
+
+    }
+
+    const onDeleteClickHandler = (schedule) => {
+        if (!window.confirm(`Do you want to remove ${schedule.label}`)) return
+        setDeleting(schedule.id)
+        removeScheduleGQL({ variables: { id: schedule.id } })
+    }
 
     return (
         <>
@@ -249,6 +304,9 @@ function ScheduleView({
                                             item={schedule}
                                             eventtypes={eventtypes}
                                             triggerCopyMessage={triggerCopyMessage}
+                                            isToday={isToday}
+                                            onEditClick={onEditClickHandler}
+                                            onDeleteClick={onDeleteClickHandler}
                                         />
                                     </Grid>
                                 ))}
@@ -263,6 +321,12 @@ function ScheduleView({
                 )}
                 
             </Dialog>
+            <AutoHideAlert 
+                open={failedAlert}
+                type={'error'}
+                message={failMessage}
+                timing={3000}
+            />
             <AutoHideAlert 
                 open={copyMessage}
                 type={'success'}
