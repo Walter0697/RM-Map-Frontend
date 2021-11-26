@@ -62,8 +62,8 @@ const fillVariableForMarker = (m) => {
     // for determine if it is hurry
     marker.is_hurry = false
     if (marker.to_time) {
-        const fivedays = dayjs(marker.to_time).add(5, 'day')
-        if (fivedays.isAfter(dayjs(), 'day')) {
+        const fivedays = dayjs(marker.to_time).add(-5, 'day')
+        if (fivedays.isBefore(dayjs())) {
             marker.is_hurry = true
         }
     }

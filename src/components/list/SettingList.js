@@ -4,6 +4,7 @@ import BottomUpTrail from '../animatein/BottomUpTrail'
 import MarkerRelation from './settings/MarkerRelation'
 import PreferredPin from './settings/PreferredPin'
 import LogoutButton from './settings/LogoutButton'
+import VersionView from './settings/VersionView'
 import WrapperBox from '../wrapper/WrapperBox'
 
 function SettingList({
@@ -49,6 +50,12 @@ function SettingList({
           <LogoutButton
             setLoading={() => {}}
           />
+        </WrapperBox>
+        <WrapperBox
+          height={30}
+          marginBottom={'15px'}
+        >
+          <VersionView />
         </WrapperBox>
       </BottomUpTrail>
     </div>

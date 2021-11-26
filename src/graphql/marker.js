@@ -135,12 +135,71 @@ const revoke = gql`
     }
 `
 
+const edit = gql`
+    mutation editMarkerGQL($id: Int!,
+                        $label: String
+                        $address: String
+                        $image_link: String
+                        $image_upload: Upload
+                        $link: String
+                        $type: String
+                        $description: String
+                        $to_time: String
+                        $from_time: String
+                        $estimate_time: String
+                        $price: String) {
+        editMarker(input: {
+            id: $id,
+            label: $label,
+            address: $address,
+            image_link: $image_link,
+            image_upload: $image_upload,
+            link: $link,
+            type: $type,
+            description: $description,
+            to_time: $to_time,
+            from_time: $from_time,
+            estimate_time: $estimate_time,
+            price: $price,
+        }) {
+            id
+            type
+            description
+            latitude
+            longitude
+            label
+            address
+            link
+            image_link
+            type
+            estimate_time
+            price
+            status
+            to_time
+            from_time
+            is_fav
+            created_at
+        }
+    }
+`
+
+// retrieving the marker after deleting the schedule
+const remove = gql`
+    mutation removeMarkerGQL($id: Int!) {
+        removeMarker(input: {
+            id: $id,
+        }) 
+    }
+`
+
 const markers = {
     list,
     create,
     update_fav,
     previous,
     revoke,
+    edit,
+    remove,
 }
 
 export default markers
