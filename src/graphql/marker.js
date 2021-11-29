@@ -14,6 +14,8 @@ const list = gql`
             image_link
             type
             estimate_time
+            permanent
+            need_booking
             price
             status
             to_time
@@ -35,6 +37,8 @@ const create = gql`
                           $image_upload: Upload,
                           $description: String, 
                           $estimate_time: String,
+                          $permanent: Boolean,
+                          $need_booking: Boolean,
                           $price: String,
                           $to_time: String, 
                           $from_time: String) {
@@ -49,6 +53,8 @@ const create = gql`
             image_upload: $image_upload,
             description: $description,
             estimate_time: $estimate_time,
+            permanent: $permanent,
+            need_booking: $need_booking,
             price: $price,
             to_time: $to_time,
             from_time: $from_time,
@@ -63,6 +69,8 @@ const create = gql`
             image_link
             type
             estimate_time
+            permanent
+            need_booking
             price
             status
             to_time
@@ -125,6 +133,8 @@ const revoke = gql`
             image_link
             type
             estimate_time
+            permanent
+            need_booking
             price
             status
             to_time
@@ -144,6 +154,8 @@ const edit = gql`
                         $link: String
                         $type: String
                         $description: String
+                        $permanent: Boolean
+                        $need_booking: Boolean
                         $to_time: String
                         $from_time: String
                         $estimate_time: String
@@ -157,6 +169,8 @@ const edit = gql`
             link: $link,
             type: $type,
             description: $description,
+            permanent: $permanent,
+            need_booking: $need_booking,
             to_time: $to_time,
             from_time: $from_time,
             estimate_time: $estimate_time,
@@ -173,6 +187,8 @@ const edit = gql`
             image_link
             type
             estimate_time
+            permanent
+            need_booking
             price
             status
             to_time

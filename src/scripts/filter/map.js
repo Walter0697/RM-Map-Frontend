@@ -22,6 +22,9 @@ const mapMarkerWithFilter = (markers, filter, options) => {
                 case types.options.label:
                     filterFunc = filterByLabel
                     break
+                case types.options.booking:
+                    filterFunc = filterByBooking
+                    break
                 default:
                     break
             }
@@ -100,6 +103,14 @@ const filterByEstimateTime = (markers, et) => {
 
 const filterByPricing = (markers, p) => {
     return markers.filter(s => s.price === p)
+}
+
+const filterByBooking = (markers, b) => {
+    if (b === 'yes') {
+        return markers.filter(s => s.need_booking)
+    } else {
+        return markers.filter(s => !s.need_booking)
+    }
 }
 
 const appendToList = (resultList, appendingList) => {

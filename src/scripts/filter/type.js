@@ -10,6 +10,7 @@ const options = {
     attribute: 'attribute',
     estimatetime: 'estimatetime',
     pricing: 'pricing',
+    booking: 'booking',
 }
 
 const allow_options = [ 
@@ -19,6 +20,7 @@ const allow_options = [
     options.attribute,
     options.estimatetime,
     options.pricing,
+    options.booking,
 ]
 
 const types = {

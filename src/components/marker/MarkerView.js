@@ -17,6 +17,9 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
 import TimerIcon from '@mui/icons-material/Timer'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import PinDropIcon from '@mui/icons-material/PinDrop'
+import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
+import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -191,6 +194,32 @@ function MarkerView({
                                             <ContentCopyIcon />
                                         </IconButton>
                                     </Grid>
+                                    {marker.permanent && (
+                                        <Grid item xs={12} md={12} lg={12}>
+                                            <PinDropIcon sx={{
+                                                verticalAlign: 'middle',
+                                                display: 'inline-block',
+                                            }} /> Permanent Location
+                                        </Grid>
+                                    )}
+                                    <Grid item xs={12} md={12} lg={12}>
+                                        {marker.need_booking ? (
+                                            <>
+                                                <LocalPhoneIcon sx={{
+                                                    verticalAlign: 'middle',
+                                                    display: 'inline-block',
+                                                }} /> Required booking
+                                            </>
+                                        ) : (
+                                            <>
+                                                <DirectionsWalkIcon sx={{
+                                                    verticalAlign: 'middle',
+                                                    display: 'inline-block',
+                                                }} /> Can Walk-in
+                                            </>
+                                        )}
+                                    </Grid>
+                                   
                                     {marker.link && (
                                         <Grid item xs={12} md={12} lg={12}>
                                             <a onClick={redirectToSite}>{marker.link}</a>

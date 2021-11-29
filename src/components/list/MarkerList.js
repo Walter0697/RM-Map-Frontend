@@ -11,6 +11,8 @@ import {
 } from '@mui/material'
 
 import StarIcon from '@mui/icons-material/Star'
+import PinDropIcon from '@mui/icons-material/PinDrop'
+import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import ImageHeadText from '../wrapper/ImageHeadText'
@@ -121,9 +123,19 @@ function MarkerItem({
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   marginTop: '5px',
+                  marginRight: '10px',
                   color: '#071c8d',
+                  display: 'flex',
+                  flexDirection: 'flex-start',
+                  width: '95%',
                 }}
               >
+                {item.permanent && (
+                  <PinDropIcon />
+                )} 
+                {item.need_booking && (
+                  <LocalPhoneIcon />
+                )} 
                 {item.description}
               </div>
             </Grid>

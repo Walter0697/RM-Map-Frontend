@@ -119,6 +119,25 @@ const pricingFilter = () => {
     }
 }
 
+const needBookingFilter = () => {
+    return {
+        title: 'Booking required',
+        label: types.options.booking,
+        options: [{
+            label: 'required booking',
+            value: 'yes',
+            icon: false,
+            size: 'middle'
+        }, {
+            label: 'walk in',
+            value: 'no',
+            icon: false,
+            size: 'middle',
+        }],
+        type: types.chooseType.single,
+    }
+}
+
 const labelFilter = () => {
     return {
         label: types.options.label,
@@ -134,6 +153,7 @@ const generate = {
     estimateTimeFilter,
     pricingFilter,
     labelFilter,
+    needBookingFilter,
 }
 
 export default generate

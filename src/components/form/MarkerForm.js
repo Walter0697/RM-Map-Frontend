@@ -44,6 +44,8 @@ function MarkerForm({
         description: '', 
         estimate_time: '',
         price: '',
+        need_booking: false,
+        permanent:  false,
         from_time: null,
         to_time: null,    
     })
@@ -153,6 +155,8 @@ function MarkerForm({
             description: formValue.description,
             estimate_time: formValue.estimate_time,
             price: formValue.price,
+            need_booking: formValue.need_booking,
+            permanent: formValue.permanent,
             to_time: to,
             from_time: from,
         }})
@@ -210,6 +214,20 @@ function MarkerForm({
                             label='latitude'
                             value={location ? location.latlon.lat : ''}
                             disabled
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Selectable
+                            label='type'
+                            required
+                            value={formValue.type}
+                            onValueChange={(e) => onValueChangeHandler('type', e.target.value)}
+                            defaultSelectaValue={''}
+                            defaultSelectText={''}
+                            errorMessage={error.type}
+                            list={eventtypes}
+                            valueKey={'value'}
+                            textKey={'label'}
                         />
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
@@ -282,20 +300,6 @@ function MarkerForm({
                         </FormControl>
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
-                        <Selectable
-                            label='type'
-                            required
-                            value={formValue.type}
-                            onValueChange={(e) => onValueChangeHandler('type', e.target.value)}
-                            defaultSelectaValue={''}
-                            defaultSelectText={''}
-                            errorMessage={error.type}
-                            list={eventtypes}
-                            valueKey={'value'}
-                            textKey={'label'}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
                         <TextField
                             variant='outlined'
                             fullWidth
@@ -355,6 +359,36 @@ function MarkerForm({
                             value={formValue.to_time}
                             onValueChange={(e) => onValueChangeHandler('to_time', e)}
                             errorMessage={error.to_time}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Selectable
+                            label='permanent'
+                            value={formValue.permanent}
+                            onValueChange={(e) => onValueChangeHandler('permanent', e.target.value)}
+                            noDefault
+                            errorMessage={''}
+                            list={[
+                                { value: false, label: 'no' },
+                                { value: true, label: 'yes' },
+                            ]}
+                            valueKey={'value'}
+                            textKey={'label'}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Selectable
+                            label='need booking'
+                            value={formValue.need_booking}
+                            onValueChange={(e) => onValueChangeHandler('need_booking', e.target.value)}
+                            noDefault
+                            errorMessage={''}
+                            list={[
+                                { value: false, label: 'no' },
+                                { value: true, label: 'yes' },
+                            ]}
+                            valueKey={'value'}
+                            textKey={'label'}
                         />
                     </Grid>
                 </Grid>

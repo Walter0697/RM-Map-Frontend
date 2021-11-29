@@ -137,6 +137,7 @@ function ScheduleForm({
                     <Grid item xs={12} md={12} lg={12}>
                         <NullableDatePicker
                             label={'selected time'}
+                            required
                             value={formValue.selected_time}
                             onValueChange={(e) => onValueChangeHandler('selected_time', e)}
                             errorMessage={error.selected_time}
@@ -146,7 +147,6 @@ function ScheduleForm({
                         <TextField
                             variant='outlined'
                             fullWidth
-                            required
                             label='description'
                             value={formValue.description}
                             onChange={(e) => onValueChangeHandler('description', e.target.value)}

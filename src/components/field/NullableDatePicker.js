@@ -15,6 +15,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 function NullableDatePicker({
     label,
     value,
+    required,
     onValueChange,
     errorMessage,
 }) {
@@ -30,6 +31,7 @@ function NullableDatePicker({
                     <TextField 
                         {...props} 
                         fullWidth
+                        required={required}
                         error={!!errorMessage}
                         helperText={errorMessage}
                         InputProps={{
