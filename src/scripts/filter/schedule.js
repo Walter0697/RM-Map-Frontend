@@ -1,10 +1,12 @@
 import dayjs from 'dayjs'
+import dayjsPluginUTC from 'dayjs-plugin-utc'
+dayjs.extend(dayjsPluginUTC)
 
 const getTodaySchedule = (schedules) => {
     if (!schedules) return []
     
     const now = dayjs().format('YYYY-MM-DD')
-    return schedules.filter(s => dayjs(s.selected_date).format('YYYY-MM-DD') === now)
+    return schedules.filter(s => dayjs.utc(s.selected_date).format('YYYY-MM-DD') === now)
 }
 
 const getUpcomingSchedules = (schedules) => {
@@ -12,7 +14,7 @@ const getUpcomingSchedules = (schedules) => {
 
     const now = dayjs()
     const nowStr = now.format('YYYY-MM-DD')
-    return schedules.filter(s => dayjs(s.selected_date).format('YYYY-MM-DD') !== nowStr && dayjs(s.selected_date).isAfter(now))
+    return schedules.filter(s => dayjs.utc(s.selected_date).format('YYYY-MM-DD') !== nowStr && dayjs(s.selected_date).isAfter(now))
 }
 
 const getTodayScheduleWithImage = (schedules, eventtypes) => {

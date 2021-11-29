@@ -27,9 +27,8 @@ const list = gql`
 const create = gql`
     mutation createScheduleGQL( $label: String!,
                         $description: String!,
-                        $selected_time: String!
-                        $marker_id: Int!
-                        ) {
+                        $selected_time: String!,
+                        $marker_id: Int!) {
         createSchedule(input: {
             label: $label,
             description: $description,
@@ -98,9 +97,8 @@ const by_marker = gql`
 const edit = gql`
     mutation editScheduleGQL($id: Int!,
                             $label: String,
-                            $value: String,
-                            $priority: Int,
-                            $icon_upload: Upload) {
+                            $description: String,
+                            $selected_time: String) {
         editSchedule(input: {
             id: $id,
             label: $label

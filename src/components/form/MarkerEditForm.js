@@ -25,6 +25,10 @@ import generic from '../../scripts/generic'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
 
+import dayjs from 'dayjs'
+import dayjsPluginUTC from 'dayjs-plugin-utc'
+dayjs.extend(dayjsPluginUTC)
+
 function MarkerEditForm({
     open, 
     handleClose,
@@ -73,8 +77,8 @@ function MarkerEditForm({
         setFormValue('description', marker.description)
         setFormValue('estimate_time', marker.estimate_time)
         setFormValue('price', marker.price)
-        setFormValue('from_time', marker.from_time)
-        setFormValue('to_time', marker.to_time)
+        setFormValue('from_time', marker.from_time ? dayjs.utc(marker.from_time).format('MM/DD/YYYY HH:mm') : null)
+        setFormValue('to_time', marker.to_time ? dayjs.utc(marker.to_time).format('MM/DD/YYYY HH:mm') : null)
         
     }, [marker])
 

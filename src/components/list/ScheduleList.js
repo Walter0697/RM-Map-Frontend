@@ -11,8 +11,6 @@ import {
     Button,
 } from '@mui/material'
 
-import dayjs from 'dayjs'
-
 import useBoop from '../../hooks/useBoop'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
@@ -20,6 +18,10 @@ import WrapperBox from '../wrapper/WrapperBox'
 
 import generic from '../../scripts/generic'
 import filters from '../../scripts/filter'
+
+import dayjs from 'dayjs'
+import dayjsPluginUTC from 'dayjs-plugin-utc'
+dayjs.extend(dayjsPluginUTC)
 
 function ScheduleItem({
     item,
@@ -327,7 +329,7 @@ function ScheduleList({
         // use dictionary for grouping the schedules into each day
         let result = {}
         upcoming_list.forEach((sd) => {
-            const date = dayjs(sd.selected_date).format('YYYY-MM-DD')
+            const date = dayjs.utc(sd.selected_date).format('MM/DD/YYYY')
             if (date in result) {
                 result[date].push(sd)
             } else {

@@ -19,7 +19,8 @@ export default function scheduleReducer(state = {
             }
         }
         case constants.EDIT_SCHEDULE: {
-            const result = state.schedules || []
+            const before = state.schedules || []
+            let result = Object.assign([], before)
             let index = result.findIndex(s => s.id === action.schedule.id)
             result[index] = action.schedule
             return {

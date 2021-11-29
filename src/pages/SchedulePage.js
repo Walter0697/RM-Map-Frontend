@@ -7,6 +7,7 @@ import useBoop from '../hooks/useBoop'
 import ScheduleList from '../components/list/ScheduleList'
 import ScheduleView from '../components/schedule/ScheduleView' 
 import ScheduleArriveForm from '../components/schedule/ScheduleArriveForm'
+import ScheduleEditForm from '../components/form/ScheduleEditForm'
 import AutoHideAlert from '../components/AutoHideAlert'
 
 function SchedulePage() {
@@ -14,6 +15,9 @@ function SchedulePage() {
     const [ selectedSchedules, setSchedules ] = useState([])
     const [ selectedDate, setSelectedDate ] = useState(null)
     const [ updateAlert, confirmUpdated ] = useBoop(3000)
+
+    const [ editingSchedule, setEditing ] = useState(null)
+    const [ editAlert, confirmedEdited ] = useBoop(3000)
 
     // if schedule is selecting for arrived
     const [ arriveFormOpen, setArriveFormOpen ] = useState(false)
@@ -34,6 +38,16 @@ function SchedulePage() {
         confirmUpdated()
     }
 
+    const onEditingSchedule = (schedule) => {
+        setEditing(schedule)
+    }
+
+    const onScheduleUpdated = () => {
+        setEditing(null)
+        closeScheduleView()
+        confirmedEdited()
+    }
+
     return (
         <Base>
             <ScheduleList
@@ -45,6 +59,7 @@ function SchedulePage() {
                 schedules={selectedSchedules}
                 selected_date={selectedDate}
                 openArriveForm={() => setArriveFormOpen(true)}
+                openEditForm={onEditingSchedule}
             />
             <ScheduleArriveForm 
                 open={arriveFormOpen}
@@ -52,10 +67,22 @@ function SchedulePage() {
                 onUpdated={onScheduleStatusUpdated}
                 schedule_list={selectedSchedules}
             />
+            <ScheduleEditForm 
+                open={!!editingSchedule}
+                handleClose={() => setEditing(null)}
+                onUpdated={onScheduleUpdated}
+                schedule={editingSchedule}
+            />
             <AutoHideAlert 
                 open={updateAlert}
                 type={'success'}
                 message={'Update status!'}
+                timing={3000}
+            />
+            <AutoHideAlert 
+                open={editAlert}
+                type={'success'}
+                message={'Successfully edit schedule!'}
                 timing={3000}
             />
         </Base>

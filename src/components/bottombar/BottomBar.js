@@ -4,7 +4,7 @@ import { useHistory, useLocation } from 'react-router-dom'
 import SearchIcon from '@mui/icons-material/Search'
 import MapIcon from '@mui/icons-material/Map'
 import HomeIcon from '@mui/icons-material/Home'
-import StarIcon from '@mui/icons-material/Star'
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import SettingsIcon from '@mui/icons-material/Settings'
 
 import BarIcon from './BarIcon'
@@ -64,8 +64,8 @@ function BottomBar({
                 <BarIcon
                     route={'/schedule'}
                     path={location.pathname}
-                    activeIcon={<StarIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    inactiveIcon={<StarIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                    activeIcon={<CalendarTodayIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    inactiveIcon={<CalendarTodayIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
                     setPath={changeTab}
                 />
             </div>

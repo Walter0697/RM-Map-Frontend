@@ -7,12 +7,19 @@ import LogoutButton from './settings/LogoutButton'
 import VersionView from './settings/VersionView'
 import WrapperBox from '../wrapper/WrapperBox'
 
+import * as serviceWorkerRegistration from '../../serviceWorkerRegistration'
+
 function SettingList({
   relationUser,
   openRelationChange,
   pinPreference,
   openPreferredPinForm,
 }) {
+
+  const checkUpdate = () => {
+    serviceWorkerRegistration.unregister()
+  }
+
   return (
     <div 
         style={{
@@ -55,7 +62,9 @@ function SettingList({
           height={30}
           marginBottom={'15px'}
         >
-          <VersionView />
+          <VersionView 
+            onClickHandler={checkUpdate}
+          />
         </WrapperBox>
       </BottomUpTrail>
     </div>

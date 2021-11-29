@@ -6,7 +6,9 @@ import {
 
 import {version} from '../../../../package.json'
 
-function VersionView() {
+function VersionView({
+    onClickHandler,
+}) {
     return (
         <Button
             size='large'
@@ -16,7 +18,7 @@ function VersionView() {
                 width: '100%',
                 boxShadow: '2px 2px 6px',
             }}
-            onClick={() => {}}
+            onClick={onClickHandler}
         >
             <Grid 
                 container fullWidth>

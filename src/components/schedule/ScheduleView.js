@@ -218,7 +218,7 @@ function ScheduleView({
     schedules,
     selected_date,
     openArriveForm,
-    editSchedule,
+    openEditForm,
     eventtypes,
     dispatch,
 }) {
@@ -267,8 +267,8 @@ function ScheduleView({
 
     const [ copyMessage, triggerCopyMessage ] = useBoop(3000)
 
-    const onEditClickHandler = () => {
-
+    const onEditClickHandler = (schedule) => {
+        openEditForm(schedule)
     }
 
     const onDeleteClickHandler = (schedule) => {
