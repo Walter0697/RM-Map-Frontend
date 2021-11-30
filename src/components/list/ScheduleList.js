@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { connect } from 'react-redux'
 import {
@@ -15,6 +15,7 @@ import useBoop from '../../hooks/useBoop'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
+import AutoUpdateTop from './AutoUpdateTop'
 
 import generic from '../../scripts/generic'
 import filters from '../../scripts/filter'
@@ -22,6 +23,8 @@ import filters from '../../scripts/filter'
 import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
 dayjs.extend(dayjsPluginUTC)
+
+const loadingBoxHeight = 300
 
 function ScheduleItem({
     item,
@@ -316,6 +319,11 @@ function ScheduleList({
     // generic utility
     const location = useLocation()
 
+    const listRef = useRef(null)
+    const itemListRef = useRef(null)
+
+    const [ bottomPaddingBox, setPaddingHeight ] = useState(0)
+
     const today_schedules = useMemo(() => {
         if (!schedules) return []
         return filters.schedules.get_today_image(schedules, eventtypes)
@@ -366,6 +374,7 @@ function ScheduleList({
     return (
         <>
             <div
+                ref={listRef}
                 style={{
                     position: 'absolute',
                     height: '90%',
@@ -375,45 +384,60 @@ function ScheduleList({
                     overflow: 'auto',
                 }}
             >
-                <BottomUpTrail>
-                    <WrapperBox
-                        height={350}
-                        marginBottom={'20px'}
-                    >
-                        <TodayList
-                            list={today_schedules}
-                            onClickHandler={openScheduleView}
-                        />
-                    </WrapperBox>
-
-                    {upcoming_schedules.length !== 0 && (
-                        <div style={{
-                            height: '50px',
-                            width: '100%',
-                            color: '#455295',
-                            fontWeight: '500',
-                            fontSize: '20px',
-                            paddingLeft: '5%',
-                        }}> 
-                            Upcoming schedule...
-                        </div>
-                    )}
-                    
-                    {upcoming_schedules.map((item, index) => (
+                <AutoUpdateTop
+                    topHeight={loadingBoxHeight}
+                    items={schedules}
+                    listRef={listRef}
+                    itemListRef={itemListRef}
+                    setBottomPaddingHeight={setPaddingHeight}
+                />
+                <div ref={itemListRef}>
+                    <BottomUpTrail>
                         <WrapperBox
-                            key={index}
-                            height={150}
-                            marginBottom={'10px'}
+                            height={350}
+                            marginBottom={'20px'}
                         >
-                            <ScheduleItem 
-                                item={item[1]}
-                                selected_date={item[0]}
-                                eventtypes={eventtypes}
-                                onClickHandler={openScheduleView}   
+                            <TodayList
+                                list={today_schedules}
+                                onClickHandler={openScheduleView}
                             />
                         </WrapperBox>
-                    ))}
-                </BottomUpTrail>
+
+                        {upcoming_schedules.length !== 0 && (
+                            <div style={{
+                                height: '50px',
+                                width: '100%',
+                                color: '#455295',
+                                fontWeight: '500',
+                                fontSize: '20px',
+                                paddingLeft: '5%',
+                            }}> 
+                                Upcoming schedule...
+                            </div>
+                        )}
+                        
+                        {upcoming_schedules.map((item, index) => (
+                            <WrapperBox
+                                key={index}
+                                height={150}
+                                marginBottom={'10px'}
+                            >
+                                <ScheduleItem 
+                                    item={item[1]}
+                                    selected_date={item[0]}
+                                    eventtypes={eventtypes}
+                                    onClickHandler={openScheduleView}   
+                                />
+                            </WrapperBox>
+                        ))}
+                    </BottomUpTrail>
+                </div>
+                <div
+                    style={{
+                    height: bottomPaddingBox,
+                    width: '100%',
+                    }}
+                />
             </div>
         </>
     )

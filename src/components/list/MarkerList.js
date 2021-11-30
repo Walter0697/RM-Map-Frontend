@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { connect } from 'react-redux'
 import {
   useSpring,
@@ -18,6 +18,9 @@ import BottomUpTrail from '../animatein/BottomUpTrail'
 import ImageHeadText from '../wrapper/ImageHeadText'
 import WrapperBox from '../wrapper/WrapperBox'
 import FilterBox from '../filterbox/FilterBox'
+import AutoUpdateTop from './AutoUpdateTop'
+
+const loadingBoxHeight = 300
 
 function MarkerItem({
   item,
@@ -172,6 +175,9 @@ function MarkerList({
   finalFilterValue,
   filterOpen,
 }) {
+    const listRef = useRef(null)
+    const itemListRef = useRef(null)
+
     const {
       filterBoxTransform,
       filterBoxOpacity,
@@ -186,9 +192,13 @@ function MarkerList({
         filterBoxTransform: filterOpen ? 'scale(1, 1) translate(0%, 0%)' : 'scale(0, 0) translate(-100%, 3000%)',
       }
     })
+
+    const [ bottomPaddingBox, setPaddingHeight ] = useState(0)
+
     return (
         <>
           <div 
+              ref={listRef}
               style={{
                   position: 'absolute',
                   height: height,
@@ -198,21 +208,37 @@ function MarkerList({
                   overflow: 'auto',
               }}
           >
-              <BottomUpTrail>
-                {markers.map((item, index) => (
-                  <WrapperBox
-                    key={index}
-                    height='120px'
-                    marginBottom='10px'
-                  >
-                    <MarkerItem
-                      item={item}
-                      typeIcon={eventtypes.find(s => s.value === item.type).icon_path}
-                      onClickHandler={() => setSelectedById(item.id)}
-                    />
-                  </WrapperBox>
-                ))}
-              </BottomUpTrail>
+            <AutoUpdateTop
+              topHeight={loadingBoxHeight}
+              items={markers}
+              listRef={listRef}
+              itemListRef={itemListRef}
+              setBottomPaddingHeight={setPaddingHeight}
+            />
+              <div ref={itemListRef}>
+                <BottomUpTrail>
+                  {markers.map((item, index) => (
+                    <WrapperBox
+                      key={index}
+                      height={'120px'}
+                      marginBottom='10px'
+                    >
+                      <MarkerItem
+                        item={item}
+                        typeIcon={eventtypes.find(s => s.value === item.type).icon_path}
+                        onClickHandler={() => setSelectedById(item.id)}
+                      />
+                    </WrapperBox>
+                  ))}
+                </BottomUpTrail>
+              </div>
+
+              <div
+                style={{
+                  height: bottomPaddingBox,
+                  width: '100%',
+                }}
+              />
           </div>
 
           <animated.div style={{
