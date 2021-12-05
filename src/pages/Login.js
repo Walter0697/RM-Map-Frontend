@@ -237,7 +237,7 @@ function Login({ jwt, dispatch }) {
                         alignItems="center"
                         justify="center"
                     >
-                        <CheckCircleOutlineIcon sx={{ fontSize: 90, color: '#89fca8' }}/>
+                        <CheckCircleOutlineIcon sx={{ fontSize: 90, color: '#b2d2a4' }}/>
                     </Grid>
                 )
         }

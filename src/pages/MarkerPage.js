@@ -145,7 +145,7 @@ function MarkerPage({
                     className={styles.flip}
                     style={{
                         transform: 'rotateY(180deg)',
-                        background: '#89fca8',
+                        background: '#b2d2a4',
                     }}
                 >
                     <MarkerList
