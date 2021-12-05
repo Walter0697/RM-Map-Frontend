@@ -287,7 +287,7 @@ function FilterBox({
             style={{
                 height: 'auto',
                 width: '95%',
-                backgroundColor: '#c1fdd1',
+                backgroundColor: '#b2d2a4',
                 color: '#002976',
                 boxShadow: '2px 2px 6px',
                 opacity: x,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { useMutation } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import {
     Grid,
     TextField,
@@ -14,6 +14,7 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 
 import useObject from '../../hooks/useObject'
+import useDebounce from '../../hooks/useDebounce'
 
 import BaseForm from './BaseForm'
 import ImageLinkValidate from './image/ImageLinkValidate'
@@ -34,7 +35,9 @@ function MarkerForm({
     dispatch,
 }) {
     const [ createMarkerGQL, { data: createData, loading: createLoading, error: createError } ] = useMutation(graphql.markers.create, { errorPolicy: 'all' })
+    const [ scrapimageGQL, { data: scrapImageData, loading: scrapImageLoading, error: scrapImageError } ] = useLazyQuery(graphql.helpers.webscrap)
 
+    //useLazyQuery
     const [ formValue, setFormValue, resetFormValue ] = useObject({
         label: '',
         address: '',
@@ -51,7 +54,7 @@ function MarkerForm({
     })
     const [ error, setError ] = useObject({})
 
-    const [ imageFormState , setImageState ] = useState('') // weblink, preview
+    const [ imageFormState , setImageState ] = useState('') // weblink, preview, scrap
     const [ imageSubmitMessage, setImageMessage ] = useState('')
 
     const [ submitting, setSubmitting ] = useState(false)
@@ -92,6 +95,34 @@ function MarkerForm({
             onCreated && onCreated()
         }
     }, [createData, createError])
+
+    useEffect(() => {
+        if (scrapImageData) {
+            console.log(scrapImageData.scrapimage)
+            if (scrapImageData.scrapimage.image_link) {
+                setFormValue('imageLink', {
+                    type: 'weblink',
+                    value: scrapImageData.scrapimage.image_link,
+                })
+                setImageState('scrap')
+                setImageMessage('image by scrapping website')
+            }
+
+            if (scrapImageData.scrapimage.title) {
+                if (!formValue.label) {
+                    setFormValue('label', scrapImageData.scrapimage.title)
+                }
+            }
+        }
+    }, [scrapImageData])
+
+    const scrapImageWithLink = () => {
+        if (formValue.link === '') return
+        console.log(formValue.link)
+        scrapimageGQL({ variables: { link: formValue.link }})
+    }
+
+    useDebounce(scrapImageWithLink, 2000, [ formValue.link ])
 
     const onValueChangeHandler = (field, value) => {
         setFormValue(field, value)

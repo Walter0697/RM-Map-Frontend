@@ -128,40 +128,44 @@ function ScheduleArriveForm({
                 {schedule_list.map((item, index) => (
                     <Grid key={index} item xs={12} md={12} lg={12}>
                         <Grid container spacing={2}>
-                            <Grid item xs={1} md={1} lg={1}>
-                                <IconButton 
-                                    size='small'
-                                    onClick={() => setStatusArrival(index)}
-                                >
-                                    { item.status === constants.status.arrived ? (
-                                        <GolfCourseIcon 
-                                            sx={{ color: '#2c6cff'}}
-                                        />
-                                    ): (
-                                        <GolfCourseIcon 
-                                            sx={{ color : '#c0c2cc'}}
-                                        />
-                                    )}
-                                   
-                                </IconButton>
+                            <Grid item xs={3} md={3} lg={3}>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={6} md={6} lg={6}>
+                                        <IconButton 
+                                            size='small'
+                                            onClick={() => setStatusArrival(index)}
+                                        >
+                                            { item.status === constants.status.arrived ? (
+                                                <GolfCourseIcon 
+                                                    sx={{ color: '#2c6cff'}}
+                                                />
+                                            ): (
+                                                <GolfCourseIcon 
+                                                    sx={{ color : '#c0c2cc'}}
+                                                />
+                                            )}
+                                        
+                                    </IconButton>
+                                    </Grid>
+                                    <Grid item xs={6} md={6} lg={6}>
+                                        <IconButton 
+                                            size='small'
+                                            onClick={() => setStatusCancel(index)}
+                                        >
+                                            { item.status === constants.status.cancelled ? (
+                                                <CancelIcon 
+                                                    sx={{ color: '#de155d'}}
+                                                />
+                                            ): (
+                                                <CancelIcon 
+                                                    sx={{ color : '#c0c2cc'}}
+                                                />
+                                            )}
+                                        </IconButton>
+                                    </Grid>
+                                </Grid>
                             </Grid>
-                            <Grid item xs={1} md={1} lg={1}>
-                                <IconButton 
-                                    size='small'
-                                    onClick={() => setStatusCancel(index)}
-                                >
-                                    { item.status === constants.status.cancelled ? (
-                                        <CancelIcon 
-                                            sx={{ color: '#de155d'}}
-                                        />
-                                    ): (
-                                        <CancelIcon 
-                                            sx={{ color : '#c0c2cc'}}
-                                        />
-                                    )}
-                                </IconButton>
-                            </Grid>
-                            <Grid item xs={10} md={10} lg={10}
+                            <Grid item xs={9} md={9} lg={9}
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',

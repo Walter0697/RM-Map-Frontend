@@ -23,7 +23,7 @@ function YesterdayUncheckList({
           onClick={onClickHandler}
       >
           <NotificationImportantIcon style={{ marginRight: '10px' }}/> 
-          Fill in status for yesterday!  
+          Fill in status these!  
       </Button>
   )
 }

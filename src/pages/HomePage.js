@@ -64,7 +64,7 @@ function HomePage() {
             <AutoHideAlert 
                 open={updateAlert}
                 type={'success'}
-                message={'Confirm yesterday schedules status!'}
+                message={'Confirm previous schedules status!'}
                 timing={3000}
             />
             {/* for featured marker */}

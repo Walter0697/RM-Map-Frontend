@@ -63,7 +63,7 @@ function MarkerPage({
         if (finalFilterValue === '') return filteredMarkers
         const list = filters.map.mapMarkerWithFilter(filteredMarkers, finalFilterValue, filterOption)
         return list
-    }, [markers, finalFilterValue, filterOption, showingList, selectedMarker])
+    }, [markers, finalFilterValue, filterOption, showingList])
 
     const [ showFilterInListView, showFilter ] = useState(false)
 
