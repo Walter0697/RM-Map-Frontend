@@ -284,34 +284,38 @@ function MarkerView({
                                             </Grid>
                                         </>
                                     )}
-                                    <Grid item xs={12} md={12} lg={12}>
-                                        <Button 
-                                            variant='contained'
-                                            size='middle'
-                                            color='primary'
-                                            style={{
-                                                color: 'white',
-                                                marginLeft: '10%',
-                                                width: '80%',
-                                                boxShadow: '2px 2px 6px'
-                                            }}
-                                            onClick={onEditClick}
-                                        >Edit</Button>
-                                    </Grid>
-                                    <Grid item xs={12} md={12} lg={12}>
-                                        <Button 
-                                            variant='contained'
-                                            size='middle'
-                                            color='error'
-                                            style={{
-                                                color: 'white',
-                                                marginLeft: '10%',
-                                                width: '80%',
-                                                boxShadow: '2px 2px 6px'
-                                            }}
-                                            onClick={onRemoveClick}
-                                        >Delete</Button>
-                                    </Grid>
+                                    {editMarker && (
+                                        <>
+                                            <Grid item xs={12} md={12} lg={12}>
+                                                <Button 
+                                                    variant='contained'
+                                                    size='middle'
+                                                    color='primary'
+                                                    style={{
+                                                        color: 'white',
+                                                        marginLeft: '10%',
+                                                        width: '80%',
+                                                        boxShadow: '2px 2px 6px'
+                                                    }}
+                                                    onClick={onEditClick}
+                                                >Edit</Button>
+                                            </Grid>
+                                            <Grid item xs={12} md={12} lg={12}>
+                                                <Button 
+                                                    variant='contained'
+                                                    size='middle'
+                                                    color='error'
+                                                    style={{
+                                                        color: 'white',
+                                                        marginLeft: '10%',
+                                                        width: '80%',
+                                                        boxShadow: '2px 2px 6px'
+                                                    }}
+                                                    onClick={onRemoveClick}
+                                                >Delete</Button>
+                                            </Grid>
+                                        </>
+                                    )}
                                 </Grid>
                             </DialogContentText>
                         </DialogContent>
