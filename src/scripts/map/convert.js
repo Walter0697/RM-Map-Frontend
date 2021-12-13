@@ -59,9 +59,11 @@ const centerToMarkerForm = (latlon, address) => {
 // for filling in the variables of markers
 const fillVariableForMarker = (m) => {
     const marker = Object.assign({}, m)
-    // for determine if it is hurry
+    // for determine if it is hurry and with schedule
     marker.is_hurry = false
+    marker.is_timed = false
     if (marker.to_time) {
+        marker.is_timed = true
         const fivedays = dayjs(marker.to_time).add(-5, 'day')
         if (fivedays.isBefore(dayjs())) {
             marker.is_hurry = true

@@ -122,6 +122,7 @@ function LocationPreview({
                     height: '75%',
                     width: '100%',
                 }}    
+                onClick={showMarkerView}
             >
                 <Grid container>
                     { imageExist && (
@@ -175,7 +176,7 @@ function LocationPreview({
                     </Grid>
                 </Grid>
             </Grid>
-            <animated.div
+            {/* <animated.div
                 style={{
                     position: 'absolute',
                     bottom: '5px',
@@ -188,7 +189,7 @@ function LocationPreview({
                 >
                     <OpenInFullIcon />
                 </CircleIconButton>
-            </animated.div>
+            </animated.div> */}
         </Grid>
     )
 }

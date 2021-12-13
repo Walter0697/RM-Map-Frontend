@@ -88,6 +88,8 @@ const filterByAttribute = (markers, attr) => {
             return markers.filter(s => s.is_fav)
         case 'hurry':
             return markers.filter(s => s.is_hurry)
+        case 'timed':
+            return markers.filter(s => s.is_timed)
         default:
             return []
     }

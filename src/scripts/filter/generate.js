@@ -61,6 +61,11 @@ const attributeFilter = () => {
             value: 'hurry',
             icon: false,
             size: 'small',
+        }, {
+            label: 'timed',
+            value: 'timed',
+            icon: false,
+            size: 'small',
         }],
         type: types.chooseType.multiple,
     }
