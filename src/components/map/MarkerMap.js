@@ -30,6 +30,8 @@ function MarkerMap({
     setExpandFilter,
     confirmFilterValue,
     finalFilterValue,
+    customFilterValue,
+    setCustomFilterValue,
     scheduleCreated, // for triggering the event that center marker can be erased
     mappins,    // for displaying pins
     
@@ -199,6 +201,8 @@ function MarkerMap({
                     setExpand={setExpandFilter}
                     confirmFilterValue={confirmFilterValue}
                     finalFilterValue={finalFilterValue}
+                    customFilterValue={customFilterValue}
+                    setCustomFilterValue={setCustomFilterValue}
                 />
             </animated.div>
 

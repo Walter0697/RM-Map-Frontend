@@ -56,6 +56,7 @@ function MarkerPage({
         let list = filters.parser.parseStringToDisplayArr(filterOption, finalFilterValue)
         return list
     }, [finalFilterValue])
+    const [ customFilterValue, setCustomFilterValue ] = useState('')
 
     const displayMarker = useMemo(() => {
         const filteredMarkers = markers.filter(s => s.status === '')
@@ -137,6 +138,8 @@ function MarkerPage({
                         isFilterExpanded={isFilterExpanded} // for viewing filter
                         setExpandFilter={setExpandFilter}
                         confirmFilterValue={confirmFilterValue} // for confirming filter values
+                        customFilterValue={customFilterValue}
+                        setCustomFilterValue={setCustomFilterValue}
                         finalFilterValue={finalFilterDisplay} // for filter options
                         scheduleCreated={confirmCreated}
                     />
@@ -159,6 +162,8 @@ function MarkerPage({
                         isFilterExpanded={isFilterExpanded} // for viewing filter
                         setExpandFilter={setExpandFilter}
                         confirmFilterValue={confirmFilterValue} // for confirming filter values
+                        customFilterValue={customFilterValue}
+                        setCustomFilterValue={setCustomFilterValue}
                         finalFilterValue={finalFilterDisplay} // for filter options
                         filterOpen={showFilterInListView}
                     />

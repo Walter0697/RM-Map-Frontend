@@ -173,6 +173,8 @@ function MarkerList({
   setExpandFilter,
   confirmFilterValue,
   finalFilterValue,
+  customFilterValue,
+  setCustomFilterValue,
   filterOpen,
 }) {
     const listRef = useRef(null)
@@ -258,6 +260,8 @@ function MarkerList({
                 setExpand={setExpandFilter}
                 confirmFilterValue={confirmFilterValue}
                 finalFilterValue={finalFilterValue}
+                customFilterValue={customFilterValue}
+                setCustomFilterValue={setCustomFilterValue}
             />
           </animated.div>
         </>

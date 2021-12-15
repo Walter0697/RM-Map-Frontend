@@ -78,6 +78,8 @@ function FilterPick({
     filterOption,
     filterValue,
     setFilterValue,
+    customFilterValue,
+    setCustomFilterValue,
 }) {
 
     const [ isBlinking, setBlink ] = useBoop(50)
@@ -111,7 +113,8 @@ function FilterPick({
 
     const onFilterValueChange = (e) => {
         setError('')
-        setFilterValue(e.target.value)
+        //setFilterValue(e.target.value)
+        setCustomFilterValue(e.target.value)
     }
 
     const validateFilterValue = () => {
@@ -143,7 +146,9 @@ function FilterPick({
                         width: '90%',
                         marginLeft: '5%',
                     }}
-                    value={filterValue}
+                    // value={filterValue}
+                    // onChange={onFilterValueChange}
+                    value={customFilterValue}
                     onChange={onFilterValueChange}
                     error={!!error}
                     helperText={error}
@@ -265,6 +270,8 @@ function FilterBox({
     setExpand,
     confirmFilterValue,
     finalFilterValue,
+    customFilterValue,
+    setCustomFilterValue,
 }) {
     const [ internalExpand, setInternalExpand ] = useState(false)
     const [ blink, refresh ] = useBoop(300)
@@ -302,6 +309,8 @@ function FilterBox({
                             filterValue={filterValue}
                             setFilterValue={setFilterValue}
                             confirmFilterValue={confirmFilterValue}
+                            customFilterValue={customFilterValue}
+                            setCustomFilterValue={setCustomFilterValue}
                         />
                     ) : (
                         <FilterView

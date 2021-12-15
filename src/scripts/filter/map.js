@@ -19,9 +19,9 @@ const mapMarkerWithFilter = (markers, filter, options) => {
                 case types.options.range:
                     filterFunc = filterByRange
                     break
-                case types.options.label:
-                    filterFunc = filterByLabel
-                    break
+                // case types.options.label:
+                //     filterFunc = filterByLabel
+                //     break
                 case types.options.booking:
                     filterFunc = filterByBooking
                     break
