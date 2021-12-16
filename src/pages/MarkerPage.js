@@ -61,10 +61,12 @@ function MarkerPage({
     const displayMarker = useMemo(() => {
         const filteredMarkers = markers.filter(s => s.status === '')
 
-        if (finalFilterValue === '') return filteredMarkers
-        const list = filters.map.mapMarkerWithFilter(filteredMarkers, finalFilterValue, filterOption)
+        if (finalFilterValue === '' && customFilterValue === '') return filteredMarkers
+
+        const filteredByQuery = filters.map.filterByQuery(filteredMarkers, customFilterValue)
+        const list = filters.map.mapMarkerWithFilter(filteredByQuery, finalFilterValue, filterOption)
         return list
-    }, [markers, finalFilterValue, filterOption, showingList])
+    }, [markers, finalFilterValue, filterOption, customFilterValue, showingList])
 
     const [ showFilterInListView, showFilter ] = useState(false)
 

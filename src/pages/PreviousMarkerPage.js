@@ -45,12 +45,14 @@ function PreviousMarkerPage({
         let list = filters.parser.parseStringToDisplayArr(filterOption, finalFilterValue)
         return list
     }, [finalFilterValue])
+    const [ customFilterValue, setCustomFilterValue ] = useState('')
 
     const displayMarker = useMemo(() => {
-        if (finalFilterValue === '') return previousMarkers
-        const list = filters.map.mapMarkerWithFilter(previousMarkers, finalFilterValue, filterOption)
+        if (finalFilterValue === '' && customFilterValue === '') return previousMarkers
+        const filteredByQuery = filters.map.filterByQuery(previousMarkers, customFilterValue)
+        const list = filters.map.mapMarkerWithFilter(filteredByQuery, finalFilterValue, filterOption)
         return list
-    }, [previousMarkers, finalFilterValue, filterOption, selectedMarker])
+    }, [previousMarkers, finalFilterValue, customFilterValue, filterOption, selectedMarker])
 
     const [ showFilter, setShowFilter ] = useState(false)
 
@@ -108,6 +110,8 @@ function PreviousMarkerPage({
                 isFilterExpanded={isFilterExpanded} // for viewing filter
                 setExpandFilter={setExpandFilter}
                 confirmFilterValue={confirmFilterValue} // for confirming filter values
+                customFilterValue={customFilterValue}
+                setCustomFilterValue={setCustomFilterValue}
                 finalFilterValue={finalFilterDisplay} // for filter options
                 filterOpen={showFilter}
                 setShowFilter={setShowFilter}

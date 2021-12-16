@@ -23,9 +23,25 @@ import filters from '../../scripts/filter'
 
 function FilterView({
     expandFilterView,
+    customFilterValue,
     finalFilterValue,
 }) {
-    if (!finalFilterValue) {
+
+    const labelValue = useMemo(() => {
+        if (customFilterValue !== '') {
+            const custom = customFilterValue.split('&')
+            if (finalFilterValue) {
+                return [...custom, ...finalFilterValue]
+            }
+            return custom
+        }
+        if (finalFilterValue) {
+            return finalFilterValue
+        }
+        return null
+    }, [finalFilterValue, customFilterValue])
+
+    if (!labelValue) {
         return (
             <Button 
                 style={{
@@ -51,7 +67,7 @@ function FilterView({
                 onClick={expandFilterView}
             >
             
-            {finalFilterValue.map(( item, index) => (
+            {labelValue.map((item, index) => (
                 <div
                     key={index}
                     style={{
@@ -315,6 +331,7 @@ function FilterBox({
                     ) : (
                         <FilterView
                             expandFilterView={() => setExpand(true)}
+                            customFilterValue={customFilterValue}
                             finalFilterValue={finalFilterValue}
                         />
                     )

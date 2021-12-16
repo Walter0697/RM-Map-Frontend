@@ -158,6 +158,8 @@ function PreviousMarkerList({
     setExpandFilter,
     confirmFilterValue,
     finalFilterValue,
+    customFilterValue,
+    setCustomFilterValue,
     filterOpen,
     setShowFilter,
 }) {
@@ -237,6 +239,8 @@ function PreviousMarkerList({
                     setExpand={setExpandFilter}
                     confirmFilterValue={confirmFilterValue}
                     finalFilterValue={finalFilterValue}
+                    customFilterValue={customFilterValue}
+                    setCustomFilterValue={setCustomFilterValue}
                 />
             </animated.div>
         </>

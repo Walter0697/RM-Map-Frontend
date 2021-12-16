@@ -1,5 +1,26 @@
 import types from './type'
 
+const filterByQuery = (markers, query) => {
+    let currentList = markers
+    if (query === '') return markers
+
+    const queryList = query.split('&')
+    for (let i = 0; i < queryList.length; i++) {
+        const key = queryList[i].toLowerCase()
+        let multiResult = []
+
+        const filteredByLabel = currentList.filter(s => s.label.toLowerCase().includes(key))
+        multiResult = appendToList(multiResult, filteredByLabel)
+
+        const filteredByAddress = currentList.filter(s => s.address.toLowerCase().includes(key))
+        multiResult = appendToList(multiResult, filteredByAddress)
+
+        currentList = multiResult
+    }
+
+    return currentList
+}
+
 // TODO: maybe need the current location for options as well, but, we might implement that later idk
 const mapMarkerWithFilter = (markers, filter, options) => {
     if (filter === '') return markers
@@ -126,6 +147,7 @@ const appendToList = (resultList, appendingList) => {
 
 const map = {
     mapMarkerWithFilter,
+    filterByQuery,
 }
 
 export default map
