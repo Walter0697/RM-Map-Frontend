@@ -64,7 +64,6 @@ function PreviousMarkerPage({
         options.push(filters.generate.attributeFilter())
         options.push(filters.generate.estimateTimeFilter())
         options.push(filters.generate.pricingFilter())
-        options.push(filters.generate.labelFilter())
 
         setFilterOption(options)
     }, [eventtypes])

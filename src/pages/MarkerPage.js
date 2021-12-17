@@ -79,7 +79,6 @@ function MarkerPage({
         options.push(filters.generate.estimateTimeFilter())
         options.push(filters.generate.pricingFilter())
         options.push(filters.generate.needBookingFilter())
-        options.push(filters.generate.labelFilter())
 
         setFilterOption(options)
     }, [eventtypes])

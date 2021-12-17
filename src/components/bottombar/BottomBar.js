@@ -7,7 +7,11 @@ import HomeIcon from '@mui/icons-material/Home'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import SettingsIcon from '@mui/icons-material/Settings'
 
+import HistoryIcon from '@mui/icons-material/History'
+import TheatersIcon from '@mui/icons-material/Theaters'
+
 import BarIcon from './BarIcon'
+import SubBarIcon from './SubBarIcon'
 
 import constants from '../../constant'
 import styles from '../../styles/bottom.module.css'
@@ -34,13 +38,23 @@ function BottomBar({
     return (
         <div className={styles.bottomnav}>
              <div className={styles.bntab}>
-                <BarIcon
-                    route={'/search'}
-                    path={location.pathname}
-                    activeIcon={<SearchIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    inactiveIcon={<SearchIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
+                { location.pathname === '/movies' ? (
+                    <SubBarIcon 
+                        route={'/movies'}
+                        parentRoute={'/search'}
+                        path={location.pathname}
+                        activeIcon={<TheatersIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                        setPath={changeTab}
+                    />
+                ) : (
+                    <BarIcon
+                        route={'/search'}
+                        path={location.pathname}
+                        activeIcon={<SearchIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                        inactiveIcon={<SearchIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                        setPath={changeTab}
+                    />
+                )}
             </div>
             <div className={styles.bntab}>
                 <BarIcon
@@ -52,13 +66,23 @@ function BottomBar({
                 />
             </div>
             <div className={styles.bntab}>
-                <BarIcon
-                    route={'/home'}
-                    path={location.pathname}
-                    activeIcon={<HomeIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    inactiveIcon={<HomeIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
+                { location.pathname === '/previous' ? (
+                    <SubBarIcon 
+                        route={'/previous'}
+                        parentRoute={'/home'}
+                        path={location.pathname}
+                        activeIcon={<HistoryIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                        setPath={changeTab}
+                    />
+                ) : (
+                    <BarIcon
+                        route={'/home'}
+                        path={location.pathname}
+                        activeIcon={<HomeIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                        inactiveIcon={<HomeIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                        setPath={changeTab}
+                    />
+                )}
             </div>
             <div className={styles.bntab}>
                 <BarIcon

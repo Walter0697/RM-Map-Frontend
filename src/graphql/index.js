@@ -6,6 +6,7 @@ import pins from './pin'
 import defaults from './default'
 import schedules from './schedule'
 import helpers from './helper'
+import movies from './movie'
 
 const graphql = {
     auth,
@@ -16,6 +17,7 @@ const graphql = {
     defaults,
     schedules,
     helpers,
+    movies,
 }
 
 export default graphql
