@@ -36,22 +36,49 @@ function MovieItem({
             <Grid
                 container
                 fullWidth
+                style={{
+                    height: '100%',
+                }}
             >
                 <Grid 
                     item xs={5}
                     style={{ marginTop: '15px'}}
                 >
-                    <img
-                        style={{
-                            width: '80%',
-                        }}
-                        src={item.image_link}
-                    />
+                    {item.image_link && (
+                        <img
+                            style={{
+                                width: '80%',
+                            }}
+                            src={item.image_link}
+                        />
+                    )}
+                    
                 </Grid>
                 <Grid 
                     item xs={7}
+                    style={{
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'column',
+                        marginTop: '40px',
+                    }}
                 >
-                    {item.title}
+                    <div
+                        style={{
+                            fontSize: '18px',
+                            color: 'black',
+                        }}
+                    >
+                        {item.title}
+                    </div>
+                    <div style={{
+                        fontSize: '10px',
+                        color: '#455295',
+                    }}>
+                        {item.release_date}
+                    </div>
                 </Grid>
             </Grid>
         </Button>
@@ -98,7 +125,6 @@ function MovieList({
 
     useEffect(() => {
         if (movieData) {
-            console.log(movieData)
             setList(movieData.moviefetch)
         }
 
@@ -144,6 +170,7 @@ function MovieList({
                     {list.map((item, index) => (
                         <WrapperBox
                             key={index}
+                            minHeight={'30px'}
                             height={'auto'}
                             marginBottom='10px'
                         >
