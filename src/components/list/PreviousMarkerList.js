@@ -45,7 +45,7 @@ function PreviousMarkerItem({
         style={{
         position: 'relative',
         backgroundColor: '#48acdb',
-        borderRaduis: '5px',
+        borderRadius: '5px',
         height: '100%',
         width: '100%',
         boxShadow: '2px 2px 6px',

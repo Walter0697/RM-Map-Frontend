@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
     Grid,
     Button,
@@ -23,7 +23,7 @@ function MovieItem({
             style={{
             position: 'relative',
             backgroundColor: '#48acdb',
-            borderRaduis: '5px',
+            borderRadius: '5px',
             height: '100%',
             width: '100%',
             boxShadow: '2px 2px 6px',
@@ -59,22 +59,42 @@ function MovieItem({
 }
 
 function MovieList({
+    searchQuery,
+    openSearchBox,
     list,
     setList,
 }) {
     
     const [ moviefetchGQL, { data: movieData, loading: movieLoading, error: movieError } ] = useLazyQuery(graphql.movies.search, { fetchPolicy: 'no-cache' })
-    const [ searchQuery, setSearchQuery ] = useState({
-        type: 'upcoming',
-        location: null,
-        query: null,
-    })
+
+    const searchDescription = useMemo(() => {
+        if (searchQuery.type === 'nowplaying') {
+            if (searchQuery.location) {
+                return `Now Playing at ${searchQuery.location}`
+            }
+            return 'Now Playing at theatre'
+        } else if (searchQuery.type === 'upcoming') {
+            if (searchQuery.location) {
+                return `Upcoming at ${searchQuery.location}`
+            }
+            return 'Upcoming movies'
+        } else {
+            return `Searching By '${searchQuery.query}'`
+        }
+    }, [searchQuery])
 
     useEffect(() => {
-        moviefetchGQL({ variables: { 
+        let variables = {
             type: searchQuery.type,
-        }})
-    }, [])
+        }
+        if (searchQuery.type === 'search') {
+            variables.query = searchQuery.query
+        } else {
+            variables.location = searchQuery.location
+        }
+           
+        moviefetchGQL({ variables })
+    }, [searchQuery])
 
     useEffect(() => {
         if (movieData) {
@@ -107,7 +127,7 @@ function MovieList({
                         style={{
                             position: 'relative',
                             backgroundColor: '#48acdb',
-                            borderRaduis: '5px',
+                            borderRadius: '5px',
                             height: '100%',
                             width: '100%',
                             boxShadow: '2px 2px 6px',
@@ -115,16 +135,16 @@ function MovieList({
                             textTransform: 'none',
                             padding: '0',
                         }}
-                            onClick={() => {}}
+                            onClick={openSearchBox}
                         >
-                        Now Playing in theatre
+                        {searchDescription}
                     </Button>
                 </WrapperBox>
                 <BottomUpTrail>
                     {list.map((item, index) => (
                         <WrapperBox
                             key={index}
-                            height={'170px'}
+                            height={'auto'}
                             marginBottom='10px'
                         >
                             <MovieItem
