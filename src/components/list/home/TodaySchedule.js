@@ -72,7 +72,7 @@ function TodaySchedule({
                             >
                                 <img 
                                     height='50px'
-                                    src={process.env.REACT_APP_IMAGE_LINK + schedule.marker.image_link}
+                                    src={process.env.REACT_APP_IMAGE_LINK + schedule.image_path}
                                 />
                             </div>
                         ))}

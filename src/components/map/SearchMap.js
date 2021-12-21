@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux'
 import {
     Button,
@@ -12,6 +13,7 @@ import {
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import RoomIcon from '@mui/icons-material/Room'
 import AddLocationIcon from '@mui/icons-material/AddLocation'
+import TheatersIcon from '@mui/icons-material/Theaters'
 
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
@@ -31,6 +33,7 @@ function SearchMap({
     openForm,
     mappins,
 }) {
+    const history = useHistory()
     // reference of the div to render the map
     const mapElement = useRef(null) 
 
@@ -221,6 +224,10 @@ function SearchMap({
 
     }
 
+    const redirectToMoviePage = () => {
+        history.replace('/movies')
+    }
+
     return (
         <>
             {/* main layout */}
@@ -292,6 +299,20 @@ function SearchMap({
                     </CircleIconButton>
                 </animated.div>
             </FadableComponent>
+
+            <animated.div
+                style={{
+                    position: 'absolute',
+                    bottom: pinButtonBottom,
+                    right: '20px',
+                }}
+            >
+                <CircleIconButton
+                    onClickHandler={redirectToMoviePage}
+                >
+                    <TheatersIcon />
+                </CircleIconButton>
+            </animated.div>
 
             <animated.div
                 style={{

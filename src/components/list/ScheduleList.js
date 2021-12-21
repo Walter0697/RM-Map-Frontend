@@ -92,7 +92,7 @@ function ScheduleItem({
                         <div key={index}>
                             <img
                                 height='80px'
-                                src={process.env.REACT_APP_IMAGE_LINK + sche.marker.image_link}
+                                src={process.env.REACT_APP_IMAGE_LINK + sche.image_path}
                             />
                         </div>
                     ))}
@@ -118,7 +118,7 @@ function TodayList({
 
     useEffect(() => {
         let timer = null
-        const filteredList = list.filter(s => s.marker?.image_link)
+        const filteredList = list.filter(s => s.image_path)
         setRandomBigImageMarker(filteredList)
 
         if (filteredList.length > 2) {
@@ -207,7 +207,7 @@ function TodayList({
                                 <>
                                     <div style={{ width: '100%'}}>
                                         <img 
-                                            src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[0].marker.image_link}
+                                            src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[0].image_path}
                                             style={{
                                                 maxHeight: '150px',
                                                 width: '90%',
@@ -230,7 +230,7 @@ function TodayList({
                                 <>
                                     <div style={{ width: '100%'}}>
                                         <img 
-                                            src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[1].marker.image_link}
+                                            src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[1].image_path}
                                             style={{
                                                 maxHeight: '150px',
                                                 width: '90%',
@@ -259,7 +259,7 @@ function TodayList({
                         <div key={index}>
                             <img 
                                 height='50px'
-                                src={process.env.REACT_APP_IMAGE_LINK + sche.marker.image_link}
+                                src={process.env.REACT_APP_IMAGE_LINK + sche.image_path}
                             />
                         </div>
                     ))}

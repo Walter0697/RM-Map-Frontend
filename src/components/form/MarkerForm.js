@@ -37,7 +37,6 @@ function MarkerForm({
     const [ createMarkerGQL, { data: createData, loading: createLoading, error: createError } ] = useMutation(graphql.markers.create, { errorPolicy: 'all' })
     const [ scrapimageGQL, { data: scrapImageData, loading: scrapImageLoading, error: scrapImageError } ] = useLazyQuery(graphql.helpers.webscrap)
 
-    //useLazyQuery
     const [ formValue, setFormValue, resetFormValue ] = useObject({
         label: '',
         address: '',
@@ -69,6 +68,7 @@ function MarkerForm({
         setSubmitting(false)
         resetFormValue()
         setImageMessage('')
+        setImageState('')
         setUnauthorized(false)
 
         if (location.address) {

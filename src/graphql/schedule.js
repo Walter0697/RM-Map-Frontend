@@ -20,6 +20,12 @@ const list = gql`
                 link
                 type
             }
+            movie {
+                id
+                label
+                release_date
+                image_path
+            }
         }
     }
 `
@@ -76,6 +82,11 @@ const update_status = gql`
                 link
                 type
             }
+            movie {
+                id
+                label
+                release_date
+            }
         }
     }
 `
@@ -120,6 +131,11 @@ const edit = gql`
                 status
                 link
                 type
+            }
+            movie {
+                id
+                label
+                release_date
             }
         }
     }

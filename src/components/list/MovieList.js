@@ -31,7 +31,7 @@ function MovieItem({
             textTransform: 'none',
             padding: '0',
             }}
-            onClick={onClickHandler}
+            onClick={() => onClickHandler(item)}
         >
             <Grid
                 container
@@ -90,6 +90,7 @@ function MovieList({
     openSearchBox,
     list,
     setList,
+    openMovieForm,
 }) {
     
     const [ moviefetchGQL, { data: movieData, loading: movieLoading, error: movieError } ] = useLazyQuery(graphql.movies.search, { fetchPolicy: 'no-cache' })
@@ -176,7 +177,7 @@ function MovieList({
                         >
                             <MovieItem
                                 item={item}
-                                onClickHandler={() => {}}
+                                onClickHandler={openMovieForm}
                             />
                         </WrapperBox>
                     ))}

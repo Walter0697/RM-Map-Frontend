@@ -21,57 +21,99 @@ const getTodayScheduleWithImage = (schedules, eventtypes) => {
     if (!schedules) return []
 
     const today_list = getTodaySchedule(schedules)
-    const included_image_list = today_list.filter(s => s.marker?.image_link)
-
-    if (included_image_list.length === 0) {
-        let result = []
-        today_list.forEach(s => {
-            if (s.marker) {
-                if (!s.marker.image_link) {
-                    if (s.marker.type) {
-                        const typeObj = eventtypes.find(et => et.value === s.marker.type)
-                        if (typeObj) {
-                            s.marker.image_link = typeObj.icon_path
-                            result.push(s)
-                        }
-                    }
-                } else {
-                    result.push(s)
-                }
+    let result = []
+    today_list.forEach(s => {
+        if (s.movie) {
+            if (s.movie.image_path) {
+                s.image_path = s.movie.image_path
+                result.push(s)
             }
-        })
-        return result
-    }
+        } else if (s.marker) {
+            if (s.marker.image_link) {
+                s.image_path = s.marker.image_link
+                result.push(s)
+            } else if (s.marker.type) {
+                const typeObj = eventtypes.find(et => et.value === s.marker.type)
+                if (typeObj) {
+                    s.image_path = typeObj.icon_path
+                    result.push(s)
+                } 
+            }
+        }
+    })
+    return result
+    // const included_image_list = today_list.filter(s => s.marker?.image_link)
 
-    return included_image_list
+    // if (included_image_list.length === 0) {
+    //     let result = []
+    //     today_list.forEach(s => {
+    //         if (s.marker) {
+    //             if (!s.marker.image_link) {
+    //                 if (s.marker.type) {
+    //                     const typeObj = eventtypes.find(et => et.value === s.marker.type)
+    //                     if (typeObj) {
+    //                         s.marker.image_link = typeObj.icon_path
+    //                         result.push(s)
+    //                     }
+    //                 }
+    //             } else {
+    //                 result.push(s)
+    //             }
+    //         }
+    //     })
+    //     return result
+    // }
+
+    // return included_image_list
 }
 
 const getScheuldeWithImage = (schedules, eventtypes) => {
     if (!schedules) return []
 
-    const included_image_list = schedules.filter(s => s.marker?.image_link)
-
-    if (included_image_list.length === 0) {
-        let result = []
-        schedules.forEach(s => {
-            if (s.marker) {
-                if (!s.marker.image_link) {
-                    if (s.marker.type) {
-                        const typeObj = eventtypes.find(et => et.value === s.marker.type)
-                        if (typeObj) {
-                            s.marker.image_link = typeObj.icon_path
-                            result.push(s)
-                        }
-                    }
-                } else {
-                    result.push(s)
-                }
+    let result = []
+    schedules.forEach(s => {
+        if (s.movie) {
+            if (s.movie.image_path) {
+                s.image_path = s.movie.image_path
+                result.push(s)
             }
-        })
-        return result
-    }
+        } else if (s.marker) {
+            if (s.marker.image_link) {
+                s.image_path = s.marker.image_link
+                result.push(s)
+            } else if (s.marker.type) {
+                const typeObj = eventtypes.find(et => et.value === s.marker.type)
+                if (typeObj) {
+                    s.image_path = typeObj.icon_path
+                    result.push(s)
+                } 
+            }
+        }
+    })
+    return result
+    // const included_image_list = schedules.filter(s => s.marker?.image_link)
 
-    return included_image_list
+    // if (included_image_list.length === 0) {
+    //     let result = []
+    //     schedules.forEach(s => {
+    //         if (s.marker) {
+    //             if (!s.marker.image_link) {
+    //                 if (s.marker.type) {
+    //                     const typeObj = eventtypes.find(et => et.value === s.marker.type)
+    //                     if (typeObj) {
+    //                         s.marker.image_link = typeObj.icon_path
+    //                         result.push(s)
+    //                     }
+    //                 }
+    //             } else {
+    //                 result.push(s)
+    //             }
+    //         }
+    //     })
+    //     return result
+    // }
+
+    //return included_image_list
 }
 
 const schedules = {

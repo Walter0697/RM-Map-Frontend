@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
 import {
     Button,
@@ -23,7 +22,6 @@ import useBoop from '../../hooks/useBoop'
 import AutoHideAlert from '../AutoHideAlert'
 
 import constants from '../../constant'
-import markerhelper from '../../scripts/marker'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
 
@@ -37,22 +35,22 @@ const TransitionUp = (props) => {
 
 function ScheduleItem({
     item,
-    eventtypes,
     triggerCopyMessage,
     isToday,
     onEditClick,
     onDeleteClick,
 }) {
-    const imageLink = useMemo(() => {
-        if (!item || !item.marker) return ''
+    // const imageLink = useMemo(() => {
+    //     // if (!item || !item.marker) return ''
         
-        return markerhelper.image.marker_image(item.marker, eventtypes)
-    }, [item, eventtypes])  // if marker has image, use this, if not, use the type image
+    //     // return markerhelper.image.marker_image(item.marker, eventtypes)
+    //     return item.image_path
+    // }, [item, eventtypes])  // if marker has image, use this, if not, use the type image
 
     const [ imageExist, setImageExist ] = useState(false)
 
     useEffect(() => {
-        if (imageLink) {
+        if (item.image_path) {
             setImageExist(true)
         } else {
             setImageExist(false)
@@ -127,7 +125,7 @@ function ScheduleItem({
                     {imageExist ? (
                         <img 
                             width='90%'
-                            src={process.env.REACT_APP_IMAGE_LINK + imageLink}
+                            src={process.env.REACT_APP_IMAGE_LINK + item.image_path}
                             onError={onImageFailedToLoad}
                         /> 
                     ) : (
@@ -219,7 +217,6 @@ function ScheduleView({
     selected_date,
     openArriveForm,
     openEditForm,
-    eventtypes,
     dispatch,
 }) {
     const [ removeScheduleGQL, { data: removeData, loading: removeLoading, error: removeError } ] = useMutation(graphql.schedules.remove, { errorPolicy: 'all' })
@@ -302,7 +299,6 @@ function ScheduleView({
                                     <Grid item xs={12} key={index} fullWidth>
                                         <ScheduleItem 
                                             item={schedule}
-                                            eventtypes={eventtypes}
                                             triggerCopyMessage={triggerCopyMessage}
                                             isToday={isToday}
                                             onEditClick={onEditClickHandler}
@@ -337,6 +333,4 @@ function ScheduleView({
     )
 }
 
-export default connect(state => ({
-    eventtypes: state.marker.eventtypes,
-})) (ScheduleView)
+export default ScheduleView

@@ -103,6 +103,12 @@ const today = gql`
                     link
                     type
                 }
+                movie {
+                    id
+                    label
+                    release_date
+                    image_path
+                }
             }
         }
     }
