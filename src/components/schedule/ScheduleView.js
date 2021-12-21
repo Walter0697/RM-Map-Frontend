@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
 import {
     Button,
@@ -333,4 +334,7 @@ function ScheduleView({
     )
 }
 
-export default ScheduleView
+
+export default connect(state => ({
+    jwt: state.auth.jwt,
+}))(ScheduleView)

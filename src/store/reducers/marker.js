@@ -64,11 +64,13 @@ export default function markerReducer(state = {
         }
         case constants.UPDATE_MARKER_STATUS: {
             const result = state.markers || []
-            let item = result.find(s => s.id === action.marker.id)
-            if (item) {
-                item.status = action.marker.status
-            } else {
-                result.push(action.marker)
+            if (action.marker) {
+                let item = result.find(s => s.id === action.marker.id)
+                if (item) {
+                    item.status = action.marker.status
+                } else {
+                    result.push(action.marker)
+                }
             }
             
             return {
