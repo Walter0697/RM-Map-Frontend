@@ -28,7 +28,7 @@ function ScheduleArriveForm({
     // graphql request
     const [ updateScheduleStatusGQL, { data: updateData, loading: updateLoading, error: updateError } ] = useMutation(graphql.schedules.update_status, { errorPolicy: 'all' })
 
-    const [ schedules, setSchedules] = useState([])
+    const [ arrivalSchedules, setSchedules] = useState([])
 
     const [ submitting, setSubmitting ] = useState(false)
     const [ isUnauthorized, setUnauthorized ] = useState(false)
@@ -37,8 +37,16 @@ function ScheduleArriveForm({
 
     // set the schedule into a state variable
     useEffect(() => {
-        setSchedules(schedule_list)
-    }, [schedule_list])
+        let current = []
+        schedule_list.forEach(s => {
+            current.push({
+                id: s.id,
+                status: s.status,
+                label: s.label,
+            })
+        })
+        setSchedules(() => current)
+    }, [schedule_list, open])
 
     useEffect(() => {
         if (updateError) {
@@ -50,10 +58,13 @@ function ScheduleArriveForm({
         }
 
         if (updateData) {
+            console.log('here')
             // update current state value
             let markers = []
             updateData.updateScheduleStatus.forEach(s => {
-                markers.push(s.marker)
+                if (s.marker) {
+                    markers.push(s.marker)
+                }
             })
             
             dispatch(actions.updateSchedulesStatus(updateData.updateScheduleStatus))
@@ -64,7 +75,7 @@ function ScheduleArriveForm({
 
     // on button click handler
     const setStatusArrival = (index) => {
-        const s = [...schedules]
+        const s = [...arrivalSchedules]
         if (s[index].status === constants.status.arrived) {
             s[index].status = ''
         } else {
@@ -74,7 +85,7 @@ function ScheduleArriveForm({
     }
 
     const setStatusCancel = (index) => {
-        const s = [...schedules]
+        const s = [...arrivalSchedules]
         if (s[index].status === constants.status.cancelled) {
             s[index].status = ''
         } else {
@@ -87,7 +98,7 @@ function ScheduleArriveForm({
         let missingStatus = false
 
         let result = []
-        schedules.forEach((s) => {
+        arrivalSchedules.forEach((s) => {
             if (!s.status) {
                 missingStatus = true
             }
@@ -125,7 +136,7 @@ function ScheduleArriveForm({
             clearAlertMessage={() => setAlertMessage(null)}
         >
             <Grid container spacing={2}>
-                {schedule_list.map((item, index) => (
+                {arrivalSchedules.map((item, index) => (
                     <Grid key={index} item xs={12} md={12} lg={12}>
                         <Grid container spacing={2}>
                             <Grid item xs={3} md={3} lg={3}>

@@ -158,6 +158,33 @@ function ScheduleItem({
                     {item.description}
                     </div>
                 </Grid>
+                {item.movie && (
+                    <>
+                        <Grid item xs={12} fullWidth>
+                            <div
+                                style={{
+                                    fontSize: '15px',
+                                    color: 'black',
+                                    fontWeight: '500',
+                                }}
+                            >
+                                Movie: {item.movie.label}
+                            </div>
+                        </Grid>
+                        {item.movie.release_date && (
+                            <Grid item xs={12} fullWidth>
+                                <div
+                                    style={{
+                                        fontSize: '14px',
+                                        color: '#455295',
+                                    }}
+                                >
+                                    Release date: {item.movie.release_date}
+                                </div>
+                            </Grid>
+                        )}
+                    </>
+                )}
                 {item.marker && (
                     <>
                         <Grid item xs={12} fullWidth>

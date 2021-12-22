@@ -86,6 +86,7 @@ const update_status = gql`
                 id
                 label
                 release_date
+                image_path
             }
         }
     }
@@ -136,6 +137,7 @@ const edit = gql`
                 id
                 label
                 release_date
+                image_path
             }
         }
     }
