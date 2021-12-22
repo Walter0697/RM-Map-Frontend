@@ -101,6 +101,10 @@ function FilterPick({
     const [ isBlinking, setBlink ] = useBoop(50)
     const [ error, setError ] = useState('')
     const displayOption = useMemo(() => {
+        let eventtypesOption = filterOption.find(s => s.label === 'eventtype')
+        if (eventtypesOption) {
+            eventtypesOption.options = eventtypesOption.options.filter(s => !s.hidden)
+        }
         return filterOption.filter(s => !s.hidden)
     }, [filterOption])
 

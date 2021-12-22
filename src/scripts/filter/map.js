@@ -1,13 +1,28 @@
 import types from './type'
 
-const filterByQuery = (markers, query) => {
-    let currentList = markers
-    if (query === '') return markers
+const filterByQuery = (markers, query, eventtypes) => {
+    let currentList = []
+    let isHidden = false
+    const hiddenEventTypes = eventtypes.filter(s => s.hidden).map(s => s.value)
+    let queryList = query.split('&')
+    if (queryList.includes('hidden')) {
+        currentList = markers.filter(s => hiddenEventTypes.includes(s.type))
+        queryList = queryList.filter(s => s !== 'hidden')
+        isHidden = true
+    }
+    else currentList = markers.filter(s => !hiddenEventTypes.includes(s.type))
 
-    const queryList = query.split('&')
+    if (queryList.length === 0) return currentList
+
     for (let i = 0; i < queryList.length; i++) {
         const key = queryList[i].toLowerCase()
         let multiResult = []
+
+        // if it is hidden, we often want to search the type as well
+        if (isHidden) {
+            const filteredByType = currentList.filter(s => s.type.toLowerCase().includes(key))
+            multiResult = appendToList(multiResult, filteredByType)
+        }
 
         const filteredByLabel = currentList.filter(s => s.label.toLowerCase().includes(key))
         multiResult = appendToList(multiResult, filteredByLabel)
@@ -148,6 +163,7 @@ const appendToList = (resultList, appendingList) => {
 const map = {
     mapMarkerWithFilter,
     filterByQuery,
+    appendToList,
 }
 
 export default map

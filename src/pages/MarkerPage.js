@@ -61,12 +61,14 @@ function MarkerPage({
     const displayMarker = useMemo(() => {
         const filteredMarkers = markers.filter(s => s.status === '')
 
-        if (finalFilterValue === '' && customFilterValue === '') return filteredMarkers
+        //if (finalFilterValue === '' && customFilterValue === '') return filteredMarkers
 
-        const filteredByQuery = filters.map.filterByQuery(filteredMarkers, customFilterValue)
+        const filteredByQuery = filters.map.filterByQuery(filteredMarkers, customFilterValue, eventtypes)
         const list = filters.map.mapMarkerWithFilter(filteredByQuery, finalFilterValue, filterOption)
+        // TODO: see if the eventtype is actually hidden
+
         return list
-    }, [markers, finalFilterValue, filterOption, customFilterValue, showingList])
+    }, [markers, finalFilterValue, filterOption, customFilterValue, showingList, eventtypes])
 
     const [ showFilterInListView, showFilter ] = useState(false)
 

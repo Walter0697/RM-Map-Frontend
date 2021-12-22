@@ -8,6 +8,7 @@ const eventTypeFilter = (eventtypes) => {
             value: et.value,
             icon: process.env.REACT_APP_IMAGE_LINK + et.icon_path,
             size: 'small',
+            hidden: et.hidden,
         })
     })
     return {

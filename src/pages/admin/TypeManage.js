@@ -41,6 +41,7 @@ function TypeManage() {
 
     useEffect(() => {
         if (typeData) {
+            console.log(typeData)
             setList(typeData.markertypes)
         }
 
@@ -123,7 +124,7 @@ function TypeManage() {
                     <Grid
                         item xs={12} md={12} lg={12}
                         style={{
-                            backgroundColor: '#dbfdff',
+                            backgroundColor: item.hidden ? '#efa8dc' : '#dbfdff',
                             marginBottom: '10px',
                             marginLeft: '10px',
                             marginRight: '10px',

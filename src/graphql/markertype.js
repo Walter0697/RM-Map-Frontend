@@ -7,6 +7,7 @@ const select = gql`
             value
             priority
             icon_path
+            hidden
         }
     }
 `
@@ -19,6 +20,7 @@ const list = gql`
             value
             priority
             icon_path
+            hidden
             created_at
             created_by {
                 id
@@ -46,12 +48,14 @@ const create = gql`
     mutation createMarkerTypeGQL($label: String!,
                             $value: String!,
                             $priority: Int!,
-                            $icon_upload: Upload) {
+                            $icon_upload: Upload
+                            $hidden: Boolean!) {
         createMarkerType(input: {
             label: $label,
             value: $value,
             priority: $priority,
             icon_upload: $icon_upload,
+            hidden: $hidden,
         }) {
             id
         }
@@ -63,13 +67,15 @@ const edit = gql`
                             $label: String,
                             $value: String,
                             $priority: Int,
-                            $icon_upload: Upload) {
+                            $icon_upload: Upload,
+                            $hidden: Boolean,) {
         editMarkerType(input: {
             id: $id,
             label: $label,
             value: $value,
             priority: $priority,
             icon_upload: $icon_upload
+            hidden: $hidden
         }) {
             id
         }

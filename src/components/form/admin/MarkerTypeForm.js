@@ -13,6 +13,7 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import useObject from '../../../hooks/useObject'
 
 import BaseForm from '../BaseForm'
+import Selectable from '../../field/Selectable'
 
 import imagehelper from '../../../scripts/image'
 import graphql from '../../../graphql'
@@ -38,6 +39,7 @@ function MarkerTypeForm({
         value: '',
         iconUpload: null,
         priority: 100,
+        hidden: false,
     })
     const [ error, setError ] = useObject({})
 
@@ -58,6 +60,7 @@ function MarkerTypeForm({
             setFormValue('label', markerType.label)
             setFormValue('value', markerType.value)
             setFormValue('priority', markerType.priority)
+            setFormValue('hidden', markerType.hidden)
         }
     }, [markerType, open])
 
@@ -184,6 +187,7 @@ function MarkerTypeForm({
             value: formValue.value,
             priority: formValue.priority,
             icon_upload: formValue.iconUpload.upload,
+            hidden: formValue.hidden,
         }})
     }
 
@@ -201,6 +205,7 @@ function MarkerTypeForm({
             value: formValue.value,
             priority: formValue.priority,
             icon_upload: formValue.iconUpload ? formValue.iconUpload.upload : null,
+            hidden: formValue.hidden,
         }})
     }
 
@@ -273,6 +278,21 @@ function MarkerTypeForm({
                                 </FormHelperText>
                             </FormControl>
                         </label>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Selectable
+                            label='hidden'
+                            value={formValue.hidden}
+                            onValueChange={(e) => onValueChangeHandler('hidden', e.target.value)}
+                            noDefault
+                            errorMessage={''}
+                            list={[
+                                { value: false, label: 'no' },
+                                { value: true, label: 'yes' },
+                            ]}
+                            valueKey={'value'}
+                            textKey={'label'}
+                        />
                     </Grid>
                     { markerType && (
                         <Grid item xs={12} md={6} lg={6}
