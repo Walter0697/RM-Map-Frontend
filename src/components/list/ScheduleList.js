@@ -351,9 +351,9 @@ function ScheduleList({
         // sorted the array according to date
         const sorted = result_arr.sort((a, b) => {
             if (dayjs(a[0]).isAfter(dayjs[b[0]])) {
-                return 1
+                return -1
             }
-            return -1
+            return 1
         })
 
         return sorted
