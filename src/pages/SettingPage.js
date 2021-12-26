@@ -90,7 +90,6 @@ function SettingPage({
 
     useEffect(() => {
         if (latestReleaseData) {
-            console.log('here')
             dispatch(actions.updateReleaseLatest(latestReleaseData.latestreleasenote))
         }
 

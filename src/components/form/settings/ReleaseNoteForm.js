@@ -135,8 +135,7 @@ function ReleaseNoteForm({
         list.forEach(s => {
             output.unshift(s)
         })
-        return output
-        //return output.filter(s => s.version !== latest.version)
+        return output.filter(s => s.version !== latest.version)
     }, [list, latest])
 
     useEffect(() => {
@@ -244,6 +243,7 @@ function ReleaseNoteForm({
                                     backgroundColor: '#f9f9f9',
                                     padding: '15px',
                                     fontWeight: '700',
+                                    marginTop: '15px',
                                 }}
                                 onClick={() => setVersion(release.version)}
                             >
