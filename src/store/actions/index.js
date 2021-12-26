@@ -127,6 +127,27 @@ export const removeSchedule = (id) => {
     }
 }
 
+export const updateReleaseList = (list) => {
+    return {
+        type: constants.UPDATE_RELEASE_LIST,
+        list,
+    }
+}
+
+export const updateReleaseSeen = (seen) =>{
+    return {
+        type: constants.UPDATE_RELEASE_SEEN,
+        seen,
+    }
+}
+
+export const updateReleaseLatest = (latest) => {
+    return {
+        type: constants.UPDATE_RELEASE_LATEST,
+        latest,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -146,6 +167,9 @@ const actions = {
     removeMarker,
     editSchedule,
     removeSchedule,
+    updateReleaseList,
+    updateReleaseLatest,
+    updateReleaseSeen,
 }
 
 export default actions

@@ -1,0 +1,8 @@
+version: "3.7"
+
+services:
+    rmmapfrontend:
+      container_name: rmmapfrontend
+      image: rmmarker/frontend:latest
+      ports:
+        - '1417:80'

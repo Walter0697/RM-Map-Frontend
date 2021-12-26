@@ -7,6 +7,7 @@ import defaults from './default'
 import schedules from './schedule'
 import helpers from './helper'
 import movies from './movie'
+import releasenotes from './releasenote'
 
 const graphql = {
     auth,
@@ -18,6 +19,7 @@ const graphql = {
     schedules,
     helpers,
     movies,
+    releasenotes,
 }
 
 export default graphql

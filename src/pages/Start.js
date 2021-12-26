@@ -9,7 +9,7 @@ function Start() {
 
     if (isDesktop) {
         return (
-            <div>This app is a PWA, which is intended to work on mobile device instead of desktop. Please try in your mobile device</div>
+            <div>This app is a PWA, which is intended to work on mobile device instead of desktop. Please try on your mobile device</div>
         )
     }
 

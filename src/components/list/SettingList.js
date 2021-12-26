@@ -5,6 +5,7 @@ import MarkerRelation from './settings/MarkerRelation'
 import PreferredPin from './settings/PreferredPin'
 import LogoutButton from './settings/LogoutButton'
 import VersionView from './settings/VersionView'
+import ReleaseNoteButton from './settings/ReleaseNoteButton'
 import WrapperBox from '../wrapper/WrapperBox'
 
 import * as serviceWorkerRegistration from '../../serviceWorkerRegistration'
@@ -14,6 +15,9 @@ function SettingList({
   openRelationChange,
   pinPreference,
   openPreferredPinForm,
+  latestVersionRelease,
+  seenRelease,
+  openReleaseNote,
 }) {
 
   const checkUpdate = () => {
@@ -51,19 +55,29 @@ function SettingList({
           />
         </WrapperBox>
         <WrapperBox
-          height={50}
+          height={30}
           marginBottom={'15px'}
         >
-          <LogoutButton
-            setLoading={() => {}}
+          <VersionView 
+            onClickHandler={checkUpdate}
           />
         </WrapperBox>
         <WrapperBox
           height={30}
           marginBottom={'15px'}
         >
-          <VersionView 
-            onClickHandler={checkUpdate}
+          <ReleaseNoteButton 
+            latestVersion={latestVersionRelease}
+            seen={seenRelease}
+            onClickHandler={openReleaseNote}
+          />
+        </WrapperBox>
+        <WrapperBox
+          height={50}
+          marginBottom={'15px'}
+        >
+          <LogoutButton
+            setLoading={() => {}}
           />
         </WrapperBox>
       </BottomUpTrail>

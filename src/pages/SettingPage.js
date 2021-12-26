@@ -8,17 +8,22 @@ import TopBar from '../components/topbar/TopBar'
 import SettingList from '../components/list/SettingList'
 import RelationSearchForm from '../components/form/settings/RelationSearchForm'
 import PreferredPinForm from '../components/form/settings/PreferredPinForm'
+import ReleaseNoteForm from '../components/form/settings/ReleaseNoteForm'
 
 import constants from '../constant'
 import actions from '../store/actions'
 import graphql from '../graphql'
 
-// TODO : add preference info into cachable local storage
-
-function SettingPage({ dispatch }) {
+function SettingPage({ 
+    latest,
+    seen,
+    list,    
+    dispatch,
+}) {
     // form open state
     const [ isRelationFormOpen, setRelationFormOpen ] = useState(false)
     const [ isPreferredPinFormOpen, setPreferredPinFormOpen ] = useState(false)
+    const [ isReleaseNoteOpen, setReleaseNoteOpen ] = useState(false)
 
     // selected open item
     const [ updatingPreferredPin, setPreferredPin ] = useState(null)
@@ -29,6 +34,9 @@ function SettingPage({ dispatch }) {
 
     // graphql request
     const { data: preferenceData, loading: preferenceLoading, error: preferenceError } = useQuery(graphql.users.preference, { errorPolicy: 'all', fetchPolicy: 'no-cache' })
+    const { data: releaseData, loading: releaseLoading, error: releaseError } = useQuery(graphql.releasenotes.list, { errorPolicy: 'all', fetchPolicy: 'no-cache' })
+    // for updating the release note if there is a new one
+    const [ latestReleaseGQL, { data: latestReleaseData, loading: latestReleaseLoading, error: latestReleaseError } ] = useLazyQuery(graphql.releasenotes.latest, { fetchPolicy: 'no-cache' })
     // for updating the map pins after changing the preferred pin
     const [ listMappinsGQL, { data: mappinsData } ] = useLazyQuery(graphql.pins.mappins, { fetchPolicy: 'no-cache' })
 
@@ -64,6 +72,32 @@ function SettingPage({ dispatch }) {
             console.log(preferenceError)
         }
     }, [preferenceData, preferenceError])
+
+    useEffect(() => {
+        if (releaseData) {
+            const newlist = releaseData.releasenotes
+
+            if (list.length !== newlist.length) {
+                latestReleaseGQL()
+                dispatch(actions.updateReleaseList(newlist))
+            }
+        }
+
+        if (releaseError) {
+            console.log(releaseError)
+        }
+    }, [releaseData, releaseError])
+
+    useEffect(() => {
+        if (latestReleaseData) {
+            console.log('here')
+            dispatch(actions.updateReleaseLatest(latestReleaseData.latestreleasenote))
+        }
+
+        if (latestReleaseError) {
+            console.log(latestReleaseError)
+        }
+    }, [latestReleaseData, latestReleaseError])
 
     useEffect(() => {
         if (mappinsData) {
@@ -116,6 +150,14 @@ function SettingPage({ dispatch }) {
         setRelationFormOpen(false)
     }
 
+    const openReleaseNote = () => {
+        setReleaseNoteOpen(true)
+    }
+
+    const closeReleaseNote = () => {
+        setReleaseNoteOpen(false)
+    }
+
     const onChangeRelation = (username) => {
         setRelation(username)
         setRelationFormOpen(false)
@@ -131,6 +173,9 @@ function SettingPage({ dispatch }) {
                 openRelationChange={openRelationForm}
                 pinPreference={pinPreference}
                 openPreferredPinForm={openPreferredPinForm}
+                latestVersionRelease={latest ? latest.version : ''}
+                seenRelease={seen}
+                openReleaseNote={openReleaseNote}
             />
             <RelationSearchForm
                 open={isRelationFormOpen}
@@ -143,10 +188,16 @@ function SettingPage({ dispatch }) {
                 pinInfo={updatingPreferredPin}
                 onCreated={onChangePreferredPin}
             />
+            <ReleaseNoteForm
+                open={isReleaseNoteOpen}
+                handleClose={closeReleaseNote}
+            />
         </Base>
     )
 }
 
 export default connect(state => ({
-    jwt: state.auth.jwt
+    list: state.release.list,
+    seen: state.release.seen,
+    latest: state.release.latest,
 })) (SettingPage)
