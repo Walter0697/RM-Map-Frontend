@@ -7,6 +7,7 @@ import {
 } from '@react-spring/web'
 
 import ViewListIcon from '@mui/icons-material/ViewList'
+import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
@@ -183,6 +184,22 @@ function MarkerMap({
                     onClickHandler={toListView}
                 >
                     <ViewListIcon />
+                </CircleIconButton>
+            </animated.div>
+
+            <animated.div
+                style={{ 
+                    position: 'absolute',
+                    visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
+                    opacity: mapOpacity,
+                    bottom: backButtonBottom,
+                    right: '20px',
+                }}
+            >
+                <CircleIconButton
+                    onClickHandler={setMapToCenter}
+                >
+                    <CenterFocusStrongIcon />
                 </CircleIconButton>
             </animated.div>
 

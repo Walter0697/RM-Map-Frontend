@@ -48,11 +48,11 @@ function PreviousMarkerPage({
     const [ customFilterValue, setCustomFilterValue ] = useState('')
 
     const displayMarker = useMemo(() => {
-        if (finalFilterValue === '' && customFilterValue === '') return previousMarkers
-        const filteredByQuery = filters.map.filterByQuery(previousMarkers, customFilterValue)
+        //if (finalFilterValue === '' && customFilterValue === '') return previousMarkers
+        const filteredByQuery = filters.map.filterByQuery(previousMarkers, customFilterValue, eventtypes)
         const list = filters.map.mapMarkerWithFilter(filteredByQuery, finalFilterValue, filterOption)
         return list
-    }, [previousMarkers, finalFilterValue, customFilterValue, filterOption, selectedMarker])
+    }, [previousMarkers, finalFilterValue, customFilterValue, filterOption, selectedMarker, eventtypes])
 
     const [ showFilter, setShowFilter ] = useState(false)
 

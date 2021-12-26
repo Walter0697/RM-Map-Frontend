@@ -58,7 +58,6 @@ function ScheduleArriveForm({
         }
 
         if (updateData) {
-            console.log('here')
             // update current state value
             let markers = []
             updateData.updateScheduleStatus.forEach(s => {

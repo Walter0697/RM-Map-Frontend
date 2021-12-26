@@ -102,7 +102,7 @@ function ScheduleItem({
                     {title(item)}
                 </Grid>
                 <Grid item xs={6}>
-                    {!isToday && (
+                    {(!isToday || (isToday && !item.status)) && (
                         <div style={{
                             float: 'right',
                         }}>

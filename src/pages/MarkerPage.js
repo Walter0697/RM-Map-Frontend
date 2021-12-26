@@ -59,7 +59,7 @@ function MarkerPage({
     const [ customFilterValue, setCustomFilterValue ] = useState('')
 
     const displayMarker = useMemo(() => {
-        const filteredMarkers = markers.filter(s => s.status === '')
+        const filteredMarkers = markers.filter(s => s.status === '' || s.status === 'scheduled')
 
         //if (finalFilterValue === '' && customFilterValue === '') return filteredMarkers
 
