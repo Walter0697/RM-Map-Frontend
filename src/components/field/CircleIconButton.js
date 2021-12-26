@@ -5,6 +5,7 @@ import {
 
 function CircleIconButton({
     onClickHandler,
+    disabled,
     float,
     children,
 }) {
@@ -17,6 +18,7 @@ function CircleIconButton({
                 boxShadow: '2px 2px 6px',
             }}
             onClick={onClickHandler}
+            disabled={disabled}
         >
             {children}
         </IconButton>

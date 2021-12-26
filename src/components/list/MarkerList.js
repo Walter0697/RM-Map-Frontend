@@ -55,6 +55,7 @@ function MarkerItem({
         alignItems: 'flex-start',
         textTransform: 'none',
         padding: '0',
+        border: item.status === 'scheduled' ? '3px solid green' : '',
       }}
       onClick={onClickHandler}
     >

@@ -144,6 +144,7 @@ function MarkerView({
                                 <Grid item xs={3} md={3} lg={3}>
                                     <CircleIconButton
                                         onClickHandler={openSchedule}
+                                        disabled={marker.status === 'scheduled'}
                                     >
                                         <CalendarTodayIcon />
                                     </CircleIconButton>
@@ -300,7 +301,7 @@ function MarkerView({
                                                     onClick={onEditClick}
                                                 >Edit</Button>
                                             </Grid>
-                                            <Grid item xs={12} md={12} lg={12}>
+                                            {/* <Grid item xs={12} md={12} lg={12}>
                                                 <Button 
                                                     variant='contained'
                                                     size='middle'
@@ -313,7 +314,7 @@ function MarkerView({
                                                     }}
                                                     onClick={onRemoveClick}
                                                 >Delete</Button>
-                                            </Grid>
+                                            </Grid> */}
                                         </>
                                     )}
                                 </Grid>
