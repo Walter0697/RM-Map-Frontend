@@ -40,7 +40,9 @@ export default function scheduleReducer(state = {
             const result = state.schedules || []
             for (let i = 0; i < action.schedules.length; i++) {
                 let item = result.find(s => s.id === action.schedules[i].id)
-                item.status = action.schedules[i].status
+                if (item) {
+                    item.status = action.schedules[i].status
+                }
             }
             return {
                 ...state,

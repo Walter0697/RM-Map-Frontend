@@ -36,7 +36,8 @@ function HomeList({
     const [ getTodayGQL, { data: todayData, loading: todayLoading, error: todayError } ] = useLazyQuery(graphql.users.today, { fetchPolicy: 'no-cache' })
 
     const getFeaturedMarkers = (markers) => {
-        const featured_list = markerhelper.find.feature_list(markers, [])
+        const filtered_markers = markers.filter(s => s.status === '')
+        const featured_list = markerhelper.find.feature_list(filtered_markers, [])
 
         const shuffle = featured_list.sort(() => Math.random() - 0.5)
 

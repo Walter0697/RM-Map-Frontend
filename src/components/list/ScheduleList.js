@@ -89,7 +89,13 @@ function ScheduleItem({
                     }}
                 >
                     {imageMarkers.map((sche, index) => (
-                        <div key={index}>
+                        <div key={index}
+                            style={{
+                                width: '80px',
+                                overflow: 'hidden',
+                                marginRight: '15px',
+                            }}
+                        >
                             <img
                                 height='80px'
                                 src={process.env.REACT_APP_IMAGE_LINK + sche.image_path}
@@ -205,7 +211,13 @@ function TodayList({
                         >
                             {bigImageMarkers.length >= 1 ? (
                                 <>
-                                    <div style={{ width: '100%'}}>
+                                    <div style={{ 
+                                        width: '100%', 
+                                        height: '100%',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}>
                                         <img 
                                             src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[0].image_path}
                                             style={{
@@ -228,7 +240,13 @@ function TodayList({
                         >
                             {bigImageMarkers.length >= 2 ? (
                                 <>
-                                    <div style={{ width: '100%'}}>
+                                    <div style={{ 
+                                        width: '100%', 
+                                        height: '100%',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}>
                                         <img 
                                             src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[1].image_path}
                                             style={{
@@ -256,7 +274,13 @@ function TodayList({
                     }}
                 >
                     {smallDisplayMarkers.map((sche, index) => (
-                        <div key={index}>
+                        <div 
+                            key={index}
+                            style={{
+                                width: '50px',
+                                overflow: 'hidden',
+                            }}
+                        >
                             <img 
                                 height='50px'
                                 src={process.env.REACT_APP_IMAGE_LINK + sche.image_path}

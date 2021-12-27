@@ -61,8 +61,8 @@ function PreviousMarkerItem({
         >
             { imageExist ? (
             <Grid 
-                item xs={5}
-                style={{ marginTop: '15px' }}
+                item xs={4}
+                style={{ marginTop: '15px', overflow: 'hidden', paddingLeft: '15px' }}
             >
                 <img
                     height='90px'
@@ -72,8 +72,8 @@ function PreviousMarkerItem({
             </Grid>
             ) : (
             <Grid 
-                item xs={5}
-                style={{ marginTop: '15px' }}
+                item xs={4}
+                style={{ marginTop: '15px', overflow: 'hidden', paddingLeft: '15px' }}
             >
                 <img
                 height='90px'
@@ -83,9 +83,10 @@ function PreviousMarkerItem({
             )}
             <Grid 
                 item 
-                xs={7}
+                xs={8}
                 style={{
                     marginTop: '15px',
+                    paddingLeft: '15px',
                 }}
             >
             <Grid container fullWidth>

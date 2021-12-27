@@ -124,7 +124,7 @@ function ScheduleArriveForm({
         <BaseForm
             open={open}
             handleClose={handleClose}
-            title={setYesterday ? 'Where did you go yesterday~?' : 'Where did you go~?'}
+            title={setYesterday ? 'Where did you go~?' : 'You arrived~?'}
             maxWidth={'lg'}
             handleSubmit={onSubmitHandler}
             cancelText={'Cancel'}

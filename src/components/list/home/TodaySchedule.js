@@ -24,7 +24,7 @@ function TodaySchedule({
         from: { scroll: 0 },
         reset: true,
         reverse: flip,
-        delay: 200,
+        delay: 150,
         onRest: () => set(!flip),
      })
 
@@ -69,6 +69,11 @@ function TodaySchedule({
                         {list.map((schedule, index) => (
                             <div 
                                 key={index}
+                                style={{
+                                    width: '50px',
+                                    overflow: 'hidden',
+                                    marginRight: '15px',
+                                }}
                             >
                                 <img 
                                     height='50px'
