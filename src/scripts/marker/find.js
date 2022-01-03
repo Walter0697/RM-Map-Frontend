@@ -2,6 +2,32 @@ import generic from '../generic'
 import text from './text'
 import dayjs from 'dayjs'
 
+const getActiveMarker = (markers) => {
+    // by status
+    const byStatus = markers.filter(s => s.status === '' || s.status === 'scheduled')
+
+    // ignore expired markers
+    const now = dayjs().add(-1, 'day')
+    const nonExpired = byStatus.filter(s => !s.to_time || dayjs(s.to_time).isAfter(now))
+
+    return nonExpired
+}
+
+const getSuggestMarker = (markers, eventtypes) => {
+    // only empty status can do
+    const byStatus = markers.filter(s => s.status === '')
+
+    // ignore expired markers
+    const now = dayjs().add(-1, 'day')
+    const nonExpired = byStatus.filter(s => !s.to_time || dayjs(s.to_time).isAfter(now))
+
+    // no hidden marker will be suggested
+    const hiddenEventTypes = eventtypes.filter(s => s.hidden).map(s => s.value)
+    const nonHidden = nonExpired.filter(s => !hiddenEventTypes.includes(s.type))
+
+    return nonHidden
+}
+
 const getFeaturedList = (markers, ignored_featured) => {
     let featured_list = []
     const ue = upcomingEnd(markers)
@@ -117,6 +143,8 @@ const expensiveSpend = (markers) => {
 }
 
 const find = {
+    active: getActiveMarker,
+    suggest: getSuggestMarker,
     feature_list: getFeaturedList,
     upcomingEnd,
     longTimeCreated,

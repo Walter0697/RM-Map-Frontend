@@ -98,7 +98,6 @@ function MarkerForm({
 
     useEffect(() => {
         if (scrapImageData) {
-            console.log(scrapImageData.scrapimage)
             if (scrapImageData.scrapimage.image_link) {
                 setFormValue('imageLink', {
                     type: 'weblink',

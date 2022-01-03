@@ -35,8 +35,9 @@ function HomeList({
     // graphql request
     const [ getTodayGQL, { data: todayData, loading: todayLoading, error: todayError } ] = useLazyQuery(graphql.users.today, { fetchPolicy: 'no-cache' })
 
-    const getFeaturedMarkers = (markers) => {
-        const filtered_markers = markers.filter(s => s.status === '')
+    const getFeaturedMarkers = (markers, eventtypes) => {
+        const filtered_markers = markerhelper.find.suggest(markers, eventtypes)
+        //const filtered_markers = markers.filter(s => s.status === '')
         const featured_list = markerhelper.find.feature_list(filtered_markers, [])
 
         const shuffle = featured_list.sort(() => Math.random() - 0.5)
@@ -75,11 +76,12 @@ function HomeList({
         } 
 
         if (!markers || (markers && markers.length === 0)) return []
-        const list = getFeaturedMarkers(markers)
+        if (!eventtypes) return []
+        const list = getFeaturedMarkers(markers, eventtypes)
         dispatch(actions.resetHomeFeatured(list))
         return list
 
-    }, [featured, markers])
+    }, [featured, markers, eventtypes])
 
     useEffect(() => {
         getTodayGQL({ variables: { time: dayjs().format('YYYY-MM-DD') } })

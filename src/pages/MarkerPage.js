@@ -21,6 +21,7 @@ import ScheduleForm from '../components/form/ScheduleForm'
 import MarkerEditForm from '../components/form/MarkerEditForm'
 import AutoHideAlert from '../components/AutoHideAlert'
 
+import markerhelper from '../scripts/marker'
 import filters from '../scripts/filter'
 
 import styles from '../styles/list.module.css'
@@ -59,16 +60,16 @@ function MarkerPage({
     const [ customFilterValue, setCustomFilterValue ] = useState('')
 
     const displayMarker = useMemo(() => {
-        const filteredMarkers = markers.filter(s => s.status === '' || s.status === 'scheduled')
+        //const filteredMarkers = markers.filter(s => s.status === '' || s.status === 'scheduled')
+        const filteredMarkers = markerhelper.find.active(markers)
 
         //if (finalFilterValue === '' && customFilterValue === '') return filteredMarkers
 
         const filteredByQuery = filters.map.filterByQuery(filteredMarkers, customFilterValue, eventtypes)
         const list = filters.map.mapMarkerWithFilter(filteredByQuery, finalFilterValue, filterOption)
-        // TODO: see if the eventtype is actually hidden
 
         return list
-    }, [markers, finalFilterValue, filterOption, customFilterValue, showingList, eventtypes])
+    }, [markers, finalFilterValue, filterOption, customFilterValue, showingList, eventtypes, editAlert])
 
     const [ showFilterInListView, showFilter ] = useState(false)
 
