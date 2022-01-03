@@ -71,14 +71,22 @@ function TodaySchedule({
                                 key={index}
                                 style={{
                                     width: '50px',
-                                    overflow: 'hidden',
+                                    //overflow: 'hidden',
                                     marginRight: '15px',
                                 }}
                             >
-                                <img 
-                                    height='50px'
-                                    src={process.env.REACT_APP_IMAGE_LINK + schedule.image_path}
-                                />
+                                <div
+                                    style={{
+                                        height: '50px',
+                                        width: '50px',
+                                        overflow: 'hidden',
+                                    }}
+                                >
+                                    <img 
+                                        height='50px'
+                                        src={process.env.REACT_APP_IMAGE_LINK + schedule.image_path}
+                                    />
+                                </div>
                             </div>
                         ))}
                     </animated.div>

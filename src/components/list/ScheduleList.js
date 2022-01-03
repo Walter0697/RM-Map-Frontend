@@ -92,14 +92,22 @@ function ScheduleItem({
                         <div key={index}
                             style={{
                                 width: '80px',
-                                overflow: 'hidden',
+                                //overflow: 'hidden',
                                 marginRight: '15px',
                             }}
                         >
-                            <img
-                                height='80px'
-                                src={process.env.REACT_APP_IMAGE_LINK + sche.image_path}
-                            />
+                            <div
+                                style={{
+                                    height: '80px',
+                                    width: '80px',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                <img
+                                    height='80px'
+                                    src={process.env.REACT_APP_IMAGE_LINK + sche.image_path}
+                                />
+                            </div>
                         </div>
                     ))}
                 </Grid>
@@ -197,7 +205,7 @@ function TodayList({
                     item xs={12}
                     fullWidth
                     style={{
-                        height: '230px',
+                        height: '280px',
                         width: '100%',
                         color: '#445295',
                     }}
@@ -270,7 +278,8 @@ function TodayList({
                         width: '100%',
                         color: '#445295',
                         display: 'flex',
-                        overflowY: 'auto',
+                        overflowX: 'auto',
+                        overflowY: 'hidden',
                     }}
                 >
                     {smallDisplayMarkers.map((sche, index) => (
@@ -278,13 +287,22 @@ function TodayList({
                             key={index}
                             style={{
                                 width: '50px',
-                                overflow: 'hidden',
+                               // overflow: 'hidden',
+                                marginRight: '15px',
                             }}
                         >
-                            <img 
-                                height='50px'
-                                src={process.env.REACT_APP_IMAGE_LINK + sche.image_path}
-                            />
+                            <div
+                                style={{
+                                    height: '50px',
+                                    width: '50px',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                <img 
+                                    height='50px'
+                                    src={process.env.REACT_APP_IMAGE_LINK + sche.image_path}
+                                />
+                            </div>
                         </div>
                     ))}
                 </Grid>
@@ -418,7 +436,7 @@ function ScheduleList({
                 <div ref={itemListRef}>
                     <BottomUpTrail>
                         <WrapperBox
-                            height={350}
+                            height={400}
                             marginBottom={'20px'}
                         >
                             <TodayList
