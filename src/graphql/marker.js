@@ -151,6 +151,7 @@ const edit = gql`
                         $address: String
                         $image_link: String
                         $image_upload: Upload
+                        $no_image: Boolean!
                         $link: String
                         $type: String
                         $description: String
@@ -166,6 +167,7 @@ const edit = gql`
             address: $address,
             image_link: $image_link,
             image_upload: $image_upload,
+            no_image: $no_image,
             link: $link,
             type: $type,
             description: $description,

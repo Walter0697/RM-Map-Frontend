@@ -12,6 +12,7 @@ import {
 import AddLinkIcon from '@mui/icons-material/AddLink'
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import VisibilityIcon from '@mui/icons-material/Visibility'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 import useObject from '../../hooks/useObject'
 
@@ -71,6 +72,7 @@ function MarkerEditForm({
         setSubmitting(false)
         setImageMessage('')
         setUnauthorized(false)
+        resetFormValue()
 
         setFormValue('label', marker.label)
         setFormValue('address', marker.address)
@@ -83,7 +85,13 @@ function MarkerEditForm({
         setFormValue('permanent', marker.permanent)
         setFormValue('from_time', marker.from_time ? dayjs.utc(marker.from_time).format('MM/DD/YYYY HH:mm') : null)
         setFormValue('to_time', marker.to_time ? dayjs.utc(marker.to_time).format('MM/DD/YYYY HH:mm') : null)
-        
+        if (marker.image_link) {
+            setFormValue('imageLink', {
+                type: 'existing', 
+                value: marker.image_link,
+            })
+            setImageMessage('current image')
+        }    
     }, [marker])
 
     useEffect(() => {
@@ -126,6 +134,10 @@ function MarkerEditForm({
         }
     }
 
+    const removeImage = () => {
+        setFormValue('imageLink', null)
+        setImageMessage('')
+    }
 
     const onSubmitHandler = async (e) => {
         e.preventDefault()
@@ -159,6 +171,7 @@ function MarkerEditForm({
             link: formValue.link,
             image_link: (formValue.imageLink && formValue.imageLink.type === 'weblink') ? formValue.imageLink.value : null,
             image_upload: (formValue.imageLink && formValue.imageLink.type === 'upload') ? formValue.imageLink.value : null,
+            no_image: formValue.imageLink ? true : false,   // since we will preset existing now, null value should be deleting the image
             description: formValue.description,
             estimate_time: formValue.estimate_time,
             price: formValue.price,
@@ -270,6 +283,9 @@ function MarkerEditForm({
                             >
                                 Preview
                             </FormLabel>
+                            <FormLabel>
+                                {imageSubmitMessage}
+                            </FormLabel>
                             <Grid container spacing={0} fullWidth>
                                 <Grid item xs={4} md={4} lg={4}>
                                     <Button 
@@ -302,7 +318,16 @@ function MarkerEditForm({
                                 </Grid>
                             </Grid>
                             <FormLabel>
-                                {imageSubmitMessage}
+                                {formValue.imageLink && (
+                                    <div 
+                                        style={{
+                                            color: 'red',
+                                        }}
+                                        onClick={removeImage}
+                                    >
+                                        <DeleteIcon sx={{ verticalAlign: 'middle', display: 'inline-block', fontSize: '18px' }}/> 
+                                        <span style={{ verticalAlign: 'middle', display: 'inline-block' }}>Remove Image</span>
+                                    </div>)}
                             </FormLabel>
                         </FormControl>
                     </Grid>

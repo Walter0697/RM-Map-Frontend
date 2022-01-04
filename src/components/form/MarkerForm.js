@@ -12,6 +12,7 @@ import {
 import AddLinkIcon from '@mui/icons-material/AddLink'
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import VisibilityIcon from '@mui/icons-material/Visibility'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 import useObject from '../../hooks/useObject'
 import useDebounce from '../../hooks/useDebounce'
@@ -148,6 +149,10 @@ function MarkerForm({
         }
     }
 
+    const removeImage = () => {
+        setFormValue('imageLink', null)
+        setImageMessage('')
+    }
 
     const onSubmitHandler = async (e) => {
         e.preventDefault()
@@ -293,6 +298,9 @@ function MarkerForm({
                             >
                                 Preview
                             </FormLabel>
+                            <FormLabel>
+                                {imageSubmitMessage}
+                            </FormLabel>
                             <Grid container spacing={0} fullWidth>
                                 <Grid item xs={4} md={4} lg={4}>
                                     <Button 
@@ -325,7 +333,16 @@ function MarkerForm({
                                 </Grid>
                             </Grid>
                             <FormLabel>
-                                {imageSubmitMessage}
+                                {formValue.imageLink && (
+                                    <div 
+                                        style={{
+                                            color: 'red',
+                                        }}
+                                        onClick={removeImage}
+                                    >
+                                        <DeleteIcon sx={{ verticalAlign: 'middle', display: 'inline-block', fontSize: '18px' }}/> 
+                                        <span style={{ verticalAlign: 'middle', display: 'inline-block' }}>Remove Image</span>
+                                    </div>)}
                             </FormLabel>
                         </FormControl>
                     </Grid>

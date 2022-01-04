@@ -32,6 +32,17 @@ function ImagePreview({
                         alt={'preview'}
                     />
                 )
+            } else if (imageInfo.type === 'existing') {
+                return (
+                    <img
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                        }}
+                        src={process.env.REACT_APP_IMAGE_LINK + imageInfo.value}
+                        alt={'preview'}
+                    />
+                )
             } else if (imageInfo.type === 'upload') {
                 const url = URL.createObjectURL(imageInfo.value)
                 return (
