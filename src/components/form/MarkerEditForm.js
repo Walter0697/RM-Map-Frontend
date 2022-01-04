@@ -171,7 +171,7 @@ function MarkerEditForm({
             link: formValue.link,
             image_link: (formValue.imageLink && formValue.imageLink.type === 'weblink') ? formValue.imageLink.value : null,
             image_upload: (formValue.imageLink && formValue.imageLink.type === 'upload') ? formValue.imageLink.value : null,
-            no_image: formValue.imageLink ? true : false,   // since we will preset existing now, null value should be deleting the image
+            no_image: formValue.imageLink ? false : true,   // since we will preset existing now, null value should be deleting the image
             description: formValue.description,
             estimate_time: formValue.estimate_time,
             price: formValue.price,
