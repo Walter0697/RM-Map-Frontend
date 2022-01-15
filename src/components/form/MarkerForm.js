@@ -118,7 +118,6 @@ function MarkerForm({
 
     const scrapImageWithLink = () => {
         if (formValue.link === '') return
-        console.log(formValue.link)
         scrapimageGQL({ variables: { link: formValue.link }})
     }
 

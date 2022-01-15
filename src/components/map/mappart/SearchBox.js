@@ -52,6 +52,7 @@ function SearchBox({
     submitHandler,
     isLoading,
     isBottomOpen,
+    isSearchFormOpen,
 }) {
     const inputRef = useRef(null)
     const manualInput = useRef(false)
@@ -70,10 +71,10 @@ function SearchBox({
     })
 
     useEffect(() => {
-        if (isBottomOpen) {
+        if (isBottomOpen || isSearchFormOpen) {
             setTyping(false)
         }
-    }, [isBottomOpen])
+    }, [isBottomOpen, isSearchFormOpen])
     
     const onSearchTextKeyDown = (e) => {
         if (e.key === 'Enter') {

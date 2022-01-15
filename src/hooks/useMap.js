@@ -192,7 +192,6 @@ function useMap(
 
     // function to create or reset the center marker
     const resetCenterMarker = async () => {
-        //mapLocation
         centerMarker?.remove()
         setCenterMarker(null)
         setCenterStreetName(null)
@@ -210,15 +209,6 @@ function useMap(
             'favourite',
             mappins,
         )
-        // let marker = maphelper.markers.getMarker(map, [
-        //         mapLocation.lon,
-        //         mapLocation.lat,
-        //     ],
-        //     onCenterMarkerClick,
-        //     0,
-        //     'center',
-        //     '20',
-        // )
         
         setCenterMarker(marker)
 
@@ -232,6 +222,38 @@ function useMap(
                 setCenterStreetName(address)
             }
         }
+    }
+
+    const setCenterToLocation = (location, address) => {
+        centerMarker?.remove()
+        setCenterMarker(null)
+        setCenterStreetName(null)
+
+        let marker = maphelper.markers.getMapPin(
+            map,
+            [
+                location.lon,
+                location.lat,
+            ],
+            onCenterMarkerClick,
+            false,
+            0,
+            '',
+            'favourite',
+            mappins,
+        )
+
+        setCenterMarker(marker)
+
+        setCenterLocation('lat', location.lat)
+        setCenterLocation('lon', location.lon)
+        setCenterStreetName(address)
+
+        setZoom(constants.maps.defaultZoomSize)
+        setTowardsLocation('lat', location.lat)
+        setSearchingLocation('lat', location.lat)
+        setTowardsLocation('lon', location.lon)
+        setSearchingLocation('lon', location.lon)
     }
 
     const onCenterMarkerClick = () => {
@@ -269,6 +291,7 @@ function useMap(
         resetCenterMarker,
         centerLocation,
         centerStreetName,
+        setCenterToLocation,
      ]
 }
 

@@ -14,6 +14,7 @@ import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import RoomIcon from '@mui/icons-material/Room'
 import AddLocationIcon from '@mui/icons-material/AddLocation'
 import TheatersIcon from '@mui/icons-material/Theaters'
+import ManageSearchIcon from '@mui/icons-material/ManageSearch'
 
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
@@ -23,11 +24,12 @@ import SearchBox from './mappart/SearchBox'
 import LocationContent from './mappart/LocationContent'
 import AutoHideAlert from '../AutoHideAlert'
 import CircleIconButton from '../field/CircleIconButton'
+import BookmarkButton from '../field/BookmarkButton'
+
+import SearchStreetForm from '../form/SearchStreetForm'
 
 import maphelper from '../../scripts/map'
 import apis from '../../apis'
-
-// TODO : add question mark?
 
 function SearchMap({
     openForm,
@@ -89,6 +91,11 @@ function SearchMap({
     // if center marker is set, show the button
     const [ showCenterPinButton, setCenterPinButton ] = useState(false)
 
+    // open form for user to search by street name and number
+    const [ showStreetNameSearch, setShowStreetNameSearch ] = useState(false)
+    const [ streetSearchAlert, setSearchAlert ] = useBoop(3000)
+    const [ streetSearchResult, setSearchResult ] = useState(null)
+
     const [ 
         map, 
         mapLocation,
@@ -102,6 +109,7 @@ function SearchMap({
         resetCenterMarker,
         centerLocation,
         centerStreetName,
+        setCenterToLocation,
      ] = useMap(
         mapElement,
         {       
@@ -224,6 +232,17 @@ function SearchMap({
 
     }
 
+    const openSearchByStreetName = () => {
+        setShowStreetNameSearch(true)
+    }
+
+    const setLocationOnMap = (lonlat, address) => {
+        setShowStreetNameSearch(false)
+        setSearchAlert()
+        setSearchResult(address)
+        setCenterToLocation(lonlat, address)
+    }
+
     const redirectToMoviePage = () => {
         history.replace('/movies')
     }
@@ -279,7 +298,22 @@ function SearchMap({
                     submitHandler={onSearchTextSubmitHandler}
                     isLoading={loading}
                     isBottomOpen={viewSearchContent}
+                    isSearchFormOpen={showStreetNameSearch}
                 />
+            </div>
+
+            <div 
+                style={{
+                    position: 'absolute',
+                    top: '120px',
+                    right: '-5px',
+                }}
+            >
+                <BookmarkButton
+                    onClickHandler={openSearchByStreetName}
+                >
+                    <ManageSearchIcon />
+                </BookmarkButton>
             </div>
             
             <FadableComponent
@@ -381,6 +415,19 @@ function SearchMap({
                 type={'warning'}
                 message={'Cannot find any result'}
                 timing={3000}
+            />
+            <AutoHideAlert
+                open={streetSearchAlert}
+                type={'success'}
+                message={streetSearchResult}
+                timing={3000}
+            />
+
+            {/* form */}
+            <SearchStreetForm
+                open={showStreetNameSearch}
+                handleClose={() => setShowStreetNameSearch(false)}
+                onFinished={setLocationOnMap}
             />
         </>
     )

@@ -75,7 +75,12 @@ function BaseForm({
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose}>{cancelText}</Button>
+                    <Button 
+                        disabled={isSubmitUnauthorized || loading}
+                        onClick={handleClose}
+                    >
+                        {cancelText}
+                    </Button>
                     <Button 
                         disabled={isSubmitUnauthorized || loading}
                         onClick={handleSubmit}

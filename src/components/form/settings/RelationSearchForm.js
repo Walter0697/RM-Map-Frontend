@@ -106,7 +106,7 @@ function RelationSearchForm({
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={12} lg={12}>
                         <TextField
-                            variable='outlined'
+                            variant='outlined'
                             size='medium'
                             fullWidth
                             label='searching'
