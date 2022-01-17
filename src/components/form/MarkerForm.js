@@ -7,17 +7,24 @@ import {
     Button,
     FormControl,
     FormLabel,
+    Menu,
+    MenuItem,
+    ListItemText,
+    ListItemIcon,
 } from '@mui/material'
 
 import AddLinkIcon from '@mui/icons-material/AddLink'
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import DeleteIcon from '@mui/icons-material/Delete'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import RiceBowlIcon from '@mui/icons-material/RiceBowl'
 
 import useObject from '../../hooks/useObject'
 import useDebounce from '../../hooks/useDebounce'
 
 import BaseForm from './BaseForm'
+import ScrapperForm from './ScrapperForm'
 import ImageLinkValidate from './image/ImageLinkValidate'
 import ImagePreview from './image/ImagePreview'
 import Selectable from '../field/Selectable'
@@ -57,10 +64,16 @@ function MarkerForm({
     const [ imageFormState , setImageState ] = useState('') // weblink, preview, scrap
     const [ imageSubmitMessage, setImageMessage ] = useState('')
 
+    const [ scrapperOpen, setScrapperOpen ] = useState(null)
+
     const [ submitting, setSubmitting ] = useState(false)
     const [ isUnauthorized, setUnauthorized ] = useState(false)
 
     const [ alertMessage, setAlertMessage ] = useState(null)
+
+    // menu for website
+    const [ anchorEl, setAnchorEl ] = useState(null)
+    const menuOpen = Boolean(anchorEl)
 
     useEffect(() => {
         if (!location) return
@@ -151,6 +164,20 @@ function MarkerForm({
     const removeImage = () => {
         setFormValue('imageLink', null)
         setImageMessage('')
+    }
+
+    const onScrapperClick = (value) => {
+        setScrapperOpen(value)
+        setAnchorEl(null)
+    }
+
+    // handle menu click
+    const handleMenuClick = (event) => {
+        setAnchorEl(event.currentTarget)
+    }
+
+    const handleMenuClose = () => {
+        setAnchorEl(null)
     }
 
     const onSubmitHandler = async (e) => {
@@ -280,15 +307,52 @@ function MarkerForm({
                         />
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            label='website'
-                            value={formValue.link}
-                            onChange={(e) => onValueChangeHandler('link', e.target.value)}
-                            error={!!error.link}
-                            helperText={error.link}
-                        />
+                        <Grid container spacing={0}>
+                            <Grid item xs={9} md={9} lg={9}>
+                                <TextField
+                                    variant='outlined'
+                                    fullWidth
+                                    label='website'
+                                    value={formValue.link}
+                                    onChange={(e) => onValueChangeHandler('link', e.target.value)}
+                                    error={!!error.link}
+                                    helperText={error.link}
+                                />
+                            </Grid>
+                            <Grid item xs={3} md={3} lg={3}>
+                                    <Button 
+                                        variant='outlined'
+                                        id='website-menu-button'
+                                        aria-controls={menuOpen ? 'website-menu' : undefined}
+                                        aria-haspopup='true'
+                                        aria-expanded={menuOpen ? 'true' : undefined}
+                                        onClick={handleMenuClick}
+                                        fullWidth
+                                        style={{
+                                            height: '100%',
+                                        }}
+                                    >
+                                        <MoreVertIcon />
+                                    </Button>
+                                    <Menu
+                                        id='website-menu'
+                                        anchorEl={anchorEl}
+                                        open={menuOpen}
+                                        onClose={handleMenuClose}
+                                        MenuListProps={{
+                                            'aria-labelledby': 'website-menu-button',
+                                        }}
+                                    >
+                                        <MenuItem onClick={() => onScrapperClick('openrice')}>
+                                            <ListItemIcon>
+                                                <RiceBowlIcon fontSize="small" />
+                                            </ListItemIcon>
+                                            <ListItemText>Openrice</ListItemText>
+                                        </MenuItem>
+                                    </Menu>
+                            </Grid>
+                        </Grid>
+                        
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
                         <FormControl component='image' fullWidth>
@@ -449,6 +513,12 @@ function MarkerForm({
                 shouldOpen={imageFormState === 'preview'}
                 handleClose={() => setImageState('')}
                 imageInfo={formValue.imageLink}
+            />
+            <ScrapperForm 
+                open={!!scrapperOpen}
+                handleClose={() => setScrapperOpen(null)}
+                source={scrapperOpen}
+                value={null}
             />
         </>
     )
