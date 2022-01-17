@@ -16,7 +16,6 @@ function RestaurantCard({
     if (!restaurant) return false
     const rating = useMemo(() => {
         if (restaurant) {
-            console.log(restaurant)
             return JSON.parse(restaurant.rating)
         }
         return {}

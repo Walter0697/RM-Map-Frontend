@@ -1,7 +1,4 @@
 import React, { useEffect } from 'react'
-import {
-    Grid,
-} from '@mui/material'
 
 import RestaurantCard from '../../card/RestaurantCard'
 import OpenRiceInstruction from '../../../images/openrice.jpg'
@@ -14,22 +11,24 @@ function OpenriceScrap({
     restaurant
 }) {
     useEffect(() => {
-        const baseURL = 'https://s.openrice.com/'
-        const arrInfo = content.split('\n')
-        let linkStr = ''
-        for (let i = 0; i < arrInfo.length; i++) {
-            const info = arrInfo[i]
-            const index = info.indexOf(baseURL)
-            if (index !== -1) {
-                linkStr = info.substring(index)
+        if (content) {
+            const baseURL = 'https://s.openrice.com/'
+            const arrInfo = content.split('\n')
+            let linkStr = ''
+            for (let i = 0; i < arrInfo.length; i++) {
+                const info = arrInfo[i]
+                const index = info.indexOf(baseURL)
+                if (index !== -1) {
+                    linkStr = info.substring(index)
+                }
             }
-        }
-
-        if (linkStr) {
-            const sourceId = linkStr.replace(baseURL, '')
-            setFetchInfo && setFetchInfo(sourceId, linkStr)
-        } else {
-            findInfoFailed && findInfoFailed()
+    
+            if (linkStr) {
+                const sourceId = linkStr.replace(baseURL, '')
+                setFetchInfo && setFetchInfo(sourceId, linkStr)
+            } else {
+                findInfoFailed && findInfoFailed()
+            }
         }
     }, [content])
 

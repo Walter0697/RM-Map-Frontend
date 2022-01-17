@@ -64,6 +64,7 @@ function MarkerForm({
     const [ imageFormState , setImageState ] = useState('') // weblink, preview, scrap
     const [ imageSubmitMessage, setImageMessage ] = useState('')
 
+    const [ scrapperData, setScrapperData ] = useState(null) 
     const [ scrapperOpen, setScrapperOpen ] = useState(null)
 
     const [ submitting, setSubmitting ] = useState(false)
@@ -169,6 +170,12 @@ function MarkerForm({
     const onScrapperClick = (value) => {
         setScrapperOpen(value)
         setAnchorEl(null)
+    }
+
+    const onScrapperFinish = (link, value) => {
+        onValueChangeHandler('link', link)
+        setScrapperData(value)
+        setScrapperOpen(false)
     }
 
     // handle menu click
@@ -518,7 +525,8 @@ function MarkerForm({
                 open={!!scrapperOpen}
                 handleClose={() => setScrapperOpen(null)}
                 source={scrapperOpen}
-                value={null}
+                value={scrapperData}
+                setValue={onScrapperFinish}
             />
         </>
     )

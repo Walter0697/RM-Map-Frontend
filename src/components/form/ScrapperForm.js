@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useMutation } from '@apollo/client'
 import {
     Grid,
-    TextField,
     Button,
 } from '@mui/material'
 
@@ -18,6 +17,7 @@ function ScrapperForm({
     handleClose,
     source,
     value,
+    setValue,
 }) {
     const [ websiteScrapGQL, { data: scrapData, loading: scrapLoading, error: scrapError } ] = useMutation(graphql.scrappers.scrap, { errorPolicy: 'all' })
 
@@ -46,9 +46,12 @@ function ScrapperForm({
     useEffect(() => {
         setLoading(true)
         if (open) {
+            if (value) {
+                setData(fetchData)
+            }
             getClipboardMessage()
         }
-    }, [open])
+    }, [open, value])
 
     useEffect(() => {
         if (source_id) {
@@ -107,8 +110,9 @@ function ScrapperForm({
         }
     }
 
-    const onSubmitHandler = () => {
-
+    const onSubmitHandler = (e) => {
+        e.preventDefault()
+        setValue(link, fetchData)
     }
 
     return (
