@@ -498,6 +498,7 @@ function MarkerEditForm({
                     <Grid item xs={12} md={12} lg={12}>
                         <NullableDatePicker
                             label={'to'}
+                            noPast
                             value={formValue.to_time}
                             onValueChange={(e) => onValueChangeHandler('to_time', e)}
                             errorMessage={error.to_time}

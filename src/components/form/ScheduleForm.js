@@ -138,6 +138,7 @@ function ScheduleForm({
                         <NullableDatePicker
                             label={'selected time'}
                             required
+                            noPast
                             value={formValue.selected_time}
                             onValueChange={(e) => onValueChangeHandler('selected_time', e)}
                             errorMessage={error.selected_time}

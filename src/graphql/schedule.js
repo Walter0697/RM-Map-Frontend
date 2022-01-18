@@ -19,6 +19,24 @@ const list = gql`
                 image_link
                 link
                 type
+                restaurant {
+                    id
+                    name
+                    source
+                    source_id
+                    price_range
+                    restaurant_type
+                    address
+                    rating
+                    direction
+                    telephone
+                    introduction
+                    opening_hours
+                    payment_method
+                    seat_number
+                    website
+                    other_info
+                }
             }
             movie {
                 id
@@ -56,6 +74,24 @@ const create = gql`
                 status
                 link
                 type
+                restaurant {
+                    id
+                    name
+                    source
+                    source_id
+                    price_range
+                    restaurant_type
+                    address
+                    rating
+                    direction
+                    telephone
+                    introduction
+                    opening_hours
+                    payment_method
+                    seat_number
+                    website
+                    other_info
+                }
             }
         }
     }
@@ -81,6 +117,24 @@ const update_status = gql`
                 status
                 link
                 type
+                restaurant {
+                    id
+                    name
+                    source
+                    source_id
+                    price_range
+                    restaurant_type
+                    address
+                    rating
+                    direction
+                    telephone
+                    introduction
+                    opening_hours
+                    payment_method
+                    seat_number
+                    website
+                    other_info
+                }
             }
             movie {
                 id
@@ -132,6 +186,24 @@ const edit = gql`
                 status
                 link
                 type
+                restaurant {
+                    id
+                    name
+                    source
+                    source_id
+                    price_range
+                    restaurant_type
+                    address
+                    rating
+                    direction
+                    telephone
+                    introduction
+                    opening_hours
+                    payment_method
+                    seat_number
+                    website
+                    other_info
+                }
             }
             movie {
                 id

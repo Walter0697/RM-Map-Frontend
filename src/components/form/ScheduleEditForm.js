@@ -4,9 +4,6 @@ import { useMutation } from '@apollo/client'
 import {
     Grid,
     TextField,
-    Button,
-    FormControl,
-    FormLabel,
 } from '@mui/material'
 
 import useObject from '../../hooks/useObject'
@@ -149,6 +146,7 @@ function ScheduleEditForm({
                         <NullableDatePicker
                             label={'selected time'}
                             required
+                            noPast
                             value={formValue.selected_time}
                             onValueChange={(e) => onValueChangeHandler('selected_time', e)}
                             errorMessage={error.selected_time}

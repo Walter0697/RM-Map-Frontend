@@ -16,6 +16,7 @@ function NullableDatePicker({
     label,
     value,
     required,
+    noPast,
     onValueChange,
     errorMessage,
 }) {
@@ -49,6 +50,7 @@ function NullableDatePicker({
                     />
                 )}
                 fullWidth
+                minDate={noPast ? new Date() : null}
                 label={label}
                 value={value}
                 onChange={onValueChange}

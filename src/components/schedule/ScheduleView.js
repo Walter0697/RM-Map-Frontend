@@ -21,6 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import useBoop from '../../hooks/useBoop'
 
 import AutoHideAlert from '../AutoHideAlert'
+import RestaurantCard from '../card/RestaurantCard'
 
 import constants from '../../constant'
 import actions from '../../store/actions'
@@ -228,6 +229,13 @@ function ScheduleItem({
                                 >
                                     {item.marker.link}
                                 </a>
+                            </Grid>
+                        )}
+                        {item.marker && item.marker.restaurant && (
+                            <Grid item xs={12} fullWidth>
+                                <RestaurantCard 
+                                    restaurant={item.marker.restaurant}
+                                />
                             </Grid>
                         )}
                     </>
