@@ -1,22 +1,30 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { connect } from 'react-redux'
-import { useMutation } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import {
     Grid,
     TextField,
     Button,
     FormControl,
     FormLabel,
+    Menu,
+    MenuItem,
+    ListItemText,
+    ListItemIcon,
 } from '@mui/material'
 
 import AddLinkIcon from '@mui/icons-material/AddLink'
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import DeleteIcon from '@mui/icons-material/Delete'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import RiceBowlIcon from '@mui/icons-material/RiceBowl'
 
 import useObject from '../../hooks/useObject'
+import useDebounce from '../../hooks/useDebounce'
 
 import BaseForm from './BaseForm'
+import ScrapperForm from './ScrapperForm'
 import ImageLinkValidate from './image/ImageLinkValidate'
 import ImagePreview from './image/ImagePreview'
 import Selectable from '../field/Selectable'
@@ -39,6 +47,7 @@ function MarkerEditForm({
     dispatch,
 }) {
     const [ editMarkerGQL, { data: editData, loading: editLoading, error: editError } ] = useMutation(graphql.markers.edit, { errorPolicy: 'all' })
+    const [ scrapimageGQL, { data: scrapImageData, loading: scrapImageLoading, error: scrapImageError } ] = useLazyQuery(graphql.helpers.webscrap)
 
     const [ formValue, setFormValue, resetFormValue ] = useObject({
         label: '',
@@ -60,15 +69,23 @@ function MarkerEditForm({
     const [ imageFormState , setImageState ] = useState('') // weblink, preview
     const [ imageSubmitMessage, setImageMessage ] = useState('')
 
+    const [ scrapperData, setScrapperData ] = useState(null) 
+    const [ scrapperOpen, setScrapperOpen ] = useState(null)
+
     const [ submitting, setSubmitting ] = useState(false)
     const [ isUnauthorized, setUnauthorized ] = useState(false)
 
     const [ alertMessage, setAlertMessage ] = useState(null)
 
+    // menu for website
+    const [ anchorEl, setAnchorEl ] = useState(null)
+    const menuOpen = Boolean(anchorEl)
+
     useEffect(() => {
         if (!marker) return
 
-        // if location updated, reset everything inside the form
+        // if marker updated, reset everything inside the form
+        
         setSubmitting(false)
         setImageMessage('')
         setUnauthorized(false)
@@ -85,6 +102,7 @@ function MarkerEditForm({
         setFormValue('permanent', marker.permanent)
         setFormValue('from_time', marker.from_time ? dayjs.utc(marker.from_time).format('MM/DD/YYYY HH:mm') : null)
         setFormValue('to_time', marker.to_time ? dayjs.utc(marker.to_time).format('MM/DD/YYYY HH:mm') : null)
+        
         if (marker.image_link) {
             setFormValue('imageLink', {
                 type: 'existing', 
@@ -92,6 +110,10 @@ function MarkerEditForm({
             })
             setImageMessage('current image')
         }    
+
+        if (marker.restaurant) {
+            setScrapperData({ restaurant: marker.restaurant })
+        }
     }, [marker])
 
     useEffect(() => {
@@ -108,6 +130,36 @@ function MarkerEditForm({
             onUpdated && onUpdated()
         }
     }, [editData, editError])
+
+    useEffect(() => {
+        if (scrapImageData) {
+            if (scrapImageData.scrapimage.image_link) {
+                if (!formValue.imageLink) {
+                    setFormValue('imageLink', {
+                        type: 'weblink',
+                        value: scrapImageData.scrapimage.image_link,
+                    })
+                    setImageState('scrap')
+                    setImageMessage('image by scrapping website')
+                }
+            }
+
+            if (scrapImageData.scrapimage.title) {
+                if (!formValue.label) {
+                    setFormValue('label', scrapImageData.scrapimage.title)
+                }
+            }
+        }
+    }, [scrapImageData])
+
+    const scrapImageWithLink = () => {
+        if (!open) return
+        if (marker.link === formValue.link) return
+        if (formValue.link === '') return
+        scrapimageGQL({ variables: { link: formValue.link }})
+    }
+
+    useDebounce(scrapImageWithLink, 2000, [ formValue.link,  ])
 
     const onValueChangeHandler = (field, value) => {
         setFormValue(field, value)
@@ -139,6 +191,26 @@ function MarkerEditForm({
         setImageMessage('')
     }
 
+    const onScrapperClick = (value) => {
+        setScrapperOpen(value)
+        setAnchorEl(null)
+    }
+
+    const onScrapperFinish = (link, value) => {
+        onValueChangeHandler('link', link)
+        setScrapperData(value)
+        setScrapperOpen(false)
+    }
+
+    // handle menu click
+    const handleMenuClick = (event) => {
+        setAnchorEl(event.currentTarget)
+    }
+
+    const handleMenuClose = () => {
+        setAnchorEl(null)
+    }
+
     const onSubmitHandler = async (e) => {
         e.preventDefault()
         setSubmitting(true)
@@ -162,6 +234,7 @@ function MarkerEditForm({
 
         const to = formValue.to_time ? generic.time.toServerFormat(formValue.to_time) : null
         const from = formValue.from_time ? generic.time.toServerFormat(formValue.from_time) : null
+        const restaurant_id = (scrapperData && scrapperData.restaurant) ? scrapperData.restaurant.id: null
 
         editMarkerGQL({ variables: {
             id: marker.id,
@@ -179,6 +252,7 @@ function MarkerEditForm({
             need_booking: formValue.need_booking,
             to_time: to,
             from_time: from,
+            restaurant_id: restaurant_id,
         }})
     }
 
@@ -266,15 +340,51 @@ function MarkerEditForm({
                         />
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            label='website'
-                            value={formValue.link}
-                            onChange={(e) => onValueChangeHandler('link', e.target.value)}
-                            error={!!error.link}
-                            helperText={error.link}
-                        />
+                    <Grid container spacing={0}>
+                            <Grid item xs={9} md={9} lg={9}>
+                                <TextField
+                                    variant='outlined'
+                                    fullWidth
+                                    label='website'
+                                    value={formValue.link}
+                                    onChange={(e) => onValueChangeHandler('link', e.target.value)}
+                                    error={!!error.link}
+                                    helperText={error.link}
+                                />
+                            </Grid>
+                            <Grid item xs={3} md={3} lg={3}>
+                                    <Button 
+                                        variant='outlined'
+                                        id='website-menu-button'
+                                        aria-controls={menuOpen ? 'website-menu' : undefined}
+                                        aria-haspopup='true'
+                                        aria-expanded={menuOpen ? 'true' : undefined}
+                                        onClick={handleMenuClick}
+                                        fullWidth
+                                        style={{
+                                            height: '100%',
+                                        }}
+                                    >
+                                        <MoreVertIcon />
+                                    </Button>
+                                    <Menu
+                                        id='website-menu'
+                                        anchorEl={anchorEl}
+                                        open={menuOpen}
+                                        onClose={handleMenuClose}
+                                        MenuListProps={{
+                                            'aria-labelledby': 'website-menu-button',
+                                        }}
+                                    >
+                                        <MenuItem onClick={() => onScrapperClick('openrice')}>
+                                            <ListItemIcon>
+                                                <RiceBowlIcon fontSize="small" />
+                                            </ListItemIcon>
+                                            <ListItemText>Openrice</ListItemText>
+                                        </MenuItem>
+                                    </Menu>
+                            </Grid>
+                        </Grid>
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
                         <FormControl component='image' fullWidth>
@@ -435,6 +545,13 @@ function MarkerEditForm({
                 shouldOpen={imageFormState === 'preview'}
                 handleClose={() => setImageState('')}
                 imageInfo={formValue.imageLink}
+            />
+            <ScrapperForm 
+                open={!!scrapperOpen}
+                handleClose={() => setScrapperOpen(null)}
+                source={scrapperOpen}
+                value={scrapperData}
+                setValue={onScrapperFinish}
             />
         </>
     )

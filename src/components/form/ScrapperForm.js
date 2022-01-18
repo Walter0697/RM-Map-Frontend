@@ -7,6 +7,7 @@ import {
 
 import BaseForm from './BaseForm'
 import OpenriceScrap from './scrapper/OpenriceScrap'
+import RestaurantCard from '../card/RestaurantCard'
 
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom'
 
@@ -44,12 +45,25 @@ function ScrapperForm({
     }, [source])
 
     useEffect(() => {
-        setLoading(true)
         if (open) {
             if (value) {
-                setData(fetchData)
+                setData(value)
+                setLoading(false)
+                setSuccess(true)
+            } else {
+                setData(null)
+                setLoading(false)
+                setSuccess(false)
+                // only try when there is no value
+                getClipboardMessage()
             }
-            getClipboardMessage()
+        } else {
+            setData(null)
+            setLoading(false)
+            setSuccess(false)
+            setSourceId('')
+            setContent('')
+            setLink('')
         }
     }, [open, value])
 
@@ -75,7 +89,11 @@ function ScrapperForm({
     }, [scrapData, scrapError])
 
     const getClipboardMessage = async () => {
+        setLoading(true)
         const text = await navigator.clipboard.readText()
+        if (text === copyContent) {
+            setLoading(false)
+        }
         setContent(text)
     }
 
@@ -94,19 +112,41 @@ function ScrapperForm({
         })
     }
 
+    const onDataSame = () => {
+        setLoading(false)
+        setAlertMessage({
+            type: 'warning',
+            message: 'data is the same',
+        })
+    }
+
     const getScrapContent = () => {
         if (source === 'openrice') {
             return (
                 <OpenriceScrap
+
                     showInstruction={!success}
                     content={copyContent}
                     setFetchInfo={setFetchInfo}
                     findInfoFailed={findInfoFailed}
-                    restaurant={fetchData}
+                    onDataSame={onDataSame}
+                    sourceId={source_id}
                 />
             )
         } else {
             return false
+        }
+    }
+
+    const getInfoCard = () => {
+        if (fetchData) {
+            if (fetchData.restaurant) {
+                return (
+                    <RestaurantCard
+                        restaurant={fetchData.restaurant}
+                    />
+                )
+            }  
         }
     }
 
@@ -151,6 +191,9 @@ function ScrapperForm({
                     
                     <Grid item xs={12} md={12} lg={12} fullWidth>
                         {getScrapContent()}
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12} fullWidth>
+                        {getInfoCard()}
                     </Grid>
                 </Grid>
             </BaseForm>

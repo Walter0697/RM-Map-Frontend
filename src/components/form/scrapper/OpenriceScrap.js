@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 
-import RestaurantCard from '../../card/RestaurantCard'
 import OpenRiceInstruction from '../../../images/openrice.jpg'
 
 function OpenriceScrap({
@@ -8,7 +7,8 @@ function OpenriceScrap({
     content,
     setFetchInfo,
     findInfoFailed,
-    restaurant
+    onDataSame,
+    sourceId,
 }) {
     useEffect(() => {
         if (content) {
@@ -24,8 +24,12 @@ function OpenriceScrap({
             }
     
             if (linkStr) {
-                const sourceId = linkStr.replace(baseURL, '')
-                setFetchInfo && setFetchInfo(sourceId, linkStr)
+                const current_source_id = linkStr.replace(baseURL, '')
+                if (sourceId === current_source_id) {
+                    onDataSame && onDataSame()
+                } else {
+                    setFetchInfo && setFetchInfo(current_source_id, linkStr)
+                }
             } else {
                 findInfoFailed && findInfoFailed()
             }
@@ -45,11 +49,6 @@ function OpenriceScrap({
                     />
                     {'Click on "Share" then "Copy"'}
                 </>
-            )}
-            {restaurant && restaurant.restaurant && (
-                <RestaurantCard
-                    restaurant={restaurant.restaurant}
-                />
             )}
         </>
     )

@@ -21,6 +21,24 @@ const list = gql`
             to_time
             from_time
             is_fav
+            restaurant {
+                id
+                name
+                source
+                source_id
+                price_range
+                restaurant_type
+                address
+                rating
+                direction
+                telephone
+                introduction
+                opening_hours
+                payment_method
+                seat_number
+                website
+                other_info
+            }
             created_at
         }
     }
@@ -41,7 +59,8 @@ const create = gql`
                           $need_booking: Boolean,
                           $price: String,
                           $to_time: String, 
-                          $from_time: String) {
+                          $from_time: String,
+                          $restaurant_id: Int) {
         createMarker(input: {
             label: $label,
             type: $type,
@@ -58,6 +77,7 @@ const create = gql`
             price: $price,
             to_time: $to_time,
             from_time: $from_time,
+            restaurant_id: $restaurant_id,
         }) {
             id
             type
@@ -76,6 +96,24 @@ const create = gql`
             to_time
             from_time
             is_fav
+            restaurant {
+                id
+                name
+                source
+                source_id
+                price_range
+                restaurant_type
+                address
+                rating
+                direction
+                telephone
+                introduction
+                opening_hours
+                payment_method
+                seat_number
+                website
+                other_info
+            }
         }
     }
 `
@@ -112,6 +150,24 @@ const previous = gql`
             to_time
             from_time
             is_fav
+            restaurant {
+                id
+                name
+                source
+                source_id
+                price_range
+                restaurant_type
+                address
+                rating
+                direction
+                telephone
+                introduction
+                opening_hours
+                payment_method
+                seat_number
+                website
+                other_info
+            }
             created_at
         }
     }
@@ -140,6 +196,24 @@ const revoke = gql`
             to_time
             from_time
             is_fav
+            restaurant {
+                id
+                name
+                source
+                source_id
+                price_range
+                restaurant_type
+                address
+                rating
+                direction
+                telephone
+                introduction
+                opening_hours
+                payment_method
+                seat_number
+                website
+                other_info
+            }
             created_at
         }
     }
@@ -147,20 +221,21 @@ const revoke = gql`
 
 const edit = gql`
     mutation editMarkerGQL($id: Int!,
-                        $label: String
-                        $address: String
-                        $image_link: String
-                        $image_upload: Upload
-                        $no_image: Boolean!
-                        $link: String
-                        $type: String
-                        $description: String
-                        $permanent: Boolean
-                        $need_booking: Boolean
-                        $to_time: String
-                        $from_time: String
-                        $estimate_time: String
-                        $price: String) {
+                        $label: String,
+                        $address: String,
+                        $image_link: String,
+                        $image_upload: Upload,
+                        $no_image: Boolean!,
+                        $link: String,
+                        $type: String,
+                        $description: String,
+                        $permanent: Boolean,
+                        $need_booking: Boolean,
+                        $to_time: String,
+                        $from_time: String,
+                        $estimate_time: String,
+                        $price: String,
+                        $restaurant_id: Int) {
         editMarker(input: {
             id: $id,
             label: $label,
@@ -177,6 +252,7 @@ const edit = gql`
             from_time: $from_time,
             estimate_time: $estimate_time,
             price: $price,
+            restaurant_id: $restaurant_id,
         }) {
             id
             type
@@ -196,6 +272,24 @@ const edit = gql`
             to_time
             from_time
             is_fav
+            restaurant {
+                id
+                name
+                source
+                source_id
+                price_range
+                restaurant_type
+                address
+                rating
+                direction
+                telephone
+                introduction
+                opening_hours
+                payment_method
+                seat_number
+                website
+                other_info
+            }
             created_at
         }
     }

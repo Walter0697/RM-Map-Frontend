@@ -27,6 +27,7 @@ import CircleIconButton from '../field/CircleIconButton'
 import FavouriteIcon from './FavouriteIcon'
 import ImageHeadText from '../wrapper/ImageHeadText'
 import AutoHideAlert from '../AutoHideAlert'
+import RestaurantCard from '../card/RestaurantCard'
 
 import generic from '../../scripts/generic'
 import actions from '../../store/actions'
@@ -316,6 +317,13 @@ function MarkerView({
                                                 >Delete</Button>
                                             </Grid> */}
                                         </>
+                                    )}
+                                    {marker.restaurant && (
+                                        <Grid item xs={12} md={12} lg={12}>
+                                            <RestaurantCard
+                                                restaurant={marker.restaurant}
+                                            />
+                                        </Grid>
                                     )}
                                 </Grid>
                             </DialogContentText>

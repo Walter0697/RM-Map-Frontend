@@ -131,11 +131,12 @@ function MarkerForm({
     }, [scrapImageData])
 
     const scrapImageWithLink = () => {
+        if (!open) return
         if (formValue.link === '') return
         scrapimageGQL({ variables: { link: formValue.link }})
     }
 
-    useDebounce(scrapImageWithLink, 2000, [ formValue.link ])
+    useDebounce(scrapImageWithLink, 2000, [ formValue.link, open ])
 
     const onValueChangeHandler = (field, value) => {
         setFormValue(field, value)
@@ -210,6 +211,7 @@ function MarkerForm({
 
         const to = formValue.to_time ? generic.time.toServerFormat(formValue.to_time) : null
         const from = formValue.from_time ? generic.time.toServerFormat(formValue.from_time) : null
+        const restaurant_id = (scrapperData && scrapperData.restaurant) ? scrapperData.restaurant.id: null
 
         createMarkerGQL({ variables: {
             label: formValue.label,
@@ -227,6 +229,7 @@ function MarkerForm({
             permanent: formValue.permanent,
             to_time: to,
             from_time: from,
+            restaurant_id: restaurant_id,
         }})
     }
 
