@@ -4,7 +4,8 @@ const filterByQuery = (markers, query, eventtypes) => {
     let currentList = []
     let isHidden = false
     const hiddenEventTypes = eventtypes.filter(s => s.hidden).map(s => s.value)
-    let queryList = query.split('&')
+
+    let queryList = query.toLowerCase().split('&')
     if (queryList.includes('hidden')) {
         currentList = markers.filter(s => hiddenEventTypes.includes(s.type))
         queryList = queryList.filter(s => s !== 'hidden')
@@ -15,7 +16,7 @@ const filterByQuery = (markers, query, eventtypes) => {
     if (queryList.length === 0) return currentList
 
     for (let i = 0; i < queryList.length; i++) {
-        const key = queryList[i].toLowerCase()
+        const key = queryList[i]
         let multiResult = []
 
         // if it is hidden, we often want to search the type as well
