@@ -24,7 +24,9 @@ function OpenriceScrap({
             }
     
             if (linkStr) {
-                const current_source_id = linkStr.replace(baseURL, '')
+                let current_source_id = linkStr.replace(baseURL, '')
+                // to avoid any invalid character
+                current_source_id = current_source_id.replace('\n', '').replace('\r', '')
                 if (sourceId === current_source_id) {
                     onDataSame && onDataSame()
                 } else {
