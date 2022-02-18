@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 
 import OpenRiceInstruction from '../../../images/openrice.jpg'
+import scrapper from '../../../scripts/scrapper'
 
 function OpenriceScrap({
     showInstruction,
@@ -12,21 +13,10 @@ function OpenriceScrap({
 }) {
     useEffect(() => {
         if (content) {
-            const baseURL = 'https://s.openrice.com/'
-            const arrInfo = content.split('\n')
-            let linkStr = ''
-            for (let i = 0; i < arrInfo.length; i++) {
-                const info = arrInfo[i]
-                const index = info.indexOf(baseURL)
-                if (index !== -1) {
-                    linkStr = info.substring(index)
-                }
-            }
-    
-            if (linkStr) {
-                let current_source_id = linkStr.replace(baseURL, '')
-                // to avoid any invalid character
-                current_source_id = current_source_id.replace('\n', '').replace('\r', '')
+            const data = scrapper.openrice.scrap(content)
+            if (data) {
+                const current_source_id = data.source_id
+                const linkStr = data.link
                 if (sourceId === current_source_id) {
                     onDataSame && onDataSame()
                 } else {
@@ -34,7 +24,7 @@ function OpenriceScrap({
                 }
             } else {
                 findInfoFailed && findInfoFailed()
-            }
+            } 
         }
     }, [content])
 

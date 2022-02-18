@@ -17,6 +17,7 @@ function ScrapperForm({
     open,
     handleClose,
     source,
+    copied_value,
     value,
     setValue,
 }) {
@@ -46,16 +47,22 @@ function ScrapperForm({
 
     useEffect(() => {
         if (open) {
-            if (value) {
-                setData(value)
-                setLoading(false)
-                setSuccess(true)
-            } else {
-                setData(null)
-                setLoading(false)
+            if (copied_value) {
+                setLoading(true)
                 setSuccess(false)
-                // only try when there is no value
-                getClipboardMessage()
+                setContent(copied_value)
+            } else {
+                if (value) {
+                    setData(value)
+                    setLoading(false)
+                    setSuccess(true)
+                } else {
+                    setData(null)
+                    setLoading(false)
+                    setSuccess(false)
+                    // only try when there is no value
+                    getClipboardMessage()
+                }
             }
         } else {
             setData(null)
@@ -124,7 +131,6 @@ function ScrapperForm({
         if (source === 'openrice') {
             return (
                 <OpenriceScrap
-
                     showInstruction={!success}
                     content={copyContent}
                     setFetchInfo={setFetchInfo}

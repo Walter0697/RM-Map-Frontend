@@ -31,6 +31,7 @@ import Selectable from '../field/Selectable'
 import NullableDatePicker from '../field/NullableDatePicker'
 
 import generic from '../../scripts/generic'
+import scrapper from '../../scripts/scrapper'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
 
@@ -64,6 +65,7 @@ function MarkerForm({
     const [ imageFormState , setImageState ] = useState('') // weblink, preview, scrap
     const [ imageSubmitMessage, setImageMessage ] = useState('')
 
+    const [ copiedValue, setCopiedValue ] = useState('')
     const [ scrapperData, setScrapperData ] = useState(null) 
     const [ scrapperOpen, setScrapperOpen ] = useState(null)
 
@@ -94,7 +96,9 @@ function MarkerForm({
             setFormValue('label', location.name)
         }
         
-    }, [location])
+        // check if clipboard has anything that is scrabble
+        getClipboardMessage()
+    }, [location, open])
 
     useEffect(() => {
         if (createError) {
@@ -114,12 +118,14 @@ function MarkerForm({
     useEffect(() => {
         if (scrapImageData) {
             if (scrapImageData.scrapimage.image_link) {
-                setFormValue('imageLink', {
-                    type: 'weblink',
-                    value: scrapImageData.scrapimage.image_link,
-                })
-                setImageState('scrap')
-                setImageMessage('image by scrapping website')
+                if (!formValue.imageLink) {
+                    setFormValue('imageLink', {
+                        type: 'weblink',
+                        value: scrapImageData.scrapimage.image_link,
+                    })
+                    setImageState('scrap')
+                    setImageMessage('image by scrapping website')
+                }
             }
 
             if (scrapImageData.scrapimage.title) {
@@ -130,9 +136,23 @@ function MarkerForm({
         }
     }, [scrapImageData])
 
+    const getClipboardMessage = async () => {
+        const text = await navigator.clipboard.readText()
+        const info = scrapper.validate(text)
+        if (info) {
+            if (confirm(`we detected that your clipboard has information for ${info}. Do you want to use it for this marker?`)) {
+                setCopiedValue(text)
+                setScrapperOpen(info)
+            }
+        }
+    }
+
     const scrapImageWithLink = () => {
         if (!open) return
         if (formValue.link === '') return
+        if (!formValue.imageLink) {
+            setImageMessage('scrapping image from website...')
+        }
         scrapimageGQL({ variables: { link: formValue.link }})
     }
 
@@ -175,6 +195,7 @@ function MarkerForm({
 
     const onScrapperFinish = (link, value) => {
         onValueChangeHandler('link', link)
+        scrapImageWithLink()
         setScrapperData(value)
         setScrapperOpen(false)
     }
@@ -528,6 +549,7 @@ function MarkerForm({
             <ScrapperForm 
                 open={!!scrapperOpen}
                 handleClose={() => setScrapperOpen(null)}
+                copied_value={copiedValue}
                 source={scrapperOpen}
                 value={scrapperData}
                 setValue={onScrapperFinish}

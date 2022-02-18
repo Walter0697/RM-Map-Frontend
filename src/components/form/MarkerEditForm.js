@@ -156,6 +156,9 @@ function MarkerEditForm({
         if (!open) return
         if (marker.link === formValue.link) return
         if (formValue.link === '') return
+        if (!formValue.imageLink) {
+            setImageMessage('scrapping image from website...')
+        }
         scrapimageGQL({ variables: { link: formValue.link }})
     }
 
