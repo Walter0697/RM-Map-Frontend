@@ -11,6 +11,8 @@ import {
     Slide,
 } from '@mui/material'
 
+import VersionIcon from '../../wrapper/VersionIcon'
+
 import actions from '../../../store/actions'
 import graphql from '../../../graphql'
 
@@ -171,7 +173,7 @@ function ReleaseNoteForm({
                         fullWidth
                         style={{
                             border: isSeen ? 'solid #bdbdbd' : 'solid #cbcb1e',
-                            backgroundColor: isSeen ? '#f9f9f9' : '#fbffd5', //#f9f9f9
+                            backgroundColor: isSeen ? '#f9f9f9' : '#fbffd5',
                             padding: '15px',
                             borderRadius: '10px',
                         }}
@@ -185,7 +187,9 @@ function ReleaseNoteForm({
                                         fontSize: '25px',
                                     }}
                                 >
-                                    Ver. {latest.version}
+                                    Ver. {latest.version}{latest.icon && (
+                                        <><span>.</span><VersionIcon icon='valentine' sx={{ fontSize: '20px' }}/></>
+                                    )}
                                 </Grid>
                                 <Grid item xs={12} md={12} lg={12}
                                     style={{
@@ -247,7 +251,11 @@ function ReleaseNoteForm({
                                 }}
                                 onClick={() => setVersion(release.version)}
                             >
-                                ver. {release.version}
+                                ver. {release.version}{release.icon && (
+                                    <>
+                                        <span>.</span><VersionIcon icon={release.icon} sx={{ fontSize: '15px' }}/>
+                                    </>
+                                )}
                             </Grid>
                         ))}
                     </Grid>

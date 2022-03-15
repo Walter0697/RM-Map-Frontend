@@ -4,6 +4,7 @@ const list = gql`
     query listReleaseNoteGQL {
         releasenotes {
             version
+            icon
         }
     }
 `
@@ -14,6 +15,7 @@ const latest = gql`
             version
             notes
             date
+            icon
         }
     }
 `
@@ -26,6 +28,7 @@ const find = gql`
             version
             notes
             date
+            icon
         }
     }
 `
