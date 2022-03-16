@@ -10096,6 +10096,11 @@ react-lifecycles-compat@^3.0.2:
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
+react-quick-pinch-zoom@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/react-quick-pinch-zoom/-/react-quick-pinch-zoom-4.1.0.tgz#1e9fd463961b018343fd96af76a49f68ef57b6ee"
+  integrity sha512-sK25vRnmEvkE0eufBtN09jeCeBSYFumI9nF9Kzr6Q2DzDOWofUzSlJ6WYSVI2KWP42F+gDt40CbQYDD6caW3Xw==
+
 react-redux@^7.2.5:
   version "7.2.5"
   resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-7.2.5.tgz#213c1b05aa1187d9c940ddfc0b29450957f6a3b8"

@@ -9,6 +9,7 @@ import SettingsIcon from '@mui/icons-material/Settings'
 
 import HistoryIcon from '@mui/icons-material/History'
 import TheatersIcon from '@mui/icons-material/Theaters'
+import TrainIcon from '@mui/icons-material/Train'
 
 import BarIcon from './BarIcon'
 import SubBarIcon from './SubBarIcon'
@@ -57,13 +58,24 @@ function BottomBar({
                 )}
             </div>
             <div className={styles.bntab}>
-                <BarIcon
-                    route={'/markers'}
-                    path={location.pathname}
-                    activeIcon={<MapIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    inactiveIcon={<MapIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
+                { location.pathname === '/station' ? (
+                    <SubBarIcon 
+                        route={'/station'}
+                        parentRoute={'/markers'}
+                        path={location.pathname}
+                        activeIcon={<TrainIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                        setPath={changeTab}
+                    />
+                ) : (
+                    <BarIcon
+                        route={'/markers'}
+                        path={location.pathname}
+                        activeIcon={<MapIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                        inactiveIcon={<MapIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                        setPath={changeTab}
+                    />
+                )}
+                
             </div>
             <div className={styles.bntab}>
                 { location.pathname === '/previous' ? (

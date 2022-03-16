@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 
-import OpenRiceInstruction from '../../../images/openrice.jpg'
+import OpenRiceInstruction from '../../../images/scrapper/openrice.jpg'
 import scrapper from '../../../scripts/scrapper'
 
 function OpenriceScrap({

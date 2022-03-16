@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux'
 import {
     useSpring,
@@ -8,6 +9,7 @@ import {
 
 import ViewListIcon from '@mui/icons-material/ViewList'
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
+import TrainIcon from '@mui/icons-material/Train'
 
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
@@ -37,6 +39,7 @@ function MarkerMap({
     mappins,    // for displaying pins
     
 }) {
+    const history = useHistory()
     // reference of the div to render the map
     const mapElement = useRef(null)
 
@@ -50,6 +53,7 @@ function MarkerMap({
         previewContentHeight,
         previewContentOpacity,
         backButtonBottom,
+        utilityButtonBottom,
      } = useSpring({
         config: config.wobbly,
         from: { 
@@ -58,6 +62,7 @@ function MarkerMap({
             previewContentHeight: '0%',
             previewContentOpacity: 0,
             backButtonBottom: '5%',
+            utilityButtonBottom: '15%',
         },
         to: {
             mapOpacity: (showingList) ? 0 : 1,
@@ -65,6 +70,7 @@ function MarkerMap({
             previewContentHeight: ( viewPreviewContent ) ? '20%' : (hasPreviewContent ? '5%' : '0%'),
             previewContentOpacity: ( viewPreviewContent || hasPreviewContent ) ? 1 : 0,
             backButtonBottom: ( viewPreviewContent ) ? '25%' : (hasPreviewContent ? '10%' : '5%'),
+            utilityButtonBottom: ( viewPreviewContent ) ? '35%' : (hasPreviewContent ? '20%' : '15%'),
         },
     })
 
@@ -136,6 +142,10 @@ function MarkerMap({
         setPreviewContent(false)
     }, [scheduleCreated])
 
+    const redirectToStationPage = () => {
+        history.replace('/station')
+    }
+
     return (
         <>
             {/* main layout */}
@@ -184,6 +194,22 @@ function MarkerMap({
                     onClickHandler={toListView}
                 >
                     <ViewListIcon />
+                </CircleIconButton>
+            </animated.div>
+
+            <animated.div
+                style={{
+                    position: 'absolute',
+                    visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
+                    opacity: mapOpacity,
+                    bottom: utilityButtonBottom,
+                    right: '20px',
+                }}
+            >
+                <CircleIconButton
+                    onClickHandler={redirectToStationPage}
+                >
+                    <TrainIcon />
                 </CircleIconButton>
             </animated.div>
 
