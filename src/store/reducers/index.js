@@ -3,6 +3,7 @@ import marker from './marker'
 import schedule from './schedule'
 import home from './home'
 import release from './release'
+import station from './station'
 
 const reducers = {
     auth,
@@ -10,6 +11,7 @@ const reducers = {
     schedule,
     home,
     release,
+    station,
 }
 
 export default reducers

@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { connect } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import Base from './Base'
+
+import { useLazyQuery } from '@apollo/client'
 
 import useBoop from '../hooks/useBoop'
 import StationButton from '../components/station/StationButton'
@@ -11,13 +14,33 @@ import MTRImage from '../images/station/hkmtr.jpeg'
 import TopBar from '../components/topbar/TopBar'
 import AutoHideAlert from '../components/AutoHideAlert'
 
-function StationPage() {
+import graphql from '../graphql'
+
+function StationPage({
+    stations,
+}) {
     const history = useHistory()
 
-    const [ station, setStations ] = useState([])
+    // graphql request
+    //const { data: listData, loading: listLoading, error: listError } = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
+
+    //const [ stations, setStations ] = useState([])
 
     const elementRef = useRef(null)
     const pinZoomRef = useRef(null)
+
+    useEffect(() => {
+        console.log(stations)
+    }, [stations])
+    // useEffect(() => {
+    //     if (listData) {
+    //         setStations(listData.stations)
+    //     }
+
+    //     if (listError) {
+    //         console.log(listError)
+    //     }
+    // }, [listData, listError])
 
     useEffect(() => {
         if (pinZoomRef && pinZoomRef.current) {
@@ -49,7 +72,7 @@ function StationPage() {
                 label='Station Page'
             />
             <div style={{
-                height: '100%',
+                height: '90%',
                 width: '100%',
                 paddingTop: '10px',
                 overflow: 'hidden',
@@ -73,43 +96,35 @@ function StationPage() {
                             overflow: 'hidden',
                         }}
                     >
-                    <QuickPinchZoom 
-                        ref={pinZoomRef}
-                        onUpdate={onUpdate}
-                    >
-                        <div ref={elementRef}
-                            style={{
-                                width: '2000px',
-                                height: '1322px',
-                                position: 'relative',
-                            }}
+                        <QuickPinchZoom 
+                            ref={pinZoomRef}
+                            onUpdate={onUpdate}
                         >
-                            <img  
+                            <div ref={elementRef}
                                 style={{
-                                    position: 'absolute',
+                                    width: '2000px',
+                                    height: '1322px',
+                                    position: 'relative',
                                 }}
-                                src={MTRImage} 
-                            />
-                            <div
-                                style={{
-                                    position: 'absolute',
-                                    height: '30px',
-                                    width: '30px',
-                                    backgroundColor: 'green',
-                                    top: '240px',
-                                    left: '698px',
-                                }}
-                                onClick={() => onLocationClick('2')}
-                            />
-                            <StationButton 
-                                position={{ x: 781, y: 240 }}
-                                size={30}
-                                active={false}
-                                value={1}
-                                onClickHandler={onLocationClick}
-                            />
-                        </div>
-                    </QuickPinchZoom>
+                            >
+                                <img  
+                                    style={{
+                                        position: 'absolute',
+                                    }}
+                                    src={MTRImage} 
+                                />
+                                {stations.map((station, index) => (
+                                    <StationButton
+                                        key={index}
+                                        position={{ x: station.photo_x, y: station.photo_y}}
+                                        size={30}
+                                        active={false}
+                                        value={station.identifier}
+                                        onClickHandler={onLocationClick}
+                                    />
+                                ))}
+                            </div>
+                        </QuickPinchZoom>
                     </div>
                 </div>
                 <div
@@ -126,4 +141,6 @@ function StationPage() {
     )
 }
 
-export default StationPage
+export default connect(state => ({
+    stations: state.station.stations,
+})) (StationPage)

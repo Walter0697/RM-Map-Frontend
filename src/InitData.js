@@ -12,6 +12,7 @@ function InitData({ jwt, dispatch }) {
     const [ listEventTypeGQL, { data: eventTypeData } ] = useLazyQuery(graphql.markertypes.select, { fetchPolicy: 'no-cache' })
     const [ listMappinsGQL, { data: mappinsData } ] = useLazyQuery(graphql.pins.mappins, { fetchPolicy: 'no-cache' })
     const [ listScheduleGQL, { data: scheduleData } ] = useLazyQuery(graphql.schedules.list, { fetchPolicy: 'no-cache' })
+    const [ listSationGQL, { data: stationData } ] = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
 
     useEffect(() => {
         if (jwt) {
@@ -19,6 +20,7 @@ function InitData({ jwt, dispatch }) {
             listEventTypeGQL()
             listMappinsGQL()
             listScheduleGQL({ variables: { time: dayjs().format('YYYY-MM-DD') } })
+            listSationGQL()
         }
     }, [jwt])  
     // this only runs once on purpose, 
@@ -51,6 +53,12 @@ function InitData({ jwt, dispatch }) {
             dispatch(actions.resetSchedules(scheduleData.schedules))
         }
     }, [scheduleData]) // we dont care about the error, we just update if we got data
+
+    useEffect(() => {
+        if (stationData) {
+            dispatch(actions.resetStations(stationData.stations))
+        }
+    }, [stationData]) // we dont care about the error, we just update if we got data
 
     return false    // do not return any view for this component
 }

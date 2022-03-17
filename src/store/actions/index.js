@@ -148,6 +148,29 @@ export const updateReleaseLatest = (latest) => {
     }
 }
 
+export const resetStations = (stations) => {
+    return {
+        type: constants.RESET_STATIONS,
+        stations,
+    }
+}
+
+export const updateStation = (identifier, map_name, station) => {
+    return {
+        type: constants.UPDATE_STATION,
+        identifier,
+        map_name,
+        station,
+    }
+}
+
+export const setStationMapShown = (list) => {
+    return {
+        type: constants.SET_STATION_IN_MAP,
+        list,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -170,6 +193,9 @@ const actions = {
     updateReleaseList,
     updateReleaseLatest,
     updateReleaseSeen,
+    resetStations,
+    updateStation,
+    setStationMapShown,
 }
 
 export default actions
