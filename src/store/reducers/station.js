@@ -2,7 +2,10 @@ import constants from '../actions/constant'
 
 export default function stationReducer(state = {
     stations: [],
-    showInMap: [],
+    showInMap: {
+        searchMap: false,
+        markerMap: false,
+    },
 }, action) {
     switch(action.type) {
         case constants.RESET_STATIONS: {
@@ -19,6 +22,15 @@ export default function stationReducer(state = {
             return {
                 ...state, 
                 stations: result,
+            }
+        }
+        case constants.SET_STATION_IN_MAP: {
+            const before = state.showInMap || {}
+            let result = Object.assign({}, before)
+            result[action.map_type] = action.enable
+            return {
+                ...state,
+                showInMap: result,
             }
         }
         default: 

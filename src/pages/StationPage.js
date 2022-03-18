@@ -15,6 +15,7 @@ import StationInfo from '../components/station/StationInfo'
 import CircleIconButton from '../components/field/CircleIconButton'
 import TopBar from '../components/topbar/TopBar'
 import AutoHideAlert from '../components/AutoHideAlert'
+import StationSettingForm from '../components/form/station/StationSettingForm'
 
 import MTRImage from '../images/station/hkmtr.jpeg'
 
@@ -73,6 +74,8 @@ function StationPage({
     }, [ selectedStation, displayStations ])
 
     const pinchZoomRef = useRef(null)
+
+    const [ openSettingForm, setOpenSettingForm ] = useState(false)
 
     useEffect(() => {
         if (pinchZoomRef && pinchZoomRef.current) {
@@ -144,7 +147,7 @@ function StationPage({
                     }}
                 >
                     <CircleIconButton
-                        onClickHandler={refresh}
+                        onClickHandler={() => setOpenSettingForm(true)}
                     >
                         <SettingsIcon />
                     </CircleIconButton>
@@ -212,6 +215,10 @@ function StationPage({
                     </CircleIconButton>
                 </div>
             </div>
+            <StationSettingForm 
+                open={openSettingForm}
+                handleClose={() => setOpenSettingForm(false)}
+            />
             <AutoHideAlert
                 open={messageDisplay}
                 type={currentMessage ? currentMessage.type : ''}

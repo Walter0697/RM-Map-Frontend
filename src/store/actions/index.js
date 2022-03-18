@@ -164,10 +164,11 @@ export const updateStation = (identifier, map_name, active) => {
     }
 }
 
-export const setStationMapShown = (list) => {
+export const setStationMapShown = (map_type, enable) => {
     return {
         type: constants.SET_STATION_IN_MAP,
-        list,
+        map_type,
+        enable,
     }
 }
 
