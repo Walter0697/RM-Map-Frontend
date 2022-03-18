@@ -34,6 +34,8 @@ import apis from '../../apis'
 function SearchMap({
     openForm,
     mappins,
+    stations,   // for stations display in map
+    showInMap,
 }) {
     const history = useHistory()
     // reference of the div to render the map
@@ -110,6 +112,7 @@ function SearchMap({
         centerLocation,
         centerStreetName,
         setCenterToLocation,
+        setExtraLocationInformation,
      ] = useMap(
         mapElement,
         {       
@@ -435,4 +438,6 @@ function SearchMap({
 
 export default connect(state => ({
     mappins: state.marker.mappins,
+    stations: state.station.stations,
+    showInMap: state.station.showInMap,
 }))(SearchMap)

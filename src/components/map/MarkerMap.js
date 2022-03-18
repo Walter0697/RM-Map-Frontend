@@ -36,8 +36,9 @@ function MarkerMap({
     customFilterValue,
     setCustomFilterValue,
     scheduleCreated, // for triggering the event that center marker can be erased
-    mappins,    // for displaying pins
-    
+    mappins,    // for displaying pins,
+    stations,   // for stations display in map
+    showInMap,
 }) {
     const history = useHistory()
     // reference of the div to render the map
@@ -93,6 +94,8 @@ function MarkerMap({
         resetCenterMarker,
         centerLocation,
         centerStreetName,
+        setCenterToLocation,
+        setExtraLocationInformation,
      ] = useMap(
         mapElement,
         {       
@@ -141,6 +144,14 @@ function MarkerMap({
         setViewContent(false)
         setPreviewContent(false)
     }, [scheduleCreated])
+
+    useEffect(() => {
+        if (showInMap.markerMap) {
+            setExtraLocationInformation('HK_MTR-station', stations)
+        } else {
+            setExtraLocationInformation('HK_MTR-station', [])
+        }
+    }, [stations, showInMap])
 
     const redirectToStationPage = () => {
         history.replace('/station')
@@ -262,4 +273,6 @@ function MarkerMap({
 
 export default connect(state => ({
     mappins: state.marker.mappins,
+    stations: state.station.stations,
+    showInMap: state.station.showInMap,
 }))(MarkerMap)

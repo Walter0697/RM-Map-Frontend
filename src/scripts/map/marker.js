@@ -2,6 +2,8 @@ import tt from '@tomtom-international/web-sdk-maps'
 import constants from '../../constant'
 import testing from '../../testing'
 
+import TrainImage from '../../images/pin/train.png'
+
 const getPinImage = (mappin_list, markertype, pintype) => {
     if (markertype) {
         const selected = mappin_list.find(s => s.pinlabel === pintype && s.typelabel === markertype)
@@ -42,6 +44,27 @@ const getMapPin = (map, location, onMarkerClick, selected, key, markertype, pinS
     return marker
 }
 
+const getOverlayPin = (map, location, type, onPinClick, identifier) => {
+    const div = document.createElement('div')
+    div.style.zIndex = '10'
+    div.style.width = '30px'
+    div.style.height = '30px'
+    if (type === 'HK_MTR-station') {
+        div.style.backgroundImage = `url(${TrainImage})`
+    }
+    div.style.backgroundSize = 'contain'
+    div.style.backgroundRepeat = 'no-repeat'
+    div.addEventListener('click', function(e) {
+        onPinClick(identifier)
+    })
+
+    var pin = new tt.Marker({
+        element: div
+    }).setLngLat(location).addTo(map)
+    
+    return pin
+}
+
 const getMarker = (map, location, onMarkerClick, key, type, zIndex) => {
     let pin = testing.pins.searchPin
     if (type === 'selected') {
@@ -70,6 +93,7 @@ const getMarker = (map, location, onMarkerClick, key, type, zIndex) => {
 const markers = {
     getMapPin,
     getMarker,
+    getOverlayPin,
 }
 
 export default markers

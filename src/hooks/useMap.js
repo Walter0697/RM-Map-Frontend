@@ -38,10 +38,16 @@ function useMap(
     const [ locationList, setLocation ] = useState([])
     const [ markerList, setMarkers ] = useState([])
     const [ clickedMarker, setClickedMarker ] = useState(-1) // for user to click on the marker and set message to the parent layout
+    
     // for center marker
     const [ centerMarker, setCenterMarker ] = useState(null)
     const [ centerLocation, setCenterLocation ] = useObject(null)
     const [ centerStreetName, setCenterStreetName ] = useState(null)
+    
+    // for extra information (such as stations)
+    const [ extraLocationList, setExtraLocationList ] = useState([])
+    const [ extraMarkerList, setExtraMarkers ] = useState([])
+
     // the map object from the api
     const [ map, setMap ] = useState(null)
 
@@ -158,6 +164,38 @@ function useMap(
             markers.push(marker)
         })
         setMarkers(() => markers)
+    }
+
+    // reset extra marker list whenever it got updated
+    useEffect(() => {
+        setExtraLocationToMarker()
+    }, [extraLocationList])
+
+    const onPinClick = (identifier) => {
+        console.log(identifier)
+    }
+
+    const setExtraLocationToMarker = () => {
+        extraMarkerList.forEach(marker => {
+            marker.remove()
+        })
+
+        let extraMarkers = []
+        extraLocationList['HK_MTR-station'] && extraLocationList['HK_MTR-station'].forEach(item => {
+            let pin = maphelper.markers.getOverlayPin(
+                map,
+                [
+                    item.map_y,
+                    item.map_x,
+                ],
+                'HK_MTR-station',
+                onPinClick,
+                item.identifier,
+            )
+
+            extraMarkers.push(pin)
+        })
+        setExtraMarkers(() => extraMarkers)
     }
 
     // get user location and set the map center
@@ -278,6 +316,13 @@ function useMap(
         }
     }
 
+    const setExtraLocationInformation = (type, list) => {
+        const before = extraLocationList
+        const extra = Object.assign({}, before)
+        extra[type] = list
+        setExtraLocationList(() => extra)
+    }
+
     return [ 
         map, 
         mapLocation,
@@ -292,6 +337,7 @@ function useMap(
         centerLocation,
         centerStreetName,
         setCenterToLocation,
+        setExtraLocationInformation,
      ]
 }
 
