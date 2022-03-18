@@ -155,12 +155,12 @@ export const resetStations = (stations) => {
     }
 }
 
-export const updateStation = (identifier, map_name, station) => {
+export const updateStation = (identifier, map_name, active) => {
     return {
         type: constants.UPDATE_STATION,
         identifier,
         map_name,
-        station,
+        active,
     }
 }
 

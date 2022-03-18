@@ -12,6 +12,7 @@ const list = gql`
             map_y
             active
             map_name
+            line_info
         }
     }
 `
@@ -34,6 +35,7 @@ const update_active = gql`
             map_y
             active
             map_name
+            line_info
         }
     }
 `

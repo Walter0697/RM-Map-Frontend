@@ -20,7 +20,7 @@ function StationButton({
                 position: 'absolute',
                 height: size,
                 width: size,
-                backgroundColor: 'green',
+                backgroundColor: active ? 'blue' : 'green',
                 top: top,
                 left: left,
             }}

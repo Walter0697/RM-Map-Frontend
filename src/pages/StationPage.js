@@ -1,37 +1,68 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router-dom'
-import Base from './Base'
-
 import { useLazyQuery } from '@apollo/client'
+import { 
+    Grid,
+    Button,
+} from '@mui/material'
+
+import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 
 import useBoop from '../hooks/useBoop'
-import StationButton from '../components/station/StationButton'
 
-import QuickPinchZoom, { make2dTransformValue } from 'react-quick-pinch-zoom'
-import MTRImage from '../images/station/hkmtr.jpeg'
-
+import Base from './Base'
+import StationMap from '../components/station/StationMap'
+import StationInfo from '../components/station/StationInfo'
+import CircleIconButton from '../components/field/CircleIconButton'
 import TopBar from '../components/topbar/TopBar'
 import AutoHideAlert from '../components/AutoHideAlert'
 
+import MTRImage from '../images/station/hkmtr.jpeg'
+
 import graphql from '../graphql'
+
+const currentMap = 'HK_MTR'
+const currentDimension = {
+    width: '2000px',
+    height: '1322px',
+}
 
 function StationPage({
     stations,
 }) {
     const history = useHistory()
 
+    const [ messageDisplay, activateMessage ] = useBoop(3000)
+    const [ currentMessage, setMessage ] = useState(null)
+
+    const displayStations = useMemo(() => {
+        return stations.filter(s => s.map_name === currentMap)
+    }, [stations])
+
+    const [ selectedStation, setSelected ] = useState(null)
+    const selectedInfo = useMemo(() => {
+        if (!selectedStation) return null
+        const station = displayStations.find(s => s.identifier === selectedStation)
+        if (station) {
+            const line = JSON.parse(station.line_info)
+            return {
+                name: station.local_name,
+                label: station.label,
+                line: line,
+                active: station.active,
+            }
+        }
+        return null
+    }, [ selectedStation, displayStations ])
+
     // graphql request
     //const { data: listData, loading: listLoading, error: listError } = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
 
     //const [ stations, setStations ] = useState([])
 
-    const elementRef = useRef(null)
-    const pinZoomRef = useRef(null)
+    const pinchZoomRef = useRef(null)
 
-    useEffect(() => {
-        console.log(stations)
-    }, [stations])
     // useEffect(() => {
     //     if (listData) {
     //         setStations(listData.stations)
@@ -43,27 +74,34 @@ function StationPage({
     // }, [listData, listError])
 
     useEffect(() => {
-        if (pinZoomRef && pinZoomRef.current) {
+        if (pinchZoomRef && pinchZoomRef.current) {
             reset()
         }
-    }, [pinZoomRef])
+    }, [pinchZoomRef])
 
     const onLocationClick = (item) => {
-        console.log(item)
+        setSelected(item)
+    }
+
+    const onLocationStateChange = (active) => {
+        if (active) {
+            setMessage({ type: 'success', message: 'successfully add record'})
+        } else {
+            setMessage({ type: 'success', message: 'successfully remove record'})
+        }
+        activateMessage()
+        setSelected(null)
+    }
+
+    const onLocationError = (message) => {
+        setMessage({ type: 'error', message: message })
+        activateMessage()
+        setSelected(null)
     }
 
     const reset = () => {
-        pinZoomRef.current.scaleTo({ x: 0, y: 0, scale: 1 })
+        pinchZoomRef.current.scaleTo({ x: 0, y: 0, scale: 1 })
     }
-
-    const onUpdate = useCallback(({ x, y, scale }) => {
-        const element = elementRef.current
-    
-        if (element) {
-            const value = make2dTransformValue({ x, y, scale })
-            element.style.setProperty('transform', value)
-        }
-      }, [])
 
     return (
         <Base>
@@ -80,7 +118,7 @@ function StationPage({
             }}>
                 <div 
                     style={{
-                        height: '50%',
+                        height: '60%',
                         width: '100%',
                         position: 'absolute',
                         display: 'flex',
@@ -91,52 +129,59 @@ function StationPage({
                         style={{
                             width: '90%',
                             height: '100%',
-                            backgroundColor: 'red',
+                            backgroundColor: '#00000099',
                             borderRadius: '10px',
                             overflow: 'hidden',
+                            boxShadow: '2px 2px 6px',
                         }}
                     >
-                        <QuickPinchZoom 
-                            ref={pinZoomRef}
-                            onUpdate={onUpdate}
-                        >
-                            <div ref={elementRef}
-                                style={{
-                                    width: '2000px',
-                                    height: '1322px',
-                                    position: 'relative',
-                                }}
-                            >
-                                <img  
-                                    style={{
-                                        position: 'absolute',
-                                    }}
-                                    src={MTRImage} 
-                                />
-                                {stations.map((station, index) => (
-                                    <StationButton
-                                        key={index}
-                                        position={{ x: station.photo_x, y: station.photo_y}}
-                                        size={30}
-                                        active={false}
-                                        value={station.identifier}
-                                        onClickHandler={onLocationClick}
-                                    />
-                                ))}
-                            </div>
-                        </QuickPinchZoom>
+                        <StationMap 
+                            mapImage={MTRImage}
+                            stations={displayStations}
+                            dimension={currentDimension}
+                            pinchZoomRef={pinchZoomRef}
+                            onItemClickHandler={onLocationClick}
+                        />
                     </div>
                 </div>
-                <div
+                <div 
                     style={{
+                        height: '25%',
+                        top: '65%',
+                        width: '100%',
                         position: 'absolute',
-                        backgroundColor: 'blue',
-                        width: '50px',
-                        height: '50px',
+                        display: 'flex',
+                        justifyContent: 'center',
                     }}
-                    onClick={reset}
-                ></div>
+                >
+                    <StationInfo
+                        currentMap={currentMap}
+                        identifier={selectedStation}
+                        station={selectedInfo}
+                        onStationUpdate={onLocationStateChange}
+                        onStationError={onLocationError}
+                    />
+                </div>
+                <div
+                    style={{ 
+                        position: 'absolute',
+                        bottom: '40%',
+                        right: '30px',
+                    }}
+                >
+                    <CircleIconButton
+                        onClickHandler={reset}
+                    >
+                        <CenterFocusStrongIcon />
+                    </CircleIconButton>
+                </div>
             </div>
+            <AutoHideAlert
+                open={messageDisplay}
+                type={currentMessage ? currentMessage.type : ''}
+                message={currentMessage ? currentMessage.message: ''}
+                timing={2000}
+            />
         </Base>
     )
 }

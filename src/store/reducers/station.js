@@ -15,7 +15,7 @@ export default function stationReducer(state = {
             const before = state.stations || []
             let result = Object.assign([], before)
             const index = result.findIndex(s => s.identifier === action.identifier && s.map_name === action.map_name)
-            result[index] = action.station
+            result[index].active = action.active
             return {
                 ...state, 
                 stations: result,
