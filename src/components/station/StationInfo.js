@@ -44,8 +44,6 @@ function StationInfo({
             map_name: currentMap,
             active: active,
         }})
-
-        
     }
 
     const activeStation = () => {
@@ -60,14 +58,14 @@ function StationInfo({
     return (
         <div 
             style={{
-            backgroundColor: '#48acdb',
-            height: '100%',
-            width: '90%',
-            boxShadow: '2px 2px 6px',
-            textTransform: 'none',
-            padding: '10px',
-            color: 'white',
-            borderRadius: '5px',
+                backgroundColor: '#48acdb',
+                height: '100%',
+                width: '90%',
+                boxShadow: '2px 2px 6px',
+                textTransform: 'none',
+                padding: '10px',
+                color: 'white',
+                borderRadius: '10px',
             }}
         >
             <Grid container fullWidth
@@ -77,56 +75,53 @@ function StationInfo({
             >
                 {station ? (
                     <>
-                        <Grid item xs={7} md={7} lg={7}>
+                        <Grid item xs={4} md={4} lg={4}>
                             <Grid container>
                                 <Grid item xs={12} style={{
-                                    fontSize: '18px',
+                                    fontSize: '20px',
                                     fontWeight: '500',
                                 }}>
                                     {station.name}
                                 </Grid>
                                 <Grid item xs={12} style={{
-                                    fontSize: '12px',
+                                    fontSize: '15px',
                                 }}>
                                     {station.label}
                                 </Grid>
-                                <Grid item xs={12} style={{
-                                    paddingLeft: '5px',
-                                    paddingTop: '12px',
-                                }}>
-                                    {station.line.map((l, index) => (
-                                        <div 
-                                            style={{
-                                                marginBottom: '5px',
-                                            }}
-                                            key={`info${index}`}>
-                                            <div
-                                                style={{
-                                                    display: 'inline-block',
-                                                    width: '20px',
-                                                    height: '20px',
-                                                    borderRadius: '50%',
-                                                    border: '2px solid white',
-                                                    backgroundColor: l.colour
-                                                }}
-                                            />
-                                            <div style={{
-                                                display: 'inline-block',
-                                                paddingLeft: '5px',
-                                            }}>
-                                                <div style={{
-                                                    fontSize: '12px',
-                                                }}>{l.localName}</div>
-                                                <div style={{
-                                                    fontSize: '8px',
-                                                }}>{l.name}</div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </Grid>
                             </Grid>
                         </Grid>
-                        <Grid item xs={5} md={5} lg={5}>
+                        <Grid item xs={4} md={4} lg={4}>
+                            {station.line.map((l, index) => (
+                                <div 
+                                    style={{
+                                        marginBottom: '5px',
+                                    }}
+                                    key={`info${index}`}>
+                                    <div
+                                        style={{
+                                            display: 'inline-block',
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '50%',
+                                            border: '2px solid white',
+                                            backgroundColor: l.colour
+                                        }}
+                                    />
+                                    <div style={{
+                                        display: 'inline-block',
+                                        paddingLeft: '5px',
+                                    }}>
+                                        <div style={{
+                                            fontSize: '12px',
+                                        }}>{l.localName}</div>
+                                        <div style={{
+                                            fontSize: '8px',
+                                        }}>{l.name}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </Grid>
+                        <Grid item xs={4} md={4} lg={4}>
                             <div 
                                 style={{
                                     position: 'relative',
@@ -168,6 +163,7 @@ function StationInfo({
                                         </Grid>
                                         <Grid item xs={12}
                                             style={{
+                                                fontSize: '12px',
                                                 display: 'flex',
                                                 justifyContent: 'center',
                                                 color: 'red',
@@ -208,6 +204,7 @@ function StationInfo({
                                         </Grid>
                                         <Grid item xs={12}
                                             style={{
+                                                fontSize: '12px',
                                                 display: 'flex',
                                                 justifyContent: 'center',
                                                 color: 'green',

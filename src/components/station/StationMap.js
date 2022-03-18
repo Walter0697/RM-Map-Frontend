@@ -1,6 +1,19 @@
 import React, { useState, useCallback, useRef } from 'react'
 
-import QuickPinchZoom, { make3dTransformValue } from 'react-quick-pinch-zoom'
+import QuickPinchZoom, {
+    make2dTransformValue,
+    make3dTransformValue,
+    hasTranslate3DSupport
+  } from 'react-quick-pinch-zoom'
+  
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+  
+  const use3DTransform = hasTranslate3DSupport() && !isSafari
+  
+  const makeTransformValue = use3DTransform
+    ? make3dTransformValue
+    : make2dTransformValue
+  
 
 import StationButton from './StationButton'
 
@@ -17,7 +30,7 @@ function StationMap({
         const element = elementRef.current
 
         if (element) {
-            const value = make3dTransformValue({ x, y, scale })
+            const value = makeTransformValue({ x, y, scale })
             element.style.setProperty('transform', value)
         }
     }, [])
@@ -25,6 +38,7 @@ function StationMap({
     return (
         <QuickPinchZoom
             ref={pinchZoomRef}
+            draggableUnzoomed={false}
             onUpdate={onUpdate}
         >
             <div ref={elementRef}

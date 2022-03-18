@@ -2,12 +2,10 @@ import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import { useLazyQuery } from '@apollo/client'
-import { 
-    Grid,
-    Button,
-} from '@mui/material'
 
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
+import RotateLeftIcon from '@mui/icons-material/RotateLeft'
+import SettingsIcon from '@mui/icons-material/Settings'
 
 import useBoop from '../hooks/useBoop'
 
@@ -20,6 +18,7 @@ import AutoHideAlert from '../components/AutoHideAlert'
 
 import MTRImage from '../images/station/hkmtr.jpeg'
 
+import actions from '../store/actions'
 import graphql from '../graphql'
 
 const currentMap = 'HK_MTR'
@@ -30,8 +29,25 @@ const currentDimension = {
 
 function StationPage({
     stations,
+    dispatch,
 }) {
     const history = useHistory()
+
+    // graphql request
+    const [ listStationGQL, { data: listData, loading: listLoading, error: listError } ] = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
+
+    useEffect(() => {
+        if (listData) {
+            dispatch(actions.resetStations(listData.stations))
+            setMessage({ type: 'success', message: 'successfully update list' })
+            activateMessage()
+        }
+
+        if (listError) {
+            setMessage({ type: 'error', message: listError.message })
+            activateMessage()
+        }
+    }, [listData, listError])
 
     const [ messageDisplay, activateMessage ] = useBoop(3000)
     const [ currentMessage, setMessage ] = useState(null)
@@ -56,22 +72,7 @@ function StationPage({
         return null
     }, [ selectedStation, displayStations ])
 
-    // graphql request
-    //const { data: listData, loading: listLoading, error: listError } = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
-
-    //const [ stations, setStations ] = useState([])
-
     const pinchZoomRef = useRef(null)
-
-    // useEffect(() => {
-    //     if (listData) {
-    //         setStations(listData.stations)
-    //     }
-
-    //     if (listError) {
-    //         console.log(listError)
-    //     }
-    // }, [listData, listError])
 
     useEffect(() => {
         if (pinchZoomRef && pinchZoomRef.current) {
@@ -103,6 +104,11 @@ function StationPage({
         pinchZoomRef.current.scaleTo({ x: 0, y: 0, scale: 1 })
     }
 
+    const refresh = () => {
+        console.log('calling')
+        listStationGQL()
+    }
+
     return (
         <Base>
             <TopBar
@@ -116,9 +122,38 @@ function StationPage({
                 overflow: 'hidden',
                 position: 'relative',
             }}>
+                {/* top bar button */}
+                <div
+                    style={{ 
+                        position: 'absolute',
+                        top: '3%',
+                        left: '30px',
+                    }}
+                >
+                    <CircleIconButton
+                        onClickHandler={refresh}
+                    >
+                        <RotateLeftIcon />
+                    </CircleIconButton>
+                </div>
+                <div
+                    style={{ 
+                        position: 'absolute',
+                        top: '3%',
+                        right: '30px',
+                    }}
+                >
+                    <CircleIconButton
+                        onClickHandler={refresh}
+                    >
+                        <SettingsIcon />
+                    </CircleIconButton>
+                </div>
+                {/* map zoom pinch view */}
                 <div 
                     style={{
-                        height: '60%',
+                        top: '12%',
+                        height: '50%',
                         width: '100%',
                         position: 'absolute',
                         display: 'flex',
@@ -144,9 +179,10 @@ function StationPage({
                         />
                     </div>
                 </div>
+                {/* station info view */}
                 <div 
                     style={{
-                        height: '25%',
+                        height: '24%',
                         top: '65%',
                         width: '100%',
                         position: 'absolute',

@@ -12,7 +12,7 @@ function InitData({ jwt, dispatch }) {
     const [ listEventTypeGQL, { data: eventTypeData } ] = useLazyQuery(graphql.markertypes.select, { fetchPolicy: 'no-cache' })
     const [ listMappinsGQL, { data: mappinsData } ] = useLazyQuery(graphql.pins.mappins, { fetchPolicy: 'no-cache' })
     const [ listScheduleGQL, { data: scheduleData } ] = useLazyQuery(graphql.schedules.list, { fetchPolicy: 'no-cache' })
-    const [ listSationGQL, { data: stationData } ] = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
+    const [ listStationGQL, { data: stationData } ] = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
 
     useEffect(() => {
         if (jwt) {
@@ -20,7 +20,7 @@ function InitData({ jwt, dispatch }) {
             listEventTypeGQL()
             listMappinsGQL()
             listScheduleGQL({ variables: { time: dayjs().format('YYYY-MM-DD') } })
-            listSationGQL()
+            listStationGQL()
         }
     }, [jwt])  
     // this only runs once on purpose, 
