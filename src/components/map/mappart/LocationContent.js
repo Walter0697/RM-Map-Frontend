@@ -16,12 +16,12 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 
+import ExtraContentDisplay from './contentpart/ExtraContentDisplay'
 import CircleIconButton from '../../field/CircleIconButton'
 
 import useBoop from '../../../hooks/useBoop'
 
 import maphelper from '../../../scripts/map'
-import constants from '../../../constant'
 
 // children element for list view
 function SearchResultBox({
@@ -179,70 +179,6 @@ function SearchResultList({
 
         </List>
     )
-}
-
-function StationContentDisplay({
-    icon,
-    localName,
-    label,
-}) {
-    return (
-        <>
-            <Grid item xs={4} md={4} lg={4}>
-                <img 
-                    style={{
-                        marginLeft: '10px',
-                    }}
-                    width='80%'
-                    src={icon}
-                />
-            </Grid>
-            <Grid item xs={8} md={8} lg={8}>
-                <Grid container>
-                    <Grid 
-                        item xs={12}
-                        style={{
-                            width: '100%',
-                            fontSize: '20px',
-                            fontWeight: 'bold',
-                            color: '#002a89',
-                        }}
-                    >
-                        {localName}
-                    </Grid>
-                    <Grid 
-                        item xs={12}
-                        style={{
-                            width: '100%',
-                        }}
-                    >
-                        {label}
-                    </Grid>
-                </Grid>
-            </Grid>
-        </>
-    )
-}
-
-function ExtraContentDisplay({
-    extraContent,
-}) {
-    const displayImage = useMemo(() => {
-        if (!extraContent) return null
-        const image = maphelper.sprite.getPinSprite(extraContent?.type)
-        return image
-    }, [extraContent])
-
-    if (extraContent?.type === constants.overlay.station.HKMTR) {
-        return (
-            <StationContentDisplay 
-                icon={displayImage}
-                localName={extraContent?.item?.local_name}
-                label={extraContent?.item?.label}
-            />    
-        )
-    }
-    return false
 }
 
 function ExtraContentView({

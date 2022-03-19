@@ -3,133 +3,16 @@ import { connect } from 'react-redux'
 import {
     Grid,
 } from '@mui/material'
-import {
-    useSpring,
-    config,
-    animated,
-} from '@react-spring/web'
 
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
 import ImageHeadText from '../../wrapper/ImageHeadText'
 
+import ContentPreview from './previewpart/ContentPreview'
+
 import maphelper from '../../../scripts/map'
-import constants from '../../../constant'
 
-function MarkerPreview({
-    imageExist,
-    typeIcon,
-    label,
-    address
-}) {
-    return (
-        <Grid 
-            item 
-            xs={imageExist ? 8 : 12} 
-            md={imageExist ? 8 : 12} 
-            lg={imageExist ? 8 : 12} 
-            style={{
-                paddingLeft: '20px',
-                paddingRight: '20px',
-            }}  
-        >
-            <Grid container>
-                <Grid 
-                    item xs={12}
-                    style={{
-                        display: 'flex',
-                    }}
-                >
-                    <ImageHeadText
-                        iconPath={typeIcon}
-                        iconSize='25px'
-                        label={label}
-                        labelSize='18px'
-                        labelColor='#002a89'
-                        labelBold
-                    />
-                </Grid>
-                <Grid 
-                    item xs={12}
-                    style={{
-                        fontSize: '15px',
-                        color: 'grey',
-                    }}
-                >
-                    {address}
-                </Grid>
-            </Grid>
-        </Grid>
-    )
-}
-
-function StationPreview({
-    imageExist,
-    localName,
-    label,
-}) {
-    return (
-        <Grid 
-            item 
-            xs={imageExist ? 8 : 12} 
-            md={imageExist ? 8 : 12} 
-            lg={imageExist ? 8 : 12} 
-            style={{
-                paddingLeft: '20px',
-                paddingRight: '20px',
-            }}  
-        >
-            <Grid container>
-                <Grid 
-                    item xs={12}
-                    style={{
-                        fontSize: '18px',
-                        color: '#002a89',
-                    }}
-                >
-                    {localName}
-                </Grid>
-                <Grid 
-                    item xs={12}
-                    style={{
-                        fontSize: '15px',
-                        color: 'grey',
-                    }}
-                >
-                    {label}
-                </Grid>
-            </Grid>
-        </Grid>
-    )
-}
-
-function ContentPreview({
-    imageExist,
-    typeIcon,
-    marker
-}) {
-    if (!marker) return false
-    if (marker?.type === 'marker') {
-        return (
-            <MarkerPreview
-                imageExist={imageExist}
-                typeIcon={typeIcon}
-                label={marker?.item?.label}
-                address={marker?.item?.address}
-            />
-        )
-    } else if (marker?.type === constants.overlay.station.HKMTR) {
-        return (
-            <StationPreview
-                imageExist={imageExist}
-                localName={marker?.item?.local_name}
-                label={marker?.item?.label}
-            />
-        )
-    }
-    return false
-}
 
 function LocationPreview({
     marker,
@@ -140,18 +23,6 @@ function LocationPreview({
     eventtypes,
 }) {
     const [ typeIcon, setIcon ] = useState(null)
-
-    // const {
-    //     buttonOpacity,
-    // } = useSpring({
-    //     config: config.slow,
-    //     from: {
-    //         buttonOpacity: 0,
-    //     },
-    //     to: {
-    //         buttonOpacity: ( shouldViewContent ) ? 1 : 0,
-    //     }
-    // })
 
     const displayImage = useMemo(() => {
         if (!marker) return null
@@ -176,8 +47,6 @@ function LocationPreview({
             // find the type icon from the list to get the icon path
             const currentType = eventtypes.find(s => s.value === marker.item.type)
             setIcon(process.env.REACT_APP_IMAGE_LINK + currentType.icon_path)
-
-            // see if marker has a preview image
         }
     }, [marker])
 
@@ -267,20 +136,6 @@ function LocationPreview({
                     />
                 </Grid>
             </Grid>
-            {/* <animated.div
-                style={{
-                    position: 'absolute',
-                    bottom: '5px',
-                    right: '15px',
-                    opacity: buttonOpacity,
-                }}
-            >
-                <CircleIconButton
-                    onClickHandler={showMarkerView}
-                >
-                    <OpenInFullIcon />
-                </CircleIconButton>
-            </animated.div> */}
         </Grid>
     )
 }
