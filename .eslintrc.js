@@ -20,6 +20,7 @@ module.exports = {
     "rules": {
         "no-unused-vars": "off",
         "react/prop-types": "off",
+        "no-unreachable": "off",
         "linebreak-style": [
             "error",
             "unix"

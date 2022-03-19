@@ -20,6 +20,7 @@ import CircleIconButton from '../field/CircleIconButton'
 import FilterBox from '../filterbox/FilterBox'
 
 import maphelper from '../../scripts/map'
+import constants from '../../constant'
 
 function MarkerMap({
     showingList,
@@ -128,9 +129,18 @@ function MarkerMap({
     useEffect(() => {
         if (!clickedMarker || clickedMarker === -1) return
         if (clickedMarker) {
-            const marker = markers.find(s => s.id === clickedMarker.id)
-            if (marker) {
-                setViewMarker(marker)
+            if (clickedMarker.type === 'marker') {
+                const marker = markers.find(s => s.id === clickedMarker.item.id)
+                if (marker) {
+                    setViewMarker({
+                        type: 'marker',
+                        item: marker,
+                    })
+                    setViewContent(true)
+                    setPreviewContent(true)
+                }
+            } else {
+                setViewMarker(clickedMarker)
                 setViewContent(true)
                 setPreviewContent(true)
             }
@@ -147,9 +157,9 @@ function MarkerMap({
 
     useEffect(() => {
         if (showInMap.markerMap) {
-            setExtraLocationInformation('HK_MTR-station', stations)
+            setExtraLocationInformation(constants.overlay.station.HKMTR, stations)
         } else {
-            setExtraLocationInformation('HK_MTR-station', [])
+            setExtraLocationInformation(constants.overlay.station.HKMTR, [])
         }
     }, [stations, showInMap])
 

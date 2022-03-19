@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import generic from './generic'
+import constants from '../../constant'
 
 // this script is to convert different object into the expected json
 // then we can use the same object into the target form
@@ -34,6 +35,7 @@ import generic from './generic'
 // }
 // there are more but those seem like not necessary
 // **********************************************
+
 const poiToMarkerForm = (location) => {
     const address = generic.getAddress(location.details.address)
     return {
@@ -73,10 +75,20 @@ const fillVariableForMarker = (m) => {
     return marker
 }
 
+const convertAPIValueToMapXY = (type, item) => {
+    if (type === constants.overlay.station.HKMTR) {
+        return {
+            lat: item.map_x,
+            lon: item.map_y,
+        }
+    }
+}
+
 const converts = {
     poiToMarkerForm,
     centerToMarkerForm,
     fillVariableForMarker,
+    convertAPIValueToMapXY,
 }
 
 export default converts

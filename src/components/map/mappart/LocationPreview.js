@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { connect } from 'react-redux'
 import {
     Grid,
@@ -16,6 +16,123 @@ import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 import CircleIconButton from '../../field/CircleIconButton'
 import ImageHeadText from '../../wrapper/ImageHeadText'
 
+import maphelper from '../../../scripts/map'
+import constants from '../../../constant'
+
+function MarkerPreview({
+    imageExist,
+    typeIcon,
+    label,
+    address
+}) {
+    return (
+        <Grid 
+            item 
+            xs={imageExist ? 8 : 12} 
+            md={imageExist ? 8 : 12} 
+            lg={imageExist ? 8 : 12} 
+            style={{
+                paddingLeft: '20px',
+                paddingRight: '20px',
+            }}  
+        >
+            <Grid container>
+                <Grid 
+                    item xs={12}
+                    style={{
+                        display: 'flex',
+                    }}
+                >
+                    <ImageHeadText
+                        iconPath={typeIcon}
+                        iconSize='25px'
+                        label={label}
+                        labelSize='18px'
+                        labelColor='#002a89'
+                        labelBold
+                    />
+                </Grid>
+                <Grid 
+                    item xs={12}
+                    style={{
+                        fontSize: '15px',
+                        color: 'grey',
+                    }}
+                >
+                    {address}
+                </Grid>
+            </Grid>
+        </Grid>
+    )
+}
+
+function StationPreview({
+    imageExist,
+    localName,
+    label,
+}) {
+    return (
+        <Grid 
+            item 
+            xs={imageExist ? 8 : 12} 
+            md={imageExist ? 8 : 12} 
+            lg={imageExist ? 8 : 12} 
+            style={{
+                paddingLeft: '20px',
+                paddingRight: '20px',
+            }}  
+        >
+            <Grid container>
+                <Grid 
+                    item xs={12}
+                    style={{
+                        fontSize: '18px',
+                        color: '#002a89',
+                    }}
+                >
+                    {localName}
+                </Grid>
+                <Grid 
+                    item xs={12}
+                    style={{
+                        fontSize: '15px',
+                        color: 'grey',
+                    }}
+                >
+                    {label}
+                </Grid>
+            </Grid>
+        </Grid>
+    )
+}
+
+function ContentPreview({
+    imageExist,
+    typeIcon,
+    marker
+}) {
+    if (!marker) return false
+    if (marker?.type === 'marker') {
+        return (
+            <MarkerPreview
+                imageExist={imageExist}
+                typeIcon={typeIcon}
+                label={marker?.item?.label}
+                address={marker?.item?.address}
+            />
+        )
+    } else if (marker?.type === constants.overlay.station.HKMTR) {
+        return (
+            <StationPreview
+                imageExist={imageExist}
+                localName={marker?.item?.local_name}
+                label={marker?.item?.label}
+            />
+        )
+    }
+    return false
+}
+
 function LocationPreview({
     marker,
     onOpen,
@@ -25,41 +142,51 @@ function LocationPreview({
     eventtypes,
 }) {
     const [ typeIcon, setIcon ] = useState(null)
-    const [ imageExist, setImageExist ] = useState(false)
-    const {
-        buttonOpacity,
-    } = useSpring({
-        config: config.slow,
-        from: {
-            buttonOpacity: 0,
-        },
-        to: {
-            buttonOpacity: ( shouldViewContent ) ? 1 : 0,
+
+    // const {
+    //     buttonOpacity,
+    // } = useSpring({
+    //     config: config.slow,
+    //     from: {
+    //         buttonOpacity: 0,
+    //     },
+    //     to: {
+    //         buttonOpacity: ( shouldViewContent ) ? 1 : 0,
+    //     }
+    // })
+
+    const displayImage = useMemo(() => {
+        if (!marker) return null
+        if (marker?.type === 'marker') {
+            if (marker?.item.image_link) {
+                return process.env.REACT_APP_IMAGE_LINK + marker.item.image_link
+            } else {
+                return typeIcon
+            }
+            return null
+        } else {
+            const image = maphelper.sprite.getPinSprite(marker?.type) 
+            return image
         }
-    })
+        return null
+    }, [marker, typeIcon])
 
     useEffect(() => {
         if (!marker) return
 
-        // find the type icon from the list to get the icon path
-        const currentType = eventtypes.find(s => s.value === marker.type)
-        setIcon(process.env.REACT_APP_IMAGE_LINK + currentType.icon_path)
+        console.log(marker)
+        if (marker?.type === 'marker') {
+            // find the type icon from the list to get the icon path
+            const currentType = eventtypes.find(s => s.value === marker.item.type)
+            setIcon(process.env.REACT_APP_IMAGE_LINK + currentType.icon_path)
 
-        // see if marker has a preview image
-        if (marker?.image_link) {
-            setImageExist(true)
-        } else {
-            setImageExist(false)
+            // see if marker has a preview image
         }
     }, [marker])
 
-    const onImageFailedToLoad = (e) => {
-        setImageExist(false)
-    }
-
     const showMarkerView = () => {
-        if (marker) {
-            setSelectedById(marker.id)
+        if (marker && marker.type === 'marker') {
+            setSelectedById(marker?.item.id)
         }
     }
 
@@ -125,55 +252,22 @@ function LocationPreview({
                 onClick={showMarkerView}
             >
                 <Grid container>
-                    { imageExist && (
+                    { displayImage && (
                         <Grid item xs={4} md={4} lg={4}>
                             <img 
                                 style={{
                                     marginLeft: '10px',
                                 }}
                                 width='80%'
-                                src={process.env.REACT_APP_IMAGE_LINK + marker.image_link}
-                                onError={onImageFailedToLoad}
+                                src={displayImage}
                             />
                         </Grid>
                     )}
-                    <Grid 
-                        item 
-                        xs={imageExist ? 8 : 12} 
-                        md={imageExist ? 8 : 12} 
-                        lg={imageExist ? 8 : 12} 
-                        style={{
-                            paddingLeft: '20px',
-                            paddingRight: '20px',
-                        }}  
-                    >
-                        <Grid container>
-                            <Grid 
-                                item xs={12}
-                                style={{
-                                    display: 'flex',
-                                }}
-                            >
-                                <ImageHeadText
-                                    iconPath={typeIcon}
-                                    iconSize='25px'
-                                    label={marker.label}
-                                    labelSize='18px'
-                                    labelColor='#002a89'
-                                    labelBold
-                                />
-                            </Grid>
-                            <Grid 
-                                item xs={12}
-                                style={{
-                                    fontSize: '15px',
-                                    color: 'grey',
-                                }}
-                            >
-                                {marker.address}
-                            </Grid>
-                        </Grid>
-                    </Grid>
+                    <ContentPreview
+                        imageExist={!!displayImage}
+                        typeIcon={typeIcon}
+                        marker={marker}
+                    />
                 </Grid>
             </Grid>
             {/* <animated.div

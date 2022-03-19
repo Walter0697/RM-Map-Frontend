@@ -127,7 +127,10 @@ function useMap(
         })
 
         setLocation(list)
-        setClickedMarker(selectedLocation)
+        setClickedMarker({
+            type: 'marker',
+            item: selectedLocation,
+        })
         updateMapLocation(selectedLocation.location)
     }
 
@@ -171,8 +174,34 @@ function useMap(
         setExtraLocationToMarker()
     }, [extraLocationList])
 
-    const onPinClick = (identifier) => {
-        console.log(identifier)
+    const onPinClick = (type, identifier) => {
+        if (extraLocationList[type] && extraLocationList[type].length === 0) return
+        let selectedLocation = null
+        let list = []
+        extraLocationList[type].forEach(item => {
+            if (item.identifier === identifier) {
+                item.selected = true
+                selectedLocation = item
+            } else {
+                item.selected = false
+            }
+            list.push(item)
+        })
+
+        const before = extraLocationList
+        let result = Object.assign({}, before)
+        result[type] = list
+        setExtraLocationList(result)
+        setClickedMarker({
+            type,
+            item: selectedLocation,
+        })
+        
+        // each API might have their own way to handle x y so this is how to parse it
+        const selectedItemLocation = maphelper.converts.convertAPIValueToMapXY(type, selectedLocation)
+        if (type === constants.overlay.station.HKMTR) {
+            updateMapLocation(selectedItemLocation)
+        }
     }
 
     const setExtraLocationToMarker = () => {
@@ -181,14 +210,15 @@ function useMap(
         })
 
         let extraMarkers = []
-        extraLocationList['HK_MTR-station'] && extraLocationList['HK_MTR-station'].forEach(item => {
+        extraLocationList[constants.overlay.station.HKMTR] && extraLocationList[constants.overlay.station.HKMTR].forEach(item => {
             let pin = maphelper.markers.getOverlayPin(
                 map,
                 [
                     item.map_y,
                     item.map_x,
                 ],
-                'HK_MTR-station',
+                item.selected,
+                constants.overlay.station.HKMTR,
                 onPinClick,
                 item.identifier,
             )
