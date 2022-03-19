@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
     useSpring,
     config,
@@ -21,6 +21,7 @@ import CircleIconButton from '../../field/CircleIconButton'
 import useBoop from '../../../hooks/useBoop'
 
 import maphelper from '../../../scripts/map'
+import constants from '../../../constant'
 
 // children element for list view
 function SearchResultBox({
@@ -42,6 +43,7 @@ function SearchResultBox({
                 onClick={() => onClickEvent(id)}
             >
                 <Grid container>
+                    <Grid item xs={6}></Grid>
                     <Grid 
                         item 
                         xs={12}
@@ -105,7 +107,6 @@ function LocationDetail({
                 paddingLeft: '15px',
                 paddingRight: '15px',
                 display: 'flex',
-                //alignItem: 'flex-start',
             }}
         >
             <Grid 
@@ -180,6 +181,107 @@ function SearchResultList({
     )
 }
 
+function StationContentDisplay({
+    icon,
+    localName,
+    label,
+}) {
+    return (
+        <>
+            <Grid item xs={4} md={4} lg={4}>
+                <img 
+                    style={{
+                        marginLeft: '10px',
+                    }}
+                    width='80%'
+                    src={icon}
+                />
+            </Grid>
+            <Grid item xs={8} md={8} lg={8}>
+                <Grid container>
+                    <Grid 
+                        item xs={12}
+                        style={{
+                            width: '100%',
+                            fontSize: '20px',
+                            fontWeight: 'bold',
+                            color: '#002a89',
+                        }}
+                    >
+                        {localName}
+                    </Grid>
+                    <Grid 
+                        item xs={12}
+                        style={{
+                            width: '100%',
+                        }}
+                    >
+                        {label}
+                    </Grid>
+                </Grid>
+            </Grid>
+        </>
+    )
+}
+
+function ExtraContentDisplay({
+    extraContent,
+}) {
+    const displayImage = useMemo(() => {
+        if (!extraContent) return null
+        const image = maphelper.sprite.getPinSprite(extraContent?.type)
+        return image
+    }, [extraContent])
+
+    if (extraContent?.type === constants.overlay.station.HKMTR) {
+        return (
+            <StationContentDisplay 
+                icon={displayImage}
+                localName={extraContent?.item?.local_name}
+                label={extraContent?.item?.label}
+            />    
+        )
+    }
+    return false
+}
+
+function ExtraContentView({
+    extraContent,
+    onBackHandler,
+}) {
+    return (
+        <Grid 
+            container
+            style={{
+                height: '100%',
+                width: '100%',
+                background: '#c3c9c9',
+                overflow: 'auto',
+                paddingTop: '5px',
+                paddingLeft: '15px',
+                paddingRight: '15px',
+                display: 'flex',
+            }}
+        >
+            <Grid 
+                item xs={12}
+                style={{
+                    height: '50px',
+                }}
+            >
+                <CircleIconButton
+                    onClickHandler={onBackHandler}
+                >
+                    <ArrowBackIcon />
+                </CircleIconButton>
+            </Grid>
+            <ExtraContentDisplay 
+                extraContent={extraContent}
+            />
+        </Grid>
+    )
+}
+
 // collapsed view
 function CollapsedView({
     count,
@@ -198,6 +300,8 @@ function LocationContent({
     setHideList,
     selectedIndex,
     setSelectedIndex,
+    extraContent,
+    cancelExtraContent,
     openForm,
 }) {
     const [ currentTab, setTab ] = useState('none')
@@ -213,7 +317,7 @@ function LocationContent({
     // for transition animation
     useEffect(() => {
         refresh()
-
+        
         const timer = window.setTimeout(() => {
             if (!shouldShowList) {
                 setTab('collapsed')
@@ -225,13 +329,17 @@ function LocationContent({
                     return
                 }
             }
+            if (extraContent) {
+                setTab('extra')
+                return
+            }
             setTab('list')
         }, 200)
 
         return () => {
             window.clearTimeout(timer)
         }
-    }, [locationList, shouldShowList, selectedIndex])
+    }, [locationList, shouldShowList, selectedIndex, extraContent])
     
     // if the tab is expanded, then close it
     // if not, open it
@@ -285,6 +393,13 @@ function LocationContent({
                 return (
                     <CollapsedView
                         count={locationList.length}
+                    />
+                )
+            case 'extra':
+                return (
+                    <ExtraContentView 
+                        extraContent={extraContent}
+                        onBackHandler={cancelExtraContent}
                     />
                 )
             default:

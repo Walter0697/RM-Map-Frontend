@@ -29,6 +29,7 @@ import BookmarkButton from '../field/BookmarkButton'
 import SearchStreetForm from '../form/SearchStreetForm'
 
 import maphelper from '../../scripts/map'
+import constants from '../../constant'
 import apis from '../../apis'
 
 function SearchMap({
@@ -81,6 +82,9 @@ function SearchMap({
     const [ searchResults, setSearchResults ] = useState([])
     const [ selectedSearch, setSelectedSearch ] = useState(-1)
 
+    // if location content is showing extra information other than search content
+    const [ extraContent, setExtraContent ] = useState(null)
+    
     // show loading icon for search box
     const [ loading, setLoading ] = useState(false)
 
@@ -137,8 +141,14 @@ function SearchMap({
     // for handling user clicking map marker instead of bottom list
     useEffect(() => {
         if (!clickedMarker || clickedMarker === -1) return
-        setSelectedSearch(clickedMarker.id)
-        setViewContent(true)
+        if (clickedMarker.type === 'marker') {
+            setSelectedSearch(clickedMarker?.item?.id)
+            setViewContent(true)
+        } else {
+            setExtraContent(clickedMarker)
+            setSelectedSearch(-1)
+            setViewContent(true)
+        }
     }, [clickedMarker])
 
     // for handling user set the center button and get the marker in the map
@@ -150,9 +160,18 @@ function SearchMap({
         }
     }, [centerLocation])
 
+    useEffect(() => {
+        if (showInMap.searchMap) {
+            setExtraLocationInformation(constants.overlay.station.HKMTR, stations)
+        } else {
+            setExtraLocationInformation(constants.overlay.station.HKMTR, [])
+        }
+    }, [stations, showInMap])
+
     // select the location and set center to that location
     const setSelectedSearchItem = (selectedIndex) => {
         setClickedMarker(null)
+        setExtraContent(null)
         setSelectedSearch(selectedIndex)
 
         let resultList = []
@@ -212,6 +231,7 @@ function SearchMap({
                 // set for bottom result list
                 setSearchResults(output)
                 setSelectedSearch(-1)
+                setExtraContent(null)
                 setViewContent(true)
 
                 // change color whenever markers are active
@@ -223,6 +243,13 @@ function SearchMap({
             setRetrieveFail()
         }
         setLoading(false)
+    }
+
+    const cancelExtraContent = () => {
+        setExtraContent(() => null)
+        if (!hasSearchContent) {
+            setViewContent(false)
+        }
     }
 
     // set center pin as create marker location
@@ -280,6 +307,8 @@ function SearchMap({
                     setHideList={() => setViewContent(false)}
                     selectedIndex={selectedSearch}
                     setSelectedIndex={setSelectedSearchItem}
+                    extraContent={extraContent}
+                    cancelExtraContent={cancelExtraContent}
                     openForm={openForm}
                 />
             </animated.div>

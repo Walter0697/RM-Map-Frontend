@@ -11,9 +11,7 @@ import {
 
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
-import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 
-import CircleIconButton from '../../field/CircleIconButton'
 import ImageHeadText from '../../wrapper/ImageHeadText'
 
 import maphelper from '../../../scripts/map'
@@ -174,7 +172,6 @@ function LocationPreview({
     useEffect(() => {
         if (!marker) return
 
-        console.log(marker)
         if (marker?.type === 'marker') {
             // find the type icon from the list to get the icon path
             const currentType = eventtypes.find(s => s.value === marker.item.type)

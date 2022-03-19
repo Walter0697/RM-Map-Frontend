@@ -53,7 +53,7 @@ const getOverlayPin = (map, location, selected, type, onPinClick, identifier) =>
     div.style.backgroundImage = `url(${pinSprite})`
 
     if (selected) {
-        div.style.filter = 'hue-rotate(100deg)'
+        div.style.filter = 'hue-rotate(180deg)'
     }
     
     div.style.backgroundSize = 'contain'
