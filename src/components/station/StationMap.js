@@ -58,7 +58,7 @@ function StationMap({
                     <StationButton
                         key={index}
                         position={{ x: station.photo_x, y: station.photo_y}}
-                        size={30}
+                        size={45}
                         active={station.active}
                         value={station.identifier}
                         onClickHandler={onItemClickHandler}

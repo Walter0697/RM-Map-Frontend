@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import DoneIcon from '@mui/icons-material/Done'
 
 function StationButton({
     position,
@@ -14,13 +15,27 @@ function StationButton({
     const left = useMemo(() => {
         return position.x - size / 2
     }, [position, size])
+    
+    if (active) {
+        return (
+            <div style={{
+                position: 'absolute',
+                height: size,
+                width: size,
+                top: top,
+                left: left,
+            }}>
+                <DoneIcon sx={{ fontSize: size, color: 'blue' }}/>
+            </div>
+        )
+    }
     return (
         <div
             style={{
                 position: 'absolute',
                 height: size,
                 width: size,
-                backgroundColor: active ? 'blue' : 'green',
+                backgroundColor: 'transparent',
                 top: top,
                 left: left,
             }}
