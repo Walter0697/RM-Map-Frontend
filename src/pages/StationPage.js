@@ -24,8 +24,8 @@ import graphql from '../graphql'
 
 const currentMap = 'HK_MTR'
 const currentDimension = {
-    width: '2000px',
-    height: '1322px',
+    width: 2000,
+    height: 1322,
 }
 
 function StationPage({
@@ -163,30 +163,19 @@ function StationPage({
                         justifyContent: 'center',
                     }}
                 >
-                    <div
-                        style={{
-                            width: '90%',
-                            height: '100%',
-                            backgroundColor: '#00000099',
-                            borderRadius: '10px',
-                            overflow: 'hidden',
-                            boxShadow: '2px 2px 6px',
-                        }}
-                    >
-                        <StationMap 
-                            mapImage={MTRImage}
-                            stations={displayStations}
-                            dimension={currentDimension}
-                            pinchZoomRef={pinchZoomRef}
-                            onItemClickHandler={onLocationClick}
-                        />
-                    </div>
+                    <StationMap 
+                        mapImage={MTRImage}
+                        stations={displayStations}
+                        dimension={currentDimension}
+                        pinchZoomRef={pinchZoomRef}
+                        onItemClickHandler={onLocationClick}
+                    />
                 </div>
                 {/* station info view */}
                 <div 
                     style={{
-                        height: '24%',
-                        top: '65%',
+                        height: '34%',
+                        top: '55%',
                         width: '100%',
                         position: 'absolute',
                         display: 'flex',
@@ -204,7 +193,7 @@ function StationPage({
                 <div
                     style={{ 
                         position: 'absolute',
-                        bottom: '40%',
+                        top: '15%',
                         right: '30px',
                     }}
                 >

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useMemo, useCallback, useRef } from 'react'
 
 import QuickPinchZoom, {
     make2dTransformValue,
@@ -26,6 +26,18 @@ function StationMap({
 }) {
     const elementRef = useRef(null)
 
+    const expectedWidth = useMemo(() => {
+        return window.innerWidth * 0.9
+    }, [])
+
+    const expectedHeight = useMemo(() => {
+        return expectedWidth * (dimension.height / dimension.width)
+    }, [dimension, expectedWidth])
+
+    const ratio = useMemo(() => {
+        return expectedWidth / dimension.width
+    }, [expectedWidth, dimension])
+
     const onUpdate = useCallback(({ x, y, scale }) => {
         const element = elementRef.current
 
@@ -36,36 +48,50 @@ function StationMap({
     }, [])
 
     return (
-        <QuickPinchZoom
-            ref={pinchZoomRef}
-            draggableUnzoomed={false}
-            onUpdate={onUpdate}
+        <div
+            style={{
+                width: expectedWidth,
+                height: expectedHeight,
+                backgroundColor: '#00000099',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                boxShadow: '2px 2px 6px',
+            }}
         >
-            <div ref={elementRef}
-                style={{
-                    width: dimension.width,
-                    height: dimension.height,
-                    position: 'relative',
-                }}
+            <QuickPinchZoom
+                ref={pinchZoomRef}
+                draggableUnzoomed={false}
+                onUpdate={onUpdate}
             >
-                <img
+                <div ref={elementRef}
                     style={{
-                        position: 'absolute',
+                        width: expectedWidth,
+                        height: expectedHeight,
+                        position: 'relative',
                     }}
-                    src={mapImage}
-                />
-                {stations.map((station, index) => (
-                    <StationButton
-                        key={index}
-                        position={{ x: station.photo_x, y: station.photo_y}}
-                        size={45}
-                        active={station.active}
-                        value={station.identifier}
-                        onClickHandler={onItemClickHandler}
+                >
+                    <img
+                        style={{
+                            position: 'absolute',
+                            width: expectedWidth,
+                            height: expectedHeight,
+                        }}
+                        src={mapImage}
                     />
-                ))}
-            </div>
-        </QuickPinchZoom>
+                    {stations.map((station, index) => (
+                        <StationButton
+                            key={index}
+                            position={{ x: station.photo_x, y: station.photo_y}}
+                            ratio={ratio}
+                            size={5}
+                            active={station.active}
+                            value={station.identifier}
+                            onClickHandler={onItemClickHandler}
+                        />
+                    ))}
+                </div>
+            </QuickPinchZoom>
+        </div>
     )
 }
 

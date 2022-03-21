@@ -4,28 +4,34 @@ import DoneIcon from '@mui/icons-material/Done'
 function StationButton({
     position,
     size,
+    ratio, 
     active,
     value,
     onClickHandler,
 }) {
+
     const top = useMemo(() => {
-        return position.y - size / 2
-    }, [position, size])
+        return (position.y * ratio) - size / 2
+    }, [position, size, ratio])
 
     const left = useMemo(() => {
-        return position.x - size / 2
-    }, [position, size])
+        return (position.x * ratio) - size / 2
+    }, [position, size, ratio])
     
     if (active) {
         return (
             <div style={{
-                position: 'absolute',
-                height: size,
-                width: size,
-                top: top,
-                left: left,
-            }}>
-                <DoneIcon sx={{ fontSize: size, color: 'blue' }}/>
+                    position: 'absolute',
+                    height: size,
+                    width: size,
+                    top: top,
+                    left: left,
+                    backgroundColor: '#001cb4cc',
+                    borderRadius: '50%',
+                }}
+                onClick={() => onClickHandler(value)}
+            >
+                {/* <DoneIcon sx={{ fontSize: size, color: 'blue' }}/> */}
             </div>
         )
     }
