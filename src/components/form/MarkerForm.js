@@ -60,6 +60,7 @@ function MarkerForm({
         from_time: null,
         to_time: null,    
     })
+    const [ websiteLink, setWebsiteLink ] = useState('')
     const [ error, setError ] = useObject({})
 
     const [ imageFormState , setImageState ] = useState('') // weblink, preview, scrap
@@ -116,6 +117,7 @@ function MarkerForm({
     }, [createData, createError])
 
     useEffect(() => {
+        let imageSet = false
         if (scrapImageData) {
             if (scrapImageData.scrapimage.image_link) {
                 if (!formValue.imageLink) {
@@ -125,6 +127,13 @@ function MarkerForm({
                     })
                     setImageState('scrap')
                     setImageMessage('image by scrapping website')
+                    imageSet = true
+                }
+            }
+
+            if (!imageSet) {
+                if (imageSubmitMessage === 'scrapping image from website...') {
+                    setImageMessage('')
                 }
             }
 
@@ -149,16 +158,19 @@ function MarkerForm({
 
     const scrapImageWithLink = () => {
         if (!open) return
-        if (formValue.link === '') return
+        if (websiteLink === '') return
         if (!formValue.imageLink) {
             setImageMessage('scrapping image from website...')
         }
-        scrapimageGQL({ variables: { link: formValue.link }})
+        scrapimageGQL({ variables: { link: websiteLink }})
     }
 
-    useDebounce(scrapImageWithLink, 2000, [ formValue.link, open ])
+    useDebounce(scrapImageWithLink, 2000, [ websiteLink, formValue.imageLink, open ])
 
     const onValueChangeHandler = (field, value) => {
+        if (field === 'link') {
+            setWebsiteLink(value)
+        }
         setFormValue(field, value)
         setError(field, '')
     }
@@ -194,10 +206,11 @@ function MarkerForm({
     }
 
     const onScrapperFinish = (link, value) => {
-        onValueChangeHandler('link', link)
-        scrapImageWithLink()
+        setFormValue('link', link)
+        setError('link', '')
         setScrapperData(value)
         setScrapperOpen(false)
+        setWebsiteLink(link)
     }
 
     // handle menu click

@@ -63,7 +63,7 @@ function MarkerEditForm({
         from_time: null,
         to_time: null,    
     })
-
+    const [ websiteLink, setWebsiteLink ] = useState('')
     const [ error, setError ] = useObject({})
 
     const [ imageFormState , setImageState ] = useState('') // weblink, preview
@@ -154,17 +154,19 @@ function MarkerEditForm({
 
     const scrapImageWithLink = () => {
         if (!open) return
-        if (marker.link === formValue.link) return
-        if (formValue.link === '') return
+        if (websiteLink === '') return
         if (!formValue.imageLink) {
             setImageMessage('scrapping image from website...')
         }
-        scrapimageGQL({ variables: { link: formValue.link }})
+        scrapimageGQL({ variables: { link: websiteLink }})
     }
 
-    useDebounce(scrapImageWithLink, 2000, [ formValue.link,  ])
+    useDebounce(scrapImageWithLink, 2000, [ websiteLink, formValue.imageLink, open ])
 
     const onValueChangeHandler = (field, value) => {
+        if (field === 'link') {
+            setWebsiteLink(value)
+        }
         setFormValue(field, value)
         setError(field, '')
     }
@@ -200,9 +202,11 @@ function MarkerEditForm({
     }
 
     const onScrapperFinish = (link, value) => {
-        onValueChangeHandler('link', link)
+        setFormValue('link', link)
+        setError('link', '')
         setScrapperData(value)
         setScrapperOpen(false)
+        setWebsiteLink(link)
     }
 
     // handle menu click
