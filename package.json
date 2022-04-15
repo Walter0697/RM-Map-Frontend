@@ -1,6 +1,6 @@
 {
   "name": "map-marker",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "private": true,
   "dependencies": {
     "@apollo/client": "^3.4.16",

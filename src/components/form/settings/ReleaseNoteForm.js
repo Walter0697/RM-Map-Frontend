@@ -188,7 +188,7 @@ function ReleaseNoteForm({
                                     }}
                                 >
                                     Ver. {latest.version}{latest.icon && (
-                                        <><span>.</span><VersionIcon icon='valentine' sx={{ fontSize: '20px' }}/></>
+                                        <><span>.</span><VersionIcon icon={latest.icon} sx={{ fontSize: '20px' }}/></>
                                     )}
                                 </Grid>
                                 <Grid item xs={12} md={12} lg={12}
