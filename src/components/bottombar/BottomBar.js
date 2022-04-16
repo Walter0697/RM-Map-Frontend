@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useMemo } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
 import SearchIcon from '@mui/icons-material/Search'
@@ -7,9 +7,10 @@ import HomeIcon from '@mui/icons-material/Home'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import SettingsIcon from '@mui/icons-material/Settings'
 
-import HistoryIcon from '@mui/icons-material/History'
-import TheatersIcon from '@mui/icons-material/Theaters'
-import TrainIcon from '@mui/icons-material/Train'
+import AvTimerIcon from '@mui/icons-material/AvTimer'       // expired marker
+import FlagIcon from '@mui/icons-material/Flag'             // previous marker
+import TheatersIcon from '@mui/icons-material/Theaters'     // movie
+import TrainIcon from '@mui/icons-material/Train'           // station
 
 import BarIcon from './BarIcon'
 import SubBarIcon from './SubBarIcon'
@@ -36,83 +37,129 @@ function BottomBar({
         }, 200)
     }
 
+    const SearchButton = useMemo(() => {
+        if (location.pathname === '/movies') {
+            return (
+                <SubBarIcon 
+                    route={'/movies'}
+                    parentRoute={'/search'}
+                    path={location.pathname}
+                    activeIcon={<TheatersIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+
+        return (
+            <BarIcon
+                route={'/search'}
+                path={location.pathname}
+                activeIcon={<SearchIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                inactiveIcon={<SearchIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                setPath={changeTab}
+            />
+        )
+    }, [location.pathname])
+
+    const MarkerButton = useMemo(() => {
+        if (location.pathname === '/station') {
+            return (
+                <SubBarIcon 
+                    route={'/station'}
+                    parentRoute={'/markers'}
+                    path={location.pathname}
+                    activeIcon={<TrainIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+
+        return (
+            <BarIcon
+                route={'/markers'}
+                path={location.pathname}
+                activeIcon={<MapIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                inactiveIcon={<MapIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                setPath={changeTab}
+            />
+        )
+    }, [location.pathname])
+
+    const HomeButton = useMemo(() => {
+        if (location.pathname === '/previous') {
+            return (
+                <SubBarIcon 
+                    route={'/previous'}
+                    parentRoute={'/home'}
+                    path={location.pathname}
+                    activeIcon={<FlagIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+        if (location.pathname === '/expired') {
+            return (
+                <SubBarIcon 
+                    route={'/expired'}
+                    parentRoute={'/home'}
+                    path={location.pathname}
+                    activeIcon={<AvTimerIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+
+        return (
+            <BarIcon
+                route={'/home'}
+                path={location.pathname}
+                activeIcon={<HomeIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                inactiveIcon={<HomeIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                setPath={changeTab}
+            />
+        )
+    }, [location.pathname])
+
+    const ScheduleButton = useMemo(() => {
+        return (
+            <BarIcon
+                route={'/schedule'}
+                path={location.pathname}
+                activeIcon={<CalendarTodayIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                inactiveIcon={<CalendarTodayIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                setPath={changeTab}
+            />
+        )
+    }, [])
+
+    const SettingButton = useMemo(() => {
+        return (
+            <BarIcon
+                route={'/setting'}
+                path={location.pathname}
+                activeIcon={<SettingsIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                inactiveIcon={<SettingsIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                setPath={changeTab}
+            />
+        )
+    }, [])
+
     return (
         <div className={styles.bottomnav}>
              <div className={styles.bntab}>
-                { location.pathname === '/movies' ? (
-                    <SubBarIcon 
-                        route={'/movies'}
-                        parentRoute={'/search'}
-                        path={location.pathname}
-                        activeIcon={<TheatersIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                        setPath={changeTab}
-                    />
-                ) : (
-                    <BarIcon
-                        route={'/search'}
-                        path={location.pathname}
-                        activeIcon={<SearchIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                        inactiveIcon={<SearchIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                        setPath={changeTab}
-                    />
-                )}
+                {SearchButton}
             </div>
             <div className={styles.bntab}>
-                { location.pathname === '/station' ? (
-                    <SubBarIcon 
-                        route={'/station'}
-                        parentRoute={'/markers'}
-                        path={location.pathname}
-                        activeIcon={<TrainIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                        setPath={changeTab}
-                    />
-                ) : (
-                    <BarIcon
-                        route={'/markers'}
-                        path={location.pathname}
-                        activeIcon={<MapIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                        inactiveIcon={<MapIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                        setPath={changeTab}
-                    />
-                )}
-                
+                {MarkerButton}
             </div>
             <div className={styles.bntab}>
-                { location.pathname === '/previous' ? (
-                    <SubBarIcon 
-                        route={'/previous'}
-                        parentRoute={'/home'}
-                        path={location.pathname}
-                        activeIcon={<HistoryIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                        setPath={changeTab}
-                    />
-                ) : (
-                    <BarIcon
-                        route={'/home'}
-                        path={location.pathname}
-                        activeIcon={<HomeIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                        inactiveIcon={<HomeIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                        setPath={changeTab}
-                    />
-                )}
+                {HomeButton}
             </div>
             <div className={styles.bntab}>
-                <BarIcon
-                    route={'/schedule'}
-                    path={location.pathname}
-                    activeIcon={<CalendarTodayIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    inactiveIcon={<CalendarTodayIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
+                {ScheduleButton}
             </div>
             <div className={styles.bntab}>
-                <BarIcon
-                    route={'/setting'}
-                    path={location.pathname}
-                    activeIcon={<SettingsIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    inactiveIcon={<SettingsIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
+                {SettingButton}
             </div>
         </div>
     )

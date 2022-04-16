@@ -173,6 +173,48 @@ const previous = gql`
     }
 `
 
+const expired = gql`
+    query expiredMarkerGQL{
+        expiredmarkers{
+            id
+            type
+            description
+            latitude
+            longitude
+            label
+            address
+            link
+            image_link
+            type
+            estimate_time
+            price
+            status
+            to_time
+            from_time
+            is_fav
+            restaurant {
+                id
+                name
+                source
+                source_id
+                price_range
+                restaurant_type
+                address
+                rating
+                direction
+                telephone
+                introduction
+                opening_hours
+                payment_method
+                seat_number
+                website
+                other_info
+            }
+            created_at
+        }
+    }
+`
+
 const revoke = gql`
     mutation revokeMarkerGQL($id: Int!) {
         revokeMarker(input: {
@@ -309,6 +351,7 @@ const markers = {
     create,
     update_fav,
     previous,
+    expired,
     revoke,
     edit,
     remove,

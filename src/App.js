@@ -15,6 +15,7 @@ import SchedulePage from './pages/SchedulePage'
 import SettingPage from './pages/SettingPage'
 
 import PreviousMarkerPage from './pages/PreviousMarkerPage'
+import ExpiredMarkerPage from './pages/ExpiredMarkerPage'
 import MoviePage from './pages/MoviePage'
 import StationPage from './pages/StationPage'
 
@@ -38,6 +39,7 @@ function App() {
             <Route path='/setting' component={SettingPage} />
 
             <Route path='/previous' component={PreviousMarkerPage} />
+            <Route path='/expired' component={ExpiredMarkerPage} />
             <Route path='/movies' component={MoviePage} />
             <Route path='/station' component={StationPage} />
 

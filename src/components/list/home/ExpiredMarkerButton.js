@@ -2,9 +2,9 @@ import React from 'react'
 import {
     Button
 } from '@mui/material'
-import FlagIcon from '@mui/icons-material/Flag'
+import AvTimerIcon from '@mui/icons-material/AvTimer'
 
-function PreviousMarkerButton({
+function ExpiredMarkerButton({
     onClickHandler,
 }) {
     return (
@@ -21,9 +21,9 @@ function PreviousMarkerButton({
           }}
           onClick={onClickHandler}
       >
-         <FlagIcon sx={{ marginRight: '15px' }} /> Previous Markers
+         <AvTimerIcon sx={{ marginRight: '15px' }} /> Expired Markers
       </Button>
     )
 }
 
-export default PreviousMarkerButton
+export default ExpiredMarkerButton

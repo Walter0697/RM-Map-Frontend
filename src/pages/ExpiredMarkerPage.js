@@ -3,13 +3,13 @@ import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux'
 import Base from './Base'
 
-import { useQuery } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client'
 
 import useBoop from '../hooks/useBoop'
 
 import TopBar from '../components/topbar/TopBar'
 import MarkerDisplayList from '../components/list/MarkerDisplayList'
-import PreviousMarkerView from '../components/marker/PreviousMarkerView'
+import MarkerEditForm from '../components/form/MarkerEditForm'
 import AutoHideAlert from '../components/AutoHideAlert'
 
 import filters from '../scripts/filter'
@@ -21,13 +21,13 @@ function PreviousMarkerPage({
     const history = useHistory()
 
     // graphql request
-    const { data: listData, loading: listLoading, error: listError } = useQuery(graphql.markers.previous, { fetchPolicy: 'no-cache' })
+    const [ listExpiredMarkerGQL, { data: listData, loading: listLoading, error: listError } ] = useLazyQuery(graphql.markers.expired, { fetchPolicy: 'no-cache' })
 
-    const [ previousMarkers, setMarkers ] = useState([])
+    const [ expiredMarkers, setMarkers ] = useState([])
 
     // selected marker
     const [ selectedMarker, setSelected ] = useState(null)
-    const [ createAlert, confirmCreated ] = useBoop(3000)
+    const [ editAlert, confirmEdited ] = useBoop(3000)
    
     // if request failed
     const [ failedAlert, fail ] = useBoop(3000)
@@ -46,13 +46,16 @@ function PreviousMarkerPage({
     const [ customFilterValue, setCustomFilterValue ] = useState('')
 
     const displayMarker = useMemo(() => {
-        //if (finalFilterValue === '' && customFilterValue === '') return previousMarkers
-        const filteredByQuery = filters.map.filterByQuery(previousMarkers, customFilterValue, eventtypes)
+        const filteredByQuery = filters.map.filterByQuery(expiredMarkers, customFilterValue, eventtypes)
         const list = filters.map.mapMarkerWithFilter(filteredByQuery, finalFilterValue, filterOption)
         return list
-    }, [previousMarkers, finalFilterValue, customFilterValue, filterOption, selectedMarker, eventtypes])
+    }, [expiredMarkers, finalFilterValue, customFilterValue, filterOption, selectedMarker, eventtypes])
 
     const [ showFilter, setShowFilter ] = useState(false)
+
+    useEffect(() => {
+        listExpiredMarkerGQL()
+    }, [])
 
     useEffect(() => {
         let options = []
@@ -68,7 +71,7 @@ function PreviousMarkerPage({
 
     useEffect(() => {
         if (listData) {
-            setMarkers(listData.previousmarkers)
+            setMarkers(listData.expiredmarkers)
         }
 
         if (listError) {
@@ -77,24 +80,20 @@ function PreviousMarkerPage({
         }
     }, [listData, listError])
 
-    const onMarkerRevoked = (marker) => {
-        if (marker) {
-            let list = previousMarkers
-            list = list.filter(s => s.id !== marker.id)
-            setMarkers(list)
-        }
-        setSelected(null)
-        confirmCreated()
-    }
-
     const confirmFilterValue = (finalValue) => {
         setFinalFilterValue(finalValue)
         setExpandFilter(false)
     }
 
+    const onMarkerUpdated = () => {
+        setSelected(null)
+        confirmEdited()
+        listExpiredMarkerGQL()
+    }
+
     const setSelectedById = (id) => {
         let selected = null
-        previousMarkers.forEach(m => {
+        expiredMarkers.forEach(m => {
             if (m.id === id) {
                 selected = m
                 return
@@ -109,7 +108,7 @@ function PreviousMarkerPage({
         <Base>
             <TopBar
                 onBackHandler={() => history.replace('/home')}
-                label='Previous Marker'
+                label='Expired Marker'
             />
             <MarkerDisplayList
                 markers={displayMarker}
@@ -126,16 +125,16 @@ function PreviousMarkerPage({
                 filterOpen={showFilter}
                 setShowFilter={setShowFilter}
             />
-            <PreviousMarkerView 
-                open={!!selectedMarker}
+            <MarkerEditForm
+                open={selectedMarker}
                 handleClose={() => setSelected(null)}
-                onUpdated={onMarkerRevoked}
+                onUpdated={onMarkerUpdated}
                 marker={selectedMarker}
             />
             <AutoHideAlert 
-                open={createAlert}
+                open={editAlert}
                 type={'success'}
-                message={'Successfully revoke marker!'}
+                message={'Successfully updated marker!'}
                 timing={3000}
             />
             <AutoHideAlert 
