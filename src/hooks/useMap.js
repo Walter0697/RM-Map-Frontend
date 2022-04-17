@@ -51,6 +51,9 @@ function useMap(
     // the map object from the api
     const [ map, setMap ] = useState(null)
 
+    // after clicking center, it will keep on center before changing position
+    const [ keepCenter, setKeepCenter ] = useState(false)
+
     // initialize the map
     useEffect(() => {
         let map = tt.map({
@@ -89,21 +92,32 @@ function useMap(
         let timer = null
         if (map) {
             map.on('move', getAPIMapLocation)
-            //map.on('click', (e) => { console.log(e) })
             timer = window.setTimeout(() => {
-                setMapToCenter()
+                initMapToCenter()
             }, 1000)
         }
         return () => {
             if (map) {
                 map.off('move')
-                //map.off('click')
             }
             if (timer) {
                 clearTimeout(timer)
             }
         }
     }, [map])
+    
+    useEffect(() => {
+        if (keepCenter) {
+            keepMapInCenter()
+            const timer = window.setInterval(() => {
+                keepMapInCenter()
+            }, 1000)
+
+            return () => {
+                window.clearInterval(timer)
+            }
+        }
+    }, [keepCenter])
 
     const getAPIMapLocation = () => {
         const center = map.getCenter()
@@ -228,8 +242,33 @@ function useMap(
         setExtraMarkers(() => extraMarkers)
     }
 
+    // init map to center
+    const initMapToCenter = () => {
+        maphelper.generic.getCenter(initRecievedCenter, failedCenter)
+    }
+
+    const initRecievedCenter = (response) => {
+        setZoom(constants.maps.defaultZoomSize)
+        if (response.coords) {
+            if (response.coords.latitude) {
+                setTowardsLocation('lat', response.coords.latitude)
+                setSearchingLocation('lat', response.coords.latitude)
+            }
+            if (response.coords.longitude) {
+                setTowardsLocation('lon', response.coords.longitude)
+                setSearchingLocation('lon', response.coords.longitude)
+            }
+        }
+    }
+
     // get user location and set the map center
     const setMapToCenter = () => {
+        initMapToCenter()
+        // TODO: after implementing, set keep Center here
+        //setKeepCenter(true)
+    }
+
+    const keepMapInCenter = () => {
         maphelper.generic.getCenter(recievedCenter, failedCenter)
     }
 
