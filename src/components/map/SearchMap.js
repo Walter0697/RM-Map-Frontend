@@ -10,6 +10,7 @@ import {
     animated,
 } from '@react-spring/web'
 
+import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak'
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import RoomIcon from '@mui/icons-material/Room'
 import AddLocationIcon from '@mui/icons-material/AddLocation'
@@ -117,6 +118,8 @@ function SearchMap({
         centerStreetName,
         setCenterToLocation,
         setExtraLocationInformation,
+        keepCenter,
+        setKeepCenter,
      ] = useMap(
         mapElement,
         {       
@@ -402,9 +405,13 @@ function SearchMap({
                 }}
             >
                 <CircleIconButton
-                    onClickHandler={setMapToCenter}
+                    onClickHandler={() => setKeepCenter(true)}
                 >
-                    <CenterFocusStrongIcon />
+                    {keepCenter ? (
+                        <CenterFocusStrongIcon />
+                    ) : (
+                        <CenterFocusWeakIcon />
+                    )}
                 </CircleIconButton>
             </animated.div>
 

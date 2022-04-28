@@ -8,6 +8,7 @@ import {
 } from '@react-spring/web'
 
 import ViewListIcon from '@mui/icons-material/ViewList'
+import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak'
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import TrainIcon from '@mui/icons-material/Train'
 
@@ -97,6 +98,8 @@ function MarkerMap({
         centerStreetName,
         setCenterToLocation,
         setExtraLocationInformation,
+        keepCenter,
+        setKeepCenter,
      ] = useMap(
         mapElement,
         {       
@@ -244,9 +247,13 @@ function MarkerMap({
                 }}
             >
                 <CircleIconButton
-                    onClickHandler={setMapToCenter}
+                    onClickHandler={() => setKeepCenter(true)}
                 >
-                    <CenterFocusStrongIcon />
+                    {keepCenter ? (
+                        <CenterFocusStrongIcon />
+                    ) : (
+                        <CenterFocusWeakIcon />
+                    )}
                 </CircleIconButton>
             </animated.div>
 

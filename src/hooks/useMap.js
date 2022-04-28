@@ -92,6 +92,7 @@ function useMap(
         let timer = null
         if (map) {
             map.on('move', getAPIMapLocation)
+            map.on('touchstart', (e) => { setKeepCenter(false) })
             timer = window.setTimeout(() => {
                 initMapToCenter()
             }, 1000)
@@ -99,6 +100,7 @@ function useMap(
         return () => {
             if (map) {
                 map.off('move')
+                map.off('touchstart')
             }
             if (timer) {
                 clearTimeout(timer)
@@ -287,6 +289,9 @@ function useMap(
     }
 
     const failedCenter = () => {
+        if (keepCenter) {
+            setKeepCenter(false)
+        }
         centerFailHandler && centerFailHandler()
     }
 
@@ -407,6 +412,8 @@ function useMap(
         centerStreetName,
         setCenterToLocation,
         setExtraLocationInformation,
+        keepCenter,
+        setKeepCenter,
      ]
 }
 
