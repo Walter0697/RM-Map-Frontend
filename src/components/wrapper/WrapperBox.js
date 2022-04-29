@@ -4,6 +4,7 @@ function WrapperBox({
     minHeight,
     height,
     marginBottom,
+    isCenter,
     children
 }) {
     return (
@@ -11,6 +12,8 @@ function WrapperBox({
             minHeight: minHeight,
             height,
             marginBottom,
+            display: isCenter ? 'flex' : '',
+            justifyContent: isCenter ? 'center' : '',
         }}>
             {children}
         </div>

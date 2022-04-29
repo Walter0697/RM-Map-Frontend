@@ -23,6 +23,7 @@ const constants = {
     RESET_STATIONS: 'RESET_STATIONS',
     UPDATE_STATION: 'UPDATE_STATION',
     SET_STATION_IN_MAP: 'SET_STATION_IN_MAP',
+    UPDATE_FILTER: 'UPDATE_FILTER',
 }
 
 export default constants

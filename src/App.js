@@ -19,6 +19,8 @@ import ExpiredMarkerPage from './pages/ExpiredMarkerPage'
 import MoviePage from './pages/MoviePage'
 import StationPage from './pages/StationPage'
 
+import MarkerFilterPage from './pages/MarkerFilterPage'
+
 import TypeManage from './pages/admin/TypeManage'
 import PinManage from './pages/admin/PinManage'
 import DefaultPinManage from './pages/admin/DefaultPinManage'
@@ -42,6 +44,8 @@ function App() {
             <Route path='/expired' component={ExpiredMarkerPage} />
             <Route path='/movies' component={MoviePage} />
             <Route path='/station' component={StationPage} />
+
+            <Route path='/filter' component={MarkerFilterPage} />
 
             <Route path='/admin/type' component={TypeManage} />
             <Route path='/admin/pin' component={PinManage} />
