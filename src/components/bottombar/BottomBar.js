@@ -75,7 +75,7 @@ function BottomBar({
             )
         }
 
-        if (location.pathname === '/filter') {
+        if (location.pathname.startsWith('/filter')) {
             return (
                 <SubBarIcon 
                     route={'/filter'}

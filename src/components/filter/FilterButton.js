@@ -8,6 +8,7 @@ import {
 
 function FilterButton({
     icon,
+    imageLink,
     text,
     isActive,
     onClickHandler,
@@ -58,7 +59,17 @@ function FilterButton({
                                 display: 'flex',
                                 justifyContent: 'center',
                             }}>
-                                {icon}
+                                {imageLink ? (
+                                    <img
+                                        style={{
+                                            verticalAlign: 'middle',
+                                        }}
+                                        width={'30px'}
+                                        src={imageLink}
+                                    />
+                                ) : (
+                                    <>{icon}</>
+                                )}
                             </div>
                         </Grid>
                         <Grid item xs={8}>
@@ -68,6 +79,7 @@ function FilterButton({
                                 alignItems: 'center',
                                 fontSize: '16px',
                                 fontWeight: '700',
+                                height: '100%',
                             }}>
                                 {text}
                             </div>

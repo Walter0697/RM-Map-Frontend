@@ -5,9 +5,12 @@ import { Grid } from '@mui/material'
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
 
+import FreeTextFilter from '../filter/FreeTextFilter'
 import EventTypeFilter from '../filter/EventTypeFilter'
 import AttributeFilter from '../filter/AttributeFilter'
 import NeedBookingFilter from '../filter/NeedBookingFilter'
+
+import FreeTextEdit from '../form/filter/FreeTextEdit'
 
 import actions from '../../store/actions'
 
@@ -15,11 +18,14 @@ function FilterList({
     height,
     filterlist,
     dispatch,
-}) {
+}) {    
     const [ init, setInit ] = useState(false)
+    const [ freeTextValue, setFreeTextValue ] = useState('')
     const [ selectedEventTypes, setSelectedEventTypes ] = useState([])
     const [ selectedAttribute, setSelectedAttribute ] = useState([])
     const [ bookingStatus, setBookingStatus ] = useState(null)
+
+    const [ freeTextOpen, setFreeTextOpen ] = useState(false)
 
     useEffect(() => {
         if (!init) {
@@ -35,6 +41,9 @@ function FilterList({
                 }
             }
             setInit(true)
+        }
+        if (filterlist.freetext) {
+            setFreeTextValue(filterlist.freetext)
         }
     }, [filterlist, init])
 
@@ -74,6 +83,12 @@ function FilterList({
         triggerFilterValueUpdate('booking', value)
     }
 
+    const updateFreeText = (value) => {
+        setFreeTextValue(value)
+        triggerFilterValueUpdate('freetext', value)
+        setFreeTextOpen(false)
+    }
+
     return (
         <div style={{
             height: height,
@@ -83,6 +98,16 @@ function FilterList({
             position: 'relative',
         }}>
             <BottomUpTrail>
+                <WrapperBox
+                    height={'100px'}
+                    marginBottom='10px'
+                    isCenter
+                >
+                    <FreeTextFilter 
+                        label={freeTextValue}
+                        openLabelModal={() => setFreeTextOpen(true)}
+                    />
+                </WrapperBox>
                 <WrapperBox
                     height={'180px'}
                     marginBottom='10px'
@@ -130,6 +155,12 @@ function FilterList({
                     </Grid>
                 </WrapperBox>
             </BottomUpTrail>
+            <FreeTextEdit
+                open={freeTextOpen}
+                handleClose={() => setFreeTextOpen(false)}
+                text={freeTextValue}
+                onConfirm={updateFreeText}
+            />
         </div>
     )
 }
@@ -138,10 +169,3 @@ export default connect(state => ({
     eventtypes: state.marker.eventtypes,
     filterlist: state.filter.list,
 })) (FilterList)
-
-// attribute -> favourite / hurry / timed DONE
-// need booking -> booking / walk in DONE
-
-// put it in code-able maybe
-// estimate time -> short / medium / long
-// pricing -> free / cheap / middle / expensive

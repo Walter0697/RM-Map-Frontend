@@ -6,6 +6,7 @@ import ImageHeadText from '../wrapper/ImageHeadText'
 import FilterContainer from './FilterContainer'
 import FilterTitle from './FilterTitle'
 import FilterBorder from './FilterBorder'
+import FilterButton from './FilterButton'
 
 function EventTypeFilter({
     eventtypes,
@@ -28,11 +29,11 @@ function EventTypeFilter({
             <FilterBorder />
             <Grid container fullWidth
                 style={{
-                    marginTop: '10px',
-                    height: '120px',
+                    height: '130px',
                     width: '100%',
                     overflowY: 'auto',
-                    padding: '10px',
+                    paddingLeft: '10px',
+                    paddingRight: '10px',
                 }}
             >
                 {displayEventTypes.map((item, index) => (
@@ -42,10 +43,16 @@ function EventTypeFilter({
                         key={index}
                         style={{
                             padding: '4px',
-                            height: '40px',
+                            height: '50px',
                         }}    
                     >
-                        <div 
+                        <FilterButton 
+                            imageLink={item.icon}
+                            text={item.label}
+                            isActive={selectedEventTypes.includes(item.value)}
+                            onClickHandler={() => toggleEventType(item.value)}
+                        />
+                        {/* <div 
                             style={{
                                 height: '100%',
                                 width: '100%',
@@ -63,7 +70,7 @@ function EventTypeFilter({
                                 label={item.label}
                                 labelSize='12px'
                             />
-                        </div>
+                        </div> */}
                     </Grid>
                 ))}
             </Grid>
