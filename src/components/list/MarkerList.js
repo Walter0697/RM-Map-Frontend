@@ -33,20 +33,20 @@ function MarkerList({
     const listRef = useRef(null)
     const itemListRef = useRef(null)
 
-    const {
-      filterBoxTransform,
-      filterBoxOpacity,
-    } = useSpring({
-      config: config.slow,
-      from: {
-        filterBoxOpacity: 0,
-        filterBoxTransform: 'scale(0, 0) translate(-100%, 3000%)',
-      },
-      to: {
-        filterBoxOpacity: filterOpen ? 1 : 0,
-        filterBoxTransform: filterOpen ? 'scale(1, 1) translate(0%, 0%)' : 'scale(0, 0) translate(-100%, 3000%)',
-      }
-    })
+    // const {
+    //   filterBoxTransform,
+    //   filterBoxOpacity,
+    // } = useSpring({
+    //   config: config.slow,
+    //   from: {
+    //     filterBoxOpacity: 0,
+    //     filterBoxTransform: 'scale(0, 0) translate(-100%, 3000%)',
+    //   },
+    //   to: {
+    //     filterBoxOpacity: filterOpen ? 1 : 0,
+    //     filterBoxTransform: filterOpen ? 'scale(1, 1) translate(0%, 0%)' : 'scale(0, 0) translate(-100%, 3000%)',
+    //   }
+    // })
 
     const [ bottomPaddingBox, setPaddingHeight ] = useState(0)
 
@@ -96,7 +96,7 @@ function MarkerList({
               />
           </div>
 
-          <animated.div style={{
+          {/* <animated.div style={{
             transform: filterBoxTransform,
             position: 'absolute',
             paddingTop: '20px',
@@ -116,7 +116,7 @@ function MarkerList({
                 customFilterValue={customFilterValue}
                 setCustomFilterValue={setCustomFilterValue}
             />
-          </animated.div>
+          </animated.div> */}
         </>
     )
 }

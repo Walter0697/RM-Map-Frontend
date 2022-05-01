@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { connect } from 'react-redux'
+import { useHistory } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import Base from './Base'
 
 import {
@@ -23,13 +25,19 @@ import AutoHideAlert from '../components/AutoHideAlert'
 
 import markerhelper from '../scripts/marker'
 import filters from '../scripts/filter'
+import search from '../scripts/search'
 
 import styles from '../styles/list.module.css'
 
 function MarkerPage({ 
     markers,
     eventtypes,
+    filterlist,
 }) {
+    const history = useHistory()
+    const location = useLocation()
+    const suffix = location.pathname.replace('/markers', '')
+
     // selected marker
     const [ selectedMarker, setSelected ] = useState(null)
     // if the selected marker is set to be schedule
@@ -40,10 +48,10 @@ function MarkerPage({
     const [ editAlert, confirmEdited ] = useBoop(3000)
 
     // if it is showing list or map
-    const [ showingList, setShowingList ] = useState(false)
+    const [ showingList, setShowingList ] = useState((suffix && suffix === '/list') ? true : false)
     const { transform } = useSpring({
         config: config.gentle,
-        from: { transform: 'rotateY(0deg)' },
+        from: { transform: (suffix && suffix === '/list') ? 'rotateY(180deg)' : 'rotateY(0deg)' },
         transform: showingList ? 'rotateY(180deg)' : 'rotateY(0deg)',
     })
 
@@ -70,6 +78,10 @@ function MarkerPage({
 
         return list
     }, [markers, finalFilterValue, filterOption, customFilterValue, showingList, eventtypes, editAlert])
+
+    const filteredMarkers = useMemo(() => {
+        return search.filter.parse(markers, filterlist, eventtypes)
+    }, [markers, filterlist, eventtypes, editAlert])
 
     const [ showFilterInListView, showFilter ] = useState(false)
 
@@ -134,7 +146,7 @@ function MarkerPage({
                     <MarkerMap 
                         showingList={showingList}
                         toListView={() => setShowingList(true)}
-                        markers={displayMarker || []}
+                        markers={filteredMarkers || []}
                         setSelectedById={setSelectedById}
                         filterOption={filterOption} // for filter option
                         filterValue={filterValue}   // for filter temporary value setter and getter
@@ -158,7 +170,7 @@ function MarkerPage({
                     <MarkerList
                         height={'100%'}
                         showingList={showingList}
-                        markers={displayMarker || []}
+                        markers={filteredMarkers || []}
                         setSelectedById={setSelectedById}
                         filterOption={filterOption} // for filter option
                         filterValue={filterValue}   // for filter temporary value setter and getter
@@ -199,7 +211,8 @@ function MarkerPage({
                             }}
                         >
                             <CircleIconButton
-                                onClickHandler={() => showFilter(s => !s)}
+                                // onClickHandler={() => showFilter(s => !s)}
+                                onClickHandler={() => history.replace('/filter/list')}
                             >
                                 <FilterAltIcon />
                             </CircleIconButton>
@@ -245,4 +258,5 @@ function MarkerPage({
 export default connect(state => ({
     markers: state.marker.markers,
     eventtypes: state.marker.eventtypes,
+    filterlist: state.filter.list,
 })) (MarkerPage)

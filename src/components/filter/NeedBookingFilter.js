@@ -20,11 +20,6 @@ function NeedBookingFilter({
     bookingStatus,
     setBookingStatus,
 }) {
-    const onFilterClick = (value) => {
-        value
-        setBookingStatus(value)
-    }
-
     return (
         <FilterContainer
             isSmall
@@ -46,7 +41,7 @@ function NeedBookingFilter({
                             value: 'walkin',
                         }]}
                         currentStatus={bookingStatus}
-                        onClickHandler={onFilterClick}
+                        onClickHandler={setBookingStatus}
                     />
                 </Grid>
                 <Grid item xs={12}>

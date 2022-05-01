@@ -11,6 +11,7 @@ import ViewListIcon from '@mui/icons-material/ViewList'
 import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak'
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import TrainIcon from '@mui/icons-material/Train'
+import FilterAltIcon from '@mui/icons-material/FilterAlt'
 
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
@@ -218,6 +219,22 @@ function MarkerMap({
                     onClickHandler={toListView}
                 >
                     <ViewListIcon />
+                </CircleIconButton>
+            </animated.div>
+
+            <animated.div 
+                style={{
+                    position: 'absolute',
+                    visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
+                    opacity: mapOpacity,
+                    bottom: utilityButtonBottom,
+                    left: '20px',
+                }}
+            >
+                <CircleIconButton
+                    onClickHandler={() => history.replace('/filter/map')}
+                >
+                    <FilterAltIcon />
                 </CircleIconButton>
             </animated.div>
 

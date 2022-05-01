@@ -1,11 +1,6 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
-import { Grid, Button } from '@mui/material'
-import {
-    useSpring,
-    config,
-    animated,
-} from '@react-spring/web'
+import { Grid } from '@mui/material'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
@@ -14,32 +9,69 @@ import EventTypeFilter from '../filter/EventTypeFilter'
 import AttributeFilter from '../filter/AttributeFilter'
 import NeedBookingFilter from '../filter/NeedBookingFilter'
 
+import actions from '../../store/actions'
+
 function FilterList({
     height,
     filterlist,
+    dispatch,
 }) {
+    const [ init, setInit ] = useState(false)
     const [ selectedEventTypes, setSelectedEventTypes ] = useState([])
     const [ selectedAttribute, setSelectedAttribute ] = useState([])
     const [ bookingStatus, setBookingStatus ] = useState(null)
 
+    useEffect(() => {
+        if (!init) {
+            if (filterlist) {
+                if (filterlist.eventtypes) {
+                    setSelectedEventTypes(filterlist.eventtypes)
+                }
+                if (filterlist.attribute) {
+                    setSelectedAttribute(filterlist.attribute)
+                }
+                if (filterlist.booking) {
+                    setBookingStatus(filterlist.booking)
+                }
+            }
+            setInit(true)
+        }
+    }, [filterlist, init])
+
+    const triggerFilterValueUpdate = (field, value) => {
+        let previous_list = {}
+        if (filterlist) {
+            previous_list = JSON.parse(JSON.stringify(filterlist))
+        }
+        previous_list[field] = value
+        dispatch(actions.updateFilter(previous_list))
+    }
+
     const toggleEventType = (value) => {
-        let prev = selectedEventTypes
+        let prev = JSON.parse(JSON.stringify(selectedEventTypes))
         if (prev.includes(value)) {
             prev = prev.filter(s => s !== value)
         } else {
             prev.push(value)
         }
-        setSelectedEventTypes(JSON.parse(JSON.stringify(prev)))
+        setSelectedEventTypes(prev)
+        triggerFilterValueUpdate('eventtypes', prev)
     }
 
     const toggleAttribute = (value) => {
-        let prev = selectedAttribute
+        let prev = JSON.parse(JSON.stringify(selectedAttribute))
         if (prev.includes(value)) {
             prev = prev.filter(s => s !== value)
         } else {
             prev.push(value)
         }
-        setSelectedAttribute(JSON.parse(JSON.stringify(prev)))
+        setSelectedAttribute(prev)
+        triggerFilterValueUpdate('attribute', prev)
+    }
+
+    const updateBookingStatus = (value) => {
+        setBookingStatus(value)
+        triggerFilterValueUpdate('booking', value)
     }
 
     return (
@@ -91,7 +123,7 @@ function FilterList({
                             }}>
                             <NeedBookingFilter
                                 bookingStatus={bookingStatus}
-                                setBookingStatus={setBookingStatus}
+                                setBookingStatus={updateBookingStatus}
                             />
                             </div>
                         </Grid>
@@ -104,5 +136,12 @@ function FilterList({
 
 export default connect(state => ({
     eventtypes: state.marker.eventtypes,
-    filterlist: state.filter.value,
+    filterlist: state.filter.list,
 })) (FilterList)
+
+// attribute -> favourite / hurry / timed DONE
+// need booking -> booking / walk in DONE
+
+// put it in code-able maybe
+// estimate time -> short / medium / long
+// pricing -> free / cheap / middle / expensive

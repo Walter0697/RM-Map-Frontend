@@ -172,6 +172,20 @@ export const setStationMapShown = (map_type, enable) => {
     }
 }
 
+export const updateFilter = (value) => {
+    return {
+        type: constants.UPDATE_FILTER,
+        value,
+    }
+}
+
+export const updateHashtag = (value) => {
+    return {
+        type: constants.UPDATE_HASHTAG,
+        value,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -197,6 +211,8 @@ const actions = {
     resetStations,
     updateStation,
     setStationMapShown,
+    updateFilter,
+    updateHashtag,
 }
 
 export default actions

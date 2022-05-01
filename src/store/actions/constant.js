@@ -24,6 +24,7 @@ const constants = {
     UPDATE_STATION: 'UPDATE_STATION',
     SET_STATION_IN_MAP: 'SET_STATION_IN_MAP',
     UPDATE_FILTER: 'UPDATE_FILTER',
+    UPDATE_HASHTAG: 'UPDATE_HASHTAG',
 }
 
 export default constants

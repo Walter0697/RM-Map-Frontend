@@ -11,6 +11,7 @@ import AvTimerIcon from '@mui/icons-material/AvTimer'       // expired marker
 import FlagIcon from '@mui/icons-material/Flag'             // previous marker
 import TheatersIcon from '@mui/icons-material/Theaters'     // movie
 import TrainIcon from '@mui/icons-material/Train'           // station
+import FilterAltIcon from '@mui/icons-material/FilterAlt'   // filter
 
 import BarIcon from './BarIcon'
 import SubBarIcon from './SubBarIcon'
@@ -69,6 +70,18 @@ function BottomBar({
                     parentRoute={'/markers'}
                     path={location.pathname}
                     activeIcon={<TrainIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+
+        if (location.pathname === '/filter') {
+            return (
+                <SubBarIcon 
+                    route={'/filter'}
+                    parentRoute={'/markers'}
+                    path={location.pathname}
+                    activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     setPath={changeTab}
                 />
             )
