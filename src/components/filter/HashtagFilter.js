@@ -5,23 +5,23 @@ import FilterContainer from './FilterContainer'
 import FilterTitle from './FilterTitle'
 import FilterBorder from './FilterBorder'
 
-function FreeTextFilter({
-    label,
-    openLabelModal,
+function HashtagFilter({
+    selectedHashtag,
+    openHashtagModal,
 }) {
-    const displayText = useMemo(() => {
-        if (label) {
-            return label.split('&')
+    const displayHashTag = useMemo(() => {
+        if (selectedHashtag.length !== 0) {
+            return selectedHashtag.map(s => '#' + s)
         }
-        return ['Click here to type...']
-    }, [label])
+        return ['No Hashtag to filter']
+    }, [selectedHashtag])
 
     return (
         <FilterContainer
-            onClickHandler={openLabelModal}
+            onClickHandler={openHashtagModal}
         >
             <FilterTitle
-                title={'Free Text'}
+                title={'Hashtag'}
             />
             <FilterBorder />
             <Grid container>
@@ -33,9 +33,9 @@ function FreeTextFilter({
                         alignItems: 'center',
                         marginLeft: '2.5%',
                         marginRight: '2.5%',
-                        overflowX: 'auto',
+                        overflowY: 'auto',
                     }}>
-                        {displayText.map((text, index) => (
+                        {displayHashTag.map((hashtag, index) => (
                             <div
                                 key={index}
                                 style={{
@@ -48,7 +48,7 @@ function FreeTextFilter({
                                     display: 'flex',
                                     alignItems: 'center',
                                 }}
-                            >{text}</div>
+                            >{hashtag}</div>
                         ))}
                     </div>
                 </Grid>
@@ -57,4 +57,4 @@ function FreeTextFilter({
     )
 }
 
-export default FreeTextFilter
+export default HashtagFilter

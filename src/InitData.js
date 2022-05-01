@@ -4,6 +4,8 @@ import { useLazyQuery } from '@apollo/client'
 
 import dayjs from 'dayjs'
 
+import search from './scripts/search'
+
 import actions from './store/actions'
 import graphql from './graphql'
 
@@ -30,6 +32,18 @@ function InitData({ jwt, dispatch }) {
     useEffect(() => {
         if (markerData) {
             dispatch(actions.resetMarkers(markerData.markers))
+            let hashTagList = {}
+            markerData.markers.forEach(marker => {
+                const currentHashtag = search.hashtag.check(marker.description)
+                currentHashtag.forEach(tag => {
+                    if (hashTagList[tag]) {
+                        hashTagList[tag] += 1
+                    } else {
+                        hashTagList[tag] = 1
+                    }
+                })
+            })
+            dispatch(actions.updateHashtag(hashTagList))
         }
     }, [markerData]) // we dont care about the error, we just update if we got data
 

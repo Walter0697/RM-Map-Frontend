@@ -13,7 +13,6 @@ function FreeTextEdit({
     onConfirm,
 }) {
     const [ value, setValue ] = useState(text)
-    const [ alertMessage, setAlertMessage ] = useState(null)
 
     useEffect(() => {
         setValue(text)
@@ -27,14 +26,12 @@ function FreeTextEdit({
         <BaseForm
             open={open}
             handleClose={handleClose}
-            title={'Free Text Label'}
+            title={'Free Text Edit'}
             maxWidth={'lg'}
             handleSubmit={onConfirmHandler}
             cancelText={'Cancel'}
             createText={'Confirm'}
             loading={false}
-            alertMessage={alertMessage}
-            clearAlertMessage={() => setAlertMessage(null)}
         >
             <Grid container spacing={2}>
                 <Grid item xs={12} md={12} lg={12}>

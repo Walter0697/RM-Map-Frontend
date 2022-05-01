@@ -9,8 +9,10 @@ import FreeTextFilter from '../filter/FreeTextFilter'
 import EventTypeFilter from '../filter/EventTypeFilter'
 import AttributeFilter from '../filter/AttributeFilter'
 import NeedBookingFilter from '../filter/NeedBookingFilter'
+import HashtagFilter from '../filter/HashtagFilter'
 
 import FreeTextEdit from '../form/filter/FreeTextEdit'
+import HashtagEdit from '../form/filter/HashtagEdit'
 
 import actions from '../../store/actions'
 
@@ -24,8 +26,10 @@ function FilterList({
     const [ selectedEventTypes, setSelectedEventTypes ] = useState([])
     const [ selectedAttribute, setSelectedAttribute ] = useState([])
     const [ bookingStatus, setBookingStatus ] = useState(null)
+    const [ selectedHashtag, setSelectedHashtag ] = useState([])
 
     const [ freeTextOpen, setFreeTextOpen ] = useState(false)
+    const [ hashtagOpen, setHashtagOpen ] = useState(false)
 
     useEffect(() => {
         if (!init) {
@@ -38,6 +42,9 @@ function FilterList({
                 }
                 if (filterlist.booking) {
                     setBookingStatus(filterlist.booking)
+                }
+                if (filterlist.hashtag) {
+                    setSelectedHashtag(filterlist.hashtag)
                 }
             }
             setInit(true)
@@ -87,6 +94,13 @@ function FilterList({
         setFreeTextValue(value)
         triggerFilterValueUpdate('freetext', value)
         setFreeTextOpen(false)
+    }
+
+    const updateHashtag = (value) => {
+        console.log(value)
+        setSelectedHashtag(value)
+        triggerFilterValueUpdate('hashtag', value)
+        setHashtagOpen(false)
     }
 
     return (
@@ -154,12 +168,28 @@ function FilterList({
                         </Grid>
                     </Grid>
                 </WrapperBox>
+                <WrapperBox
+                    height={'100px'}
+                    marginBottom='10px'
+                    isCenter
+                >
+                    <HashtagFilter 
+                        selectedHashtag={selectedHashtag}
+                        openHashtagModal={() => setHashtagOpen(true)}
+                    />
+                </WrapperBox>
             </BottomUpTrail>
             <FreeTextEdit
                 open={freeTextOpen}
                 handleClose={() => setFreeTextOpen(false)}
                 text={freeTextValue}
                 onConfirm={updateFreeText}
+            />
+            <HashtagEdit 
+                open={hashtagOpen}
+                handleClose={() => setHashtagOpen(false)}
+                selectedHashtag={selectedHashtag}
+                onConfirm={updateHashtag}
             />
         </div>
     )
@@ -169,3 +199,7 @@ export default connect(state => ({
     eventtypes: state.marker.eventtypes,
     filterlist: state.filter.list,
 })) (FilterList)
+
+// put it in code-able maybe
+// estimate time -> short / medium / long
+// pricing -> free / cheap / middle / expensive

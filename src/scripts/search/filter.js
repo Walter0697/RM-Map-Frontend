@@ -86,6 +86,16 @@ const filterByBooking = (markers, status) => {
     return markers
 }
 
+const filterByHashtag = (markers, selected) => {
+    if (!selected) return markers
+    if (selected.length === 0) return markers
+    let outputList = []
+    for (let i = 0 ; i < selected.length; i++) {
+        let matchList = markers.filter(s => s.description.includes('#' + selected[i]))
+        appendToList(outputList, matchList)
+    }
+    return outputList
+}
 const outputMarkerByFilter = (markers, filterlist, eventtypes) => {
     let outputList = markers
 
@@ -93,6 +103,7 @@ const outputMarkerByFilter = (markers, filterlist, eventtypes) => {
     outputList = filterByEventType(outputList, filterlist.eventtypes)
     outputList = filterByAttribute(outputList, filterlist.attribute)
     outputList = filterByBooking(outputList, filterlist.booking)
+    outputList = filterByHashtag(outputList, filterlist.hashtag)
 
     return outputList
 }
