@@ -227,7 +227,7 @@ function MarkerMap({
                     position: 'absolute',
                     visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
                     opacity: mapOpacity,
-                    bottom: utilityButtonBottom,
+                    top: '5%',
                     left: '20px',
                 }}
             >
@@ -274,7 +274,7 @@ function MarkerMap({
                 </CircleIconButton>
             </animated.div>
 
-            <animated.div style={{
+            {/* <animated.div style={{
                 visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
                 position: 'absolute',
                 paddingTop: '20px',
@@ -292,7 +292,7 @@ function MarkerMap({
                     customFilterValue={customFilterValue}
                     setCustomFilterValue={setCustomFilterValue}
                 />
-            </animated.div>
+            </animated.div> */}
 
             {/* alert */}
             <AutoHideAlert

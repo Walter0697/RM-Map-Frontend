@@ -206,7 +206,7 @@ function MarkerPage({
                             style={{
                                 position: 'absolute',
                                 transform: 'rotateY(180deg)',
-                                bottom: '15%',
+                                top: '5%',
                                 right: '20px',
                             }}
                         >

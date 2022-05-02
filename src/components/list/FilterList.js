@@ -4,12 +4,15 @@ import { Grid } from '@mui/material'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
+import CircleIconButton from '../field/CircleIconButton'
 
 import FreeTextFilter from '../filter/FreeTextFilter'
 import EventTypeFilter from '../filter/EventTypeFilter'
 import AttributeFilter from '../filter/AttributeFilter'
 import NeedBookingFilter from '../filter/NeedBookingFilter'
 import HashtagFilter from '../filter/HashtagFilter'
+
+import ClearRoundedIcon from '@mui/icons-material/ClearRounded'
 
 import FreeTextEdit from '../form/filter/FreeTextEdit'
 import HashtagEdit from '../form/filter/HashtagEdit'
@@ -97,10 +100,18 @@ function FilterList({
     }
 
     const updateHashtag = (value) => {
-        console.log(value)
         setSelectedHashtag(value)
         triggerFilterValueUpdate('hashtag', value)
         setHashtagOpen(false)
+    }
+
+    const clearAllFilter = () => {
+        dispatch(actions.updateFilter({}))
+        setFreeTextValue('')
+        setSelectedEventTypes([])
+        setSelectedAttribute([])
+        setBookingStatus(null)
+        setSelectedHashtag([])
     }
 
     return (
@@ -191,6 +202,19 @@ function FilterList({
                 selectedHashtag={selectedHashtag}
                 onConfirm={updateHashtag}
             />
+            <div 
+                style={{
+                    position: 'absolute',
+                    top: '5%',
+                    right: '20px',
+                }}
+            >
+                <CircleIconButton
+                    onClickHandler={clearAllFilter}
+                >
+                    <ClearRoundedIcon />
+                </CircleIconButton>
+            </div>
         </div>
     )
 }
@@ -199,7 +223,3 @@ export default connect(state => ({
     eventtypes: state.marker.eventtypes,
     filterlist: state.filter.list,
 })) (FilterList)
-
-// put it in code-able maybe
-// estimate time -> short / medium / long
-// pricing -> free / cheap / middle / expensive
