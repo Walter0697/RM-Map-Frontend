@@ -23,7 +23,6 @@ import ScheduleForm from '../components/form/ScheduleForm'
 import MarkerEditForm from '../components/form/MarkerEditForm'
 import AutoHideAlert from '../components/AutoHideAlert'
 
-import markerhelper from '../scripts/marker'
 import filters from '../scripts/filter'
 import search from '../scripts/search'
 
@@ -67,17 +66,17 @@ function MarkerPage({
     }, [finalFilterValue])
     const [ customFilterValue, setCustomFilterValue ] = useState('')
 
-    const displayMarker = useMemo(() => {
-        //const filteredMarkers = markers.filter(s => s.status === '' || s.status === 'scheduled')
-        const filteredMarkers = markerhelper.find.active(markers)
+    // const displayMarker = useMemo(() => {
+    //     //const filteredMarkers = markers.filter(s => s.status === '' || s.status === 'scheduled')
+    //     const filteredMarkers = markerhelper.find.active(markers)
 
-        //if (finalFilterValue === '' && customFilterValue === '') return filteredMarkers
+    //     //if (finalFilterValue === '' && customFilterValue === '') return filteredMarkers
 
-        const filteredByQuery = filters.map.filterByQuery(filteredMarkers, customFilterValue, eventtypes)
-        const list = filters.map.mapMarkerWithFilter(filteredByQuery, finalFilterValue, filterOption)
+    //     const filteredByQuery = filters.map.filterByQuery(filteredMarkers, customFilterValue, eventtypes)
+    //     const list = filters.map.mapMarkerWithFilter(filteredByQuery, finalFilterValue, filterOption)
 
-        return list
-    }, [markers, finalFilterValue, filterOption, customFilterValue, showingList, eventtypes, editAlert])
+    //     return list
+    // }, [markers, finalFilterValue, filterOption, customFilterValue, showingList, eventtypes, editAlert])
 
     const filteredMarkers = useMemo(() => {
         return search.filter.parse(markers, filterlist, eventtypes)
@@ -85,18 +84,18 @@ function MarkerPage({
 
     const [ showFilterInListView, showFilter ] = useState(false)
 
-    useEffect(() => {
-        let options = []
+    // useEffect(() => {
+    //     let options = []
         
-        //options.push(filters.generate.rangeFilter())
-        options.push(filters.generate.eventTypeFilter(eventtypes))
-        options.push(filters.generate.attributeFilter())
-        options.push(filters.generate.estimateTimeFilter())
-        options.push(filters.generate.pricingFilter())
-        options.push(filters.generate.needBookingFilter())
+    //     //options.push(filters.generate.rangeFilter())
+    //     options.push(filters.generate.eventTypeFilter(eventtypes))
+    //     options.push(filters.generate.attributeFilter())
+    //     options.push(filters.generate.estimateTimeFilter())
+    //     options.push(filters.generate.pricingFilter())
+    //     options.push(filters.generate.needBookingFilter())
 
-        setFilterOption(options)
-    }, [eventtypes])
+    //     setFilterOption(options)
+    // }, [eventtypes])
 
     const setSelectedById = (id) => {
         let selected = null

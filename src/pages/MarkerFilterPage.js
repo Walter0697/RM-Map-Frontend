@@ -7,11 +7,37 @@ import TopBar from '../components/topbar/TopBar'
 import FilterList from '../components/list/FilterList'
 import Base from './Base'
 
-function MarkerFilterPage() {
+import search from '../scripts/search'
+
+import actions from '../store/actions'
+
+function MarkerFilterPage({
+    markers,
+    dispatch,
+}) {
     const history = useHistory()
     const location = useLocation()
     const suffix = location.pathname.replace('/filter', '')
 
+    const updateHashtag = () => {
+        let hashTagList = {}
+        markers.forEach(marker => {
+            const currentHashtag = search.hashtag.check(marker.description)
+            currentHashtag.forEach(tag => {
+                if (hashTagList[tag]) {
+                    hashTagList[tag] += 1
+                } else {
+                    hashTagList[tag] = 1
+                }
+            })
+        })
+        dispatch(actions.updateHashtag(hashTagList))
+    }
+
+    useEffect(() => {
+        updateHashtag()
+    }, [markers])
+    
     return (
         <Base>
             <TopBar
@@ -25,4 +51,6 @@ function MarkerFilterPage() {
     )
 }
 
-export default MarkerFilterPage
+export default connect(state => ({
+    markers: state.marker.markers,
+})) (MarkerFilterPage)

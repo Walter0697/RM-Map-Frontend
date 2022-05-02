@@ -77,6 +77,8 @@ function HashtagEdit({
                         height: '200px',
                         padding: '10px',
                         overflowY: 'auto',
+                        overflowX: 'hidden',
+                        flexWrap: 'wrap',
                         display: 'flex',
                     }}>
                         {filteredHashtag.map((hashtag, index) => (

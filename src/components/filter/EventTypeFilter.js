@@ -2,7 +2,6 @@ import React, { useMemo } from 'react'
 import { connect } from 'react-redux'
 import { Grid } from '@mui/material'
 
-import ImageHeadText from '../wrapper/ImageHeadText'
 import FilterContainer from './FilterContainer'
 import FilterTitle from './FilterTitle'
 import FilterBorder from './FilterBorder'
@@ -52,25 +51,6 @@ function EventTypeFilter({
                             isActive={selectedEventTypes.includes(item.value)}
                             onClickHandler={() => toggleEventType(item.value)}
                         />
-                        {/* <div 
-                            style={{
-                                height: '100%',
-                                width: '100%',
-                                backgroundColor: selectedEventTypes.includes(item.value) ? '#21cebd' : '#bcddda',
-                                border: selectedEventTypes.includes(item.value) ? 'thin solid #1ca4ff' : 'thin solid black',
-                                borderRadius: '5px',
-                                paddingTop: '2px',
-                                paddingLeft: '2px',
-                            }}
-                            onClick={() => toggleEventType(item.value)}
-                        >
-                            <ImageHeadText
-                                iconPath={item.icon}
-                                iconSize='20px'
-                                label={item.label}
-                                labelSize='12px'
-                            />
-                        </div> */}
                     </Grid>
                 ))}
             </Grid>
