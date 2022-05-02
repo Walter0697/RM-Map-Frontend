@@ -19,7 +19,7 @@ function MarkerFilterPage() {
                 label='Marker Filter'
             />
             <FilterList
-                height={'90%'}
+                height={'80%'}
             />
         </Base>
     )

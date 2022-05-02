@@ -11,11 +11,13 @@ import EventTypeFilter from '../filter/EventTypeFilter'
 import AttributeFilter from '../filter/AttributeFilter'
 import NeedBookingFilter from '../filter/NeedBookingFilter'
 import HashtagFilter from '../filter/HashtagFilter'
+import ScriptFilter from '../filter/ScriptFilter'
 
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded'
 
 import FreeTextEdit from '../form/filter/FreeTextEdit'
 import HashtagEdit from '../form/filter/HashtagEdit'
+import ScriptEdit from '../form/filter/ScriptEdit'
 
 import actions from '../../store/actions'
 
@@ -30,9 +32,11 @@ function FilterList({
     const [ selectedAttribute, setSelectedAttribute ] = useState([])
     const [ bookingStatus, setBookingStatus ] = useState(null)
     const [ selectedHashtag, setSelectedHashtag ] = useState([])
+    const [ currentScript, setCurrentScript ] = useState('')
 
     const [ freeTextOpen, setFreeTextOpen ] = useState(false)
     const [ hashtagOpen, setHashtagOpen ] = useState(false)
+    const [ scriptOpen, setScriptOpen ] = useState(false)
 
     useEffect(() => {
         if (!init) {
@@ -105,6 +109,12 @@ function FilterList({
         setHashtagOpen(false)
     }
 
+    const updateScript = (value) => {
+        setCurrentScript(value)
+        triggerFilterValueUpdate('script', value)
+        setScriptOpen(false)
+    }
+
     const clearAllFilter = () => {
         dispatch(actions.updateFilter({}))
         setFreeTextValue('')
@@ -118,78 +128,97 @@ function FilterList({
         <div style={{
             height: height,
             width: '100%',
-            paddingTop: '5%',
-            overflow: 'hidden',
+            paddingTop: '10%',
+            paddingBottom: '10%',
+            overflowY: 'hidden',
             position: 'relative',
         }}>
-            <BottomUpTrail>
-                <WrapperBox
-                    height={'100px'}
-                    marginBottom='10px'
-                    isCenter
-                >
-                    <FreeTextFilter 
-                        label={freeTextValue}
-                        openLabelModal={() => setFreeTextOpen(true)}
-                    />
-                </WrapperBox>
-                <WrapperBox
-                    height={'180px'}
-                    marginBottom='10px'
-                    isCenter
-                >
-                    <EventTypeFilter 
-                        selectedEventTypes={selectedEventTypes}
-                        toggleEventType={toggleEventType}
-                    />
-                </WrapperBox>
-                <WrapperBox
-                    height={'230px'}
-                    marginBottom='10px'
-                    isCenter
-                >
-                    <Grid container fullWidth
-                        style={{
-                            width: '90%',
-                        }}
+            <div style={{
+                height: '100%',
+                width: '100%',
+                paddingBottom: '10%',
+                overflowY: 'auto',
+                position: 'absolute',
+            }}>
+                <BottomUpTrail>
+                    <WrapperBox
+                        height={'100px'}
+                        marginBottom='10px'
+                        isCenter
                     >
-                        <Grid item xs={6}>
-                            <div style={{
-                                height: '100%',
-                                width: '100%',
-                            }}>
-                            <AttributeFilter
-                                selectedAttribute={selectedAttribute}
-                                toggleAttribute={toggleAttribute}
-                            />
-                            </div>
+                        <FreeTextFilter 
+                            label={freeTextValue}
+                            openLabelModal={() => setFreeTextOpen(true)}
+                        />
+                    </WrapperBox>
+                    <WrapperBox
+                        height={'180px'}
+                        marginBottom='10px'
+                        isCenter
+                    >
+                        <EventTypeFilter 
+                            selectedEventTypes={selectedEventTypes}
+                            toggleEventType={toggleEventType}
+                        />
+                    </WrapperBox>
+                    <WrapperBox
+                        height={'230px'}
+                        marginBottom='10px'
+                        isCenter
+                    >
+                        <Grid container fullWidth
+                            style={{
+                                width: '90%',
+                            }}
+                        >
+                            <Grid item xs={6}>
+                                <div style={{
+                                    height: '100%',
+                                    width: '100%',
+                                }}>
+                                <AttributeFilter
+                                    selectedAttribute={selectedAttribute}
+                                    toggleAttribute={toggleAttribute}
+                                />
+                                </div>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <div style={{
+                                    height: '100%',
+                                    width: '100%',
+                                    display: 'flex',
+                                    justifyContent: 'flex-end',
+                                }}>
+                                <NeedBookingFilter
+                                    bookingStatus={bookingStatus}
+                                    setBookingStatus={updateBookingStatus}
+                                />
+                                </div>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={6}>
-                            <div style={{
-                                height: '100%',
-                                width: '100%',
-                                display: 'flex',
-                                justifyContent: 'flex-end',
-                            }}>
-                            <NeedBookingFilter
-                                bookingStatus={bookingStatus}
-                                setBookingStatus={updateBookingStatus}
-                            />
-                            </div>
-                        </Grid>
-                    </Grid>
-                </WrapperBox>
-                <WrapperBox
-                    height={'100px'}
-                    marginBottom='10px'
-                    isCenter
-                >
-                    <HashtagFilter 
-                        selectedHashtag={selectedHashtag}
-                        openHashtagModal={() => setHashtagOpen(true)}
-                    />
-                </WrapperBox>
-            </BottomUpTrail>
+                    </WrapperBox>
+                    <WrapperBox
+                        height={'100px'}
+                        marginBottom='10px'
+                        isCenter
+                    >
+                        <HashtagFilter 
+                            selectedHashtag={selectedHashtag}
+                            openHashtagModal={() => setHashtagOpen(true)}
+                        />
+                    </WrapperBox>
+                    <WrapperBox
+                        height={'100px'}
+                        marginBottom='10px'
+                        isCenter
+                    >
+                        <ScriptFilter 
+                            scripts={currentScript}
+                            openScriptModal={() => setScriptOpen(true)}
+                        />
+                    </WrapperBox>
+                </BottomUpTrail>
+            </div>
             <FreeTextEdit
                 open={freeTextOpen}
                 handleClose={() => setFreeTextOpen(false)}
@@ -202,6 +231,14 @@ function FilterList({
                 selectedHashtag={selectedHashtag}
                 onConfirm={updateHashtag}
             />
+            <ScriptEdit
+                open={scriptOpen}
+                handleClose={() => setScriptOpen(false)}
+                script={currentScript}
+                onConfirm={updateScript}
+            />
+
+            {/* circle button at the corner */}
             <div 
                 style={{
                     position: 'absolute',
