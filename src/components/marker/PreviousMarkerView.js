@@ -20,6 +20,7 @@ import useBoop from '../../hooks/useBoop'
 
 import ImageHeadText from '../wrapper/ImageHeadText'
 import AutoHideAlert from '../AutoHideAlert'
+import MarkerDescription from './MarkerDescription'
 
 import generic from '../../scripts/generic'
 import actions from '../../store/actions'
@@ -142,7 +143,10 @@ function PreviousMarkerView({
                                         </IconButton>
                                     </Grid>
                                     <Grid item xs={12} md={12} lg={12}>
-                                        { marker.description } 
+                                        <MarkerDescription 
+                                            description={marker.description}
+                                            onHashTagClick={handleClose}
+                                        />
                                     </Grid>
                                     <Grid item xs={12} md={12} lg={12}>
                                         History:

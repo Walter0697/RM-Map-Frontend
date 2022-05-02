@@ -28,6 +28,7 @@ import FavouriteIcon from './FavouriteIcon'
 import ImageHeadText from '../wrapper/ImageHeadText'
 import AutoHideAlert from '../AutoHideAlert'
 import RestaurantCard from '../card/RestaurantCard'
+import MarkerDescription from './MarkerDescription'
 
 import generic from '../../scripts/generic'
 import actions from '../../store/actions'
@@ -228,7 +229,10 @@ function MarkerView({
                                         </Grid>
                                     )}
                                     <Grid item xs={12} md={12} lg={12}>
-                                        { marker.description } 
+                                        <MarkerDescription 
+                                            description={marker.description}
+                                            onHashTagClick={handleClose}
+                                        />
                                     </Grid>
                                     {marker.price && (
                                         <Grid item xs={12} md={12} lg={12}>
