@@ -16,7 +16,7 @@ function FreeTextEdit({
 
     useEffect(() => {
         setValue(text)
-    }, [text])
+    }, [text, open])
 
     const onConfirmHandler = () => {
         onConfirm(value)

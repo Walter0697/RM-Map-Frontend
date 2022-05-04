@@ -24,7 +24,7 @@ function HashtagEdit({
 
     useEffect(() => {
         setSelectedList(selectedHashtag)
-    }, [selectedHashtag])
+    }, [selectedHashtag, open])
 
     useEffect(() => {
         const list = Object.keys(hashtags)
