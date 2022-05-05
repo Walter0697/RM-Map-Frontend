@@ -14,9 +14,37 @@ function ScriptFilter({
             onClickHandler={openScriptModal}
         >
             <FilterTitle
-                title={'Script'}
+                title={'Query Script'}
             />
             <FilterBorder />
+            <Grid container>
+                <Grid item xs={12}>
+                    <div style={{
+                        height: 'auto',
+                        width: '95%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        marginTop: '10px',
+                        marginLeft: '2.5%',
+                        marginRight: '2.5%',
+                        overflowX: 'auto',
+                    }}>
+                        <div
+                            style={{
+                                marginRight: '10px',
+                                backgroundColor: '#33333311',
+                                paddingTop: '10px',
+                                paddingBottom: '10px',
+                                paddingLeft: '10px',
+                                paddingRight: '10px',
+                                borderRadius: '15px',
+                                display: 'flex',
+                                alignItems: 'center',
+                            }}
+                        >{scripts ? scripts : 'No Query Script filtering...'}</div>
+                    </div>
+                </Grid>
+            </Grid>
         </FilterContainer>
     )
 }

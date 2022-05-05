@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { connect } from 'react-redux'
 import {
     Grid,
     TextField,
@@ -37,14 +38,21 @@ function ScriptEdit({
     handleClose,
     script,
     onConfirm,
+    eventtypes,
 }) {
     const textRef = useRef(null)
 
     const [ value, setValue ] = useState(script)
+    const [ error, setError ] = useState(null)
 
     useEffect(() => {
         setValue(script)
     }, [script, open])
+
+    const onTextChangeHandler = (e) => {
+        setError(null)
+        setValue(e.target.value)
+    }
 
     const addKeyword = (word) => {
         let prev = value
@@ -61,8 +69,18 @@ function ScriptEdit({
     }
 
     const onConfirmHandler = () => {
-        const valid = search.querys.validate(value)
-        console.log(valid)
+        const eventtype_list = eventtypes.map(s => {
+            return {
+                label: s.label,
+                value: s.value,
+            }
+        })
+        const result = search.querys.validate(value, eventtype_list)
+        if (!result.error) {
+            onConfirm(value)
+        } else {
+            setError(result.error)
+        }
     }
 
     return (
@@ -89,12 +107,21 @@ function ScriptEdit({
                         autoComplete="off"
                         variant="outlined"
                         value={value}
-                        onChange={e => setValue(e.target.value)}
+                        onChange={onTextChangeHandler}
+                        error={error}
                     />
                 </Grid>
+                {error && (
+                    <Grid item xs={12} md={12} lg={12}>
+                        <div style={{
+                            width: '100%',
+                            color: 'red',
+                        }}>{error}</div>
+                    </Grid>
+                )}
                 <Grid item xs={12} md={12} lg={12}>
                     <div style={{
-                        height: '100px',
+                        height: '350px',
                         width: '95%',
                         display: 'flex',
                         marginLeft: '2.5%',
@@ -110,22 +137,18 @@ function ScriptEdit({
                                 keyword={keyword}
                             />
                         ))}
-                    </div>
-                    <div style={{
-                        height: '150px',
-                        width: '95%',
-                        display: 'flex',
-                        marginLeft: '2.5%',
-                        marginRight: '2.5%',
-                        overflowY: 'auto',
-                        overflowX: 'hidden',
-                        flexWrap: 'wrap',
-                    }}>
                         {fieldList.map((field, index) => (
                             <KeywordBlock
                                 key={`field${index}`}
                                 addKeyword={addKeyword}
                                 keyword={field}
+                            />
+                        ))}
+                        {eventtypes.filter(s => !s.hidden).map((eventtype, index) => (
+                            <KeywordBlock
+                                key={`eventtype${index}`}
+                                addKeyword={addKeyword}
+                                keyword={eventtype.label}
                             />
                         ))}
                     </div>
@@ -135,4 +158,6 @@ function ScriptEdit({
     )
 }
 
-export default ScriptEdit
+export default connect(state => ({
+    eventtypes: state.marker.eventtypes,
+})) (ScriptEdit)

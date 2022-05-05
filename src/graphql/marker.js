@@ -12,7 +12,6 @@ const list = gql`
             address
             link
             image_link
-            type
             estimate_time
             permanent
             need_booking

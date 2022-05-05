@@ -53,6 +53,9 @@ function FilterList({
                 if (filterlist.hashtag) {
                     setSelectedHashtag(filterlist.hashtag)
                 }
+                if (filterlist.script) {
+                    setCurrentScript(filterlist.script)
+                }
             }
             setInit(true)
         }
@@ -122,6 +125,7 @@ function FilterList({
         setSelectedAttribute([])
         setBookingStatus(null)
         setSelectedHashtag([])
+        setCurrentScript('')
     }
 
     return (
@@ -208,7 +212,7 @@ function FilterList({
                         />
                     </WrapperBox>
                     <WrapperBox
-                        height={'100px'}
+                        height={'150px'}
                         marginBottom='10px'
                         isCenter
                     >

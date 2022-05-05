@@ -1,3 +1,5 @@
+import query from './query'
+
 // generic utilties
 const appendToList = (resultList, appendingList) => {
     appendingList.forEach(item => {
@@ -96,6 +98,12 @@ const filterByHashtag = (markers, selected) => {
     }
     return outputList
 }
+
+const filterByQueryScript = (markers, queryScript, eventtypes) => {
+    if (!queryScript) return markers
+    return query.parse(markers, queryScript, eventtypes)
+}
+
 const outputMarkerByFilter = (markers, filterlist, eventtypes) => {
     let outputList = markers
 
@@ -104,6 +112,7 @@ const outputMarkerByFilter = (markers, filterlist, eventtypes) => {
     outputList = filterByAttribute(outputList, filterlist.attribute)
     outputList = filterByBooking(outputList, filterlist.booking)
     outputList = filterByHashtag(outputList, filterlist.hashtag)
+    outputList = filterByQueryScript(outputList, filterlist.script, eventtypes)
 
     return outputList
 }
