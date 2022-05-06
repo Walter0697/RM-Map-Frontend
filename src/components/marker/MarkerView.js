@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
 import {
@@ -47,6 +48,8 @@ function MarkerView({
     eventtypes,
     dispatch,
 }) {
+    const history = useHistory()
+
     const [ updateMarkerFavouriteGQL, { data: updateData, loading: updateLoading, error: updateError } ] = useMutation(graphql.markers.update_fav, { errorPolicy: 'all' }) 
     const [ removeMarkerGQL, { data: removeData, loading: removeLoading, error: removeError } ] = useMutation(graphql.markers.remove, { errorPolicy: 'all' })
 
@@ -101,6 +104,11 @@ function MarkerView({
             fail()
         }
     }, [removeData, removeError, deletingId])
+
+    const onHashTagClick = () => {
+        history.replace('/markers/list')
+        handleClose()
+    }
 
     const toggleMarkerFavourite = () => {
         if (!updateLoading) {
@@ -231,7 +239,7 @@ function MarkerView({
                                     <Grid item xs={12} md={12} lg={12}>
                                         <MarkerDescription 
                                             description={marker.description}
-                                            onHashTagClick={handleClose}
+                                            onHashTagClick={onHashTagClick}
                                         />
                                     </Grid>
                                     {marker.price && (

@@ -547,6 +547,13 @@ const getListFromQueryFilter = (list, block_list, eventtype_list) => {
 		} else if (first.type === FIELD && mid.type === OPERATOR && last.type === VAR) {
 			// case for FIELD OPERATOR VAR
 			return filterByField(list, first.value, mid.value, last.value, eventtype_list)
+		} else if (mid.type === AND) {
+			const firstList = getListFromQueryFilter(list, [first], eventtype_list)
+			return getListFromQueryFilter(firstList, [last], eventtype_list)
+		} else if (mid.type === OR) {
+			const firstList = getListFromQueryFilter(list, [first], eventtype_list)
+			const lastList = getListFromQueryFilter(list, [last], eventtype_list)
+			return joinList(firstList, lastList)
 		} else {
 			return list
 		}
@@ -576,11 +583,10 @@ const getListFromQueryFilter = (list, block_list, eventtype_list) => {
 		} else if (first.type === NESTED && (second.type === AND || second.type == OR)) {
 			// case for NESTED AND or NESTED OR
 			const firstList = getListFromQueryFilter(list, [first], eventtype_list)
-			const fourth = block_list[3]
 			const rest = block_list.slice(2)
-			if (fourth.value === AND) {
+			if (second.value === AND) {
 				return getListFromQueryFilter(firstList, rest, eventtype_list)
-			} else if (fourth.value === OR) {
+			} else if (second.value === OR) {
 				const lastList = getListFromQueryFilter(list, rest, eventtype_list)
 				return joinList(firstList, lastList)
 			}
