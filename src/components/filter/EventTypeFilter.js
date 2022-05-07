@@ -37,12 +37,13 @@ function EventTypeFilter({
             >
                 {displayEventTypes.map((item, index) => (
                     <Grid item
-                        xs={4}
+                        xs={6}
                         fullWidth
                         key={index}
                         style={{
                             padding: '4px',
                             height: '50px',
+                            marginBottom: '10px',
                         }}    
                     >
                         <FilterButton 

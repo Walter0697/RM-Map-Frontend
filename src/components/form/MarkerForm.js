@@ -200,6 +200,10 @@ function MarkerForm({
         setImageMessage('')
     }
 
+    const removeScrapperData = () => {
+        setScrapperData(null)
+    }
+
     const onScrapperClick = (value) => {
         setScrapperOpen(value)
         setAnchorEl(null)
@@ -395,6 +399,17 @@ function MarkerForm({
                                         </MenuItem>
                                     </Menu>
                             </Grid>
+                            {scrapperData?.restaurant && (
+                                <div 
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                    onClick={removeScrapperData}
+                                >
+                                    <DeleteIcon sx={{ verticalAlign: 'middle', display: 'inline-block', fontSize: '18px' }}/> 
+                                    <span style={{ verticalAlign: 'middle', display: 'inline-block' }}>Remove Restaurant Data</span>
+                                </div>
+                            )}
                         </Grid>
                         
                     </Grid>
@@ -449,7 +464,8 @@ function MarkerForm({
                                     >
                                         <DeleteIcon sx={{ verticalAlign: 'middle', display: 'inline-block', fontSize: '18px' }}/> 
                                         <span style={{ verticalAlign: 'middle', display: 'inline-block' }}>Remove Image</span>
-                                    </div>)}
+                                    </div>
+                                )}
                             </FormLabel>
                         </FormControl>
                     </Grid>

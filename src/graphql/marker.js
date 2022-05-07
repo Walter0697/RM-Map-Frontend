@@ -276,7 +276,8 @@ const edit = gql`
                         $from_time: String,
                         $estimate_time: String,
                         $price: String,
-                        $restaurant_id: Int) {
+                        $restaurant_id: Int,
+                        $remove_restaurant: Boolean,) {
         editMarker(input: {
             id: $id,
             label: $label,
@@ -294,6 +295,7 @@ const edit = gql`
             estimate_time: $estimate_time,
             price: $price,
             restaurant_id: $restaurant_id,
+            remove_restaurant: $remove_restaurant,
         }) {
             id
             type

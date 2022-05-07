@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import {
@@ -68,6 +68,8 @@ function MarkerEditForm({
 
     const [ imageFormState , setImageState ] = useState('') // weblink, preview
     const [ imageSubmitMessage, setImageMessage ] = useState('')
+
+    const [ shouldRemoveRestaurantData, setShouldRemoveRestaurantData ] = useState(false)
 
     const [ scrapperData, setScrapperData ] = useState(null) 
     const [ scrapperOpen, setScrapperOpen ] = useState(null)
@@ -209,6 +211,18 @@ function MarkerEditForm({
         setWebsiteLink(link)
     }
 
+    const removeRestaurantData = () => {
+        setScrapperData(null)
+        setShouldRemoveRestaurantData(true)
+    }
+
+    const restoreRestaurantData = () => {
+        setShouldRemoveRestaurantData(false)
+        if (marker.restaurant) {
+            setScrapperData({ restaurant: marker.restaurant })
+        }
+    }
+
     // handle menu click
     const handleMenuClick = (event) => {
         setAnchorEl(event.currentTarget)
@@ -260,8 +274,38 @@ function MarkerEditForm({
             to_time: to,
             from_time: from,
             restaurant_id: restaurant_id,
+            remove_restaurant: shouldRemoveRestaurantData,
         }})
     }
+
+    const restaurantInfoMessage = useMemo(() => {
+        if (scrapperData?.restaurant) {
+            return (
+                <div
+                    style={{
+                        color: 'red'
+                    }}
+                    onClick={removeRestaurantData}
+                >
+                    <DeleteIcon sx={{ verticalAlign: 'middle', display: 'inline-block', fontSize: '18px' }}/> 
+                    <span style={{ verticalAlign: 'middle', display: 'inline-block' }}>Remove {scrapperData?.restaurant.name} Data</span>
+                </div>
+            )
+        }
+        if (marker?.restaurant) {
+            return (
+                <div
+                    style={{
+                        color: 'blue'
+                    }}
+                    onClick={restoreRestaurantData}
+                >
+                    <DeleteIcon sx={{ verticalAlign: 'middle', display: 'inline-block', fontSize: '18px' }}/> 
+                    <span style={{ verticalAlign: 'middle', display: 'inline-block' }}>Restore {marker?.restaurant.name} Data</span>
+                </div>
+            )
+        }
+    }, [scrapperData, marker, setShouldRemoveRestaurantData])
 
     return (
         <>
@@ -391,6 +435,7 @@ function MarkerEditForm({
                                         </MenuItem>
                                     </Menu>
                             </Grid>
+                            {restaurantInfoMessage}
                         </Grid>
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
