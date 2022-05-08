@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { connect } from 'react-redux'
-import { useHistory } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import Base from './Base'
 
@@ -11,7 +10,6 @@ import {
 } from '@react-spring/web'
 
 import ExploreIcon from '@mui/icons-material/Explore'
-import FilterAltIcon from '@mui/icons-material/FilterAlt'
 
 import useBoop from '../hooks/useBoop'
 
@@ -19,6 +17,7 @@ import MarkerMap from '../components/map/MarkerMap'
 import MarkerList from '../components/list/MarkerList'
 import MarkerView from '../components/marker/MarkerView'
 import CircleIconButton from '../components/field/CircleIconButton'
+import FilterCirlceButton from '../components/wrapper/FilterCircleButton'
 import ScheduleForm from '../components/form/ScheduleForm'
 import MarkerEditForm from '../components/form/MarkerEditForm'
 import AutoHideAlert from '../components/AutoHideAlert'
@@ -33,7 +32,6 @@ function MarkerPage({
     eventtypes,
     filterlist,
 }) {
-    const history = useHistory()
     const location = useLocation()
     const suffix = location.pathname.replace('/markers', '')
 
@@ -55,16 +53,16 @@ function MarkerPage({
     })
 
     // filter option
-    const [ filterOption, setFilterOption ] = useState({})
-    const [ filterValue, setFilterValue ] = useState('')
-    const [ finalFilterValue, setFinalFilterValue ] = useState('')
-    const [ isFilterExpanded, setExpandFilter ] = useState(false)
-    const finalFilterDisplay = useMemo(() => {
-        if (finalFilterValue === '') return null
-        let list = filters.parser.parseStringToDisplayArr(filterOption, finalFilterValue)
-        return list
-    }, [finalFilterValue])
-    const [ customFilterValue, setCustomFilterValue ] = useState('')
+    // const [ filterOption, setFilterOption ] = useState({})
+    // const [ filterValue, setFilterValue ] = useState('')
+    // const [ finalFilterValue, setFinalFilterValue ] = useState('')
+    // const [ isFilterExpanded, setExpandFilter ] = useState(false)
+    // const finalFilterDisplay = useMemo(() => {
+    //     if (finalFilterValue === '') return null
+    //     let list = filters.parser.parseStringToDisplayArr(filterOption, finalFilterValue)
+    //     return list
+    // }, [finalFilterValue])
+    // const [ customFilterValue, setCustomFilterValue ] = useState('')
 
     // const displayMarker = useMemo(() => {
     //     //const filteredMarkers = markers.filter(s => s.status === '' || s.status === 'scheduled')
@@ -82,7 +80,7 @@ function MarkerPage({
         return search.filter.parse(markers, filterlist, eventtypes)
     }, [markers, filterlist, eventtypes, editAlert])
 
-    const [ showFilterInListView, showFilter ] = useState(false)
+    // const [ showFilterInListView, showFilter ] = useState(false)
 
     // useEffect(() => {
     //     let options = []
@@ -110,10 +108,10 @@ function MarkerPage({
         }
     } 
 
-    const confirmFilterValue = (finalValue) => {
-        setFinalFilterValue(finalValue)
-        setExpandFilter(false)
-    }
+    // const confirmFilterValue = (finalValue) => {
+    //     setFinalFilterValue(finalValue)
+    //     setExpandFilter(false)
+    // }
 
     const onMarkerUpdated = () => {
         setSelected(null)
@@ -147,15 +145,15 @@ function MarkerPage({
                         toListView={() => setShowingList(true)}
                         markers={filteredMarkers || []}
                         setSelectedById={setSelectedById}
-                        filterOption={filterOption} // for filter option
-                        filterValue={filterValue}   // for filter temporary value setter and getter
-                        setFilterValue={setFilterValue}  
-                        isFilterExpanded={isFilterExpanded} // for viewing filter
-                        setExpandFilter={setExpandFilter}
-                        confirmFilterValue={confirmFilterValue} // for confirming filter values
-                        customFilterValue={customFilterValue}
-                        setCustomFilterValue={setCustomFilterValue}
-                        finalFilterValue={finalFilterDisplay} // for filter options
+                        // filterOption={filterOption} // for filter option
+                        // filterValue={filterValue}   // for filter temporary value setter and getter
+                        // setFilterValue={setFilterValue}  
+                        // isFilterExpanded={isFilterExpanded} // for viewing filter
+                        // setExpandFilter={setExpandFilter}
+                        // confirmFilterValue={confirmFilterValue} // for confirming filter values
+                        // customFilterValue={customFilterValue}
+                        // setCustomFilterValue={setCustomFilterValue}
+                        // finalFilterValue={finalFilterDisplay} // for filter options
                         scheduleCreated={confirmCreated}
                     />
                 </div>
@@ -171,16 +169,16 @@ function MarkerPage({
                         showingList={showingList}
                         markers={filteredMarkers || []}
                         setSelectedById={setSelectedById}
-                        filterOption={filterOption} // for filter option
-                        filterValue={filterValue}   // for filter temporary value setter and getter
-                        setFilterValue={setFilterValue}  
-                        isFilterExpanded={isFilterExpanded} // for viewing filter
-                        setExpandFilter={setExpandFilter}
-                        confirmFilterValue={confirmFilterValue} // for confirming filter values
-                        customFilterValue={customFilterValue}
-                        setCustomFilterValue={setCustomFilterValue}
-                        finalFilterValue={finalFilterDisplay} // for filter options
-                        filterOpen={showFilterInListView}
+                        // filterOption={filterOption} // for filter option
+                        // filterValue={filterValue}   // for filter temporary value setter and getter
+                        // setFilterValue={setFilterValue}  
+                        // isFilterExpanded={isFilterExpanded} // for viewing filter
+                        // setExpandFilter={setExpandFilter}
+                        // confirmFilterValue={confirmFilterValue} // for confirming filter values
+                        // customFilterValue={customFilterValue}
+                        // setCustomFilterValue={setCustomFilterValue}
+                        // finalFilterValue={finalFilterDisplay} // for filter options
+                        // filterOpen={showFilterInListView}
                     />
                 </div>
 
@@ -209,12 +207,9 @@ function MarkerPage({
                                 right: '20px',
                             }}
                         >
-                            <CircleIconButton
-                                // onClickHandler={() => showFilter(s => !s)}
-                                onClickHandler={() => history.replace('/filter/list')}
-                            >
-                                <FilterAltIcon />
-                            </CircleIconButton>
+                            <FilterCirlceButton 
+                                redirectPath={'/filter/list'}
+                            />
                         </div>
                     </>
                 )}

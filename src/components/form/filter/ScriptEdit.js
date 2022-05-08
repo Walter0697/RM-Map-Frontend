@@ -69,6 +69,10 @@ function ScriptEdit({
     }
 
     const onConfirmHandler = () => {
+        if (value === '') {
+            onConfirm(value)
+            return
+        }
         const eventtype_list = eventtypes.map(s => {
             return {
                 label: s.label,

@@ -1,49 +1,53 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { connect } from 'react-redux'
-import {
-    useSpring,
-    config,
-    animated,
-} from '@react-spring/web'
-
-import FilterAltIcon from '@mui/icons-material/FilterAlt'
+import { useLocation } from 'react-router-dom'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
-import CircleIconButton from '../field/CircleIconButton'
-import FilterBox from '../filterbox/FilterBox'
+import FilterCircleButton from '../wrapper/FilterCircleButton'
+// import FilterBox from '../filterbox/FilterBox'
 import MarkerItem from './listitem/MarkerItem'
+
+import search from '../../scripts/search'
 
 function MarkerDisplayList({
     markers,
     setSelectedById,
     eventtypes,
-    filterOption,   // below filter related
-    filterValue,
-    setFilterValue,
-    isFilterExpanded,
-    setExpandFilter,
-    confirmFilterValue,
-    finalFilterValue,
-    customFilterValue,
-    setCustomFilterValue,
-    filterOpen,
-    setShowFilter,
+    filterlist,
+    // filterOption,   // below filter related
+    // filterValue,
+    // setFilterValue,
+    // isFilterExpanded,
+    // setExpandFilter,
+    // confirmFilterValue,
+    // finalFilterValue,
+    // customFilterValue,
+    // setCustomFilterValue,
+    // filterOpen,
+    // setShowFilter,
 }) {
-    const {
-        filterBoxTransform,
-        filterBoxOpacity,
-      } = useSpring({
-        config: config.slow,
-        from: {
-          filterBoxOpacity: 0,
-          filterBoxTransform: 'scale(0, 0) translate(-100%, 3000%)',
-        },
-        to: {
-          filterBoxOpacity: filterOpen ? 1 : 0,
-          filterBoxTransform: filterOpen ? 'scale(1, 1) translate(0%, 0%)' : 'scale(0, 0) translate(-100%, 3000%)',
-        }
-      })
+    const location = useLocation()
+    const current_path = location.pathname
+
+    const filteredMarkers = useMemo(() => {
+        return search.filter.parse(markers, filterlist, eventtypes)
+    }, [markers, filterlist, eventtypes])
+
+    // const {
+    //     filterBoxTransform,
+    //     filterBoxOpacity,
+    //   } = useSpring({
+    //     config: config.slow,
+    //     from: {
+    //       filterBoxOpacity: 0,
+    //       filterBoxTransform: 'scale(0, 0) translate(-100%, 3000%)',
+    //     },
+    //     to: {
+    //       filterBoxOpacity: filterOpen ? 1 : 0,
+    //       filterBoxTransform: filterOpen ? 'scale(1, 1) translate(0%, 0%)' : 'scale(0, 0) translate(-100%, 3000%)',
+    //     }
+    //   })
 
     return (
         <>
@@ -58,18 +62,18 @@ function MarkerDisplayList({
                 }}
             >
                 <BottomUpTrail>
-                    {markers.map((item, index) => (
-                    <WrapperBox
-                        key={index}
-                        height='120px'
-                        marginBottom='10px'
-                    >
-                        <MarkerItem
-                            item={item}
-                            typeIcon={eventtypes.find(s => s.value === item.type).icon_path}
-                            onClickHandler={() => setSelectedById(item.id)}
-                        />
-                    </WrapperBox>
+                    {filteredMarkers.map((item, index) => (
+                        <WrapperBox
+                            key={index}
+                            height='120px'
+                            marginBottom='10px'
+                        >
+                            <MarkerItem
+                                item={item}
+                                typeIcon={eventtypes.find(s => s.value === item.type).icon_path}
+                                onClickHandler={() => setSelectedById(item.id)}
+                            />
+                        </WrapperBox>
                     ))}
                 </BottomUpTrail>
             </div>
@@ -78,18 +82,16 @@ function MarkerDisplayList({
             <div
                 style={{ 
                     position: 'absolute',
-                    bottom: '15%',
+                    top: '10%',
                     left: '20px',
                 }}
             >
-                <CircleIconButton
-                    onClickHandler={() => setShowFilter(s => !s)}
-                >
-                    <FilterAltIcon />
-                </CircleIconButton>
+                <FilterCircleButton
+                    redirectPath={'/filter' + current_path}
+                />
             </div>
             {/* filter box */}
-            <animated.div style={{
+            {/* <animated.div style={{
                 transform: filterBoxTransform,
                 position: 'absolute',
                 paddingTop: '20px',
@@ -109,11 +111,12 @@ function MarkerDisplayList({
                     customFilterValue={customFilterValue}
                     setCustomFilterValue={setCustomFilterValue}
                 />
-            </animated.div>
+            </animated.div> */}
         </>
     )
 }
 
 export default connect(state => ({
     eventtypes: state.marker.eventtypes,
+    filterlist: state.filter.list,
   }))(MarkerDisplayList)

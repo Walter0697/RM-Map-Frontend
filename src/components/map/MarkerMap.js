@@ -11,7 +11,7 @@ import ViewListIcon from '@mui/icons-material/ViewList'
 import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak'
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import TrainIcon from '@mui/icons-material/Train'
-import FilterAltIcon from '@mui/icons-material/FilterAlt'
+// import FilterAltIcon from '@mui/icons-material/FilterAlt'
 
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
@@ -19,7 +19,8 @@ import useBoop from '../../hooks/useBoop'
 import LocationPreview from './mappart/LocationPreview'
 import AutoHideAlert from '../AutoHideAlert'
 import CircleIconButton from '../field/CircleIconButton'
-import FilterBox from '../filterbox/FilterBox'
+import FilterCircleButton from '../wrapper/FilterCircleButton'
+// import FilterBox from '../filterbox/FilterBox'
 
 import maphelper from '../../scripts/map'
 import constants from '../../constant'
@@ -231,11 +232,9 @@ function MarkerMap({
                     left: '20px',
                 }}
             >
-                <CircleIconButton
-                    onClickHandler={() => history.replace('/filter/map')}
-                >
-                    <FilterAltIcon />
-                </CircleIconButton>
+                <FilterCircleButton 
+                    redirectPath={'/filter/map'}
+                />
             </animated.div>
 
             <animated.div

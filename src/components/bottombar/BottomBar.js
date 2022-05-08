@@ -75,7 +75,7 @@ function BottomBar({
             )
         }
 
-        if (location.pathname.startsWith('/filter')) {
+        if (location.pathname === '/filter/list' || location.pathname === '/filter/map') {
             return (
                 <SubBarIcon 
                     route={'/filter'}
@@ -110,6 +110,17 @@ function BottomBar({
                 />
             )
         }
+        if (location.pathname === '/filter/previous') {
+            return (
+                <SubBarIcon 
+                    route={'/filter'}
+                    parentRoute={'/previous'}
+                    path={location.pathname}
+                    activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
         if (location.pathname === '/expired') {
             return (
                 <SubBarIcon 
@@ -117,6 +128,17 @@ function BottomBar({
                     parentRoute={'/home'}
                     path={location.pathname}
                     activeIcon={<AvTimerIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+        if (location.pathname === '/filter/expired') {
+            return (
+                <SubBarIcon 
+                    route={'/filter'}
+                    parentRoute={'/expired'}
+                    path={location.pathname}
+                    activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     setPath={changeTab}
                 />
             )

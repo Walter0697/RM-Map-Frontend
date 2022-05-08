@@ -19,6 +19,15 @@ function MarkerFilterPage({
     const location = useLocation()
     const suffix = location.pathname.replace('/filter', '')
 
+    const getBackPagePath = () => {
+        if (suffix === '/expired' || suffix === '/previous') {
+            return suffix
+        }
+        return '/markers' + suffix
+    }
+
+    const back_path = getBackPagePath()
+
     const updateHashtag = () => {
         let hashTagList = {}
         markers.forEach(marker => {
@@ -41,7 +50,7 @@ function MarkerFilterPage({
     return (
         <Base>
             <TopBar
-                onBackHandler={() => history.replace('/markers' + suffix)}
+                onBackHandler={() => history.replace(back_path)}
                 label='Marker Filter'
             />
             <FilterList
