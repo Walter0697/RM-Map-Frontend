@@ -75,8 +75,8 @@ function ScriptEdit({
         }
         const eventtype_list = eventtypes.map(s => {
             return {
-                label: s.label,
-                value: s.value,
+                label: s.label.toLowerCase(),
+                value: s.value.toLowerCase(),
             }
         })
         const result = search.querys.validate(value, eventtype_list)

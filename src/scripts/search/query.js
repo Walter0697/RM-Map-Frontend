@@ -54,12 +54,12 @@ const filterByField = (list, field, operator, value, eventtype_list) => {
 		default: {
 			if (field === 'eventtype') {
 				if (operator === '=') {
-					const typeObj = eventtype_list.find(s => s.label === value.toLowerCase())
+					const typeObj = eventtype_list.find(s => s.label.toLowerCase() === value.toLowerCase())
 					if (typeObj) {
 						return list.filter(s => s.type === typeObj.value)
 					}
 				} else if (operator === '!=') {
-					const typeObj = eventtype_list.find(s => s.label === value.toLowerCase())
+					const typeObj = eventtype_list.find(s => s.label.toLowerCase() === value.toLowerCase())
 					if (typeObj) {
 						return list.filter(s => s.type !== typeObj.value)
 					}
