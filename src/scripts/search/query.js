@@ -15,7 +15,7 @@ const UNKNOWN = 'UNKNOWN'
 const MARKERS = 'markers'
 const operator_list = ['=', '<', '>', '>=', '<=', '!=']
 const keyword_list = [SELECT, WHERE, AND, OR, MARKERS]
-const field_list = ['eventtype', 'permanent', 'need_booking', 'price', 'status', 'is_fav', 'is_hurry', 'is_timed', 'estimate_time']
+const field_list = ['eventtype', 'permanent', 'need_booking', 'price', 'is_fav', 'is_hurry', 'is_timed', 'estimate_time']
 
 const enum_list = {
 	'price': [ 'free', 'cheap', 'middle', 'expensive' ],
@@ -28,7 +28,6 @@ const field_type_list = {
 	'need_booking': 'boolean',
 	'price': 'enum',
 	'estimate_time': 'enum',
-	'status': 'enum',
 	'is_fav': 'boolean',
 	'is_hurry': 'boolean',
 	'is_timed': 'boolean',
@@ -54,27 +53,38 @@ const filterByField = (list, field, operator, value, eventtype_list) => {
 		case 'enum': 
 		default: {
 			if (field === 'eventtype') {
-				const typeObj = eventtype_list.find(s => s.label === value.toLowerCase())
-				if (typeObj) {
-					return list.filter(s => s.type === typeObj.value)
+				if (operator === '=') {
+					const typeObj = eventtype_list.find(s => s.label === value.toLowerCase())
+					if (typeObj) {
+						return list.filter(s => s.type === typeObj.value)
+					}
+				} else if (operator === '!=') {
+					const typeObj = eventtype_list.find(s => s.label === value.toLowerCase())
+					if (typeObj) {
+						return list.filter(s => s.type !== typeObj.value)
+					}
 				}
 				return list
 			} else {
 				if (operator === '=') {
 					return list.filter(s => s[fieldName] === value)
-				} else if (operator === '<') {
-					return list.filter(s => s[fieldName] === value)
-				} else if (operator === '>') {
-					return list.filter(s => s[fieldName] === value)
-				} else if (operator === '<=') {
-					return list.filter(s => s[fieldName] === value)
-				} else if (operator === '>=') {
-					return list.filter(s => s[fieldName] === value)
 				} else if (operator === '!=') {
 					return list.filter(s => s[fieldName] !== value)
+				} else  {
+					const field_list = enum_list[fieldName]
+					const value_index = field_list.indexOf(value)
+					let allowed_list = field_list
+					if (operator === '<') {
+						allowed_list = field_list.slice(0, value_index)
+					} else if (operator === '<=') {
+						allowed_list = field_list.slice(0, value_index + 1)
+					} else if (operator === '>') {
+						allowed_list = field_list.slice(value_index + 1, field_list.length)
+					} else if (operator === '>=') {
+						allowed_list = field_list.slice(value_index, field_list.length)
+					}
+					return list.filter(s => allowed_list.includes(s[fieldName]))
 				}
-				// for now, all the rest operators will return ===
-				return list.filter(s => s[fieldName] === value)
 			}
 		}	
 	}
@@ -108,14 +118,14 @@ const checkFieldValid = (field, value, operator, eventtype_list) => {
 	switch (fieldType) {
 		case 'boolean': {
 			if (toLower === 'true' || toLower === 'false') {
-				if (operator === '=') {
+				if (operator === '=' || operator === '!=') {
 					return {
 						isValid: true,
 					}
 				} else {
 					return {
 						isValid: false,
-						error: `boolean field expected operator =, got ${operator}`,
+						error: `boolean field expected operator = or !=, got ${operator}`,
 					}
 				}
 			} else {
