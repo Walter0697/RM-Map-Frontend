@@ -17,7 +17,7 @@ import TopBar from '../components/topbar/TopBar'
 import AutoHideAlert from '../components/AutoHideAlert'
 import StationSettingForm from '../components/form/station/StationSettingForm'
 
-import MTRImage from '../images/station/hkmtr.jpeg'
+import MTRImage from '../images/station/hkmtr2.jpeg'
 
 import actions from '../store/actions'
 import graphql from '../graphql'
