@@ -47,8 +47,11 @@ function HashtagFilter({
                                     borderRadius: '15px',
                                     display: 'flex',
                                     alignItems: 'center',
+                                    whiteSpace: 'nowrap'
                                 }}
-                            >{hashtag}</div>
+                            >
+                                {hashtag}
+                            </div>
                         ))}
                     </div>
                 </Grid>
