@@ -34,7 +34,7 @@ function MovieForm({
     eventtypes,
     dispatch,
 }) {
-    const [ createMovieScheduleGQL, { data: createData, loading: createLoading, error: createError } ] = useMutation(graphql.movies.create, { errorPolicy: 'all' })
+    const [ createMovieScheduleGQL, { data: createData, loading: createLoading, error: createError } ] = useMutation(graphql.movies.schedule, { errorPolicy: 'all' })
 
     const [ formValue, setFormValue, resetFormValue ] = useObject({
         label: '',
@@ -74,19 +74,6 @@ function MovieForm({
         if (movie) {
             if (movie.title) {
                 setFormValue('label', movie.title)
-                setFormValue('movie_name', movie.title)
-            }
-
-            if (movie.release_date) {
-                setFormValue('movie_release', movie.release_date)
-            }
-
-            if (movie.image_link) {
-                setFormValue('movie_image', {
-                    type: 'weblink',
-                    value: movie.image_link,
-                })
-                setImageMessage('movie poster')
             }
         }
     }, [movie])
@@ -148,9 +135,7 @@ function MovieForm({
             description: formValue.description,
             selected_time,
             marker_id: formValue.marker_id,
-            movie_name: formValue.movie_name,
-            movie_release: formValue.movie_release,
-            movie_image: formValue.movie_image ? formValue.movie_image.value: null,
+            movie_rid: movie?.ref_id,
         }})
     }
 
@@ -205,10 +190,9 @@ function MovieForm({
                         <TextField
                             variant='outlined'
                             fullWidth
-                            required
+                            disabled
                             label='movie title'
-                            value={formValue.movie_name}
-                            onChange={(e) => onValueChangeHandler('movie_name', e.target.value)}
+                            value={movie?.title}
                             error={!!error.movie_name}
                             helperText={error.movie_name}
                         />
@@ -225,7 +209,7 @@ function MovieForm({
                                     <Button 
                                         variant='outlined'
                                         fullWidth
-                                        disabled={!formValue.movie_image}
+                                        disabled={!movie?.image_link}
                                         onClick={() => setImageState('preview')}
                                     >
                                         <VisibilityIcon />
@@ -243,8 +227,7 @@ function MovieForm({
                             fullWidth
                             disabled
                             label='release date'
-                            value={formValue.movie_release}
-                            onChange={(e) => onValueChangeHandler('movie_release', e.target.value)}
+                            value={movie?.release_date}
                             error={!!error.movie_release}
                             helperText={error.movie_release}
                         />
@@ -280,7 +263,7 @@ function MovieForm({
             <ImagePreview
                 shouldOpen={imageFormState === 'preview'}
                 handleClose={() => setImageState('')}
-                imageInfo={formValue.movie_image}
+                imageInfo={movie?.image_link}
             />
         </>
     )

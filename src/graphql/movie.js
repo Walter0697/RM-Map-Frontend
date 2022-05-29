@@ -9,6 +9,7 @@ const search = gql`
             location: $location,
             query: $query,
         }) {
+            ref_id
             title
             image_link
             release_date
@@ -16,22 +17,18 @@ const search = gql`
     }
 `
 
-const create = gql`
+const schedule = gql`
     mutation createMovieScheduleGQL($label: String!,
                                 $description: String!,
                                 $selected_time: String!,
                                 $marker_id: Int,
-                                $movie_name: String!,
-                                $movie_release: String,
-                                $movie_image: String,) {
+                                $movie_rid: Int!) {
         createMovieSchedule(input: {
             label: $label,
             description: $description,
             selected_time: $selected_time,
             marker_id: $marker_id,
-            movie_name: $movie_name,
-            movie_release: $movie_release,
-            movie_image: $movie_image,
+            movie_rid: $movie_rid,
         }) {
             id
             label
@@ -60,7 +57,7 @@ const create = gql`
 
 const movies = {
     search,
-    create,
+    schedule,
 }
 
 export default movies

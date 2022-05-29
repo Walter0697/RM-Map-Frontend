@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { connect } from 'react-redux'
 import {
     Grid,
     Button,
@@ -9,12 +10,15 @@ import { useLazyQuery } from '@apollo/client'
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
 
+import constant from '../../constant'
+
 import actions from '../../store/actions'
 import graphql from '../../graphql'
 
 function MovieItem({
     item,
-    onClickHandler
+    movieTypeIcon,
+    onClickHandler,
 }) {
     return (
         <Button
@@ -44,12 +48,19 @@ function MovieItem({
                     item xs={5}
                     style={{ marginTop: '15px'}}
                 >
-                    {item.image_link && (
+                    {item.image_link ? (
                         <img
                             style={{
                                 width: '80%',
                             }}
                             src={item.image_link}
+                        />
+                    ) : (
+                        <img 
+                            style={{
+                                width: '80%',
+                            }}
+                            src={process.env.REACT_APP_IMAGE_LINK + movieTypeIcon}
                         />
                     )}
                     
@@ -91,6 +102,7 @@ function MovieList({
     list,
     setList,
     openMovieForm,
+    eventtypes,
 }) {
     
     const [ moviefetchGQL, { data: movieData, loading: movieLoading, error: movieError } ] = useLazyQuery(graphql.movies.search, { fetchPolicy: 'no-cache' })
@@ -110,6 +122,14 @@ function MovieList({
             return `Searching By '${searchQuery.query}'`
         }
     }, [searchQuery])
+
+    const movieIconImage = useMemo(() => {
+        const movieType = eventtypes.find(s => s.value === constant.identifiers.movieTypeIdentifier)
+        if (movieType) {
+            return movieType.icon_path
+        }
+        return ''
+    }, [eventtypes])
 
     useEffect(() => {
         let variables = {
@@ -177,6 +197,7 @@ function MovieList({
                         >
                             <MovieItem
                                 item={item}
+                                movieTypeIcon={movieIconImage}
                                 onClickHandler={openMovieForm}
                             />
                         </WrapperBox>
@@ -187,4 +208,6 @@ function MovieList({
     )
 }
 
-export default MovieList
+export default connect(state => ({
+    eventtypes: state.marker.eventtypes,
+}))(MovieList)
