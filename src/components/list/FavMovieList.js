@@ -100,6 +100,7 @@ function MovieItem({
 function FavMovieList({
     list,
     eventtypes,
+    openMovieForm,
 }) {
     const filteredList = useMemo(() => {
         const unsorted = list.filter(s => s.is_fav)
@@ -115,6 +116,8 @@ function FavMovieList({
         }
         return ''
     }, [eventtypes])
+
+
 
     return (
         <>
@@ -137,7 +140,7 @@ function FavMovieList({
                             <MovieItem
                                 item={item}
                                 movieTypeIcon={movieIconImage}
-                                onClickHandler={() => {}}
+                                onClickHandler={openMovieForm}
                             />
                         </WrapperBox>
                     ))}

@@ -17,39 +17,38 @@ import BaseForm from './BaseForm'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
 
-function MovieSelectForm({
+function FavMovieSelectForm({
     open,
     handleClose,
     movie,
     openFormForMovie,
-    isMovieFav,
-    onCreated,
+    onRemoved,
     dispatch,
 }) {
-    const [ createFavMovieGQL, { data: createData, loading: createLoading, error: createError } ] = useMutation(graphql.movies.create, { errorPolicy: 'all' })
+    const [ removeFavMovieGQL, { data: removeData, loading: removeLoading, error: removeError } ] = useMutation(graphql.movies.remove, { errorPolicy: 'all' })
 
     const [ submitting, setSubmitting ] = useState(false)
     const [ alertMessage, setAlertMessage ] = useState(null)
 
     useEffect(() => {
-        if (createError) {
+        if (removeError) {
             setAlertMessage({
                 type: 'error',
-                message: createError.message,
+                message: removeError.message,
             })
             setSubmitting(false)
         }
 
-        if (createData) {
-            dispatch(actions.addMovie(createData.createFavouriteMovie))
-            onCreated && onCreated()
+        if (removeData) {
+            //dispatch(actions.addMovie(removeData.removeFavouriteMovie))
+            onRemoved && onRemoved()
         }
-    }, [createData, createError])
+    }, [removeData, removeError])
 
-    const setMovieFavourite = () => {
-        createFavMovieGQL({ variables: {
-            movie_rid: movie.ref_id,
-        }})
+    const removeMovieFavourite = () => {
+        // removeFavMovieGQL({ variables: {
+        //     id: movie.id,
+        // }})
     }
 
     const setMovieSchedule = () => {
@@ -61,7 +60,7 @@ function MovieSelectForm({
             <BaseForm
                 open={open}
                 handleClose={handleClose}
-                title={movie?.title}
+                title={movie?.label}
                 maxWidth={'lg'}
                 cancelText={'Cancel'}
                 loading={submitting}
@@ -74,7 +73,7 @@ function MovieSelectForm({
                             variant='contained'
                             size='large'
                             style={{
-                                backgroundColor: isMovieFav ? '#cece11' : '#48acdb',
+                                backgroundColor: 'red',
                                 borderRadius: '5px',
                                 height: '50px',
                                 width: '100%',
@@ -83,10 +82,10 @@ function MovieSelectForm({
                                 textTransform: 'none',
                                 padding: '0',
                             }}
-                            disblaed={submitting || isMovieFav}
-                            onClick={setMovieFavourite}
+                            disblaed={submitting}
+                            onClick={removeMovieFavourite}
                         >
-                            <StarIcon sx={{ color: 'white', marginRight: '15px' }} />{isMovieFav ? 'Already Favourite' : 'Set To Favourite'}
+                            <StarIcon sx={{ color: 'white', marginRight: '15px' }} /> Remove Favourite
                         </Button>
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
@@ -115,4 +114,4 @@ function MovieSelectForm({
 }
 export default connect(state => ({
     eventtypes: state.marker.eventtypes,
-}))(MovieSelectForm)
+}))(FavMovieSelectForm)
