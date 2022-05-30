@@ -186,6 +186,27 @@ export const updateHashtag = (value) => {
     }
 }
 
+export const resetMovies = (movies) => {
+    return {
+        type: constants.RESET_MOVIES,
+        movies,
+    }
+}
+
+export const addMovie = (movie) => {
+    return {
+        type: constants.ADD_MOVIE,
+        movie,
+    }
+}
+
+export const updateMovie = (movie) => {
+    return {
+        type: constants.EDIT_MOVIE,
+        movie,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -213,6 +234,9 @@ const actions = {
     setStationMapShown,
     updateFilter,
     updateHashtag,
+    resetMovies,
+    addMovie,
+    updateMovie,
 }
 
 export default actions

@@ -17,6 +17,7 @@ import SettingPage from './pages/SettingPage'
 import PreviousMarkerPage from './pages/PreviousMarkerPage'
 import ExpiredMarkerPage from './pages/ExpiredMarkerPage'
 import MoviePage from './pages/MoviePage'
+import FavouriteMoviePage from './pages/FavouriteMoviePage'
 import StationPage from './pages/StationPage'
 
 import MarkerFilterPage from './pages/MarkerFilterPage'
@@ -43,6 +44,7 @@ function App() {
             <Route path='/previous' component={PreviousMarkerPage} />
             <Route path='/expired' component={ExpiredMarkerPage} />
             <Route path='/movies' component={MoviePage} />
+            <Route path='/favmovies' component={FavouriteMoviePage} />
             <Route path='/station' component={StationPage} />
 
             <Route path='/filter' component={MarkerFilterPage} />

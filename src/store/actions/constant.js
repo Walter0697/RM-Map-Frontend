@@ -25,6 +25,9 @@ const constants = {
     SET_STATION_IN_MAP: 'SET_STATION_IN_MAP',
     UPDATE_FILTER: 'UPDATE_FILTER',
     UPDATE_HASHTAG: 'UPDATE_HASHTAG',
+    ADD_MOVIE: 'ADD_MOVIE',
+    EDIT_MOVIE: 'EDIT_MOVIE',
+    RESET_MOVIES: 'RESET_MOVIES',
 }
 
 export default constants

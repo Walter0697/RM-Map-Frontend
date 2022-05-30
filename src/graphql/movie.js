@@ -1,5 +1,41 @@
 import { gql } from '@apollo/client'
 
+const list = gql`
+    query listMovieGQL {
+        movies {
+            id
+            reference_id
+            label
+            release_date
+            image_path
+            is_fav
+        }
+    }
+`
+
+const create = gql`
+    mutation createFavMovieGQL($movie_rid: Int!) {
+        createFavouriteMovie(input: {
+            movie_rid: $movie_rid,
+        }) { 
+            id
+            reference_id
+            label
+            release_date
+            image_path
+            is_fav
+        }
+    }
+`
+
+const remove = gql`
+    mutation removeFavMovieGQL($id: Int!) {
+        removeFavouriteMovie(input: {
+            id: $id,
+        })
+    }
+`
+
 const search = gql`
     query moviefetchGQL($type: String!, 
                     $location: String,
@@ -56,6 +92,9 @@ const schedule = gql`
 `
 
 const movies = {
+    list,
+    create,
+    remove,
     search,
     schedule,
 }

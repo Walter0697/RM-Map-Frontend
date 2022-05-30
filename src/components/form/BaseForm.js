@@ -81,12 +81,14 @@ function BaseForm({
                     >
                         {cancelText}
                     </Button>
-                    <Button 
-                        disabled={isSubmitUnauthorized || loading}
-                        onClick={handleSubmit}
-                    >   
-                        {createText}
-                    </Button>
+                    {createText && (
+                        <Button 
+                            disabled={isSubmitUnauthorized || loading}
+                            onClick={handleSubmit}
+                        >   
+                            {createText}
+                        </Button>
+                    )}
                 </DialogActions>
             </Dialog>
             <AutoHideAlert
