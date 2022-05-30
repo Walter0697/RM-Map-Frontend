@@ -34,7 +34,7 @@ function FavouriteMoviePage({
     return (
         <Base>
             <TopBar
-                onBackHandler={() => history.replace('/movie')}
+                onBackHandler={() => history.replace('/movies')}
                 label='Favourite Movie Page'
             />
             <FavMovieList

@@ -4,6 +4,7 @@ import {
     Grid,
     Button,
 } from '@mui/material'
+import dayjs from 'dayjs'
 
 import { useLazyQuery } from '@apollo/client'
 
@@ -48,12 +49,12 @@ function MovieItem({
                     item xs={5}
                     style={{ marginTop: '15px'}}
                 >
-                    {item.image_link ? (
+                    {item.image_path ? (
                         <img
                             style={{
                                 width: '80%',
                             }}
-                            src={item.image_link}
+                            src={process.env.REACT_APP_IMAGE_LINK + item.image_path}
                         />
                     ) : (
                         <img 
@@ -82,7 +83,7 @@ function MovieItem({
                             color: 'black',
                         }}
                     >
-                        {item.title}
+                        {item.label}
                     </div>
                     <div style={{
                         fontSize: '10px',
@@ -101,8 +102,10 @@ function FavMovieList({
     eventtypes,
 }) {
     const filteredList = useMemo(() => {
-        console.log(list)
-        return ''
+        const unsorted = list.filter(s => s.is_fav)
+        return unsorted.sort((a, b) => {
+            return dayjs(b.release_date).diff(dayjs(a.release_date))
+        })
     }, [list])
 
     const movieIconImage = useMemo(() => {
@@ -124,7 +127,20 @@ function FavMovieList({
                 overflow: 'auto',
             }}>
                 <BottomUpTrail>
-                    {filteredList}
+                    {filteredList.map((item, index) => (
+                        <WrapperBox
+                            key={index}
+                            minHeight={'30px'}
+                            height={'auto'}
+                            marginBottom='10px'
+                        >
+                            <MovieItem
+                                item={item}
+                                movieTypeIcon={movieIconImage}
+                                onClickHandler={() => {}}
+                            />
+                        </WrapperBox>
+                    ))}
                 </BottomUpTrail>
             </div>
         </>

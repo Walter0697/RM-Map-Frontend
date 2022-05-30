@@ -229,17 +229,17 @@ function MovieList({
                         </WrapperBox>
                     ))}
                 </BottomUpTrail>
-                <div style={{
-                    position: 'absolute',
-                    bottom: '10px',
-                    right: '20px'
-                }}>
-                    <CircleIconButton
-                        onClickHandler={() => history.push('/favmovies')}
-                    >
-                        <StarIcon />
-                    </CircleIconButton>
-                </div>
+            </div>
+            <div style={{
+                position: 'absolute',
+                bottom: '150px',
+                right: '20px'
+            }}>
+                <CircleIconButton
+                    onClickHandler={() => history.push('/favmovies')}
+                >
+                    <StarIcon />
+                </CircleIconButton>
             </div>
         </>
     )
