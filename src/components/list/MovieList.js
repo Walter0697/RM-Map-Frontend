@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux'
 import {
     Grid,
@@ -7,8 +8,11 @@ import {
 
 import { useLazyQuery } from '@apollo/client'
 
+import StarIcon from '@mui/icons-material/Star'
+
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
+import CircleIconButton from '../field/CircleIconButton'
 
 import constant from '../../constant'
 
@@ -18,8 +22,18 @@ import graphql from '../../graphql'
 function MovieItem({
     item,
     movieTypeIcon,
+    movies,
     onClickHandler,
 }) {
+
+    const isFavourited = useMemo(() => {
+        const dbmovie = movies.find(s => s.reference_id === item.ref_id)
+        if (dbmovie) {
+            return dbmovie.is_fav
+        }
+        return false
+    }, [movies, item])
+
     return (
         <Button
             variant='contained'
@@ -37,6 +51,15 @@ function MovieItem({
             }}
             onClick={() => onClickHandler(item)}
         >
+            {isFavourited && (
+                <div style={{
+                    position: 'absolute',
+                    top: '5%',
+                    right: '5%',
+                }}>
+                    <StarIcon sx={{ color: 'yellow' }} />
+                </div>
+            )}
             <Grid
                 container
                 fullWidth
@@ -103,8 +126,10 @@ function MovieList({
     setList,
     openMovieForm,
     eventtypes,
+    movies,
 }) {
-    
+    const history = useHistory()
+
     const [ moviefetchGQL, { data: movieData, loading: movieLoading, error: movieError } ] = useLazyQuery(graphql.movies.search, { fetchPolicy: 'no-cache' })
 
     const searchDescription = useMemo(() => {
@@ -198,11 +223,23 @@ function MovieList({
                             <MovieItem
                                 item={item}
                                 movieTypeIcon={movieIconImage}
+                                movies={movies}
                                 onClickHandler={openMovieForm}
                             />
                         </WrapperBox>
                     ))}
                 </BottomUpTrail>
+                <div style={{
+                    position: 'absolute',
+                    bottom: '10px',
+                    right: '20px'
+                }}>
+                    <CircleIconButton
+                        onClickHandler={() => history.push('/favmovies')}
+                    >
+                        <StarIcon />
+                    </CircleIconButton>
+                </div>
             </div>
         </>
     )
@@ -210,4 +247,5 @@ function MovieList({
 
 export default connect(state => ({
     eventtypes: state.marker.eventtypes,
+    movies: state.movie.movies,
 }))(MovieList)

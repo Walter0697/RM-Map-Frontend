@@ -74,7 +74,7 @@ function MovieSelectForm({
                             variant='contained'
                             size='large'
                             style={{
-                                backgroundColor: '#48acdb',
+                                backgroundColor: isMovieFav ? '#cece11' : '#48acdb',
                                 borderRadius: '5px',
                                 height: '50px',
                                 width: '100%',
@@ -83,11 +83,10 @@ function MovieSelectForm({
                                 textTransform: 'none',
                                 padding: '0',
                             }}
-                            disblaed={submitting}
+                            disblaed={submitting || isMovieFav}
                             onClick={setMovieFavourite}
                         >
-                            {isMovieFav}
-                           <StarIcon sx={{ color: 'white', marginRight: '15px' }} /> Set To Favourite
+                            <StarIcon sx={{ color: 'white', marginRight: '15px' }} />{isMovieFav ? 'Already Favourite' : 'Set To Favourite'}
                         </Button>
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>

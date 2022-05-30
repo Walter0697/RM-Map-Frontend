@@ -10,6 +10,7 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import AvTimerIcon from '@mui/icons-material/AvTimer'       // expired marker
 import FlagIcon from '@mui/icons-material/Flag'             // previous marker
 import TheatersIcon from '@mui/icons-material/Theaters'     // movie
+import StarIcon from '@mui/icons-material/Star'             // favourite movie
 import TrainIcon from '@mui/icons-material/Train'           // station
 import FilterAltIcon from '@mui/icons-material/FilterAlt'   // filter
 
@@ -46,6 +47,17 @@ function BottomBar({
                     parentRoute={'/search'}
                     path={location.pathname}
                     activeIcon={<TheatersIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+        if (location.pathname === '/favmovies') {
+            return (
+                <SubBarIcon 
+                    route={'/favmovies'}
+                    parentRoute={'/search'}
+                    path={location.pathname}
+                    activeIcon={<StarIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     setPath={changeTab}
                 />
             )

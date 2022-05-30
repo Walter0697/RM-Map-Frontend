@@ -34,9 +34,14 @@ function MoviePage({
     const [ createFavAlert, confirmFavCreated ] = useBoop(3000)
 
     const isMovieFav = useMemo(() => {
-        console.log(movies)
-        console.log(selectedMovie)
-        return ''
+        if (selectedMovie) {
+            const dbmovie = movies.find(s => s.reference_id === selectedMovie.ref_id)
+            if (dbmovie) {
+                return dbmovie.is_fav
+            }
+        }
+       
+        return false
     }, [selectedMovie, movies])
 
     const openSelectForm = (movie) => {
@@ -58,7 +63,7 @@ function MoviePage({
 
     const onFavCreated = () => {
         setSelectedMovie(null)
-        setCreateFormOpen(false)
+        setSelectFormOpen(false)
         confirmFavCreated()
     }
 

@@ -11,8 +11,13 @@ export default function movieReducer(state = {
             }
         }
         case constants.ADD_MOVIE: {
-            const result = state.movies || []
+            const before = state.movies || []
+            let result = Object.assign([], before)
+            if (result.includes(s => s.id === action.movie.id)) {
+                result = result.filter(s => s.id !== action.movie.id)
+            }
             result.push(action.movie)
+
             return {
                 ...state,
                 movies: result,
