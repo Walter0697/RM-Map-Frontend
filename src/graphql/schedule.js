@@ -40,9 +40,11 @@ const list = gql`
             }
             movie {
                 id
+                reference_id
                 label
                 release_date
                 image_path
+                is_fav
             }
         }
     }

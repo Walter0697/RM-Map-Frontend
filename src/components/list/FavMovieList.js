@@ -13,28 +13,37 @@ import WrapperBox from '../wrapper/WrapperBox'
 
 import constant from '../../constant'
 
-import actions from '../../store/actions'
-import graphql from '../../graphql'
-
 function MovieItem({
     item,
+    schedules,
     movieTypeIcon,
     onClickHandler,
 }) {
+
+    const isScheduled = useMemo(() => {
+        const movieSchedules = schedules.filter(s => s.movie)
+        const dbschedule = movieSchedules.find(s => s.movie.reference_id === item.reference_id)
+        if (dbschedule) {
+            return true
+        }
+        return false
+    }, [schedules, item])
+
     return (
         <Button
             variant='contained'
             size='large'
             style={{
-            position: 'relative',
-            backgroundColor: '#48acdb',
-            borderRadius: '5px',
-            height: '100%',
-            width: '100%',
-            boxShadow: '2px 2px 6px',
-            alignItems: 'flex-start',
-            textTransform: 'none',
-            padding: '0',
+                position: 'relative',
+                backgroundColor: '#48acdb',
+                borderRadius: '5px',
+                height: '100%',
+                width: '100%',
+                boxShadow: '2px 2px 6px',
+                alignItems: 'flex-start',
+                textTransform: 'none',
+                padding: '0',
+                border: isScheduled ? '3px solid green' : ''
             }}
             onClick={() => onClickHandler(item)}
         >
@@ -100,6 +109,7 @@ function MovieItem({
 function FavMovieList({
     list,
     eventtypes,
+    schedules,
     openMovieForm,
 }) {
     const filteredList = useMemo(() => {
@@ -139,6 +149,7 @@ function FavMovieList({
                         >
                             <MovieItem
                                 item={item}
+                                schedules={schedules}
                                 movieTypeIcon={movieIconImage}
                                 onClickHandler={openMovieForm}
                             />
@@ -152,4 +163,5 @@ function FavMovieList({
 
 export default connect(state => ({
     eventtypes: state.marker.eventtypes,
+    schedules: state.schedule.schedules,
 }))(FavMovieList)

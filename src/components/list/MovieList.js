@@ -23,6 +23,7 @@ function MovieItem({
     item,
     movieTypeIcon,
     movies,
+    schedules,
     onClickHandler,
 }) {
 
@@ -34,20 +35,30 @@ function MovieItem({
         return false
     }, [movies, item])
 
+    const isScheduled = useMemo(() => {
+        const movieSchedules = schedules.filter(s => s.movie)
+        const dbschedule = movieSchedules.find(s => s.movie.reference_id === item.ref_id)
+        if (dbschedule) {
+            return true
+        }
+        return false
+    }, [schedules, item])
+
     return (
         <Button
             variant='contained'
             size='large'
             style={{
-            position: 'relative',
-            backgroundColor: '#48acdb',
-            borderRadius: '5px',
-            height: '100%',
-            width: '100%',
-            boxShadow: '2px 2px 6px',
-            alignItems: 'flex-start',
-            textTransform: 'none',
-            padding: '0',
+                position: 'relative',
+                backgroundColor: '#48acdb',
+                borderRadius: '5px',
+                height: '100%',
+                width: '100%',
+                boxShadow: '2px 2px 6px',
+                alignItems: 'flex-start',
+                textTransform: 'none',
+                padding: '0',
+                border: isScheduled ? '3px solid green' : '',
             }}
             onClick={() => onClickHandler(item)}
         >
@@ -127,6 +138,7 @@ function MovieList({
     openMovieForm,
     eventtypes,
     movies,
+    schedules,
 }) {
     const history = useHistory()
 
@@ -224,6 +236,7 @@ function MovieList({
                                 item={item}
                                 movieTypeIcon={movieIconImage}
                                 movies={movies}
+                                schedules={schedules}
                                 onClickHandler={openMovieForm}
                             />
                         </WrapperBox>
@@ -248,4 +261,5 @@ function MovieList({
 export default connect(state => ({
     eventtypes: state.marker.eventtypes,
     movies: state.movie.movies,
+    schedules: state.schedule.schedules,
 }))(MovieList)
