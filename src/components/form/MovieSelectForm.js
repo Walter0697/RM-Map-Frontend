@@ -3,10 +3,7 @@ import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
 import {
     Grid,
-    TextField,
     Button,
-    FormControl,
-    FormLabel,
 } from '@mui/material'
 
 import StarIcon from '@mui/icons-material/Star'
@@ -83,7 +80,7 @@ function MovieSelectForm({
                                 textTransform: 'none',
                                 padding: '0',
                             }}
-                            disblaed={submitting || isMovieFav}
+                            disabled={submitting || isMovieFav}
                             onClick={setMovieFavourite}
                         >
                             <StarIcon sx={{ color: 'white', marginRight: '15px' }} />{isMovieFav ? 'Already Favourite' : 'Set To Favourite'}

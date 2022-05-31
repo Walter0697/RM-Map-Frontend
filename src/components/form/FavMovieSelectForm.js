@@ -3,10 +3,7 @@ import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
 import {
     Grid,
-    TextField,
     Button,
-    FormControl,
-    FormLabel,
 } from '@mui/material'
 
 import StarIcon from '@mui/icons-material/Star'
@@ -40,15 +37,17 @@ function FavMovieSelectForm({
         }
 
         if (removeData) {
-            //dispatch(actions.addMovie(removeData.removeFavouriteMovie))
+            let removedMovie = Object.assign({}, movie)
+            removedMovie.is_fav = false
+            dispatch(actions.updateMovie(removedMovie))
             onRemoved && onRemoved()
         }
     }, [removeData, removeError])
 
     const removeMovieFavourite = () => {
-        // removeFavMovieGQL({ variables: {
-        //     id: movie.id,
-        // }})
+        removeFavMovieGQL({ variables: {
+            id: movie.id,
+        }})    
     }
 
     const setMovieSchedule = () => {
