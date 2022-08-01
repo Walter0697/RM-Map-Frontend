@@ -1,4 +1,4 @@
-FROM node:lts AS build-stage
+FROM node:16.16.0 AS build-stage
 WORKDIR /app
 COPY . .
 RUN yarn --network-timeout 100000

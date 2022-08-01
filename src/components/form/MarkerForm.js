@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { connect } from 'react-redux'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import {
@@ -84,6 +84,7 @@ function MarkerForm({
 
         // if location updated, reset everything inside the form
         setSubmitting(false)
+        setScrapperData(null)
         resetFormValue()
         setImageMessage('')
         setImageState('')
@@ -156,16 +157,16 @@ function MarkerForm({
         }
     }
 
-    const scrapImageWithLink = () => {
+    const scrapImageWithLink = useCallback(() => {
         if (!open) return
         if (websiteLink === '') return
         if (!formValue.imageLink) {
             setImageMessage('scrapping image from website...')
         }
         scrapimageGQL({ variables: { link: websiteLink }})
-    }
+    }, [ websiteLink, formValue.imageLink ])
 
-    useDebounce(scrapImageWithLink, 2000, [ websiteLink, formValue.imageLink, open ])
+    //useDebounce(scrapImageWithLink, 2000, [ websiteLink, formValue.imageLink, open ])
 
     const onValueChangeHandler = (field, value) => {
         if (field === 'link') {
@@ -410,6 +411,14 @@ function MarkerForm({
                                     <span style={{ verticalAlign: 'middle', display: 'inline-block' }}>Remove Restaurant Data</span>
                                 </div>
                             )}
+                            <Grid item xs={12} md={12} lg={12}>
+                                <Button 
+                                    variant='outlined'
+                                    fullWidth
+                                    disabled={!websiteLink}
+                                    onClick={() => scrapImageWithLink()}
+                                >FETCH DATA</Button>
+                            </Grid>
                         </Grid>
                         
                     </Grid>

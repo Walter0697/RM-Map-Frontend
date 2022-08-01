@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { connect } from 'react-redux'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import {
@@ -154,16 +154,16 @@ function MarkerEditForm({
         }
     }, [scrapImageData])
 
-    const scrapImageWithLink = () => {
+    const scrapImageWithLink = useCallback(() => {
         if (!open) return
         if (websiteLink === '') return
         if (!formValue.imageLink) {
             setImageMessage('scrapping image from website...')
         }
         scrapimageGQL({ variables: { link: websiteLink }})
-    }
+    }, [ websiteLink, formValue.imageLink ])
 
-    useDebounce(scrapImageWithLink, 2000, [ websiteLink, formValue.imageLink, open ])
+    //bounce(scrapImageWithLink, 2000, [ websiteLink, formValue.imageLink, open ])
 
     const onValueChangeHandler = (field, value) => {
         if (field === 'link') {
@@ -436,6 +436,14 @@ function MarkerEditForm({
                                     </Menu>
                             </Grid>
                             {restaurantInfoMessage}
+                            <Grid item xs={12} md={12} lg={12}>
+                                <Button 
+                                    variant='outlined'
+                                    fullWidth
+                                    disabled={!websiteLink}
+                                    onClick={() => scrapImageWithLink()}
+                                >FETCH DATA</Button>
+                            </Grid>
                         </Grid>
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
