@@ -21,6 +21,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import PinDropIcon from '@mui/icons-material/PinDrop'
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk'
+import InsertPhotoIcon from '@mui/icons-material/InsertPhoto'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -30,6 +31,7 @@ import ImageHeadText from '../wrapper/ImageHeadText'
 import AutoHideAlert from '../AutoHideAlert'
 import RestaurantCard from '../card/RestaurantCard'
 import MarkerDescription from './MarkerDescription'
+import MarkerShareView from './MarkerShareView'
 
 import generic from '../../scripts/generic'
 import actions from '../../store/actions'
@@ -56,6 +58,8 @@ function MarkerView({
     const [ typeIcon, setIcon ] = useState(null)
     const [ isFav, setFav ] = useState(false)
     const [ deletingId, setDeleting ] = useState(-1)
+
+    const [ previewOpen, setPreviewOpen ] = useState(false)
 
     // if request failed
     const [ failedAlert, fail ] = useBoop(3000)
@@ -159,9 +163,26 @@ function MarkerView({
                                         <CalendarTodayIcon />
                                     </CircleIconButton>
                                 </Grid>
-                                <Grid item xs={6} md={6} lg={6}>
-                                </Grid>
                                 <Grid item xs={3} md={3} lg={3}>
+                                </Grid>
+                                <Grid item xs={3} md={3} lg={3}
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'flex-end',
+                                    }}
+                                >
+                                    <CircleIconButton
+                                        onClickHandler={() => setPreviewOpen(true)}
+                                    >
+                                        <InsertPhotoIcon />
+                                    </CircleIconButton>
+                                </Grid>
+                                <Grid item xs={3} md={3} lg={3}
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'flex-end',
+                                    }}
+                                >
                                     <FavouriteIcon 
                                         active={isFav}
                                         onClickHandler={toggleMarkerFavourite}
@@ -343,6 +364,11 @@ function MarkerView({
                     </>
                 )}
             </Dialog>
+            <MarkerShareView 
+                open={previewOpen}
+                handleClose={() => setPreviewOpen(false)}
+                marker={marker}
+            />
             <AutoHideAlert 
                 open={failedAlert}
                 type={'error'}
