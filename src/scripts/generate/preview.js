@@ -98,13 +98,16 @@ const generatePreviewImage = async (marker, eventIcon) => {
     const eventIconLink = process.env.REACT_APP_IMAGE_LINK + eventIcon.icon_path
     const iconImg = await preloadImage(eventIconLink)
 
-    const imageLink = process.env.REACT_APP_IMAGE_LINK + marker.image_link
-    const img = await preloadImage(imageLink)
-
-    const imgDesiredWidth = imageWidth
-    const imgDesiredHeight = (imgDesiredWidth / img.width) * img.height 
-
-    marker.label = 'asdaihdfskdufhsudfhs si ks hsudhfusdkufskdufhskufds sdkuhf '
+    let img = null
+    let imgDesiredWidth = imageWidth
+    let imgDesiredHeight = imageWidth
+    if (marker.image_link) {
+        const imageLink = process.env.REACT_APP_IMAGE_LINK + marker.image_link
+        img = await preloadImage(imageLink)
+    
+        imgDesiredWidth = imageWidth
+        imgDesiredHeight = (imgDesiredWidth / img.width) * img.height 
+    }
 
     const labelArr = getWrapText(ctx, marker.label, titleFont, contentWidth)
     const descriptionArr = getWrapText(ctx, marker.description, descriptionFont, contentWidth)
@@ -124,15 +127,19 @@ const generatePreviewImage = async (marker, eventIcon) => {
 
     // after deciding the dimension of the image, draw everything
     
-    
     ctx.fillStyle = backgroundColor
     ctx.fillRect(0, 0, previewWidth, previewHeight)
 
     const imageLeftMargin = ( previewWidth - imageWidth ) / 2
-    ctx.drawImage(img, imageLeftMargin, imageTopMargin, imgDesiredWidth, imgDesiredHeight)
+    if (img) {
+        ctx.drawImage(img, imageLeftMargin, imageTopMargin, imgDesiredWidth, imgDesiredHeight)
+        
+        drawCircle(ctx, iconBgColor, imageLeftMargin - iconBgOffset, imageTopMargin - iconBgOffset, iconBgRadius)
+        ctx.drawImage(iconImg, imageLeftMargin - iconOffset, imageTopMargin - iconOffset, iconImageSize, iconImageSize)
+    } else {
+        ctx.drawImage(iconImg, imageLeftMargin, imageTopMargin, imgDesiredWidth, imgDesiredHeight)
+    }
     
-    drawCircle(ctx, iconBgColor, imageLeftMargin - iconBgOffset, imageTopMargin - iconBgOffset, iconBgRadius)
-    ctx.drawImage(iconImg, imageLeftMargin - iconOffset, imageTopMargin - iconOffset, iconImageSize, iconImageSize)
 
     ctx.fillStyle = titleColor
     ctx.font = titleFont
