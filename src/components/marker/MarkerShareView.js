@@ -38,6 +38,29 @@ function MarkerShareView({
         setGenerating(false)
     }
 
+    const shareImage = async () => {
+        const filename = `${marker.label}.png`
+        if (navigator.share) {
+            const blob = await (await fetch(previewImage)).blob()
+            const filesArray = [
+                new File(
+                    [blob],
+                    filename,
+                    {
+                        type: blob.type,
+                        lastModified: new Date().getTime()
+                    }
+                )
+            ]
+            const shareData = {
+                files: filesArray,
+            }
+            navigator.share(shareData)
+        } else {
+            save_image(filename, dataURL)
+        }
+    }
+
     const downloadImage = async () => {
         var a = document.createElement('a')
         a.href = previewImage
@@ -95,12 +118,14 @@ function MarkerShareView({
                                                     justifyContent: 'flex-start',
                                                 }}
                                             >
-                                                <CircleIconButton
-                                                    onClickHandler={() => {}}
-                                                    disabled={generating}
-                                                >
-                                                    <SendIcon />
-                                                </CircleIconButton>
+                                                {navigator.share && (
+                                                    <CircleIconButton
+                                                        onClickHandler={shareImage}
+                                                        disabled={generating}
+                                                    >
+                                                        <SendIcon />
+                                                    </CircleIconButton>
+                                                )}
                                             </Grid>
                                             <Grid item xs={6} md={6} lg={6}
                                                 style={{
