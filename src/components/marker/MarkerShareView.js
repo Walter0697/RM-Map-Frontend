@@ -52,12 +52,17 @@ function MarkerShareView({
                     }
                 )
             ]
+            let shareText = marker.label
+            if (marker.link) {
+                shareText = marker.label + ', url: ' + marker.link
+            }
             const shareData = {
                 files: filesArray,
+                text: shareText,
             }
             navigator.share(shareData)
         } else {
-            save_image(filename, dataURL)
+            downloadImage()
         }
     }
 
