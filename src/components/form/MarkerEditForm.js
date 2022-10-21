@@ -104,7 +104,8 @@ function MarkerEditForm({
         setFormValue('permanent', marker.permanent)
         setFormValue('from_time', marker.from_time ? dayjs.utc(marker.from_time).format('MM/DD/YYYY HH:mm') : null)
         setFormValue('to_time', marker.to_time ? dayjs.utc(marker.to_time).format('MM/DD/YYYY HH:mm') : null)
-        
+        setWebsiteLink('')
+
         if (marker.image_link) {
             setFormValue('imageLink', {
                 type: 'existing', 
@@ -134,6 +135,7 @@ function MarkerEditForm({
     }, [editData, editError])
 
     useEffect(() => {
+        if (scrapImageLoading) return
         if (scrapImageData) {
             if (scrapImageData.scrapimage.image_link) {
                 if (!formValue.imageLink) {
@@ -152,16 +154,16 @@ function MarkerEditForm({
                 }
             }
         }
-    }, [scrapImageData])
+    }, [scrapImageData, scrapImageLoading])
 
     const scrapImageWithLink = useCallback(() => {
         if (!open) return
-        if (websiteLink === '') return
+        if (!websiteLink) return
         if (!formValue.imageLink) {
             setImageMessage('scrapping image from website...')
         }
         scrapimageGQL({ variables: { link: websiteLink }})
-    }, [ websiteLink, formValue.imageLink ])
+    }, [ open, websiteLink, formValue.imageLink ])
 
     //bounce(scrapImageWithLink, 2000, [ websiteLink, formValue.imageLink, open ])
 

@@ -89,6 +89,7 @@ function MarkerForm({
         setImageMessage('')
         setImageState('')
         setUnauthorized(false)
+        setWebsiteLink('')
 
         if (location.address) {
             setFormValue('address', location.address)
@@ -118,6 +119,7 @@ function MarkerForm({
     }, [createData, createError])
 
     useEffect(() => {
+        if (scrapImageLoading) return
         let imageSet = false
         if (scrapImageData) {
             if (scrapImageData.scrapimage.image_link) {
@@ -144,7 +146,7 @@ function MarkerForm({
                 }
             }
         }
-    }, [scrapImageData])
+    }, [scrapImageData, scrapImageLoading])
 
     const getClipboardMessage = async () => {
         const text = await navigator.clipboard.readText()
@@ -159,12 +161,13 @@ function MarkerForm({
 
     const scrapImageWithLink = useCallback(() => {
         if (!open) return
-        if (websiteLink === '') return
+        if (!websiteLink) return
         if (!formValue.imageLink) {
             setImageMessage('scrapping image from website...')
         }
+
         scrapimageGQL({ variables: { link: websiteLink }})
-    }, [ websiteLink, formValue.imageLink ])
+    }, [ open, websiteLink, formValue.imageLink ])
 
     //useDebounce(scrapImageWithLink, 2000, [ websiteLink, formValue.imageLink, open ])
 
