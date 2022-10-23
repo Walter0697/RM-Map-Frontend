@@ -6,6 +6,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle'
 import DeleteIcon from '@mui/icons-material/Delete'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import CloseIcon from '@mui/icons-material/Close'
+import FilterAltIcon from '@mui/icons-material/FilterAlt' 
 
 import useBoop from '../../hooks/useBoop'
 
@@ -22,6 +23,9 @@ function RoroadListList({
     roroadlists,
     openCreateForm,
     openEditForm,
+    openViewForm,
+    openFilterForm,
+    isPrevious,
     dispatch,
 }) {
     const [ manageRoroadListsGQL, { data: manageData, loading: manageLoading, error: manageError } ] = useMutation(graphql.roroadlists.manage_multiple, { errorPolicy: 'all' })
@@ -32,7 +36,9 @@ function RoroadListList({
     const [ uploadFail, setUploadFail ] = useBoop(3000)
 
     const sortedList = useMemo(() => {
+        if (!roroadlists) return []
         return roroadlists.sort((a, b) => {
+            if (!a || !b) return 0
             if (a.checked && !b.checked) return -1
             if (b.checked && a.checked) return 1
             return 0
@@ -47,7 +53,11 @@ function RoroadListList({
 
     const onItemClickHandler = (item) => {
         if (!isHidingItem) {
-            openEditForm(item)
+            if (isPrevious) {
+                openViewForm(item)
+            } else {
+                openEditForm(item)
+            }
         } else {
             let current = JSON.parse(JSON.stringify(hidingItemList))
             if (current.includes(item.id)) {
@@ -102,7 +112,7 @@ function RoroadListList({
             <div 
                 style={{
                     position: 'absolute',
-                    height: '80%',
+                    height: '100%',
                     width: '95%',
                     paddingLeft: '5%',
                     paddingTop: '20px',
@@ -128,40 +138,43 @@ function RoroadListList({
             </div>
 
             {/* circle button */}
-            <div
-                style={{ 
-                    position: 'absolute',
-                    bottom: '15%',
-                    left: '20px',
-                }}
-            >
-                 <CircleIconButton
-                    onClickHandler={openCreateForm}
+            {openCreateForm && (
+                <div
+                    style={{ 
+                        position: 'absolute',
+                        bottom: '5%',
+                        left: '20px',
+                    }}
                 >
-                    <AddCircleIcon />
-                </CircleIconButton>
-            </div>
-            <div
-                style={{ 
-                    position: 'absolute',
-                    bottom: '15%',
-                    right: '20px',
-                }}
-            >
-                 <CircleIconButton
-                    onClickHandler={onTrashClickHandler}
-                    background={isHidingItem ? '#e58282' : null}
-                    badgeNumber={hidingItemList.length !== 0 ? hidingItemList.length : null}
+                    <CircleIconButton
+                        onClickHandler={openCreateForm}
+                    >
+                        <AddCircleIcon />
+                    </CircleIconButton>
+                </div>
+            )}
+            {!isPrevious && (
+                <div
+                    style={{ 
+                        position: 'absolute',
+                        bottom: '5%',
+                        right: '20px',
+                    }}
                 >
-                    {isHidingItem ? <DeleteForeverIcon /> : <DeleteIcon />}
-                </CircleIconButton>
-            </div>
-            {
-                isHidingItem && (
+                    <CircleIconButton
+                        onClickHandler={onTrashClickHandler}
+                        background={isHidingItem ? '#e58282' : null}
+                        badgeNumber={hidingItemList.length !== 0 ? hidingItemList.length : null}
+                    >
+                        {isHidingItem ? <DeleteForeverIcon /> : <DeleteIcon />}
+                    </CircleIconButton>
+                </div>
+            )}
+            {isHidingItem && (
                     <div
                         style={{ 
                             position: 'absolute',
-                            bottom: '25%',
+                            bottom: '15%',
                             right: '20px',
                         }}
                     >
@@ -171,8 +184,22 @@ function RoroadListList({
                             <CloseIcon />
                         </CircleIconButton>
                     </div>
-                )
-            }
+            )}
+            {openFilterForm && (
+                <div
+                style={{ 
+                    position: 'absolute',
+                    bottom: '5%',
+                    right: '20px',
+                }}
+            >
+                <CircleIconButton
+                    onClickHandler={openFilterForm}
+                >
+                    <FilterAltIcon />
+                </CircleIconButton>
+            </div>
+            )}
 
             {/* alert */}
             <AutoHideAlert 
@@ -186,5 +213,5 @@ function RoroadListList({
 }
 
 export default connect(state => ({
-    roroadlists: state.roroadlist.roroadlists,
+    eventtypes: state.marker.eventtypes,
 })) (RoroadListList)

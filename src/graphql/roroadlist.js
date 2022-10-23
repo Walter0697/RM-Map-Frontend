@@ -13,8 +13,11 @@ const list = gql`
 `
 
 const search = gql`
-    query searchRoroadListGQL($name: String!) {
-        roroadlistsbyname{
+    query searchRoroadListGQL($name: String, $hidden: Boolean) {
+        roroadlistsbyname(params: {
+            name: $name,
+            hidden: $hidden,
+        }){
             id
             name
             list_type

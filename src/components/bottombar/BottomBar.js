@@ -167,6 +167,17 @@ function BottomBar({
                 />
             )
         }
+        if (location.pathname === '/previousroroadlist') {
+            return (
+                <SubBarIcon 
+                    route={'/previousroroadlist'}
+                    parentRoute={'/home'}
+                    path={location.pathname}
+                    activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
 
         return (
             <BarIcon

@@ -20,6 +20,7 @@ import MoviePage from './pages/MoviePage'
 import FavouriteMoviePage from './pages/FavouriteMoviePage'
 import StationPage from './pages/StationPage'
 import RoroadListPage from './pages/RoroadListPage'
+import PreviousRoroadListPage from './pages/PreviousRoroadListPage'
 
 import MarkerFilterPage from './pages/MarkerFilterPage'
 
@@ -48,6 +49,7 @@ function App() {
             <Route path='/favmovies' component={FavouriteMoviePage} />
             <Route path='/station' component={StationPage} />
             <Route path='/roroadlist' component={RoroadListPage} />
+            <Route path='/previousroroadlist' component={PreviousRoroadListPage} />
 
             <Route path='/filter' component={MarkerFilterPage} />
 

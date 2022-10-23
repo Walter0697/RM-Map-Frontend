@@ -11,7 +11,8 @@ import useObject from '../../hooks/useObject'
 import BaseForm from './BaseForm'
 import Selectable from '../field/Selectable'
 
-import actions, { updateRoroadlist } from '../../store/actions'
+import constants from '../../constant'
+import actions from '../../store/actions'
 import graphql from '../../graphql'
 
 function RoroadListForm({
@@ -213,13 +214,7 @@ function RoroadListForm({
                             defaultSelectText={''}
                             errorMessage={error.list_type}
                             noDefault
-                            list={[
-                                { label: 'To Go', value: 'togo' },
-                                { label: 'To Do', value: 'todo' },
-                                { label: 'Important', value: 'important' },
-                                { label: 'For your partner', value: 'partner' },
-                                { label: 'Others', value: 'others' },
-                            ]}
+                            list={constants.listtype.list}
                             valueKey={'value'}
                             textKey={'label'}
                         />

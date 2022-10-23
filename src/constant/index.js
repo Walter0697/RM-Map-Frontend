@@ -4,6 +4,7 @@ import pins from './pin'
 import status from './status'
 import overlay from './overlay'
 import identifiers from './identifier'
+import listtype from './listtype'
 
 const constants = {
     maps,
@@ -12,6 +13,7 @@ const constants = {
     status,
     overlay,
     identifiers,
+    listtype,
 }
 
 export default constants

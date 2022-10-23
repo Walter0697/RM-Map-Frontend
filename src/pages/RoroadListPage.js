@@ -1,21 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux'
 import Base from './Base'
-
-import { useLazyQuery } from '@apollo/client'
-
-import useBoop from '../hooks/useBoop'
 
 import TopBar from '../components/topbar/TopBar'
 import RoroadListList from '../components/list/RoroadListList'
 import RoroadListForm from '../components/form/RoroadListForm'
 
-import AutoHideAlert from '../components/AutoHideAlert'
-
-import graphql from '../graphql'
-
-function RoroadListPage() {
+function RoroadListPage({
+    roroadlists,
+}) {
     const history = useHistory()
 
     const [ isFormOpen, setFormOpen ] = useState(false)
@@ -38,25 +32,34 @@ function RoroadListPage() {
 
     return (
         <Base>
-            <TopBar
-                onBackHandler={() => history.replace('/home')}
-                label='RoroadList'
-            />
-            <RoroadListList 
-                openCreateForm={openCreateForm}
-                openEditForm={openEditForm}
-            />
-            <RoroadListForm
-                open={isFormOpen}
-                handleClose={closeForm}
-                updatingItem={edittingItem}
-                onCreated={closeForm}
-                onUpdated={closeForm}
-            />
+            <div
+                style={{
+                    width: '100%',
+                    height: '90%',
+                    position: 'relative',
+                }}
+            >
+                <TopBar
+                    onBackHandler={() => history.replace('/home')}
+                    label='RoroadList'
+                />
+                <RoroadListList 
+                    openCreateForm={openCreateForm}
+                    openEditForm={openEditForm}
+                    roroadlists={roroadlists}
+                />
+                <RoroadListForm
+                    open={isFormOpen}
+                    handleClose={closeForm}
+                    updatingItem={edittingItem}
+                    onCreated={closeForm}
+                    onUpdated={closeForm}
+                />
+            </div>
         </Base>
     )
 }
 
 export default connect(state => ({
-    eventtypes: state.marker.eventtypes,
+    roroadlists: state.roroadlist.roroadlists,
 })) (RoroadListPage)

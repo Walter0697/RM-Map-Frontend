@@ -13,6 +13,7 @@ import FeaturedMarkerRow from './home/FeaturedMarkerRow'
 import YesterdayUncheckList from './home/YesterdayUncheckList'
 import PreviousMarkerButton from './home/PreviousMarkerButton'
 import ExpiredMarkerButton from './home/ExpiredMarkerButton'
+import PreviousRoroadListButton from './home/PreviousRoroadListButton'
 
 import markerhelper from '../../scripts/marker'
 import filters from '../../scripts/filter'
@@ -116,11 +117,15 @@ function HomeList({
         history.replace('/expired')
     }
 
+    const onPreviousRoroadListClick = () => {
+        history.replace('/previousroroadlist')
+    }
+
     return (
         <>
             <div style={{
                 position: 'absolute',
-                height: '80%',
+                height: '100%',
                 width: '95%',
                 paddingLeft: '5%',
                 paddingTop: '20px',
@@ -177,6 +182,14 @@ function HomeList({
                     >
                         <ExpiredMarkerButton
                             onClickHandler={onExpiredMarkerClick}
+                        />
+                    </WrapperBox>
+                    <WrapperBox
+                        height={40}
+                        marginBottom={'20px'}
+                    >
+                        <PreviousRoroadListButton
+                            onClickHandler={onPreviousRoroadListClick}
                         />
                     </WrapperBox>
                 </RandomFadeIn>
