@@ -207,6 +207,34 @@ export const updateMovie = (movie) => {
     }
 }
 
+export const resetRoroadLists = (roroadlists) => {
+    return {
+        type: constants.RESET_ROROADLISTS,
+        roroadlists,
+    }
+}
+
+export const addRoroadList = (roroadlist) => {
+    return {
+        type: constants.ADD_ROROADLIST,
+        roroadlist,
+    }
+}
+
+export const updateRoroadlist = (roroadlist) => {
+    return {
+        type: constants.EDIT_ROROADLIST,
+        roroadlist,
+    }
+}
+
+export const manageMultipleRoroadLists = (roroadlists) => {
+    return {
+        type: constants.MANAGE_ROROADLISTS,
+        roroadlists,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -237,6 +265,10 @@ const actions = {
     resetMovies,
     addMovie,
     updateMovie,
+    resetRoroadLists,
+    addRoroadList,
+    updateRoroadlist,
+    manageMultipleRoroadLists,
 }
 
 export default actions

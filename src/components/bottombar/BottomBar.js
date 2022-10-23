@@ -13,6 +13,7 @@ import TheatersIcon from '@mui/icons-material/Theaters'     // movie
 import StarIcon from '@mui/icons-material/Star'             // favourite movie
 import TrainIcon from '@mui/icons-material/Train'           // station
 import FilterAltIcon from '@mui/icons-material/FilterAlt'   // filter
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck' // roroadlist
 
 import BarIcon from './BarIcon'
 import SubBarIcon from './SubBarIcon'
@@ -151,6 +152,17 @@ function BottomBar({
                     parentRoute={'/expired'}
                     path={location.pathname}
                     activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+        if (location.pathname === '/roroadlist') {
+            return (
+                <SubBarIcon 
+                    route={'/roroadlist'}
+                    parentRoute={'/home'}
+                    path={location.pathname}
+                    activeIcon={<PlaylistAddCheckIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     setPath={changeTab}
                 />
             )

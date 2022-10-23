@@ -131,6 +131,12 @@ function MarkerView({
         window.open(url, '_blank')
     }
 
+    const redirectToGoogleMap = () => {
+        const latlon = `${marker.latitude},${marker.longitude}`
+        
+        window.open(`https://maps.google.com/?q=${latlon}`, '_blank')
+    }
+
     const onEditClick = () => {
         editMarker()
     }
@@ -206,7 +212,9 @@ function MarkerView({
                         </DialogTitle>
                         <DialogContent dividers>
                             <DialogContentText>
-                                <Grid container spacing={2}>
+                                <Grid container spacing={2} style={{
+                                    overflow: 'hidden'
+                                }}>
                                     { marker.image_link && (
                                         <Grid item xs={12} md={12} lg={12}>
                                             <img
@@ -216,7 +224,12 @@ function MarkerView({
                                         </Grid>
                                     )}
                                     <Grid item xs={12} md={12} lg={12}>
-                                        { marker.address } 
+                                        <span 
+                                            style={{
+                                                cursor: 'pointer',
+                                            }}
+                                            onClick={() => redirectToGoogleMap()}
+                                        > { marker.address } </span>
                                         <IconButton
                                             onClick={() => { 
                                                 navigator.clipboard.writeText(marker.address)
@@ -254,7 +267,11 @@ function MarkerView({
                                    
                                     {marker.link && (
                                         <Grid item xs={12} md={12} lg={12}>
-                                            <a onClick={redirectToSite}>{marker.link}</a>
+                                                <a style={{
+                                                    overflowWrap: 'anywhere',
+                                                }}
+                                                onClick={redirectToSite}
+                                                >{marker.link}</a>
                                         </Grid>
                                     )}
                                     <Grid item xs={12} md={12} lg={12}>
