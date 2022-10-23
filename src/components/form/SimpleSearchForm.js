@@ -6,9 +6,10 @@ import {
 
 import BaseForm from './BaseForm'
 
-function RoroadListSearchForm({
+function SimpleSearchForm({
     open,
     handleClose,
+    title,
     searchName,
     setSearchName,
 }) {
@@ -22,7 +23,7 @@ function RoroadListSearchForm({
         <BaseForm
             open={open}
             handleClose={handleClose}
-            title={'Search RoroadList'}
+            title={title}
             maxWidth={'lg'}
             handleSubmit={onSearchHandler}
             cancelText={'Cancel'}
@@ -45,4 +46,4 @@ function RoroadListSearchForm({
     )
 }
 
-export default RoroadListSearchForm
+export default SimpleSearchForm

@@ -54,7 +54,7 @@ function MarkerDisplayList({
             <div 
                 style={{
                     position: 'absolute',
-                    height: '80%',
+                    height: '90%',
                     width: '95%',
                     paddingLeft: '5%',
                     paddingTop: '20px',

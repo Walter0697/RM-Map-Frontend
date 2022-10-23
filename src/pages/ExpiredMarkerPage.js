@@ -106,31 +106,39 @@ function PreviousMarkerPage({
 
     return (
         <Base>
-            <TopBar
-                onBackHandler={() => history.replace('/home')}
-                label='Expired Marker'
-            />
-            <MarkerDisplayList
-                markers={displayMarker}
-                setSelectedById={setSelectedById}
-                filterOption={filterOption} // for filter option
-                filterValue={filterValue}   // for filter temporary value setter and getter
-                setFilterValue={setFilterValue}  
-                isFilterExpanded={isFilterExpanded} // for viewing filter
-                setExpandFilter={setExpandFilter}
-                confirmFilterValue={confirmFilterValue} // for confirming filter values
-                customFilterValue={customFilterValue}
-                setCustomFilterValue={setCustomFilterValue}
-                finalFilterValue={finalFilterDisplay} // for filter options
-                filterOpen={showFilter}
-                setShowFilter={setShowFilter}
-            />
-            <MarkerEditForm
-                open={selectedMarker}
-                handleClose={() => setSelected(null)}
-                onUpdated={onMarkerUpdated}
-                marker={selectedMarker}
-            />
+            <div
+                style={{
+                    width: '100%',
+                    height: '90%',
+                    position: 'relative',
+                }}
+            >
+                <TopBar
+                    onBackHandler={() => history.replace('/home')}
+                    label='Expired Marker'
+                />
+                <MarkerDisplayList
+                    markers={displayMarker}
+                    setSelectedById={setSelectedById}
+                    filterOption={filterOption} // for filter option
+                    filterValue={filterValue}   // for filter temporary value setter and getter
+                    setFilterValue={setFilterValue}  
+                    isFilterExpanded={isFilterExpanded} // for viewing filter
+                    setExpandFilter={setExpandFilter}
+                    confirmFilterValue={confirmFilterValue} // for confirming filter values
+                    customFilterValue={customFilterValue}
+                    setCustomFilterValue={setCustomFilterValue}
+                    finalFilterValue={finalFilterDisplay} // for filter options
+                    filterOpen={showFilter}
+                    setShowFilter={setShowFilter}
+                />
+                <MarkerEditForm
+                    open={selectedMarker}
+                    handleClose={() => setSelected(null)}
+                    onUpdated={onMarkerUpdated}
+                    marker={selectedMarker}
+                />
+            </div>
             <AutoHideAlert 
                 open={editAlert}
                 type={'success'}

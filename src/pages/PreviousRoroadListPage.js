@@ -13,7 +13,7 @@ import BottomSearchNameDisplay from '../components/wrapper/BottomSearchNameDispl
 import AutoHideAlert from '../components/AutoHideAlert'
 
 import graphql from '../graphql'
-import RoroadListSearchForm from '../components/form/RoroadListSearchForm'
+import SimpleSearchForm from '../components/form/SimpleSearchForm'
 
 function PreviousRoroadListPage() {
     const history = useHistory()
@@ -109,9 +109,10 @@ function PreviousRoroadListPage() {
                     onFailHandler={setSearchFail}
                     handleClose={closeForm}
                 />
-                <RoroadListSearchForm
+                <SimpleSearchForm
                     open={isSearchFormOpen}
                     handleClose={() => setSearchFormOpen(false)}
+                    title={'Search RoroadList'}
                     searchName={searchName}
                     setSearchName={onSearchNameSet}
                 />
