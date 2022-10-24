@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
+import { 
+    useSpring,
+    config,
+    animated,
+} from '@react-spring/web'
 
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import DeleteIcon from '@mui/icons-material/Delete'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import CloseIcon from '@mui/icons-material/Close'
-import FilterAltIcon from '@mui/icons-material/FilterAlt' 
+import FilterAltIcon from '@mui/icons-material/FilterAlt'
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh' 
 
 import useBoop from '../../hooks/useBoop'
 
@@ -34,6 +40,27 @@ function RoroadListList({
     const [ hidingItemList, setHidingItemList ] = useState([])
 
     const [ uploadFail, setUploadFail ] = useBoop(3000)
+
+    const { 
+        hiddenButtonOpacity,
+        hiddenButtonRight,
+        hiddenButtonBottom,
+        hiddenButtonColor,
+    } = useSpring({
+        config: config.wobbly,
+        from: {
+            hiddenButtonOpacity: 0,
+            hiddenButtonRight: '20px',
+            hiddenButtonBottom: '5%',
+            hiddenButtonColor: 'white',
+        },
+        to: {
+            hiddenButtonOpacity: (isHidingItem) ? 1 : 0,
+            hiddenButtonRight: (isHidingItem) ? '80px' : '20px',
+            hiddenButtonBottom: (isHidingItem) ? '15%' : '5%',
+            hiddenButtonColor: (isHidingItem) ? '#e58282' : 'white'
+        }
+    })
 
     const sortedList = useMemo(() => {
         if (!roroadlists) return []
@@ -102,6 +129,21 @@ function RoroadListList({
         }
     }
 
+    const onAutoSelectHandler = () => {
+        const selectedSet = new Set()
+        for (let i = 0; i < hidingItemList.length; i++) {
+            selectedSet.add(hidingItemList[i])
+        }
+
+        for (let i = 0; i < roroadlists.length; i++) {
+            if (roroadlists[i].checked) {
+                selectedSet.add(roroadlists[i].id)
+            }
+        }
+
+        setHidingItemList([...selectedSet])
+    }
+
     const onTrashCancelHandler = () => {
         setIsHidingItem(false)
         setHidingItemList([])
@@ -154,37 +196,54 @@ function RoroadListList({
                 </div>
             )}
             {!isPrevious && (
-                <div
+                <animated.div
                     style={{ 
                         position: 'absolute',
                         bottom: '5%',
                         right: '20px',
+                        background: hiddenButtonColor,
+                        borderRadius: '100%',
                     }}
                 >
                     <CircleIconButton
                         onClickHandler={onTrashClickHandler}
-                        background={isHidingItem ? '#e58282' : null}
+                        background={'inherit'}
                         badgeNumber={hidingItemList.length !== 0 ? hidingItemList.length : null}
                     >
                         {isHidingItem ? <DeleteForeverIcon /> : <DeleteIcon />}
                     </CircleIconButton>
-                </div>
+                </animated.div>
             )}
-            {isHidingItem && (
-                    <div
-                        style={{ 
-                            position: 'absolute',
-                            bottom: '15%',
-                            right: '20px',
-                        }}
+            <animated.div
+                style={{ 
+                    position: 'absolute',
+                    right: '20px',
+                    visibility: hiddenButtonOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
+                    opacity: hiddenButtonOpacity,
+                    bottom: hiddenButtonBottom,
+                }}
+            >
+                <CircleIconButton
+                    onClickHandler={onTrashCancelHandler}
+                >
+                    <CloseIcon />
+                </CircleIconButton>
+            </animated.div>
+            <animated.div
+                    style={{ 
+                        position: 'absolute',
+                        bottom: '5%',
+                        visibility: hiddenButtonOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
+                        opacity: hiddenButtonOpacity,
+                        right: hiddenButtonRight,
+                    }}
+                >
+                    <CircleIconButton
+                        onClickHandler={onAutoSelectHandler}
                     >
-                        <CircleIconButton
-                            onClickHandler={onTrashCancelHandler}
-                        >
-                            <CloseIcon />
-                        </CircleIconButton>
-                    </div>
-            )}
+                        <AutoFixHighIcon />
+                    </CircleIconButton>
+                </animated.div>
             {openFilterForm && (
                 <div
                 style={{ 
