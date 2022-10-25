@@ -1,4 +1,5 @@
 import query from './query'
+import dayjs from 'dayjs'
 
 // generic utilties
 const appendToList = (resultList, appendingList) => {
@@ -104,6 +105,57 @@ const filterByQueryScript = (markers, queryScript, eventtypes) => {
     return query.parse(markers, queryScript, eventtypes)
 }
 
+const sortByInstruction = (markers, sorting, eventtypes) => {
+    if (!sorting) return markers
+    
+    let outputList = markers
+    let typeDictionary = {}
+    eventtypes.forEach((s) => {
+        typeDictionary[s.value] = s.priority
+    })
+
+    for (let i = sorting.length - 1; i >= 0; i--) {
+        const instruction = sorting[i]
+        if (instruction.sortType === 'label') {
+            outputList.sort((a, b) => {
+                if (instruction.sortOrder === 'ASC') {
+                    return a.label.localeCompare(b.label)   // a -> z
+                } else {
+                    return b.label.localeCompare(a.label)   // z -> a
+                }
+            })
+        } else if (instruction.sortType === 'fromTime') {
+            outputList.sort((a, b) => {
+                const ascending = instruction.sortOrder === 'ASC'
+                const first = ascending ? a.from_time : b.from_time
+                const second = ascending ? b.from_time : a.from_time
+                if (first && !second) return ascending ? -1 : 1
+                if (second && !first) return ascending ? 1 : -1
+                return dayjs(first).diff(dayjs(second))
+            })
+        } else if (instruction.sortType === 'toTime') {
+            outputList.sort((a, b) => {
+                const ascending = instruction.sortOrder === 'ASC'
+                const first = ascending ? a.to_time : b.to_time
+                const second = ascending ? b.to_time : a.to_time
+                if (first && !second) return ascending ? -1 : 1
+                if (second && !first) return ascending ? 1 : -1
+                return dayjs(first).diff(dayjs(second))
+            })
+        } else if (instruction.sortType === 'eventtype') {
+            outputList.sort((a, b) => {
+                if (instruction.sortOrder === 'ASC') {
+                    return typeDictionary[a.type] - typeDictionary[b.type]
+                } else {
+                    return typeDictionary[b.type] - typeDictionary[a.type]
+                }
+            })
+        }
+    }
+
+    return outputList
+}
+
 const outputMarkerByFilter = (markers, filterlist, eventtypes) => {
     let outputList = markers
 
@@ -113,6 +165,7 @@ const outputMarkerByFilter = (markers, filterlist, eventtypes) => {
     outputList = filterByBooking(outputList, filterlist.booking)
     outputList = filterByHashtag(outputList, filterlist.hashtag)
     outputList = filterByQueryScript(outputList, filterlist.script, eventtypes)
+    outputList = sortByInstruction(outputList, filterlist.sort, eventtypes)
 
     return outputList
 }

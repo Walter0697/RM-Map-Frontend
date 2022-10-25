@@ -12,12 +12,14 @@ import AttributeFilter from '../filter/AttributeFilter'
 import NeedBookingFilter from '../filter/NeedBookingFilter'
 import HashtagFilter from '../filter/HashtagFilter'
 import ScriptFilter from '../filter/ScriptFilter'
+import SortFilter from '../filter/SortFilter'
 
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded'
 
 import FreeTextEdit from '../form/filter/FreeTextEdit'
 import HashtagEdit from '../form/filter/HashtagEdit'
 import ScriptEdit from '../form/filter/ScriptEdit'
+import SortEdit from '../form/filter/SortEdit'
 
 import actions from '../../store/actions'
 
@@ -33,10 +35,12 @@ function FilterList({
     const [ bookingStatus, setBookingStatus ] = useState(null)
     const [ selectedHashtag, setSelectedHashtag ] = useState([])
     const [ currentScript, setCurrentScript ] = useState('')
+    const [ currentSort, setCurrentSort ] = useState([])
 
     const [ freeTextOpen, setFreeTextOpen ] = useState(false)
     const [ hashtagOpen, setHashtagOpen ] = useState(false)
     const [ scriptOpen, setScriptOpen ] = useState(false)
+    const [ sortOpen, setSortOpen ] = useState(false)
 
     useEffect(() => {
         if (!init) {
@@ -55,6 +59,9 @@ function FilterList({
                 }
                 if (filterlist.script) {
                     setCurrentScript(filterlist.script)
+                }
+                if (filterlist.sort) {
+                    setCurrentSort(filterlist.sort)
                 }
             }
             setInit(true)
@@ -118,6 +125,12 @@ function FilterList({
         setScriptOpen(false)
     }
 
+    const updateSort = (value) => {
+        setCurrentSort(value)
+        triggerFilterValueUpdate('sort', value)
+        setSortOpen(false)
+    }
+
     const clearAllFilter = () => {
         dispatch(actions.updateFilter({}))
         setFreeTextValue('')
@@ -126,6 +139,7 @@ function FilterList({
         setBookingStatus(null)
         setSelectedHashtag([])
         setCurrentScript('')
+        setCurrentSort([])
     }
 
     return (
@@ -163,6 +177,16 @@ function FilterList({
                         <EventTypeFilter 
                             selectedEventTypes={selectedEventTypes}
                             toggleEventType={toggleEventType}
+                        />
+                    </WrapperBox>
+                    <WrapperBox
+                        height={'100px'}
+                        marginBottom='10px'
+                        isCenter
+                    >
+                        <SortFilter 
+                            sortList={currentSort}
+                            openSortModel={() => setSortOpen(true)}
                         />
                     </WrapperBox>
                     <WrapperBox
@@ -240,6 +264,12 @@ function FilterList({
                 handleClose={() => setScriptOpen(false)}
                 script={currentScript}
                 onConfirm={updateScript}
+            />
+            <SortEdit 
+                open={sortOpen}
+                handleClose={() => setSortOpen(false)}
+                selectedSortList={currentSort}
+                onConfirm={updateSort}
             />
 
             {/* circle button at the corner */}
