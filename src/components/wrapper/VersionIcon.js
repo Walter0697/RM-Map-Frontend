@@ -13,7 +13,7 @@ import IcecreamIcon from '@mui/icons-material/Icecream'
 import LocalDiningIcon from '@mui/icons-material/LocalDining'
 import MuseumIcon from '@mui/icons-material/Museum'
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset'
-
+import FestivalIcon from '@mui/icons-material/Festival'
 
 function VersionIcon({
     icon,
@@ -46,6 +46,8 @@ function VersionIcon({
             return (<MuseumIcon sx={sx} />)
         case 'game':
             return (<VideogameAssetIcon sx={sx} />)
+        case 'festival':
+            return (<FestivalIcon sx={sx} />)
         default:
             return false
     }
