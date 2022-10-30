@@ -1,9 +1,10 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
 import {
     Grid,
     Button,
+    Chip,
 } from '@mui/material'
 
 import EditLocationIcon from '@mui/icons-material/EditLocation'
@@ -121,7 +122,7 @@ function RoroadListItem({
                 >
                     {item.checked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
                 </Grid>
-                <Grid item xs={9}
+                <Grid item xs={8}
                     style={{
                         display: 'flex',
                         width: '100%',
@@ -131,6 +132,22 @@ function RoroadListItem({
                     onClick={onClickHandler}
                 >
                     {item.name}
+                </Grid>
+                <Grid item xs={1}
+                    style={{
+                        display: 'flex',
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                    }}
+                    onClick={onClickHandler}
+                >
+                    <Chip
+                        style={{
+                            color: 'white',
+                        }}
+                        label={item.target_user.substring(0, 1).toUpperCase()}
+                    />
                 </Grid>
                 <Grid item xs={1}
                     style={{

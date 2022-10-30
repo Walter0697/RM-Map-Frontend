@@ -27,6 +27,7 @@ import graphql from '../../graphql'
 
 function RoroadListList({
     roroadlists,
+    username,
     openCreateForm,
     openEditForm,
     openViewForm,
@@ -66,11 +67,13 @@ function RoroadListList({
         if (!roroadlists) return []
         return roroadlists.sort((a, b) => {
             if (!a || !b) return 0
+            if (a.target_user === username && b.target_user !== username) return -1
+            if (b.target_user === username && a.target_user !== username) return 1
             if (a.checked && !b.checked) return -1
             if (b.checked && a.checked) return 1
             return 0
         })
-    }, [roroadlists])
+    }, [roroadlists, username])
 
     useEffect(() => {
         if (manageError) {
@@ -273,4 +276,5 @@ function RoroadListList({
 
 export default connect(state => ({
     eventtypes: state.marker.eventtypes,
+    username: state.auth.username,
 })) (RoroadListList)
