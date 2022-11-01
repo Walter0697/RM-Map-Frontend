@@ -32,6 +32,7 @@ import NullableDatePicker from '../field/NullableDatePicker'
 
 import generic from '../../scripts/generic'
 import scrapper from '../../scripts/scrapper'
+import image from '../../scripts/image'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
 
@@ -66,6 +67,11 @@ function MarkerForm({
     const [ imageFormState , setImageState ] = useState('') // weblink, preview, scrap
     const [ imageSubmitMessage, setImageMessage ] = useState('')
 
+    // storing the image information, to determined if it is using the compressed one, or the original one
+    let rawImageCaches = {}
+    const [ imageCache, setImageCache ] = useState({})
+    const [ imageVersion, setImageVersion ] = useState(null)
+
     const [ copiedValue, setCopiedValue ] = useState('')
     const [ scrapperData, setScrapperData ] = useState(null) 
     const [ scrapperOpen, setScrapperOpen ] = useState(null)
@@ -90,6 +96,9 @@ function MarkerForm({
         setImageState('')
         setUnauthorized(false)
         setWebsiteLink('')
+        setImageCache({})
+        rawImageCaches = {}
+        setImageVersion(null)
 
         if (location.address) {
             setFormValue('address', location.address)
@@ -187,15 +196,59 @@ function MarkerForm({
         setImageMessage('image from the internet')
     }
 
+    const chooseImageVersion = (selected) => {
+        const target = imageCache[selected]
+        setFormValue('imageLink', {
+            type: 'upload',
+            value: target.data,
+            name: target.data.name,
+        })
+        setImageVersion(selected)
+    }
+
+    const handleCompressedImage = (result) => {
+        setFormValue('imageLink', {
+            type: 'upload',
+            value: result,
+            name: result.name
+        })
+        setImageVersion('compressed')
+        const caches = Object.assign({}, rawImageCaches)
+        caches['compressed'] = {
+            size: result.size,
+            data: result,
+        }
+        rawImageCaches = caches
+        setImageCache(caches)
+    }
+
     // handle image upload
     const handleImageChange = (e) => {
         if (e.target.files.length) {
+            const fileValue = e.target.files[0]
+            const isImage = image.compress.isImage(fileValue)
+            if (!isImage) return
+            setImageMessage('image from user upload')
             setFormValue('imageLink', {
                 type: 'upload',
                 value: e.target.files[0],
                 name: e.target.files[0].name,
             })
-            setImageMessage('image from user upload')
+            setImageVersion('original')
+            const caches = Object.assign({}, rawImageCaches)
+            caches['original'] = {
+                size: e.target.files[0].size,
+                data: e.target.files[0],
+            }
+            rawImageCaches = caches
+            setImageCache(caches)
+            const sc = image.compress.shouldCompress(fileValue)
+            if (sc) {
+                image.compress.compressImage(fileValue).then(result => {
+                    handleCompressedImage(result)
+                })
+            }
+            
         }
     }
 
@@ -586,6 +639,9 @@ function MarkerForm({
                 shouldOpen={imageFormState === 'preview'}
                 handleClose={() => setImageState('')}
                 imageInfo={formValue.imageLink}
+                imageVersion={imageVersion}
+                chooseImageVersion={chooseImageVersion}
+                imageCache={imageCache}
             />
             <ScrapperForm 
                 open={!!scrapperOpen}
