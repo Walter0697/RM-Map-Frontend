@@ -15,7 +15,7 @@ const scrap = (content) => {
         const info = arrInfo[i]
         const index = info.indexOf(baseURL)
         if (index !== -1) {
-            linkStr = info.substring(index)
+            linkStr = info.substring(index).replace('\n', '').replace('\r', '')
         }
     }
 
