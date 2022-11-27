@@ -75,12 +75,7 @@ function SettingPage({
 
     useEffect(() => {
         if (releaseData) {
-            const newlist = releaseData.releasenotes
-
-            if (list.length !== newlist.length) {
-                latestReleaseGQL()
-                dispatch(actions.updateReleaseList(newlist))
-            }
+            latestReleaseGQL()
         }
 
         if (releaseError) {
