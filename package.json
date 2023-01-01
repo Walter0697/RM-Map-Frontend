@@ -20,6 +20,7 @@
     "@tomtom-international/web-sdk-services": "^6.15.0",
     "apollo-upload-client": "^16.0.0",
     "axios": "^0.22.0",
+    "country-flag-emoji": "^1.0.3",
     "date-fns": "^2.25.0",
     "dayjs": "^1.10.7",
     "dayjs-plugin-utc": "^0.1.2",

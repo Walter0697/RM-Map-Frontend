@@ -10,6 +10,7 @@ import MarkerItem from './listitem/MarkerItem'
 const loadingBoxHeight = 300
 
 function MarkerList({
+  top,
   height,
   markers,
   setSelectedById,
@@ -51,6 +52,7 @@ function MarkerList({
               ref={listRef}
               style={{
                   position: 'absolute',
+                  top: top ?? null,
                   height: height,
                   width: '95%',
                   paddingLeft: '5%',

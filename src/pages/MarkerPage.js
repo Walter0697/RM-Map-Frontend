@@ -21,6 +21,7 @@ import FilterCirlceButton from '../components/wrapper/FilterCircleButton'
 import ScheduleForm from '../components/form/ScheduleForm'
 import MarkerEditForm from '../components/form/MarkerEditForm'
 import AutoHideAlert from '../components/AutoHideAlert'
+import CountrySelect from '../components/map/mappart/countryselect/CountrySelect'
 
 import filters from '../scripts/filter'
 import search from '../scripts/search'
@@ -50,6 +51,12 @@ function MarkerPage({
         config: config.gentle,
         from: { transform: (suffix && suffix === '/list') ? 'rotateY(180deg)' : 'rotateY(0deg)' },
         transform: showingList ? 'rotateY(180deg)' : 'rotateY(0deg)',
+    })
+
+    const { fakeTranform } = useSpring({
+        config: config.gentle,
+        from: { fakeTranform: (suffix && suffix === '/list') ? 1 : 0 },
+        fakeTranform: showingList ? 1 : 0,
     })
 
     // filter option
@@ -128,6 +135,7 @@ function MarkerPage({
     return (
         <Base>
             {/* flipping card logic */}
+            
             <animated.div 
                 style={{
                     width: '100%',
@@ -165,7 +173,8 @@ function MarkerPage({
                     }}
                 >
                     <MarkerList
-                        height={'100%'}
+                        top={'15%'}
+                        height={'85%'}
                         showingList={showingList}
                         markers={filteredMarkers || []}
                         setSelectedById={setSelectedById}
@@ -214,6 +223,19 @@ function MarkerPage({
                     </>
                 )}
             </animated.div>
+            
+            <animated.div
+                style={{
+                    transformStyle: 'preserve-3d',
+                    transform: fakeTranform.to({ range: [0.0, 0.5, 1.0], output: ['rotateY(0deg)', 'rotateY(180deg)', 'rotateY(0deg)']}),
+                    position: 'absolute',
+                    top: '5%',
+                    left: '30%',
+                }}
+            >
+                <CountrySelect />
+            </animated.div>
+
             <MarkerView
                 open={!!selectedMarker}
                 handleClose={() => setSelected(null)}

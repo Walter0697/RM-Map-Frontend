@@ -17,6 +17,7 @@ function InitData({ jwt, dispatch }) {
     const [ listStationGQL, { data: stationData } ] = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
     const [ listMovieGQL, { data: movieData } ] = useLazyQuery(graphql.movies.list, { fetchPolicy: 'no-cache' })
     const [ listRoroadListGQL, { data: roroadListData } ] = useLazyQuery(graphql.roroadlists.list, { fetchPolicy: 'no-cache' })
+    const [ listCountryCodeMapGQL, { data: countryCodeData } ] = useLazyQuery(graphql.markers.country_code, { fetchPolicy: 'no-cache' })
 
     useEffect(() => {
         if (jwt) {
@@ -27,6 +28,7 @@ function InitData({ jwt, dispatch }) {
             listStationGQL()
             listMovieGQL()
             listRoroadListGQL()
+            listCountryCodeMapGQL()
         }
     }, [jwt])  
     // this only runs once on purpose, 
@@ -36,7 +38,8 @@ function InitData({ jwt, dispatch }) {
     useEffect(() => {
         if (markerData) {
             dispatch(actions.resetMarkers(markerData.markers))
-            let hashTagList = {}
+            const hashTagList = {}
+            const countryPartMap = {}
             markerData.markers.forEach(marker => {
                 const currentHashtag = search.hashtag.check(marker.description)
                 currentHashtag.forEach(tag => {
@@ -46,8 +49,25 @@ function InitData({ jwt, dispatch }) {
                         hashTagList[tag] = 1
                     }
                 })
+
+                if (!countryPartMap[marker.country_code]) {
+                    countryPartMap[marker.country_code] = {}
+                } 
+                countryPartMap[marker.country_code][marker.country_part] = true
             })
+
             dispatch(actions.updateHashtag(hashTagList))
+
+            const countryPartList = {}
+            for (const country in countryPartMap) {
+                const list = []
+                for (let part in countryPartMap[country]) {
+                    list.push(part)
+                }
+                countryPartList[country] = list
+            }
+
+            dispatch(actions.resetCountryParts(countryPartList))
         }
     }, [markerData]) // we dont care about the error, we just update if we got data
 
@@ -89,6 +109,12 @@ function InitData({ jwt, dispatch }) {
             dispatch(actions.resetRoroadLists(roroadListData.roroadlists))
         }
     }, [roroadListData]) // we dont care about the error, we just update if we got data
+
+    useEffect(() => {
+        if (countryCodeData) {
+            dispatch(actions.resetCountryCodes(countryCodeData.countrycodemap))
+        }
+    }, [countryCodeData])
 
     return false    // do not return any view for this component
 }

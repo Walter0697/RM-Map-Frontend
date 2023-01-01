@@ -17,6 +17,8 @@ const list = gql`
             need_booking
             price
             status
+            country_code
+            country_part
             to_time
             from_time
             is_fav
@@ -95,6 +97,8 @@ const create = gql`
             to_time
             from_time
             is_fav
+            country_code
+            country_part
             restaurant {
                 id
                 name
@@ -149,6 +153,8 @@ const previous = gql`
             to_time
             from_time
             is_fav
+            country_code
+            country_part
             restaurant {
                 id
                 name
@@ -191,6 +197,8 @@ const expired = gql`
             to_time
             from_time
             is_fav
+            country_code
+            country_part
             restaurant {
                 id
                 name
@@ -237,6 +245,8 @@ const revoke = gql`
             to_time
             from_time
             is_fav
+            country_code
+            country_part
             restaurant {
                 id
                 name
@@ -315,6 +325,8 @@ const edit = gql`
             to_time
             from_time
             is_fav
+            country_code
+            country_part
             restaurant {
                 id
                 name
@@ -347,6 +359,15 @@ const remove = gql`
     }
 `
 
+const country_code = gql`
+    query ListCountryCodeMapGQL {
+        countrycodemap{
+            country_code
+            country_name
+        }
+    }
+`
+
 const markers = {
     list,
     create,
@@ -356,6 +377,7 @@ const markers = {
     revoke,
     edit,
     remove,
+    country_code,
 }
 
 export default markers

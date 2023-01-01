@@ -235,6 +235,27 @@ export const manageMultipleRoroadLists = (roroadlists) => {
     }
 }
 
+export const resetCountryCodes = (countryCodes) => {
+    return {
+        type: constants.RESET_COUNTRYCODE,
+        countryCodes,
+    }
+}
+
+export const resetCountryParts = (countryparts) => {
+    return {
+        type: constants.RESET_COUNTRYPARTS,
+        countryparts,
+    }
+}
+
+export const resetFilterCountry = (filtered) => {
+    return {
+        type: constants.RESET_FILTERCOUNTRY,
+        filtered,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -269,6 +290,9 @@ const actions = {
     addRoroadList,
     updateRoroadlist,
     manageMultipleRoroadLists,
+    resetCountryCodes,
+    resetCountryParts,
+    resetFilterCountry,
 }
 
 export default actions

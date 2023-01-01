@@ -5,6 +5,9 @@ export default function markerReducer(state = {
     markers: [],
     eventtypes: [],
     mappins: [],
+    countrycodes: [],
+    countryparts: [],
+    filtercountry: null,
 }, action) {
     switch(action.type) {
         case constants.RESET_MARKERS: {
@@ -107,6 +110,24 @@ export default function markerReducer(state = {
             return {
                 ...state,
                 markers: result,
+            }
+        }
+        case constants.RESET_COUNTRYCODE: {
+            return {
+                ...state,
+                countrycodes: action.countryCodes,
+            }
+        }
+        case constants.RESET_COUNTRYPARTS: {
+            return {
+                ...state,
+                countryparts: action.countryparts,
+            }
+        }
+        case constants.RESET_FILTERCOUNTRY: {
+            return {
+                ...state,
+                filtercountry: action.filtered,
             }
         }
         default:
