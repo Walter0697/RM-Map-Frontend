@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 import Base from './Base'
@@ -8,6 +8,7 @@ import {
     config,
     animated,
 } from '@react-spring/web'
+import { nanoid } from 'nanoid'
 
 import ExploreIcon from '@mui/icons-material/Explore'
 
@@ -32,6 +33,7 @@ function MarkerPage({
     markers,
     eventtypes,
     filterlist,
+    filtercountry,
 }) {
     const location = useLocation()
     const suffix = location.pathname.replace('/markers', '')
@@ -44,6 +46,8 @@ function MarkerPage({
     // if the selected marker is set to be editing
     const [ editingMarker, setEditing ] = useState(false)
     const [ editAlert, confirmEdited ] = useBoop(3000)
+
+    const [ editedTrigger, setEditTrigger ] = useState(nanoid())
 
     // if it is showing list or map
     const [ showingList, setShowingList ] = useState((suffix && suffix === '/list') ? true : false)
@@ -84,8 +88,14 @@ function MarkerPage({
     // }, [markers, finalFilterValue, filterOption, customFilterValue, showingList, eventtypes, editAlert])
 
     const filteredMarkers = useMemo(() => {
-        return search.filter.parse(markers, filterlist, eventtypes)
-    }, [markers, filterlist, eventtypes, editAlert])
+        return search.filter.parse(markers, filterlist, eventtypes, filtercountry)
+    }, [markers, filterlist, eventtypes, filtercountry, editedTrigger])
+
+    useEffect(() => {
+        if (editAlert) {
+            setEditTrigger(nanoid())
+        }
+    }, [editAlert])
 
     // const [ showFilterInListView, showFilter ] = useState(false)
 
@@ -275,4 +285,5 @@ export default connect(state => ({
     markers: state.marker.markers,
     eventtypes: state.marker.eventtypes,
     filterlist: state.filter.list,
+    filtercountry: state.marker.filtercountry
 })) (MarkerPage)

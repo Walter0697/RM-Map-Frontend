@@ -156,8 +156,19 @@ const sortByInstruction = (markers, sorting, eventtypes) => {
     return outputList
 }
 
-const outputMarkerByFilter = (markers, filterlist, eventtypes) => {
+const outputMarkerByFilter = (markers, filterlist, eventtypes, locationfilter) => {
     let outputList = markers
+
+    if (locationfilter) {
+        if (locationfilter.countryCode) {
+            outputList = outputList.filter(s => s.country_code === locationfilter.countryCode)
+        }
+        if (locationfilter.countryPart) {
+            if (locationfilter.countryPart.type === 'part') {
+                outputList = outputList.filter(s => s.country_part === locationfilter.countryPart.name)
+            }
+        }
+    }
 
     outputList = filterByFreeText(outputList, filterlist.freetext, eventtypes)
     outputList = filterByEventType(outputList, filterlist.eventtypes)
