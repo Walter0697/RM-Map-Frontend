@@ -6,6 +6,7 @@ import {
     config,
     animated,
 } from '@react-spring/web'
+import _ from 'lodash'
 
 import ViewListIcon from '@mui/icons-material/ViewList'
 import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak'
@@ -29,6 +30,7 @@ function MarkerMap({
     showingList,
     toListView,
     markers,
+    filtercountry,
     setSelectedById,
     filterOption,   // below filter related
     filterValue,
@@ -85,6 +87,8 @@ function MarkerMap({
     // alert related
     const [ gpsFail, setGPSFail ] = useBoop(3000)
 
+    const [ previousCountry, setPreviousCountry ] = useState(null)
+
     const [ 
         map, 
         mapLocation,
@@ -102,6 +106,7 @@ function MarkerMap({
         setExtraLocationInformation,
         keepCenter,
         setKeepCenter,
+        setLocationCenter,
      ] = useMap(
         mapElement,
         {       
@@ -112,6 +117,28 @@ function MarkerMap({
         setGPSFail,
         mappins,
     )
+
+    useEffect(() => {
+        if (previousCountry) {
+            if (!_.isEqual(previousCountry, filtercountry)) {
+                if (filtercountry?.countryCode) {
+                    let output = markers.filter(s => s.country_code === filtercountry.countryCode)
+                    if (filtercountry?.countryPart && filtercountry?.countryPart?.type === 'part') {
+                        output = output.filter(s => s.country_part === filtercountry.countryPart.name)
+                    }
+
+                    const position = maphelper.generic.getCenterFromMarkerList(output)
+                    setLocationCenter(position.latitude, position.longitude)
+                
+                }
+                const selectedCountry = _.cloneDeep(filtercountry)
+                setPreviousCountry(selectedCountry)
+            }
+        } else {
+            const selectedCountry = _.cloneDeep(filtercountry)
+            setPreviousCountry(selectedCountry)
+        }
+    }, [markers, filtercountry, previousCountry])
 
     useEffect(() => {
         let output = []
@@ -308,4 +335,5 @@ export default connect(state => ({
     mappins: state.marker.mappins,
     stations: state.station.stations,
     showInMap: state.station.showInMap,
+    filtercountry: state.marker.filtercountry,
 }))(MarkerMap)

@@ -295,6 +295,13 @@ function useMap(
         centerFailHandler && centerFailHandler()
     }
 
+    const setLocationCenter = (lat, lon) => {
+        setTowardsLocation('lat', lat)
+        setSearchingLocation('lat', lat)
+        setTowardsLocation('lon', lon)
+        setSearchingLocation('lon', lon)
+    }
+
     // set searching location to viewing location
     const setSearchingToViewing = () => {
         const current = mapLocation
@@ -414,6 +421,7 @@ function useMap(
         setExtraLocationInformation,
         keepCenter,
         setKeepCenter,
+        setLocationCenter,
      ]
 }
 
