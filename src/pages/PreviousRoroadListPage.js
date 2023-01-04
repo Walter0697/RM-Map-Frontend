@@ -89,7 +89,7 @@ function PreviousRoroadListPage() {
                 }}
             >
                 <TopBar
-                    onBackHandler={() => history.replace('/home')}
+                    onBackHandler={() => history.replace('/setting')}
                     label='Previous RoroadList'
                 />
                 <RoroadListList 

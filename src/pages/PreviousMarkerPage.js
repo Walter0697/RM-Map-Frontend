@@ -115,7 +115,7 @@ function PreviousMarkerPage({
                 }}
             >
                 <TopBar
-                    onBackHandler={() => history.replace('/home')}
+                    onBackHandler={() => history.replace('/setting')}
                     label='Previous Marker'
                 />
                 <MarkerDisplayList

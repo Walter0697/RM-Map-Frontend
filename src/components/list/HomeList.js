@@ -11,9 +11,6 @@ import WrapperBox from '../wrapper/WrapperBox'
 import TodaySchedule from './home/TodaySchedule'
 import FeaturedMarkerRow from './home/FeaturedMarkerRow'
 import YesterdayUncheckList from './home/YesterdayUncheckList'
-import PreviousMarkerButton from './home/PreviousMarkerButton'
-import ExpiredMarkerButton from './home/ExpiredMarkerButton'
-import PreviousRoroadListButton from './home/PreviousRoroadListButton'
 
 import markerhelper from '../../scripts/marker'
 import filters from '../../scripts/filter'
@@ -108,19 +105,7 @@ function HomeList({
     const onTodayScheduleClick = () => {
         history.replace('/schedule/open')
     }
-
-    const onPreviousMarkerClick = () => {
-        history.replace('/previous')
-    }
-
-    const onExpiredMarkerClick = () => {
-        history.replace('/expired')
-    }
-
-    const onPreviousRoroadListClick = () => {
-        history.replace('/previousroroadlist')
-    }
-
+    
     return (
         <>
             <div style={{
@@ -168,30 +153,6 @@ function HomeList({
                             />
                         </WrapperBox>
                     ))}
-                    <WrapperBox
-                        height={40}
-                        marginBottom={'20px'}
-                    >
-                        <PreviousMarkerButton
-                            onClickHandler={onPreviousMarkerClick}
-                        />
-                    </WrapperBox>
-                    <WrapperBox
-                        height={40}
-                        marginBottom={'20px'}
-                    >
-                        <ExpiredMarkerButton
-                            onClickHandler={onExpiredMarkerClick}
-                        />
-                    </WrapperBox>
-                    <WrapperBox
-                        height={40}
-                        marginBottom={'20px'}
-                    >
-                        <PreviousRoroadListButton
-                            onClickHandler={onPreviousRoroadListClick}
-                        />
-                    </WrapperBox>
                 </RandomFadeIn>
             </div>
         </>

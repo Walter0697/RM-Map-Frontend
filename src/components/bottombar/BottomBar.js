@@ -7,13 +7,15 @@ import HomeIcon from '@mui/icons-material/Home'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import SettingsIcon from '@mui/icons-material/Settings'
 
-import AvTimerIcon from '@mui/icons-material/AvTimer'       // expired marker
-import FlagIcon from '@mui/icons-material/Flag'             // previous marker
 import TheatersIcon from '@mui/icons-material/Theaters'     // movie
 import StarIcon from '@mui/icons-material/Star'             // favourite movie
 import TrainIcon from '@mui/icons-material/Train'           // station
 import FilterAltIcon from '@mui/icons-material/FilterAlt'   // filter
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck' // roroadlist
+
+import DoneAllIcon from '@mui/icons-material/DoneAll'       // previous roroadlist
+import AvTimerIcon from '@mui/icons-material/AvTimer'       // expired marker
+import FlagIcon from '@mui/icons-material/Flag'             // previous marker
 
 import BarIcon from './BarIcon'
 import SubBarIcon from './SubBarIcon'
@@ -112,50 +114,6 @@ function BottomBar({
     }, [location.pathname])
 
     const HomeButton = useMemo(() => {
-        if (location.pathname === '/previous') {
-            return (
-                <SubBarIcon 
-                    route={'/previous'}
-                    parentRoute={'/home'}
-                    path={location.pathname}
-                    activeIcon={<FlagIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
-            )
-        }
-        if (location.pathname === '/filter/previous') {
-            return (
-                <SubBarIcon 
-                    route={'/filter'}
-                    parentRoute={'/previous'}
-                    path={location.pathname}
-                    activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
-            )
-        }
-        if (location.pathname === '/expired') {
-            return (
-                <SubBarIcon 
-                    route={'/expired'}
-                    parentRoute={'/home'}
-                    path={location.pathname}
-                    activeIcon={<AvTimerIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
-            )
-        }
-        if (location.pathname === '/filter/expired') {
-            return (
-                <SubBarIcon 
-                    route={'/filter'}
-                    parentRoute={'/expired'}
-                    path={location.pathname}
-                    activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
-            )
-        }
         if (location.pathname === '/roroadlist') {
             return (
                 <SubBarIcon 
@@ -163,17 +121,6 @@ function BottomBar({
                     parentRoute={'/home'}
                     path={location.pathname}
                     activeIcon={<PlaylistAddCheckIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
-            )
-        }
-        if (location.pathname === '/previousroroadlist') {
-            return (
-                <SubBarIcon 
-                    route={'/previousroroadlist'}
-                    parentRoute={'/home'}
-                    path={location.pathname}
-                    activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     setPath={changeTab}
                 />
             )
@@ -203,6 +150,62 @@ function BottomBar({
     }, [])
 
     const SettingButton = useMemo(() => {
+        if (location.pathname === '/previousroroadlist') {
+            return (
+                <SubBarIcon 
+                    route={'/previousroroadlist'}
+                    parentRoute={'/home'}
+                    path={location.pathname}
+                    activeIcon={<DoneAllIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+        if (location.pathname === '/previous') {
+            return (
+                <SubBarIcon 
+                    route={'/previous'}
+                    parentRoute={'/setting'}
+                    path={location.pathname}
+                    activeIcon={<FlagIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+        if (location.pathname === '/filter/previous') {
+            return (
+                <SubBarIcon 
+                    route={'/filter'}
+                    parentRoute={'/previous'}
+                    path={location.pathname}
+                    activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+        if (location.pathname === '/expired') {
+            return (
+                <SubBarIcon 
+                    route={'/expired'}
+                    parentRoute={'/setting'}
+                    path={location.pathname}
+                    activeIcon={<AvTimerIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+        if (location.pathname === '/filter/expired') {
+            return (
+                <SubBarIcon 
+                    route={'/filter'}
+                    parentRoute={'/expired'}
+                    path={location.pathname}
+                    activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+
         return (
             <BarIcon
                 route={'/setting'}
