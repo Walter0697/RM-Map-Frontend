@@ -7,9 +7,11 @@ import PreferredPin from './settings/PreferredPin'
 import LogoutButton from './settings/LogoutButton'
 import VersionView from './settings/VersionView'
 import ReleaseNoteButton from './settings/ReleaseNoteButton'
+
 import PreviousMarkerButton from './settings/PreviousMarkerButton'
 import ExpiredMarkerButton from './settings/ExpiredMarkerButton'
 import PreviousRoroadListButton from './settings/PreviousRoroadListButton'
+import WatchedMovieListButton from './settings/WatchedMovieListButton'
 
 import WrapperBox from '../wrapper/WrapperBox'
 import SectionHeader from './settings/SectionHeader'
@@ -17,6 +19,7 @@ import SectionHeader from './settings/SectionHeader'
 import TagIcon from '@mui/icons-material/Tag'
 import MapIcon from '@mui/icons-material/Map'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
+import TheatersIcon from '@mui/icons-material/Theaters'
 
 import * as serviceWorkerRegistration from '../../serviceWorkerRegistration'
 
@@ -45,6 +48,10 @@ function SettingList({
 
   const onPreviousRoroadListClick = () => {
     history.replace('/previousroroadlist')
+  }
+
+  const onWatchedMovieListClick = () => {
+    history.replace('/watchedmovies')
   }
 
   return (
@@ -144,6 +151,24 @@ function SettingList({
         >
             <PreviousRoroadListButton
                 onClickHandler={onPreviousRoroadListClick}
+            />
+        </WrapperBox>
+
+        <WrapperBox
+          height={50}
+          marginBottom={'15px'}
+        >
+          <SectionHeader
+            title={'Movies'}
+            icon={<TheatersIcon />}
+          />
+        </WrapperBox>
+        <WrapperBox
+            height={30}
+            marginBottom={'30px'}
+        >
+            <WatchedMovieListButton
+                onClickHandler={onWatchedMovieListClick}
             />
         </WrapperBox>
         <WrapperBox

@@ -16,6 +16,7 @@ import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck' // roroa
 import DoneAllIcon from '@mui/icons-material/DoneAll'       // previous roroadlist
 import AvTimerIcon from '@mui/icons-material/AvTimer'       // expired marker
 import FlagIcon from '@mui/icons-material/Flag'             // previous marker
+import MovieIcon from '@mui/icons-material/Movie'           // watched movie
 
 import BarIcon from './BarIcon'
 import SubBarIcon from './SubBarIcon'
@@ -201,6 +202,17 @@ function BottomBar({
                     parentRoute={'/expired'}
                     path={location.pathname}
                     activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+        if (location.pathname === '/watchedmovies') {
+            return (
+                <SubBarIcon 
+                    route={'/watchedmovies'}
+                    parentRoute={'/setting'}
+                    path={location.pathname}
+                    activeIcon={<MovieIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     setPath={changeTab}
                 />
             )

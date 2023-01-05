@@ -91,12 +91,41 @@ const schedule = gql`
     }
 `
 
+const watched = gql`
+    query listWatchedMovieGQL {
+        watchedmovies {
+            id
+            label
+            description
+            status
+            selected_date
+            marker {
+                id
+                label
+                latitude
+                longitude
+                address
+                image_link
+                link
+                type
+            }
+            movie {
+                id
+                label
+                release_date
+                image_path
+            }
+        }
+    }
+`
+
 const movies = {
     list,
     create,
     remove,
     search,
     schedule,
+    watched,
 }
 
 export default movies

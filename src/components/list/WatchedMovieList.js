@@ -13,20 +13,8 @@ import constant from '../../constant'
 
 function MovieItem({
     item,
-    schedules,
     movieTypeIcon,
-    onClickHandler,
 }) {
-
-    const isScheduled = useMemo(() => {
-        const movieSchedules = schedules.filter(s => s.movie)
-        const dbschedule = movieSchedules.find(s => s.movie.reference_id === item.reference_id)
-        if (dbschedule) {
-            return true
-        }
-        return false
-    }, [schedules, item])
-
     return (
         <Button
             variant='contained'
@@ -41,9 +29,7 @@ function MovieItem({
                 alignItems: 'flex-start',
                 textTransform: 'none',
                 padding: '0',
-                border: isScheduled ? '3px solid green' : ''
             }}
-            onClick={() => onClickHandler(item)}
         >
             <Grid
                 container
@@ -56,12 +42,12 @@ function MovieItem({
                     item xs={5}
                     style={{ marginTop: '15px'}}
                 >
-                    {item.image_path ? (
+                    {item?.movie?.image_path ? (
                         <img
                             style={{
                                 width: '80%',
                             }}
-                            src={process.env.REACT_APP_IMAGE_LINK + item.image_path}
+                            src={process.env.REACT_APP_IMAGE_LINK + item.movie.image_path}
                         />
                     ) : (
                         <img 
@@ -71,7 +57,6 @@ function MovieItem({
                             src={process.env.REACT_APP_IMAGE_LINK + movieTypeIcon}
                         />
                     )}
-                    
                 </Grid>
                 <Grid 
                     item xs={7}
@@ -90,13 +75,19 @@ function MovieItem({
                             color: 'black',
                         }}
                     >
-                        {item.label}
+                        {item?.movie?.label}
                     </div>
                     <div style={{
-                        fontSize: '10px',
+                        fontSize: '15px',
                         color: '#455295',
                     }}>
-                        {item.release_date}
+                        Watched at: {dayjs(item.selected_date).format('YYYY-MM-DD')}
+                    </div>
+                    <div style={{
+                        fontSize: '15px',
+                        color: '#455295',
+                    }}>
+                        in {item?.marker?.label}
                     </div>
                 </Grid>
             </Grid>
@@ -104,16 +95,13 @@ function MovieItem({
     )
 }
 
-function FavMovieList({
+function WathcedMovieList({
     list,
     eventtypes,
-    schedules,
-    openMovieForm,
 }) {
-    const filteredList = useMemo(() => {
-        const unsorted = list.filter(s => s.is_fav)
-        return unsorted.sort((a, b) => {
-            return dayjs(b.release_date).diff(dayjs(a.release_date))
+    const sortedList = useMemo(() => {
+        return list.sort((a, b) => {
+            return dayjs(b.selected_date).diff(dayjs(a.selected_date))
         })
     }, [list])
 
@@ -124,7 +112,7 @@ function FavMovieList({
         }
         return ''
     }, [eventtypes])
-
+    
     return (
         <>
             <div style={{
@@ -136,7 +124,7 @@ function FavMovieList({
                 overflow: 'auto',
             }}>
                 <BottomUpTrail>
-                    {filteredList.map((item, index) => (
+                    {sortedList.map((item, index) => (
                         <WrapperBox
                             key={index}
                             minHeight={'30px'}
@@ -145,9 +133,7 @@ function FavMovieList({
                         >
                             <MovieItem
                                 item={item}
-                                schedules={schedules}
                                 movieTypeIcon={movieIconImage}
-                                onClickHandler={openMovieForm}
                             />
                         </WrapperBox>
                     ))}
@@ -159,5 +145,4 @@ function FavMovieList({
 
 export default connect(state => ({
     eventtypes: state.marker.eventtypes,
-    schedules: state.schedule.schedules,
-}))(FavMovieList)
+}))(WathcedMovieList)
