@@ -343,7 +343,7 @@ function useMap(
         }
     }
 
-    const setCenterToLocation = (location, address) => {
+    const setCenterToLocation = async (location, address, withStreetNameSearch = false) => {
         centerMarker?.remove()
         setCenterMarker(null)
         setCenterStreetName(null)
@@ -366,13 +366,25 @@ function useMap(
 
         setCenterLocation('lat', location.lat)
         setCenterLocation('lon', location.lon)
-        setCenterStreetName(address)
+        
 
         setZoom(constants.maps.defaultZoomSize)
         setTowardsLocation('lat', location.lat)
         setSearchingLocation('lat', location.lat)
         setTowardsLocation('lon', location.lon)
         setSearchingLocation('lon', location.lon)
+
+        if (withStreetNameSearch) {
+            let result = await apis.maps.streetname(location.lon, location.lat)
+            if (result.status === 200) {
+                if (result.data?.addresses.length !== 0) {
+                    const address = maphelper.generic.getAddress(result.data.addresses[0].address)
+                    setCenterStreetName(address)
+                }
+            }
+        } else {
+            setCenterStreetName(address)
+        }
     }
 
     const onCenterMarkerClick = () => {

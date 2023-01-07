@@ -16,6 +16,7 @@ import RoomIcon from '@mui/icons-material/Room'
 import AddLocationIcon from '@mui/icons-material/AddLocation'
 import TheatersIcon from '@mui/icons-material/Theaters'
 import ManageSearchIcon from '@mui/icons-material/ManageSearch'
+import LocationSearchingIcon from '@mui/icons-material/LocationSearching'
 
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
@@ -28,6 +29,7 @@ import CircleIconButton from '../field/CircleIconButton'
 import BookmarkButton from '../field/BookmarkButton'
 
 import SearchStreetForm from '../form/SearchStreetForm'
+import LatLonLocationForm from '../form/LatLonLocationForm'
 
 import maphelper from '../../scripts/map'
 import constants from '../../constant'
@@ -102,6 +104,9 @@ function SearchMap({
     const [ showStreetNameSearch, setShowStreetNameSearch ] = useState(false)
     const [ streetSearchAlert, setSearchAlert ] = useBoop(3000)
     const [ streetSearchResult, setSearchResult ] = useState(null)
+
+    // open form for user to search by location code
+    const [ showLatLonSearch, setShowLatLonSearch ] = useState(false)
 
     const [ 
         map, 
@@ -269,11 +274,22 @@ function SearchMap({
         setShowStreetNameSearch(true)
     }
 
+    const openSearchByLocationCode = () => {
+        setShowLatLonSearch(true)
+    }
+
     const setLocationOnMap = (lonlat, address) => {
         setShowStreetNameSearch(false)
         setSearchAlert()
         setSearchResult(address)
         setCenterToLocation(lonlat, address)
+    }
+
+    const setLatLonOnMap = (lonlat) => {
+        setShowLatLonSearch(false)
+        setSearchAlert()
+        setSearchResult('Success')
+        setCenterToLocation(lonlat, '', true)
     }
 
     const redirectToMoviePage = () => {
@@ -348,6 +364,20 @@ function SearchMap({
                     onClickHandler={openSearchByStreetName}
                 >
                     <ManageSearchIcon />
+                </BookmarkButton>
+            </div>
+
+            <div 
+                style={{
+                    position: 'absolute',
+                    top: '160px',
+                    right: '-5px',
+                }}
+            >
+                <BookmarkButton
+                    onClickHandler={openSearchByLocationCode}
+                >
+                    <LocationSearchingIcon />
                 </BookmarkButton>
             </div>
             
@@ -467,6 +497,11 @@ function SearchMap({
                 open={showStreetNameSearch}
                 handleClose={() => setShowStreetNameSearch(false)}
                 onFinished={setLocationOnMap}
+            />
+            <LatLonLocationForm
+                open={showLatLonSearch}
+                handleClose={() => setShowLatLonSearch(false)}
+                onFinished={setLatLonOnMap}
             />
         </>
     )
