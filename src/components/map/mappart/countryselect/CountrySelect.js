@@ -62,7 +62,7 @@ function CountrySelect({
         setCountryPartOpen(prev => !prev)
     }
 
-    const emoji = countryFlagEmoji.get(filtercountry.countryCode)
+    const emoji = countryFlagEmoji.get(filtercountry?.countryCode ?? 'HK')
 
     return (
         <>

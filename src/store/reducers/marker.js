@@ -7,7 +7,12 @@ export default function markerReducer(state = {
     mappins: [],
     countrycodes: [],
     countryparts: [],
-    filtercountry: null,
+    filtercountry: {
+        countryCode: 'HK',
+        countryPart: {
+            type: 'all',
+        },
+    },
 }, action) {
     switch(action.type) {
         case constants.RESET_MARKERS: {

@@ -52,7 +52,7 @@ function CountryPartSelect({
     dispatch,
 }) {
     const selectableParts = useMemo(() => {
-        const selectedCountryCode = filtercountry.countryCode
+        const selectedCountryCode = filtercountry?.countryCode
         if (selectedCountryCode) {
             if (countryparts[selectedCountryCode]) {
                 return countryparts[selectedCountryCode]

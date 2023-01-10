@@ -111,7 +111,7 @@ function CountryCodeSelect({
             {countrycodes.map((code, index) => (
                 <CountryCodeOption 
                     key={code.country_code}
-                    isSelected={code.country_code === filtercountry.countryCode}
+                    isSelected={code.country_code === filtercountry?.countryCode}
                     countryCode={code.country_code}
                     countryName={code.country_name}
                     onClick={onCountryCodeClick}
