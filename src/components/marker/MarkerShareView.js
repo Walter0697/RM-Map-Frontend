@@ -60,6 +60,9 @@ function MarkerShareView({
                 files: filesArray,
                 text: shareText,
             }
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(shareText)
+            }
             navigator.share(shareData)
         } else {
             downloadImage()
