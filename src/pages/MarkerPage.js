@@ -24,7 +24,6 @@ import MarkerEditForm from '../components/form/MarkerEditForm'
 import AutoHideAlert from '../components/AutoHideAlert'
 import CountrySelect from '../components/map/mappart/countryselect/CountrySelect'
 
-import filters from '../scripts/filter'
 import search from '../scripts/search'
 
 import styles from '../styles/list.module.css'

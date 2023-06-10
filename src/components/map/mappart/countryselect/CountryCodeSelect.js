@@ -106,6 +106,7 @@ function CountryCodeSelect({
                 opacity: listOpacity,
                 width: '55vw',
                 borderRadius: '5px',
+                pointerEvents: open ? 'auto' : 'none',
             }}
         >
             {countrycodes.map((code, index) => (

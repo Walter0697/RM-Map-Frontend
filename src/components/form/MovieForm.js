@@ -181,6 +181,8 @@ function MovieForm({
                     <Grid item xs={12} md={12} lg={12}>
                         <NullableDatePicker
                             label={'selected time'}
+                            required
+                            noPast
                             value={formValue.selected_time}
                             onValueChange={(e) => onValueChangeHandler('selected_time', e)}
                             errorMessage={error.selected_time}
@@ -263,7 +265,10 @@ function MovieForm({
             <ImagePreview
                 shouldOpen={imageFormState === 'preview'}
                 handleClose={() => setImageState('')}
-                imageInfo={movie?.image_link}
+                imageInfo={{
+                    type: 'weblink',
+                    value: movie?.image_link,
+                }}
             />
         </>
     )

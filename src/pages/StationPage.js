@@ -108,7 +108,6 @@ function StationPage({
     }
 
     const refresh = () => {
-        console.log('calling')
         listStationGQL()
     }
 
