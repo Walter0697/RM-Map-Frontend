@@ -11,6 +11,7 @@ import releasenotes from './releasenote'
 import scrappers from './scrapper'
 import stations from './station'
 import roroadlists from './roroadlist'
+import countries from './country'
 
 const graphql = {
     auth,
@@ -26,6 +27,7 @@ const graphql = {
     scrappers,
     stations,
     roroadlists,
+    countries,
 }
 
 export default graphql
