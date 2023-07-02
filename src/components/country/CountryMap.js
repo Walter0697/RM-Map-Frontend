@@ -25,6 +25,8 @@ const makeTransformValue = use3DTransform
 function CountryMap({
     pointerRef,
     pointerRef2,
+    displayInfo1,
+    displayInfo2,
     dimension,
     setTrigger,
     onItemClickHandler,
@@ -125,25 +127,8 @@ function CountryMap({
                             <ZoomInMapIcon fontSize='10px' color={'error'} />
                         </div>
                     )}
-                    {position && (
-                        <div 
-                            ref={pointerRef}
-                            style={{
-                                position: 'absolute',
-                                left: position.x,
-                                top: position.y,
-                                width: '10px',
-                                height: '10px',
-                                transform: 'translate(-50%, -50%)',
-                                backgroundColor: 'red',
-                                pointerEvents: 'none',
-                                borderRadius: '5px',
-                            }}
-                        >
-                            
-                        </div>
-                    )}
-                   
+                    <CountryPointDot displayInfo={displayInfo1} pointerRef={pointerRef} />                   
+                    <CountryPointDot displayInfo={displayInfo2} pointerRef={pointerRef2} />                   
                 </div>
             </QuickPinchZoom>
             <div
@@ -159,6 +144,34 @@ function CountryMap({
                     <CenterFocusStrongIcon />
                 </CircleIconButton>
             </div>
+        </div>
+    )
+}
+
+function CountryPointDot({
+    displayInfo,
+    pointerRef,
+}) {
+    if (!displayInfo) return false
+    return (
+        <div 
+            ref={pointerRef}
+            style={{
+                position: 'absolute',
+                left: displayInfo.x,
+                top: displayInfo.y,
+                width: '10px',
+                height: '10px',            
+                pointerEvents: 'none',
+            }}
+        >
+            <div style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'red',
+                borderRadius: '5px',
+                transform: 'translate(-50%, -50%)',
+            }}></div>
         </div>
     )
 }

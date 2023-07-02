@@ -256,6 +256,20 @@ export const resetFilterCountry = (filtered) => {
     }
 }
 
+export const resetCountryPoints = (countryPoints) => {
+    return {
+        type: constants.RESET_COUNTRYPOINT,
+        countryPoints,
+    }
+}
+
+export const resetCountryLocations = (countryLocations) => {
+    return {
+        type: constants.RESET_COUNTRYLOCATION,
+        countryLocations,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -293,6 +307,8 @@ const actions = {
     resetCountryCodes,
     resetCountryParts,
     resetFilterCountry,
+    resetCountryPoints,
+    resetCountryLocations,
 }
 
 export default actions

@@ -7,6 +7,7 @@ import station from './station'
 import filter from './filter'
 import movie from './movie'
 import roroadlist from './roroadlist'
+import country from './country'
 
 const reducers = {
     auth,
@@ -18,6 +19,7 @@ const reducers = {
     filter,
     movie,
     roroadlist,
+    country,
 }
 
 export default reducers
