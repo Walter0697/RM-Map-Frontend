@@ -8,39 +8,41 @@ import CancelIcon from '@mui/icons-material/Cancel'
 import { Alert, Button } from '@mui/material'
 
 import useBoop from '../hooks/useBoop'
+import useCountryPoint from '../hooks/useCountryPoint'
 
 import Base from './Base'
 import CountryMap from '../components/country/CountryMap'
-import StationMap from '../components/station/StationMap'
-import StationInfo from '../components/station/StationInfo'
 import CircleIconButton from '../components/field/CircleIconButton'
 import TopBar from '../components/topbar/TopBar'
 import AutoHideAlert from '../components/AutoHideAlert'
 
 import CountryPointCreateForm from '../components/form/country/CountryPointCreateForm'
 
-import actions from '../store/actions'
-import graphql from '../graphql'
-
 const currentDimension = {
     width: 2291,
     height: 2048,
 }
 const headerHeight = 56
+const pointerLineAndMapDistance = 30
+const countryLocationBoxHeight = 100
 
 function CountryPage({
-    stations,
+    countryPoints,
+    countryLocations,
+    currentShowPoints,
     dispatch,
 }) {
     const history = useHistory()
 
+    const [ mapName, setMapName ] = useState('JAPAN')
+
     const [ isAdding, setIsAdding ] = useState(false)
     const [ addingPosition, setAddingPosition ] = useState(null)
     const [ addDialog, setAddDialog ] = useState(false)
+    const [ createAlert, confirmCreated ] = useBoop(3000)
 
-    const mapPointerRef = useRef(null)
-    const mapPointer2Ref = useRef(null)
-
+    // getting the whole screen size to show the svg container
+    const [ viewPort, setViewPort ] = useState({ x: 0, y: 0 })
     const containerRef = useRef(null)
     useEffect(() => {
         if (containerRef) {
@@ -51,30 +53,19 @@ function CountryPage({
         }
     }, [containerRef])
 
-    const [ viewPort, setViewPort ] = useState({ x: 0, y: 0 })
+    const viewBoxStr = useMemo(() => {
+        return `0 0 ${viewPort.x} ${viewPort.y}`
+    }, [viewPort])
+
+    // for updating the pointer position even if the map moving
     const [ trigger, setTrigger ] = useState(0)
-
-    const [ currentPointer1, setPointer1 ] = useState({ x: 0, y: 0 })
-    const [ currentPointer2, setPointer2 ] = useState({ x: 0, y: 0 })
-
-    useEffect(() => {
-        if (mapPointerRef && mapPointerRef.current) {
-            const topPos = mapPointerRef.current.getBoundingClientRect().top + window.scrollY
-            const leftPos = mapPointerRef.current.getBoundingClientRect().left + window.scrollX
-            setPointer1({
-                // set to current location relative to screen
-                x: leftPos,
-                y: topPos - headerHeight,
-            })
-        }
-    }, [mapPointerRef, trigger])
 
     const visibleBoundary = useMemo(() => {
         const expectedWidth = window.innerWidth * 0.9
         const expectedHeight =  expectedWidth * (currentDimension.height / currentDimension.width)
         const left = (window.innerWidth - expectedWidth) / 2
         const right = left + expectedWidth
-        const top = (window.innerHeight - expectedHeight) / 2 - headerHeight
+        const top = (viewPort.y - expectedHeight) / 2
         const bottom = top + expectedHeight
         return {
             left,
@@ -84,18 +75,67 @@ function CountryPage({
         }
     }, [viewPort])
 
-    const shouldShowPointer = useMemo(() => {
-        if (currentPointer1.x > visibleBoundary.left && currentPointer1.x < visibleBoundary.right) {
-            if (currentPointer1.y > visibleBoundary.top && currentPointer1.y < visibleBoundary.bottom) {
-                return true
-            }
+    const pointer1Head = useMemo(() => {
+        return {
+            x: visibleBoundary.left * 0.7 + visibleBoundary.right * 0.3,
+            y: visibleBoundary.top - pointerLineAndMapDistance,
         }
-        return false
-    }, [visibleBoundary, currentPointer1])
+    }, [visibleBoundary])
 
-    const viewBoxStr = useMemo(() => {
-        return `0 0 ${viewPort.x} ${viewPort.y}`
-    }, [viewPort])
+    const pointer2Head = useMemo(() => {
+        return {
+            x: visibleBoundary.left * 0.3 + visibleBoundary.right * 0.7,
+            y: visibleBoundary.bottom + pointerLineAndMapDistance,
+        }
+    }, [visibleBoundary])
+
+    // data related
+    const countryPointList = useMemo(() => {
+        if (!countryPoints) return []
+        return countryPoints.filter(point => point.map_name === mapName)
+    }, [countryPoints, mapName])
+
+    const displayInfo1 = useMemo(() => {
+        if (!countryPointList || countryPointList.length === 0) return null
+        if (!currentShowPoints[mapName] || !currentShowPoints[mapName].top) return null
+        const id = currentShowPoints[mapName].top
+        const currentPoint = countryPointList.find(point => point.id === id)
+        if (!currentPoint) return null
+        
+        return {
+            x: currentPoint.photo_x,
+            y: currentPoint.photo_y,
+            info: currentPoint,
+        }
+    }, [countryPointList, currentShowPoints])
+
+    const displayInfo2 = useMemo(() => {
+        if (!countryPointList || countryPointList.length === 0) return null
+        if (!currentShowPoints[mapName] || !currentShowPoints[mapName].bottom) return null
+        const id = currentShowPoints[mapName].bottom
+        const currentPoint = countryPointList.find(point => point.id === id)
+        if (!currentPoint) return null
+        
+        return {
+            x: currentPoint.photo_x,
+            y: currentPoint.photo_y,
+            info: currentPoint,
+        }
+    }, [countryPointList])
+
+    const [ mapPointerRef, currentPointer1, shouldShowPointer1 ] = useCountryPoint({
+        headerHeight,
+        trigger,
+        visibleBoundary,
+        displayInfo: displayInfo1,
+    })
+
+    const [ mapPointerRef2, currentPointer2, shouldShowPointer2 ] = useCountryPoint({
+        headerHeight,
+        trigger,
+        visibleBoundary,
+        displayInfo: displayInfo2,
+    })
 
     const onAddClickHandler = () => {
         setIsAdding(true)
@@ -121,11 +161,19 @@ function CountryPage({
 
     const onCountryPointCreated = () => {
         setAddDialog(false)
+        onAddCancelHandler()
+        confirmCreated()
     }
 
     const onMapClickHandler = (location) => {
         if (isAdding) {
             setAddingPosition(location)
+        }
+    }
+
+    const onItemClickHandler = (item) => {
+        if (isAdding) {
+            console.log(item)
         }
     }
 
@@ -149,9 +197,11 @@ function CountryPage({
                 <CountryMap 
                     dimension={currentDimension}
                     pointerRef={mapPointerRef}
-                    pointerRef2={mapPointer2Ref}
+                    pointerRef2={mapPointerRef2}
+                    displayInfo1={displayInfo1}
+                    displayInfo2={displayInfo2}
                     setTrigger={setTrigger}
-                    onItemClickHandler={() => {}}
+                    onItemClickHandler={onItemClickHandler}
                     onMapClickHandler={onMapClickHandler}
                     addingPosition={addingPosition}
                 />
@@ -164,10 +214,39 @@ function CountryPage({
                         pointerEvents: 'none',
                     }}
                 >
-                    {shouldShowPointer && (
-                        <line x1={20 + 80} y1={1} x2={currentPointer1.x} y2={currentPointer1.y} stroke='red'/>
+                    {shouldShowPointer1 && !isAdding && (
+                        <line x1={pointer1Head.x} y1={pointer1Head.y} x2={currentPointer1.x} y2={currentPointer1.y} stroke='red' strokeWidth={3} />
+                    )}
+                    {shouldShowPointer2 && !isAdding && (
+                        <line x1={pointer2Head.x} y1={pointer2Head.y} x2={currentPointer2.x} y2={currentPointer2.y} stroke='red' strokeWidth={3} />
                     )}
                 </svg>
+
+                {/* country location info display */}
+                {displayInfo1 && !isAdding && (
+                    <Button style={{
+                        position: 'absolute',
+                        top: pointer1Head.y - countryLocationBoxHeight,
+                        left: '5%',
+                        width: '90%',
+                        height: countryLocationBoxHeight,
+                        backgroundColor: 'red',
+                        borderRadius: '5px',
+                    }}></Button>
+                )}
+                
+                {displayInfo2 && !isAdding && (
+                    <Button style={{
+                        position: 'absolute',
+                        top: pointer2Head.y,
+                        left: '5%',
+                        width: '90%',
+                        height: countryLocationBoxHeight,
+                        backgroundColor: 'red',
+                        borderRadius: '5px',
+                    }}></Button>
+                )}
+                
 
                 {/* button list */}
                 <div
@@ -212,19 +291,26 @@ function CountryPage({
                         >Add Pointer</Button>
                     </div>
                 )}
-                
             </div>
             <CountryPointCreateForm 
                 open={addDialog}
                 handleClose={() => setAddDialog(false)}
                 position={addingPosition}
-                mapName={'JAPAN'}
+                mapName={mapName}
                 onCreated={onCountryPointCreated}
+            />
+            <AutoHideAlert 
+                open={createAlert}
+                type={'success'}
+                message={'Successfully create point!'}
+                timing={3000}
             />
         </Base>
     )
 }
 
 export default connect(state => ({
-    stations: state.station.stations,
+    countryPoints: state.country.countryPoints,
+    countryLocations: state.country.countryLocations,
+    currentShowPoints: state.country.currentShowPoints,
 })) (CountryPage)

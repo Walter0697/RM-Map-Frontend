@@ -1,6 +1,3 @@
-// countrypoints: [CountryPoint]!
-//   countrylocations: [CountryLocation]!
-
 import { gql } from '@apollo/client'
 
 const listCountryPoint = gql`
