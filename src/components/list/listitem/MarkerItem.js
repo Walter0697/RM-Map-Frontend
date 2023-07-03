@@ -10,6 +10,7 @@ import PinDropIcon from '@mui/icons-material/PinDrop'
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
 
 import ImageHeadText from '../../wrapper/ImageHeadText'
+import constant from '../../../scripts/constant'
 
 function MarkerItem({
     item,
@@ -37,7 +38,7 @@ function MarkerItem({
             size='large'
             style={{
                 position: 'relative',
-                backgroundColor: '#48acdb',
+                backgroundColor: constant.StaticColour.CardBackground,
                 borderRadius: '5px',
                 height: '100%',
                 width: '100%',
@@ -45,7 +46,7 @@ function MarkerItem({
                 alignItems: 'flex-start',
                 textTransform: 'none',
                 padding: '0',
-                border: item.status === 'scheduled' ? '3px solid green' : '',
+                border: item.status === 'scheduled' ? `3px solid ${constant.StaticColour.ScheduledBorder}` : '',
             }}
             onClick={onClickHandler}
         >
