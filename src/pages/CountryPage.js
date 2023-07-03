@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router-dom'
-import { useLazyQuery } from '@apollo/client'
 
 import AddIcon from '@mui/icons-material/Add'
 import CancelIcon from '@mui/icons-material/Cancel'
@@ -12,11 +11,16 @@ import useCountryPoint from '../hooks/useCountryPoint'
 
 import Base from './Base'
 import CountryMap from '../components/country/CountryMap'
+import LocationPreviewList from '../components/country/LocationPreviewList'
+
 import CircleIconButton from '../components/field/CircleIconButton'
 import TopBar from '../components/topbar/TopBar'
 import AutoHideAlert from '../components/AutoHideAlert'
 
 import CountryPointCreateForm from '../components/form/country/CountryPointCreateForm'
+
+import generic from '../scripts/generic'
+import constant from '../scripts/constant'
 
 const currentDimension = {
     width: 2291,
@@ -30,6 +34,7 @@ function CountryPage({
     countryPoints,
     countryLocations,
     currentShowPoints,
+    markers,
     dispatch,
 }) {
     const history = useHistory()
@@ -105,9 +110,10 @@ function CountryPage({
         return {
             x: currentPoint.photo_x,
             y: currentPoint.photo_y,
+            label: currentPoint.label,
             info: currentPoint,
         }
-    }, [countryPointList, currentShowPoints])
+    }, [countryPointList, currentShowPoints, countryLocations])
 
     const displayInfo2 = useMemo(() => {
         if (!countryPointList || countryPointList.length === 0) return null
@@ -215,36 +221,28 @@ function CountryPage({
                     }}
                 >
                     {shouldShowPointer1 && !isAdding && (
-                        <line x1={pointer1Head.x} y1={pointer1Head.y} x2={currentPointer1.x} y2={currentPointer1.y} stroke='red' strokeWidth={3} />
+                        <line x1={pointer1Head.x} y1={pointer1Head.y} x2={currentPointer1.x} y2={currentPointer1.y} stroke={constant.StaticColour.CountryLocationBorder} strokeWidth={3} />
                     )}
                     {shouldShowPointer2 && !isAdding && (
-                        <line x1={pointer2Head.x} y1={pointer2Head.y} x2={currentPointer2.x} y2={currentPointer2.y} stroke='red' strokeWidth={3} />
+                        <line x1={pointer2Head.x} y1={pointer2Head.y} x2={currentPointer2.x} y2={currentPointer2.y} stroke={constant.StaticColour.CountryLocationBorder} strokeWidth={3} />
                     )}
                 </svg>
 
                 {/* country location info display */}
                 {displayInfo1 && !isAdding && (
-                    <Button style={{
-                        position: 'absolute',
-                        top: pointer1Head.y - countryLocationBoxHeight,
-                        left: '5%',
-                        width: '90%',
-                        height: countryLocationBoxHeight,
-                        backgroundColor: 'red',
-                        borderRadius: '5px',
-                    }}></Button>
+                    <LocationPreviewList 
+                        top={pointer1Head.y - countryLocationBoxHeight}
+                        height={countryLocationBoxHeight}
+                        displayInfo={displayInfo1}
+                    />
                 )}
                 
                 {displayInfo2 && !isAdding && (
-                    <Button style={{
-                        position: 'absolute',
-                        top: pointer2Head.y,
-                        left: '5%',
-                        width: '90%',
-                        height: countryLocationBoxHeight,
-                        backgroundColor: 'red',
-                        borderRadius: '5px',
-                    }}></Button>
+                    <LocationPreviewList 
+                        top={pointer2Head.y}
+                        height={countryLocationBoxHeight}
+                        displayInfo={displayInfo2}
+                    />
                 )}
                 
 
@@ -310,6 +308,7 @@ function CountryPage({
 }
 
 export default connect(state => ({
+    markers: state.marker.markers,
     countryPoints: state.country.countryPoints,
     countryLocations: state.country.countryLocations,
     currentShowPoints: state.country.currentShowPoints,
