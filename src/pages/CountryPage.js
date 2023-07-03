@@ -18,6 +18,7 @@ import TopBar from '../components/topbar/TopBar'
 import AutoHideAlert from '../components/AutoHideAlert'
 
 import CountryPointCreateForm from '../components/form/country/CountryPointCreateForm'
+import CountryLocationList from '../components/form/country/CountryLocationList'
 
 import generic from '../scripts/generic'
 import constant from '../scripts/constant'
@@ -41,10 +42,15 @@ function CountryPage({
 
     const [ mapName, setMapName ] = useState('JAPAN')
 
+    // adding related
     const [ isAdding, setIsAdding ] = useState(false)
     const [ addingPosition, setAddingPosition ] = useState(null)
     const [ addDialog, setAddDialog ] = useState(false)
     const [ createAlert, confirmCreated ] = useBoop(3000)
+
+    // for display country location 
+    const [ openLocationList, setOpenLocationList ] = useState(false)
+    const [ countryPointId, setCountryPointId ] = useState(null)
 
     // getting the whole screen size to show the svg container
     const [ viewPort, setViewPort ] = useState({ x: 0, y: 0 })
@@ -183,6 +189,11 @@ function CountryPage({
         }
     }
 
+    const onLocationListClick = (pointId) => {
+        setCountryPointId(pointId)
+        setOpenLocationList(true)
+    }
+
     return (
         <Base>
             <TopBar
@@ -234,6 +245,7 @@ function CountryPage({
                         top={pointer1Head.y - countryLocationBoxHeight}
                         height={countryLocationBoxHeight}
                         displayInfo={displayInfo1}
+                        onClick={() => onLocationListClick(displayInfo1.info.id)}
                     />
                 )}
                 
@@ -242,6 +254,7 @@ function CountryPage({
                         top={pointer2Head.y}
                         height={countryLocationBoxHeight}
                         displayInfo={displayInfo2}
+                        onClick={() => onLocationListClick(displayInfo2.info.id)}
                     />
                 )}
                 
@@ -296,6 +309,12 @@ function CountryPage({
                 position={addingPosition}
                 mapName={mapName}
                 onCreated={onCountryPointCreated}
+            />
+            <CountryLocationList
+                open={openLocationList}
+                handleClose={() => setOpenLocationList(false)}
+                countryPointId={countryPointId}
+                mapName={mapName}
             />
             <AutoHideAlert 
                 open={createAlert}

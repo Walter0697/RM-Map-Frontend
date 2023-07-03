@@ -8,6 +8,8 @@ import {
 
 import useBoop from '../../hooks/useBoop'
 
+import RoundImage from '../wrapper/RoundImage'
+
 import { Button } from '@mui/material'
 
 import math from '../../scripts/generic/math'
@@ -19,6 +21,7 @@ function LocationPreviewList({
     height,
     countryLocations,
     markers,
+    onClick,
 }) {
     const [ isBlinking, setBlink ] = useBoop(500)
     const [ imageList, setImageList ] = useState([])
@@ -36,7 +39,6 @@ function LocationPreviewList({
     const setRandomListImage = (list) => {
         const shuffleList = math.shuffleElement(list, 8)
         setBlink()
-        console.log('testing')
         setTimeout(() => {
             setImageList(shuffleList)
         }, 500)
@@ -57,6 +59,7 @@ function LocationPreviewList({
             const currentLocation = locationList[i]
             if (currentLocation.image_link) {
                 photoList.push(currentLocation.image_link)
+                continue
             }
             const currentMarker = markers.find(marker => marker.id === currentLocation.marker_id)
             if (currentMarker) {
@@ -79,25 +82,28 @@ function LocationPreviewList({
     }, [displayInfo, countryLocations, markers])
     
     return (
-        <Button style={{
-            position: 'absolute',
-            top: top,
-            height: height,
-            left: '5%',
-            width: '90%',
-            backgroundColor: constant.StaticColour.CardBackground,
-            border: `3px solid ${constant.StaticColour.CountryLocationBorder}`,
-            borderRadius: '5px',
-            color: constant.StaticColour.CountryLocationBorder,
-            display: 'flex',
-            justifyContent: 'flex-start',
-            alignItems: 'flex-start',
-            textTransform: 'none',
-            fontSize: '16px',
-            paddingTop: '1px',
-            paddingLeft: '5px',
-            flexDirection: 'column',
-        }}>
+        <Button 
+            style={{
+                position: 'absolute',
+                top: top,
+                height: height,
+                left: '5%',
+                width: '90%',
+                backgroundColor: constant.StaticColour.CardBackground,
+                border: `3px solid ${constant.StaticColour.CountryLocationBorder}`,
+                borderRadius: '5px',
+                color: constant.StaticColour.CountryLocationBorder,
+                display: 'flex',
+                justifyContent: 'flex-start',
+                alignItems: 'flex-start',
+                textTransform: 'none',
+                fontSize: '16px',
+                paddingTop: '1px',
+                paddingLeft: '5px',
+                flexDirection: 'column',
+            }}
+            onClick={onClick}
+        >
             <div>{displayInfo.label}</div>
             <animated.div
                 style={{
@@ -119,12 +125,11 @@ function LocationPreviewList({
                         <div style={{
                             height: imageHeight,
                             width: imageHeight,
-                            borderRadius: '5px',
                             overflow: 'hidden',
                         }}>
-                            <img 
+                            <RoundImage 
                                 height={imageHeight}
-                                src={constant.BackendImageLink + image}
+                                src={image}
                             />
                         </div>
                     </div>
