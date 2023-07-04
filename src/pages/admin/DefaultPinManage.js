@@ -15,6 +15,7 @@ import AdminTopBar from '../../components/topbar/AdminTopBar'
 import DefaultPinForm from '../../components/form/admin/DefaultPinForm'
 
 import graphql from '../../graphql'
+import constants from '../../constant'
 
 function DefaultPinManage() {
     // graphql request
@@ -103,7 +104,7 @@ function DefaultPinManage() {
                                 >
                                     <img
                                     height='70px'
-                                    src={process.env.REACT_APP_IMAGE_LINK + item.pin.display_path}
+                                    src={constants.BackendImageLink + item.pin.display_path}
                                 />
                                 </Grid>
                             ) : (

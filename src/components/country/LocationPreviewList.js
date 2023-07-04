@@ -13,7 +13,7 @@ import RoundImage from '../wrapper/RoundImage'
 import { Button } from '@mui/material'
 
 import math from '../../scripts/generic/math'
-import constant from '../../scripts/constant'
+import constants from '../../constant'
 
 function LocationPreviewList({
     displayInfo,
@@ -89,10 +89,10 @@ function LocationPreviewList({
                 height: height,
                 left: '5%',
                 width: '90%',
-                backgroundColor: constant.StaticColour.CardBackground,
-                border: `3px solid ${constant.StaticColour.CountryLocationBorder}`,
+                backgroundColor: constants.colors.CardBackground,
+                border: `3px solid ${constants.colors.CountryLocationBorder}`,
                 borderRadius: '5px',
-                color: constant.StaticColour.CountryLocationBorder,
+                color: constants.colors.CountryLocationBorder,
                 display: 'flex',
                 justifyContent: 'flex-start',
                 alignItems: 'flex-start',

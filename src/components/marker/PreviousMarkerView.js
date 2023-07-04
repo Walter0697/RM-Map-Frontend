@@ -19,12 +19,13 @@ import dayjs from 'dayjs'
 import useBoop from '../../hooks/useBoop'
 
 import ImageHeadText from '../wrapper/ImageHeadText'
+import RoundImage from '../wrapper/RoundImage'
 import AutoHideAlert from '../AutoHideAlert'
 import MarkerDescription from './MarkerDescription'
 
-import generic from '../../scripts/generic'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
+import constants from '../../constant'
 
 const TransitionUp = (props) => {
     return <Slide {...props} direction='up' />
@@ -55,7 +56,7 @@ function PreviousMarkerView({
         if (!marker) return
 
         const currentType = eventtypes.find(s => s.value === marker.type)
-        setIcon(process.env.REACT_APP_IMAGE_LINK + currentType.icon_path)
+        setIcon(constants.BackendImageLink + currentType.icon_path)
 
         listMarkerScheduleGQL({ variables: { id: marker.id } })
     }, [marker])
@@ -125,9 +126,9 @@ function PreviousMarkerView({
                                 <Grid container spacing={2}>
                                     { marker.image_link && (
                                         <Grid item xs={12} md={12} lg={12}>
-                                            <img
-                                                width='100%'
-                                                src={process.env.REACT_APP_IMAGE_LINK + marker.image_link}                                            
+                                            <RoundImage
+                                                width={'100%'}
+                                                src={marker.image_link}
                                             />
                                         </Grid>
                                     )}

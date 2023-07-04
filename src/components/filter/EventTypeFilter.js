@@ -7,6 +7,8 @@ import FilterTitle from './FilterTitle'
 import FilterBorder from './FilterBorder'
 import FilterButton from './FilterButton'
 
+import constants from '../../constant'
+
 function EventTypeFilter({
     eventtypes,
     selectedEventTypes,
@@ -14,7 +16,7 @@ function EventTypeFilter({
 }) {
     const displayEventTypes = useMemo(() => {
         return eventtypes.filter(s => !s.hidden).map(s => ({
-            icon: process.env.REACT_APP_IMAGE_LINK + s.icon_path,
+            icon: constants.BackendImageLink + s.icon_path,
             label: s.label,
             value: s.value,
         }))

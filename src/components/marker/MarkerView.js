@@ -30,12 +30,14 @@ import FavouriteIcon from './FavouriteIcon'
 import ImageHeadText from '../wrapper/ImageHeadText'
 import AutoHideAlert from '../AutoHideAlert'
 import RestaurantCard from '../card/RestaurantCard'
+import RoundImage from '../wrapper/RoundImage'
 import MarkerDescription from './MarkerDescription'
 import MarkerShareView from './MarkerShareView'
 
 import generic from '../../scripts/generic'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
+import constants from '../../constant'
 
 const TransitionUp = (props) => {
     return <Slide {...props} direction='up' />
@@ -73,7 +75,7 @@ function MarkerView({
 
         // find the type icon from the list to get the icon path
         const currentType = eventtypes.find(s => s.value === marker.type)
-        setIcon(process.env.REACT_APP_IMAGE_LINK + currentType.icon_path)
+        setIcon(constants.BackendImageLink + currentType.icon_path)
 
         setDeleting(-1)
 
@@ -227,9 +229,9 @@ function MarkerView({
                                 }}>
                                     { marker.image_link && (
                                         <Grid item xs={12} md={12} lg={12}>
-                                            <img
-                                                width='100%'
-                                                src={process.env.REACT_APP_IMAGE_LINK + marker.image_link}                                            
+                                            <RoundImage
+                                                width={'100%'}
+                                                src={marker.image_link}
                                             />
                                         </Grid>
                                     )}

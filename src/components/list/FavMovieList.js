@@ -8,6 +8,7 @@ import dayjs from 'dayjs'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
+import RoundImage from '../wrapper/RoundImage'
 
 import constant from '../../constant'
 
@@ -57,18 +58,14 @@ function MovieItem({
                     style={{ marginTop: '15px'}}
                 >
                     {item.image_path ? (
-                        <img
-                            style={{
-                                width: '80%',
-                            }}
-                            src={process.env.REACT_APP_IMAGE_LINK + item.image_path}
+                        <RoundImage 
+                            width={'80%'}
+                            src={item.image_path}
                         />
                     ) : (
-                        <img 
-                            style={{
-                                width: '80%',
-                            }}
-                            src={process.env.REACT_APP_IMAGE_LINK + movieTypeIcon}
+                        <RoundImage 
+                            width={'80%'}
+                            src={movieTypeIcon}
                         />
                     )}
                     

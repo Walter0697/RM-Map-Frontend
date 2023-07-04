@@ -7,6 +7,7 @@ import {
 import BaseForm from '../BaseForm'
 
 import graphql from '../../../graphql'
+import constants from '../../../constant'
 
 function PreferredPinForm({
     open,
@@ -97,7 +98,7 @@ function PreferredPinForm({
                                     {item.label}  
                                     <img
                                         width='100%'
-                                        src={process.env.REACT_APP_IMAGE_LINK + item.display_path}
+                                        src={constants.BackendImageLink + item.display_path}
                                     />  
                                 </div>
                             </Grid>

@@ -9,7 +9,8 @@ import PinDropIcon from '@mui/icons-material/PinDrop'
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
 
 import ImageHeadText from '../../wrapper/ImageHeadText'
-import constant from '../../../scripts/constant'
+import RoundImage from '../../wrapper/RoundImage'
+import constants from '../../../constant'
 
 function MarkerItem({
     item,
@@ -37,7 +38,7 @@ function MarkerItem({
             size='large'
             style={{
                 position: 'relative',
-                backgroundColor: constant.StaticColour.CardBackground,
+                backgroundColor: constants.colors.CardBackground,
                 borderRadius: '5px',
                 height: '100%',
                 width: '100%',
@@ -45,7 +46,7 @@ function MarkerItem({
                 alignItems: 'flex-start',
                 textTransform: 'none',
                 padding: '0',
-                border: item.status === 'scheduled' ? `3px solid ${constant.StaticColour.ScheduledBorder}` : '',
+                border: item.status === 'scheduled' ? `3px solid ${constants.colors.ScheduledBorder}` : '',
             }}
             onClick={onClickHandler}
         >
@@ -58,10 +59,10 @@ function MarkerItem({
                     item xs={4}
                     style={{ marginTop: '15px', overflow: 'hidden', paddingLeft: '15px' }}
                 >
-                    <img
-                    height='90px'
-                    src={process.env.REACT_APP_IMAGE_LINK + item.image_link}
-                    onError={onImageFailedToLoad}
+                    <RoundImage 
+                        height={'90px'}
+                        src={item.image_link}
+                        onError={onImageFailedToLoad}
                     />
                 </Grid>
             ) : (
@@ -69,9 +70,10 @@ function MarkerItem({
                     item xs={4}
                     style={{ marginTop: '15px', overflow: 'hidden', paddingLeft: '15px' }}
                 >
-                    <img
-                    height='90px'
-                    src={process.env.REACT_APP_IMAGE_LINK + typeIcon}
+                    <RoundImage 
+                        height={'90px'}
+                        src={typeIcon}
+                        onError={onImageFailedToLoad}
                     />
                 </Grid>
             )}
@@ -92,7 +94,7 @@ function MarkerItem({
                     }}
                     >
                         <ImageHeadText
-                            iconPath={process.env.REACT_APP_IMAGE_LINK + typeIcon}
+                            iconPath={constants.BackendImageLink + typeIcon}
                             iconSize='20px'
                             label={item.label}
                             labelSize='20px'

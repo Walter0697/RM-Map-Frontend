@@ -2,16 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import {
     Grid,
-    TextField,
-    Button,
-    FormControl,
-    InputLabel,
-    FormHelperText,
 } from '@mui/material'
 
 import BaseForm from '../BaseForm'
 
 import graphql from '../../../graphql'
+import constants from '../../../constant'
 
 function DefaultPinForm({
     open,
@@ -99,7 +95,7 @@ function DefaultPinForm({
                                     {item.label}  
                                     <img
                                         width='100%'
-                                        src={process.env.REACT_APP_IMAGE_LINK + item.display_path}
+                                        src={constants.BackendImageLink + item.display_path}
                                     />  
                                 </div>
                             </Grid>

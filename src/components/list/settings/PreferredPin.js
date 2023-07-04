@@ -49,7 +49,7 @@ function PreferredPin({
                                     }}
                                 >
                                     <img 
-                                        src={process.env.REACT_APP_IMAGE_LINK + pin.image_path}
+                                        src={constants.BackendImageLink + pin.image_path}
                                         width='70%'
                                     />
                                 </Grid>

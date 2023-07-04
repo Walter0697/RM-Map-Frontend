@@ -8,6 +8,8 @@ import {
     Button,
 } from '@mui/material'
 
+import RoundImage from '../../wrapper/RoundImage'
+
 function TodaySchedule({
     list,   // an array of string containning image link
     onClickHandler,
@@ -82,9 +84,9 @@ function TodaySchedule({
                                         overflow: 'hidden',
                                     }}
                                 >
-                                    <img 
-                                        height='50px'
-                                        src={process.env.REACT_APP_IMAGE_LINK + schedule.image_path}
+                                    <RoundImage 
+                                        width={'50px'}
+                                        src={schedule.image_path}
                                     />
                                 </div>
                             </div>

@@ -10,6 +10,7 @@ import {
     Slide,
 } from '@mui/material'
 import image from '../../../scripts/image'
+import constants from '../../../constant'
 
 const TransitionFromLeft = (props) => {
     return <Slide {...props} direction='right' />
@@ -55,7 +56,7 @@ function ImagePreview({
                             width: '100%',
                             height: '100%',
                         }}
-                        src={process.env.REACT_APP_IMAGE_LINK + imageInfo.value}
+                        src={constants.BackendImageLink + imageInfo.value}
                         alt={'preview'}
                     />
                 )

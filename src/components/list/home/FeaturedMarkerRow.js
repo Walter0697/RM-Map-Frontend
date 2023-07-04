@@ -4,6 +4,8 @@ import {
     Button,
 } from '@mui/material'
 
+import RoundImage from '../../wrapper/RoundImage'
+
 import markerhelper from '../../../scripts/marker'
 
 function FeaturedMarker({
@@ -60,9 +62,9 @@ function FeaturedMarker({
                             height: 'auto',
                         }}
                     >
-                        <img
-                            width='80%'
-                            src={process.env.REACT_APP_IMAGE_LINK + imageLink}
+                        <RoundImage 
+                            width={'80%'}
+                            src={imageLink}
                         />
                     </Grid>
                     <Grid

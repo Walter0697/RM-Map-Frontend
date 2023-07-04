@@ -14,9 +14,7 @@ import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
 import CircleIconButton from '../field/CircleIconButton'
 
-import constant from '../../constant'
-
-import actions from '../../store/actions'
+import constants from '../../constant'
 import graphql from '../../graphql'
 
 function MovieItem({
@@ -94,7 +92,7 @@ function MovieItem({
                             style={{
                                 width: '80%',
                             }}
-                            src={process.env.REACT_APP_IMAGE_LINK + movieTypeIcon}
+                            src={constants.BackendImageLink + movieTypeIcon}
                         />
                     )}
                     
@@ -161,7 +159,7 @@ function MovieList({
     }, [searchQuery])
 
     const movieIconImage = useMemo(() => {
-        const movieType = eventtypes.find(s => s.value === constant.identifiers.movieTypeIdentifier)
+        const movieType = eventtypes.find(s => s.value === constants.identifiers.movieTypeIdentifier)
         if (movieType) {
             return movieType.icon_path
         }

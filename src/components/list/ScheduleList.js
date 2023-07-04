@@ -16,6 +16,7 @@ import useBoop from '../../hooks/useBoop'
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
 import AutoUpdateTop from './AutoUpdateTop'
+import RoundImage from '../wrapper/RoundImage'
 
 import generic from '../../scripts/generic'
 import filters from '../../scripts/filter'
@@ -103,9 +104,9 @@ function ScheduleItem({
                                     overflow: 'hidden',
                                 }}
                             >
-                                <img
-                                    height='80px'
-                                    src={process.env.REACT_APP_IMAGE_LINK + sche.image_path}
+                                <RoundImage 
+                                    height={'80px'}
+                                    src={sche.image_path}
                                 />
                             </div>
                         </div>
@@ -226,12 +227,10 @@ function TodayList({
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                     }}>
-                                        <img 
-                                            src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[0].image_path}
-                                            style={{
-                                                maxHeight: '150px',
-                                                width: '90%',
-                                            }}
+                                        <RoundImage 
+                                            maxHeight={'150px'}
+                                            width={'90%'}
+                                            src={bigImageMarkers[0].image_path}
                                         />
                                     </div>
                                     {bigImageMarkers[0].label}
@@ -255,12 +254,10 @@ function TodayList({
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                     }}>
-                                        <img 
-                                            src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[1].image_path}
-                                            style={{
-                                                maxHeight: '150px',
-                                                width: '90%',
-                                            }}
+                                        <RoundImage 
+                                            maxHeight={'150px'}
+                                            width={'90%'}
+                                            src={bigImageMarkers[1].image_path}
                                         />
                                     </div>
                                     {bigImageMarkers[1].label}
@@ -298,9 +295,9 @@ function TodayList({
                                     overflow: 'hidden',
                                 }}
                             >
-                                <img 
-                                    height='50px'
-                                    src={process.env.REACT_APP_IMAGE_LINK + sche.image_path}
+                                <RoundImage 
+                                    height={'50px'}
+                                    src={sche.image_path}
                                 />
                             </div>
                         </div>

@@ -14,7 +14,7 @@ import MarkerView from '../../marker/MarkerView'
 import CountryLocationForm from './CountryLocationForm'
 import AutoHideAlert from '../../AutoHideAlert'
 
-import constant from '../../../scripts/constant'
+import constants from '../../../constant'
 
 function CountryLocationItem({
     location,
@@ -112,7 +112,7 @@ function CountryLocationItem({
                             variant="contained"
                             size="small"
                             style={{
-                                backgroundColor: constant.StaticColour.CardBackground,
+                                backgroundColor: constants.colors.CardBackground,
                                 width: '100%',
                             }}
                             onClick={() => openMarkerPreview(location.markerId)}

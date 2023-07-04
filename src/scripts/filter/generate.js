@@ -1,4 +1,5 @@
 import types from './type'
+import constants from '../../constant'
 
 const eventTypeFilter = (eventtypes) => {
     let typefilter = []
@@ -6,7 +7,7 @@ const eventTypeFilter = (eventtypes) => {
         typefilter.push({
             label: et.label,
             value: et.value,
-            icon: process.env.REACT_APP_IMAGE_LINK + et.icon_path,
+            icon: constants.BackendImageLink + et.icon_path,
             size: 'small',
             hidden: et.hidden,
         })

@@ -1,11 +1,12 @@
 import React from 'react'
 
-import constant from '../../scripts/constant'
+import constants from '../../constant'
 
 function RoundImage({
     style,
     width,
     height,
+    maxHeight,
     src,
     onError,
 }) {
@@ -13,11 +14,12 @@ function RoundImage({
         <img
             style={{
                 ...style,
+                maxHeight: maxHeight ?? null,
                 borderRadius: '5px',
             }}
             width={width ?? null}
             height={height ?? null}
-            src={constant.BackendImageLink + src}
+            src={constants.BackendImageLink + src}
             onError={onError ?? null}
         />
     )

@@ -13,7 +13,7 @@ import CircleIconButton from '../field/CircleIconButton'
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap'
 
-import constant from '../../scripts/constant'
+import constants from '../../constant'
 
 const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
@@ -187,8 +187,8 @@ function CountryPointDot({
             <div style={{
                 width: '100%',
                 height: '100%',
-                backgroundColor: constant.StaticColour.CountryLocationBorder,
-                border: `2px solid ${constant.StaticColour.CardBackground}`,
+                backgroundColor: constants.colors.CountryLocationBorder,
+                border: `2px solid ${constants.colors.CardBackground}`,
                 borderRadius: '50%',
                 transform: 'translate(-50%, -50%)',
             }}></div>

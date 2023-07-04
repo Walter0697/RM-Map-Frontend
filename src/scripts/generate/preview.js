@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import constants from '../../constant'
 
 const previewWidth = 500
 const imageWidth = 450
@@ -95,14 +96,14 @@ const generatePreviewImage = async (marker, eventIcon) => {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
 
-    const eventIconLink = process.env.REACT_APP_IMAGE_LINK + eventIcon.icon_path
+    const eventIconLink = constants.BackendImageLink + eventIcon.icon_path
     const iconImg = await preloadImage(eventIconLink)
 
     let img = null
     let imgDesiredWidth = imageWidth
     let imgDesiredHeight = imageWidth
     if (marker.image_link) {
-        const imageLink = process.env.REACT_APP_IMAGE_LINK + marker.image_link
+        const imageLink = constants.BackendImageLink + marker.image_link
         img = await preloadImage(imageLink)
     
         imgDesiredWidth = imageWidth

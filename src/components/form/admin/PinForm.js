@@ -17,6 +17,7 @@ import BaseForm from '../BaseForm'
 import Selectable from '../../field/Selectable'
 
 import graphql from '../../../graphql'
+import constants from '../../../constant'
 
 import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
@@ -89,7 +90,7 @@ function PinForm({
 
     useEffect(() => {
         if (previewData) {
-            setPreview(process.env.REACT_APP_IMAGE_LINK + previewData.previewPin)
+            setPreview(constants.BackendImageLink + previewData.previewPin)
         }
 
         if (previewError) {

@@ -22,7 +22,7 @@ const getMapPin = (map, location, onMarkerClick, selected, key, markertype, pinS
     const pinImage = getPinImage(mappins, markertype, pinType)
     let pinImageLink = constants.pins.defaultPin
     if (pinImage) {
-        pinImageLink = process.env.REACT_APP_IMAGE_LINK + pinImage
+        pinImageLink = constants.BackendImageLink + pinImage
     }
     
     var div = document.createElement('div')

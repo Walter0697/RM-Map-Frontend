@@ -22,6 +22,7 @@ import useBoop from '../../hooks/useBoop'
 
 import AutoHideAlert from '../AutoHideAlert'
 import RestaurantCard from '../card/RestaurantCard'
+import RoundImage from '../wrapper/RoundImage'
 
 import constants from '../../constant'
 import actions from '../../store/actions'
@@ -125,11 +126,11 @@ function ScheduleItem({
                 </Grid>
                 <Grid item xs={5} fullWidth>
                     {imageExist ? (
-                        <img 
-                            width='90%'
-                            src={process.env.REACT_APP_IMAGE_LINK + item.image_path}
+                        <RoundImage
+                            width={'90%'}
+                            src={item.image_path}
                             onError={onImageFailedToLoad}
-                        /> 
+                        />
                     ) : (
                         <div
                             style={{

@@ -20,7 +20,7 @@ import AutoHideAlert from '../components/AutoHideAlert'
 import CountryPointCreateForm from '../components/form/country/CountryPointCreateForm'
 import CountryLocationList from '../components/form/country/CountryLocationList'
 
-import constant from '../scripts/constant'
+import constants from '../constant'
 import actions from '../store/actions'
 
 const currentDimension = {
@@ -252,10 +252,10 @@ function CountryPage({
                     }}
                 >
                     {shouldShowPointer1 && !isAdding && (
-                        <line x1={pointer1Head.x} y1={pointer1Head.y} x2={currentPointer1.x} y2={currentPointer1.y} stroke={constant.StaticColour.CountryLocationBorder} strokeWidth={3} />
+                        <line x1={pointer1Head.x} y1={pointer1Head.y} x2={currentPointer1.x} y2={currentPointer1.y} stroke={constants.colors.CountryLocationBorder} strokeWidth={3} />
                     )}
                     {shouldShowPointer2 && !isAdding && (
-                        <line x1={pointer2Head.x} y1={pointer2Head.y} x2={currentPointer2.x} y2={currentPointer2.y} stroke={constant.StaticColour.CountryLocationBorder} strokeWidth={3} />
+                        <line x1={pointer2Head.x} y1={pointer2Head.y} x2={currentPointer2.x} y2={currentPointer2.y} stroke={constants.colors.CountryLocationBorder} strokeWidth={3} />
                     )}
                 </svg>
 

@@ -17,6 +17,7 @@ import AdminTopBar from '../../components/topbar/AdminTopBar'
 import MarkerTypeForm from '../../components/form/admin/MarkerTypeForm'
 
 import graphql from '../../graphql'
+import constants from '../../constant'
 
 function TypeManage() {
     const [ listMarkerTypeGQL, { data: typeData, loading: typeLoading, error: typeError } ]= useLazyQuery(graphql.markertypes.list, { fetchPolicy: 'no-cache' })
@@ -139,7 +140,7 @@ function TypeManage() {
                             >
                                 <img
                                     height='70px'
-                                    src={process.env.REACT_APP_IMAGE_LINK + item.icon_path}
+                                    src={constants.BackendImageLink + item.icon_path}
                                 />
                             </Grid>
                             <Grid item xs={6} md={6} lg={6}>

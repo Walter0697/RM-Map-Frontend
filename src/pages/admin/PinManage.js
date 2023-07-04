@@ -17,6 +17,7 @@ import AdminTopBar from '../../components/topbar/AdminTopBar'
 import PinForm from '../../components/form/admin/PinForm'
 
 import graphql from '../../graphql'
+import constants from '../../constant'
 
 function PinManage() {
     // graphql request
@@ -147,7 +148,7 @@ function PinManage() {
                             >
                                 <img
                                     height='70px'
-                                    src={process.env.REACT_APP_IMAGE_LINK + item.image_path}
+                                    src={constants.BackendImageLink + item.image_path}
                                 />
                             </Grid>
                             <Grid item xs={6} md={6} lg={6}>
