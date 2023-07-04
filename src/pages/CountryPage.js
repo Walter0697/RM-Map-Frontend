@@ -20,8 +20,8 @@ import AutoHideAlert from '../components/AutoHideAlert'
 import CountryPointCreateForm from '../components/form/country/CountryPointCreateForm'
 import CountryLocationList from '../components/form/country/CountryLocationList'
 
-import generic from '../scripts/generic'
 import constant from '../scripts/constant'
+import actions from '../store/actions'
 
 const currentDimension = {
     width: 2291,
@@ -35,12 +35,12 @@ function CountryPage({
     countryPoints,
     countryLocations,
     currentShowPoints,
-    markers,
     dispatch,
 }) {
     const history = useHistory()
+    const showPointSettingTop = useRef(true)   // will switch between top and bottom
 
-    const [ mapName, setMapName ] = useState('JAPAN')
+    const [ mapName, setMapName ] = useState('Japan')
 
     // adding related
     const [ isAdding, setIsAdding ] = useState(false)
@@ -103,7 +103,8 @@ function CountryPage({
     // data related
     const countryPointList = useMemo(() => {
         if (!countryPoints) return []
-        return countryPoints.filter(point => point.map_name === mapName)
+        const list = countryPoints.filter(point => point.map_name === mapName)
+        return list
     }, [countryPoints, mapName])
 
     const displayInfo1 = useMemo(() => {
@@ -112,14 +113,14 @@ function CountryPage({
         const id = currentShowPoints[mapName].top
         const currentPoint = countryPointList.find(point => point.id === id)
         if (!currentPoint) return null
-        
+
         return {
             x: currentPoint.photo_x,
             y: currentPoint.photo_y,
             label: currentPoint.label,
             info: currentPoint,
         }
-    }, [countryPointList, currentShowPoints, countryLocations])
+    }, [countryPointList, currentShowPoints, countryLocations, mapName])
 
     const displayInfo2 = useMemo(() => {
         if (!countryPointList || countryPointList.length === 0) return null
@@ -131,9 +132,21 @@ function CountryPage({
         return {
             x: currentPoint.photo_x,
             y: currentPoint.photo_y,
+            label: currentPoint.label,
             info: currentPoint,
         }
-    }, [countryPointList])
+    }, [countryPointList, currentShowPoints, countryLocations, mapName])
+
+    const unfocusLocationList = useMemo(() => {
+        if (!countryPointList || countryPointList.length === 0) return []
+        if (!currentShowPoints[mapName] || !currentShowPoints[mapName].bottom) return countryPointList
+        const list = countryPointList.filter(point => {
+            if (point.id === currentShowPoints[mapName].top) return false
+            if (point.id === currentShowPoints[mapName].bottom) return false
+            return true
+        })
+        return list
+    }, [countryPointList, currentShowPoints])
 
     const [ mapPointerRef, currentPointer1, shouldShowPointer1 ] = useCountryPoint({
         headerHeight,
@@ -184,8 +197,14 @@ function CountryPage({
     }
 
     const onItemClickHandler = (item) => {
-        if (isAdding) {
-            console.log(item)
+        if (!isAdding) {
+            const showPoints = Object.assign({}, currentShowPoints)
+            const currentShowList = showPoints[mapName] ?? {}
+            let settingField = showPointSettingTop.current ? 'top' : 'bottom'
+            currentShowList[settingField] = item.id
+            showPoints[mapName] = currentShowList
+            showPointSettingTop.current = !showPointSettingTop.current
+            dispatch(actions.resetCurrentShow(showPoints))
         }
     }
 
@@ -218,6 +237,7 @@ function CountryPage({
                     displayInfo1={displayInfo1}
                     displayInfo2={displayInfo2}
                     setTrigger={setTrigger}
+                    itemList={unfocusLocationList}
                     onItemClickHandler={onItemClickHandler}
                     onMapClickHandler={onMapClickHandler}
                     addingPosition={addingPosition}

@@ -9,6 +9,7 @@ import {
 import BaseForm from '../BaseForm'
 
 import graphql from '../../../graphql'
+import actions from '../../../store/actions'
 
 function CountryPointCreateform({
     open,
@@ -27,6 +28,13 @@ function CountryPointCreateform({
     const [ alertMessage, setAlertMessage ] = useState(null)
 
     useEffect(() => {
+        if (open) {
+            setLabel('')
+            setError('')
+        }
+    }, [open])
+
+    useEffect(() => {
         if (createError) {
             setAlertMessage({
                 type: 'error',
@@ -36,9 +44,8 @@ function CountryPointCreateform({
         }
 
         if (createData) {
-            console.log(createData)
+            dispatch(actions.addCountryPoint(createData.createCountryPoint))
             onCreated && onCreated()
-            
         }
     }, [createData, createError])
 

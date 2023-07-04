@@ -57,12 +57,14 @@ const createCountryLocation = gql`
     mutation createCountryLocationGQL($label: String!
                                     $country_point_id: Int!
                                     $marker_id: Int 
-                                    $image_upload: Upload
+                                    $image_link: String, 
+                                    $image_upload: Upload,
                                     $visit_time: String) {
         createCountryLocation(input: {
             label: $label,
             country_point_id: $country_point_id,
             marker_id: $marker_id,
+            image_link: $image_link,
             image_upload: $image_upload,
             visit_time: $visit_time,
         }) {

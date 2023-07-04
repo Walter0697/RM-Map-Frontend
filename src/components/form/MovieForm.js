@@ -235,7 +235,7 @@ function MovieForm({
                         />
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
-                    <Selectable
+                        <Selectable
                             label='marker type'
                             value={selectedType}
                             onValueChange={(e) => setSelectedType(e.target.value)}
