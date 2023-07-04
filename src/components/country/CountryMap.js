@@ -31,11 +31,11 @@ function CountryMap({
     displayInfo2,
     dimension,
     setTrigger,
+    itemList,
     onItemClickHandler,
     onMapClickHandler,
     addingPosition,
 }) {
-    const [position, setPosition] = useState(null)
     const parentRef = useRef(null)
     const elementRef = useRef(null)
     
@@ -73,6 +73,10 @@ function CountryMap({
             element.style.setProperty('transform', value)
         }
     }, [])
+
+    useEffect(() => {
+        setTrigger((prev) => (prev + 1) % 10)
+    }, [displayInfo1, displayInfo2])
 
     return (
         <div
@@ -130,14 +134,26 @@ function CountryMap({
                         </div>
                     )}
                     <CountryPointDot displayInfo={displayInfo1} pointerRef={pointerRef} />                   
-                    <CountryPointDot displayInfo={displayInfo2} pointerRef={pointerRef2} />                   
+                    <CountryPointDot displayInfo={displayInfo2} pointerRef={pointerRef2} />      
+                    {itemList.map((item, index) => (
+                        <CountryPointDot 
+                            key={`${item.id}-${index}`}
+                            displayInfo={{
+                                x: item.photo_x,
+                                y: item.photo_y,
+                            }}
+                            onClickHandler={() => {
+                                onItemClickHandler(item)
+                            }}
+                        />
+                    ))}     
                 </div>
             </QuickPinchZoom>
             <div
                 style={{ 
                     position: 'absolute',
-                    top: '10px',
-                    right: '10px',
+                    top: '30px',
+                    right: '30px',
                 }}
             >
                 <CircleIconButton
@@ -153,6 +169,7 @@ function CountryMap({
 function CountryPointDot({
     displayInfo,
     pointerRef,
+    onClickHandler,
 }) {
     if (!displayInfo) return false
     return (
@@ -162,16 +179,17 @@ function CountryPointDot({
                 position: 'absolute',
                 left: displayInfo.x,
                 top: displayInfo.y,
-                width: '10px',
-                height: '10px',            
-                pointerEvents: 'none',
+                width: '12px',
+                height: '12px',            
             }}
+            onClick={onClickHandler}
         >
             <div style={{
                 width: '100%',
                 height: '100%',
                 backgroundColor: constant.StaticColour.CountryLocationBorder,
-                borderRadius: '5px',
+                border: `2px solid ${constant.StaticColour.CardBackground}`,
+                borderRadius: '50%',
                 transform: 'translate(-50%, -50%)',
             }}></div>
         </div>

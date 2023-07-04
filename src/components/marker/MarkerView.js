@@ -49,6 +49,7 @@ function MarkerView({
     marker,
     editMarker,
     eventtypes,
+    noStar,
     dispatch,
 }) {
     const history = useHistory()
@@ -163,15 +164,21 @@ function MarkerView({
                         <DialogTitle>
                             <Grid container spacing={1}>
                                 <Grid item xs={3} md={3} lg={3}>
-                                    <CircleIconButton
-                                        onClickHandler={openSchedule}
-                                        disabled={marker.status === 'scheduled'}
-                                    >
-                                        <CalendarTodayIcon />
-                                    </CircleIconButton>
+                                    {openSchedule && (
+                                         <CircleIconButton
+                                            onClickHandler={openSchedule}
+                                            disabled={marker.status === 'scheduled'}
+                                        >
+                                            <CalendarTodayIcon />
+                                        </CircleIconButton>
+                                    )}
                                 </Grid>
                                 <Grid item xs={3} md={3} lg={3}>
                                 </Grid>
+                                {noStar && (
+                                    <Grid item xs={3} md={3} lg={3}>
+                                    </Grid>
+                                )}
                                 <Grid item xs={3} md={3} lg={3}
                                     style={{
                                         display: 'flex',
@@ -184,17 +191,20 @@ function MarkerView({
                                         <InsertPhotoIcon />
                                     </CircleIconButton>
                                 </Grid>
-                                <Grid item xs={3} md={3} lg={3}
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: 'flex-end',
-                                    }}
-                                >
-                                    <FavouriteIcon 
-                                        active={isFav}
-                                        onClickHandler={toggleMarkerFavourite}
-                                    />
-                                </Grid>
+                                {!noStar && (
+                                    <Grid item xs={3} md={3} lg={3}
+                                        style={{
+                                            display: 'flex',
+                                            justifyContent: 'flex-end',
+                                        }}
+                                    >
+                                        <FavouriteIcon 
+                                            active={isFav}
+                                            onClickHandler={toggleMarkerFavourite}
+                                        />
+                                    </Grid>
+                                )}
+                                
                                 <Grid item xs={12} md={12} lg={12}
                                     style={{
                                         width: '100%',

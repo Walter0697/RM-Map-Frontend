@@ -228,6 +228,13 @@ export const resetFilterCountry = (filtered) => {
     }
 }
 
+export const addCountryPoint = (countryPoint) => {
+    return {
+        type: constants.ADD_COUNTRYPOINT,
+        countryPoint,
+    }
+}
+
 export const resetCountryPoints = (countryPoints) => {
     return {
         type: constants.RESET_COUNTRYPOINT,
@@ -235,10 +242,24 @@ export const resetCountryPoints = (countryPoints) => {
     }
 }
 
+export const addCountryLocation = (countryLocation) => {
+    return {
+        type: constants.ADD_COUNTRYLOCATION,
+        countryLocation,
+    }
+}
+
 export const resetCountryLocations = (countryLocations) => {
     return {
         type: constants.RESET_COUNTRYLOCATION,
         countryLocations,
+    }
+}
+
+export const resetCurrentShow = (currentShowPoints) => {
+    return {
+        type: constants.RESET_CURRENTSHOW,
+        currentShowPoints,
     }
 }
 
@@ -275,8 +296,11 @@ const actions = {
     resetCountryCodes,
     resetCountryParts,
     resetFilterCountry,
+    addCountryPoint,
     resetCountryPoints,
+    addCountryLocation,
     resetCountryLocations,
+    resetCurrentShow,
 }
 
 export default actions
