@@ -130,6 +130,7 @@ function CountryLocationList({
     open,
     handleClose,
     mapName,
+    previousMarkers,
     countryPointId,
     countryPoints,
     countryLocations,
@@ -236,6 +237,7 @@ function CountryLocationList({
             <CountryLocationForm 
                 open={openCreate}
                 handleClose={() => setOpenCreate(false)}
+                previousMarkers={previousMarkers}
                 countryPoint={currentPoint}
                 onCreated={onLocationCreated}
             />

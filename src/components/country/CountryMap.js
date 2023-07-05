@@ -1,6 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
-
-import JapanMap from '../../images/country/japan.png'
+import React, { useMemo, useEffect, useCallback, useRef } from 'react'
 
 import QuickPinchZoom, {
     make2dTransformValue,
@@ -25,11 +23,12 @@ const makeTransformValue = use3DTransform
 
 
 function CountryMap({
+    dimension,
+    countryImage,
     pointerRef,
     pointerRef2,
     displayInfo1,
     displayInfo2,
-    dimension,
     setTrigger,
     itemList,
     onItemClickHandler,
@@ -109,7 +108,7 @@ function CountryMap({
                             width: expectedWidth,
                             height: expectedHeight,
                         }}
-                        src={JapanMap}
+                        src={countryImage}
                         onClick={(e) => {
                             const parent = parentRef.current
                             let bounds = parent.getBoundingClientRect()

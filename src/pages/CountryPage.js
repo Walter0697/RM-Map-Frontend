@@ -2,8 +2,11 @@ import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 
+import { useQuery } from '@apollo/client'
+
 import AddIcon from '@mui/icons-material/Add'
 import CancelIcon from '@mui/icons-material/Cancel'
+import PublicIcon from '@mui/icons-material/Public'
 import { Alert, Button } from '@mui/material'
 
 import useBoop from '../hooks/useBoop'
@@ -22,11 +25,8 @@ import CountryLocationList from '../components/form/country/CountryLocationList'
 
 import constants from '../constant'
 import actions from '../store/actions'
+import graphql from '../graphql'
 
-const currentDimension = {
-    width: 2291,
-    height: 2048,
-}
 const headerHeight = 56
 const pointerLineAndMapDistance = 30
 const countryLocationBoxHeight = 100
@@ -38,9 +38,48 @@ function CountryPage({
     dispatch,
 }) {
     const history = useHistory()
+
+    // fetching previous markers first
+    const { data: listData, loading: listLoading, error: listError } = useQuery(graphql.markers.previous, { fetchPolicy: 'no-cache' })
+    const [ previousMarkers, setMarkers ] = useState([])
+     // if request failed
+     const [ failedAlert, fail ] = useBoop(3000)
+     const [ failMessage, setFailMessage ] = useState('')
+
+    useEffect(() => {
+        if (listData) {
+            setMarkers(listData.previousmarkers)
+        }
+
+        if (listError) {
+            setFailMessage(listError.message)
+            fail()
+        }
+    }, [listData, listError])
+
     const showPointSettingTop = useRef(true)   // will switch between top and bottom
 
+    // map related
     const [ mapName, setMapName ] = useState('Japan')
+    const countryMapInfo = useMemo(() => {
+        const map = constants.country.countryList.find(item => item.label === mapName)
+        return map
+    }, [mapName])
+
+    const currentDimension = useMemo(() => {
+        if (!countryMapInfo) {
+            return {
+                width: 0,
+                height: 0,
+            }
+        }
+        return countryMapInfo.dimension
+    }, [countryMapInfo])
+
+    const countryImage = useMemo(() => {
+        if (!countryMapInfo) return null
+        return countryMapInfo.image
+    }, [countryMapInfo])
 
     // adding related
     const [ isAdding, setIsAdding ] = useState(false)
@@ -232,6 +271,7 @@ function CountryPage({
                 }}>
                 <CountryMap 
                     dimension={currentDimension}
+                    countryImage={countryImage}
                     pointerRef={mapPointerRef}
                     pointerRef2={mapPointerRef2}
                     displayInfo1={displayInfo1}
@@ -293,6 +333,20 @@ function CountryPage({
                         {isAdding ? <CancelIcon color={'error'} /> : <AddIcon />}
                     </CircleIconButton>
                 </div>
+                 <div
+                    style={{ 
+                        position: 'absolute',
+                        bottom: '5%',
+                        right: '30px',
+                    }}
+                >
+                    <CircleIconButton
+                        onClickHandler={null}
+                    >
+                        <PublicIcon />
+                    </CircleIconButton>
+                </div>
+                
 
                 {/* adding related */}
                 {isAdding && (
@@ -335,11 +389,18 @@ function CountryPage({
                 handleClose={() => setOpenLocationList(false)}
                 countryPointId={countryPointId}
                 mapName={mapName}
+                previousMarkers={previousMarkers}
             />
             <AutoHideAlert 
                 open={createAlert}
                 type={'success'}
                 message={'Successfully create point!'}
+                timing={3000}
+            />
+            <AutoHideAlert 
+                open={failedAlert}
+                type={'error'}
+                message={failMessage}
                 timing={3000}
             />
         </Base>
