@@ -31,6 +31,7 @@ function CountryLocationForm({
     open,
     handleClose,
     countryPoint,
+    previousMarkers,
     onCreated,
     markers,
     eventtypes,
@@ -61,12 +62,24 @@ function CountryLocationForm({
 
     const [ alertMessage, setAlertMessage ] = useState(null)
 
+    const allMarkers = useMemo(() => {
+        if (previousMarkers && markers) {
+            return previousMarkers.concat(markers)
+        } else if (markers) {
+            return markers
+        } else if (previousMarkers) {
+            return previousMarkers
+        }
+        return []
+    }, [markers, previousMarkers])
+
     const filteredMarkers = useMemo(() => {
         if (selectedType) {
-            return markers.filter(s => s.type === selectedType)
+            return allMarkers.filter(s => s.type === selectedType)
         }
-        return markers
-    }, [selectedType, markers])
+        return allMarkers
+    }, [selectedType, allMarkers])
+
 
     useEffect(() => {
         if (createError) {
