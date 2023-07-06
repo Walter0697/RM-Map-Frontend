@@ -23,6 +23,27 @@ const listCountryLocation = gql`
             marker_id
             image_link
             visit_time
+            marker {
+                id
+                type
+                description
+                latitude
+                longitude
+                label
+                address
+                link
+                image_link
+                estimate_time
+                permanent
+                need_booking
+                price
+                status
+                country_code
+                country_part
+                to_time
+                from_time
+                is_fav
+            }
         }
     }
 `
@@ -74,6 +95,27 @@ const createCountryLocation = gql`
             marker_id
             image_link
             visit_time
+            marker {
+                id
+                type
+                description
+                latitude
+                longitude
+                label
+                address
+                link
+                image_link
+                estimate_time
+                permanent
+                need_booking
+                price
+                status
+                country_code
+                country_part
+                to_time
+                from_time
+                is_fav
+            }
         }
     }
 `

@@ -77,6 +77,10 @@ function CountryMap({
         setTrigger((prev) => (prev + 1) % 10)
     }, [displayInfo1, displayInfo2])
 
+    useEffect(() => {
+        reset()
+    }, [countryImage])
+
     return (
         <div
             ref={parentRef}

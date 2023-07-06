@@ -22,6 +22,7 @@ import AutoHideAlert from '../components/AutoHideAlert'
 
 import CountryPointCreateForm from '../components/form/country/CountryPointCreateForm'
 import CountryLocationList from '../components/form/country/CountryLocationList'
+import CountryMapSelect from '../components/form/country/CountryMapSelect'
 
 import constants from '../constant'
 import actions from '../store/actions'
@@ -90,6 +91,9 @@ function CountryPage({
     // for display country location 
     const [ openLocationList, setOpenLocationList ] = useState(false)
     const [ countryPointId, setCountryPointId ] = useState(null)
+
+    // for changing map
+    const [ openMapChange, setOpenMapChange ] = useState(false)
 
     // getting the whole screen size to show the svg container
     const [ viewPort, setViewPort ] = useState({ x: 0, y: 0 })
@@ -341,7 +345,7 @@ function CountryPage({
                     }}
                 >
                     <CircleIconButton
-                        onClickHandler={null}
+                        onClickHandler={() => setOpenMapChange(true)}
                     >
                         <PublicIcon />
                     </CircleIconButton>
@@ -390,6 +394,12 @@ function CountryPage({
                 countryPointId={countryPointId}
                 mapName={mapName}
                 previousMarkers={previousMarkers}
+            />
+            <CountryMapSelect 
+                open={openMapChange}
+                handleClose={() => setOpenMapChange(false)}
+                mapName={mapName}
+                setMapName={setMapName}
             />
             <AutoHideAlert 
                 open={createAlert}

@@ -107,7 +107,7 @@ function CountryLocationItem({
                         fontWeight: 'bold',
                         marginBottom: '10px',
                     }}>{location.label}</div>
-                    {location.markerId && (
+                    {location.marker && (
                         <Button
                             variant="contained"
                             size="small"
@@ -115,7 +115,7 @@ function CountryLocationItem({
                                 backgroundColor: constants.colors.CardBackground,
                                 width: '100%',
                             }}
-                            onClick={() => openMarkerPreview(location.markerId)}
+                            onClick={() => openMarkerPreview(location.marker)}
                         >
                             Marker
                         </Button>
@@ -134,7 +134,6 @@ function CountryLocationList({
     countryPointId,
     countryPoints,
     countryLocations,
-    markers,
 }) {
     const [ openPreview, setOpenPreview ] = useState(false)
     const [ previewingMarker, setPreview ] = useState(null)
@@ -165,21 +164,21 @@ function CountryLocationList({
             if (currentLocation.image_link) {
                 bigImage = currentLocation.image_link
             }
-            const currentMarker = markers.find(marker => marker.id === currentLocation.marker_id)
 
-            if (currentMarker && currentMarker.image_link) {
+            if (currentLocation.marker) {
                 if (!bigImage) {
-                    bigImage = currentMarker.image_link
+                    bigImage = currentLocation.marker.image_link
                 } else {
-                    smallImage = currentMarker.image_link
+                    smallImage = currentLocation.marker.image_link
                 }
             } 
+
             output.push({
                 id: currentLocation.id,
                 label: currentLocation.label,
                 bigImage: bigImage,
                 smallImage: smallImage,
-                markerId: currentLocation.marker_id,
+                marker: currentLocation.marker,
                 visitTime: dayjs(currentLocation.visit_time),
                 visitTimeStr: dayjs(currentLocation.visit_time).format('YYYY-MM-DD'),
             })
@@ -190,12 +189,11 @@ function CountryLocationList({
         })
 
         return result
-    }, [countryLocations, currentPoint, markers])
+    }, [countryLocations, currentPoint])
 
-    const openMarkerPreview = (markerId) => {
-        const currentMarker = markers.find(marker => marker.id === markerId)
-        if (currentMarker) {
-            setPreview(currentMarker)
+    const openMarkerPreview = (marker) => {
+        if (marker) {
+            setPreview(marker)
             setOpenPreview(true)
         }
     }
@@ -252,7 +250,6 @@ function CountryLocationList({
 }
 
 export default connect(state => ({
-    markers: state.marker.markers,
     countryPoints: state.country.countryPoints,
     countryLocations: state.country.countryLocations,
 }))(CountryLocationList)
