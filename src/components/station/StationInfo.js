@@ -8,6 +8,7 @@ import { useMutation } from '@apollo/client'
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt'
 import WrongLocationIcon from '@mui/icons-material/WrongLocation'
 
+import constants from '../../constant'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
 
@@ -58,7 +59,7 @@ function StationInfo({
     return (
         <div 
             style={{
-                backgroundColor: '#48acdb',
+                backgroundColor: constants.colors.CardBackground,
                 height: '100%',
                 width: '90%',
                 boxShadow: '2px 2px 6px',

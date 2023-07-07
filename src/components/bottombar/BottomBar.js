@@ -16,6 +16,9 @@ import AvTimerIcon from '@mui/icons-material/AvTimer'       // expired marker
 import FlagIcon from '@mui/icons-material/Flag'             // previous marker
 import MovieIcon from '@mui/icons-material/Movie'           // watched movie
 
+import FlightIcon from '@mui/icons-material/Flight'         // country map      
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
+
 import BarIcon from './BarIcon'
 import SubBarIcon from './SubBarIcon'
 
@@ -113,6 +116,28 @@ function BottomBar({
     }, [location.pathname])
 
     const HomeButton = useMemo(() => {
+        if (location.pathname === '/roroadlist') {
+            return (
+                <SubBarIcon 
+                    route={'/roroadlist'}
+                    parentRoute={'/home'}
+                    path={location.pathname}
+                    activeIcon={<PlaylistAddCheckIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+        if (location.pathname === '/country') {
+            return (
+                <SubBarIcon 
+                    route={'/country'}
+                    parentRoute={'/home'}
+                    path={location.pathname}
+                    activeIcon={<FlightIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
         return (
             <BarIcon
                 route={'/home'}
