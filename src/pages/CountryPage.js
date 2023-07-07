@@ -15,14 +15,13 @@ import useCountryPoint from '../hooks/useCountryPoint'
 import Base from './Base'
 import CountryMap from '../components/country/CountryMap'
 import LocationPreviewList from '../components/country/LocationPreviewList'
+import CountryPointCreateForm from '../components/form/country/CountryPointCreateForm'
+import CountryLocationList from '../components/form/country/CountryLocationList'
+import CountryMapSelect from '../components/form/country/CountryMapSelect'
 
 import CircleIconButton from '../components/field/CircleIconButton'
 import TopBar from '../components/topbar/TopBar'
 import AutoHideAlert from '../components/AutoHideAlert'
-
-import CountryPointCreateForm from '../components/form/country/CountryPointCreateForm'
-import CountryLocationList from '../components/form/country/CountryLocationList'
-import CountryMapSelect from '../components/form/country/CountryMapSelect'
 
 import constants from '../constant'
 import actions from '../store/actions'
@@ -127,7 +126,7 @@ function CountryPage({
             top,
             bottom,
         }
-    }, [viewPort])
+    }, [viewPort, currentDimension])
 
     const pointer1Head = useMemo(() => {
         return {
@@ -259,7 +258,7 @@ function CountryPage({
     return (
         <Base>
             <TopBar
-                onBackHandler={() => history.replace('/markers')}
+                onBackHandler={() => history.replace('/home')}
                 label='Country Page'
             />
             <div 
