@@ -19,7 +19,7 @@ function ContentPreview({
                 address={marker?.item?.address}
             />
         )
-    } else if (marker?.type === constants.overlay.station.HKMTR) {
+    } else if (marker?.type === constants.overlay.typeStation) {
         return (
             <StationPreview
                 imageExist={imageExist}

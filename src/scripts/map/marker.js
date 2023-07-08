@@ -43,13 +43,13 @@ const getMapPin = (map, location, onMarkerClick, selected, key, markertype, pinS
     return marker
 }
 
-const getOverlayPin = (map, location, selected, type, onPinClick, identifier) => {
+const getOverlayPin = (map, location, selected, type, typeValue, onPinClick, identifier) => {
     const div = document.createElement('div')
     div.style.zIndex = selected ? '30' : '10'
     div.style.width = '40px'
     div.style.height = '40px'
 
-    const pinSprite = sprite.getPinSprite(type)
+    const pinSprite = sprite.getPinSprite(type, typeValue)
     div.style.backgroundImage = `url(${pinSprite})`
 
     if (selected) {

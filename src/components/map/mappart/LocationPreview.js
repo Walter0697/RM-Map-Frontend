@@ -32,8 +32,12 @@ function LocationPreview({
             }
             return null
         } else {
-            const image = maphelper.sprite.getPinSprite(marker?.type) 
-            return image
+            let imageValue = null
+            switch (marker?.type) {
+                case constants.overlay.typeStation:
+                    imageValue = maphelper.sprite.getPinSprite(marker?.type, marker?.item?.map_name)
+            }
+            return imageValue
         }
         return null
     }, [marker, typeIcon])

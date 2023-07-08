@@ -215,7 +215,7 @@ function useMap(
         
         // each API might have their own way to handle x y so this is how to parse it
         const selectedItemLocation = maphelper.converts.convertAPIValueToMapXY(type, selectedLocation)
-        if (type === constants.overlay.station.HKMTR) {
+        if (type === constants.overlay.typeStation) {
             updateMapLocation(selectedItemLocation)
         }
     }
@@ -226,21 +226,25 @@ function useMap(
         })
 
         let extraMarkers = []
-        extraLocationList[constants.overlay.station.HKMTR] && extraLocationList[constants.overlay.station.HKMTR].forEach(item => {
-            let pin = maphelper.markers.getOverlayPin(
-                map,
-                [
-                    item.map_y,
-                    item.map_x,
-                ],
-                item.selected,
-                constants.overlay.station.HKMTR,
-                onPinClick,
-                item.identifier,
-            )
-
-            extraMarkers.push(pin)
-        })
+        if (extraLocationList[constants.overlay.typeStation]) {
+            const list = extraLocationList[constants.overlay.typeStation]
+            list.forEach(item => {
+                let pin = maphelper.markers.getOverlayPin(
+                    map,
+                    [
+                        item.map_y,
+                        item.map_x,
+                    ],
+                    item.selected,
+                    constants.overlay.typeStation,
+                    item.map_name,
+                    onPinClick,
+                    item.identifier,
+                )
+                extraMarkers.push(pin)
+            })
+        }
+        
         setExtraMarkers(() => extraMarkers)
     }
 

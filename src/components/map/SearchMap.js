@@ -49,7 +49,11 @@ function SearchMap({
     const [ searchText, setSearch ] = useState('') 
     // for controlling the size of the map and search content
     const [ viewSearchContent, setViewContent ] = useState(false)
-    const [ hasSearchContent, setHasContent ] = useState(false)    
+    const [ hasSearchContent, setHasContent ] = useState(false) 
+    
+    // if location content is showing extra information other than search content
+    const [ extraContent, setExtraContent ] = useState(null)
+    
     const { 
         //mapContentHeight, 
         mapContentTransform,
@@ -73,11 +77,11 @@ function SearchMap({
         to: {
             //mapContentHeight: ( viewSearchContent ) ? '50%' : (hasSearchContent ? '85%' : '90%'),
             mapContentTransform: ( viewSearchContent ) ? 'translate(0, -15%)' : 'translate(0, 0)',
-            listContentHeight: ( viewSearchContent ) ? '40%' : (hasSearchContent ? '7%' : '0%'),
+            listContentHeight: (extraContent) ? '20%' : (( viewSearchContent ) ? '40%' : (hasSearchContent ? '7%' : '0%')),
             listContentOpacity: ( viewSearchContent || hasSearchContent ) ? 1 : 0,
-            pinButtonBottom: ( viewSearchContent ) ? '65%' : ( hasSearchContent ? '30%' : '25%'),
-            centerButtonBottom: ( viewSearchContent ) ? '55%' : (hasSearchContent ? '20%' : '15%'),
-            mapSearchButtonBottom: ( viewSearchContent ) ? '55%' : (hasSearchContent ? '25%' : '20%'),
+            pinButtonBottom: (extraContent) ? '45%' : (( viewSearchContent ) ? '65%' : ( hasSearchContent ? '30%' : '25%')),
+            centerButtonBottom: (extraContent) ? '35%' : (( viewSearchContent ) ? '55%' : (hasSearchContent ? '20%' : '15%')),
+            mapSearchButtonBottom: (extraContent) ? '35%' :(( viewSearchContent ) ? '55%' : (hasSearchContent ? '25%' : '20%')),
         },
     })
 
@@ -85,9 +89,6 @@ function SearchMap({
     const [ searchResults, setSearchResults ] = useState([])
     const [ selectedSearch, setSelectedSearch ] = useState(-1)
 
-    // if location content is showing extra information other than search content
-    const [ extraContent, setExtraContent ] = useState(null)
-    
     // show loading icon for search box
     const [ loading, setLoading ] = useState(false)
 
@@ -170,9 +171,9 @@ function SearchMap({
 
     useEffect(() => {
         if (showInMap.searchMap) {
-            setExtraLocationInformation(constants.overlay.station.HKMTR, stations)
+            setExtraLocationInformation(constants.overlay.typeStation, stations)
         } else {
-            setExtraLocationInformation(constants.overlay.station.HKMTR, [])
+            setExtraLocationInformation(constants.overlay.typeStation, [])
         }
     }, [stations, showInMap])
 
@@ -323,7 +324,12 @@ function SearchMap({
                     locationList={searchResults}
                     shouldShowList={viewSearchContent}
                     setShowList={() => setViewContent(true)}
-                    setHideList={() => setViewContent(false)}
+                    setHideList={() => {
+                        if (extraContent) {
+                            setExtraContent(null)
+                        }
+                        setViewContent(false)
+                    }}
                     selectedIndex={selectedSearch}
                     setSelectedIndex={setSelectedSearchItem}
                     extraContent={extraContent}
