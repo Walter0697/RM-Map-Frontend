@@ -25,6 +25,7 @@ import AutoHideAlert from '../components/AutoHideAlert'
 
 import constant from '../scripts/constant'
 import constants from '../constant'
+import storage from '../scripts/storage'
 import actions from '../store/actions'
 import graphql from '../graphql'
 
@@ -62,6 +63,12 @@ function CountryPage({
 
     // map related
     const [ mapName, setMapName ] = useState('Japan')
+    useEffect(() => {
+        const defaultMap = storage.getCurrentMap('country')
+        if (defaultMap) {
+            setMapName(defaultMap)
+        }
+    }, [])
     const countryMapInfo = useMemo(() => {
         const map = constants.country.countryList.find(item => item.label === mapName)
         return map

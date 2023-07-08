@@ -21,6 +21,7 @@ import TopBar from '../components/topbar/TopBar'
 import AutoHideAlert from '../components/AutoHideAlert'
 
 import constants from '../constant'
+import storage from '../scripts/storage'
 import actions from '../store/actions'
 import graphql from '../graphql'
 
@@ -48,6 +49,13 @@ function StationPage({
 
     // map related 
     const [ mapName, setMapName] = useState('HK_MTR')
+    useEffect(() => {
+        const defaultMap = storage.getCurrentMap('station')
+        if (defaultMap) {
+            setMapName(defaultMap)
+        }
+    }, [])
+
     const stationMapInfo = useMemo(() => {
         const stationMap = constants.country.stationList.find(s => s.identifier === mapName)
        return stationMap
