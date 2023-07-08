@@ -189,9 +189,9 @@ function MarkerMap({
 
     useEffect(() => {
         if (showInMap.markerMap) {
-            setExtraLocationInformation(constants.overlay.station.HKMTR, stations)
+            setExtraLocationInformation(constants.overlay.typeStation, stations)
         } else {
-            setExtraLocationInformation(constants.overlay.station.HKMTR, [])
+            setExtraLocationInformation(constants.overlay.typeStation, [])
         }
     }, [stations, showInMap])
 

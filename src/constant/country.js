@@ -23,9 +23,11 @@ const countryList = [
     }
 ]
 
+const HK_MTR = 'HK_MTR'
+const TOR_TCC = 'TOR_TCC'
 const stationList = [
     {
-        identifier: 'HK_MTR',
+        identifier: HK_MTR,
         label: 'Hong Kong MTR',
         image: HKMTRImage,
         dimension: {
@@ -34,7 +36,7 @@ const stationList = [
         }
     },
     {
-        identifier: 'TOR_TCC',
+        identifier: TOR_TCC,
         label: 'Toronto TCC',
         image: TORTCCImage,
         dimension: {
@@ -44,9 +46,15 @@ const stationList = [
     }
 ]
 
+const stationIdentifier = {
+    HK_MTR,
+    TOR_TCC,
+}
+
 const country = {
     countryList,
     stationList,
+    stationIdentifier,
 }
 
 export default country

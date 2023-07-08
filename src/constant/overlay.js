@@ -1,9 +1,7 @@
-const HKMTR = 'HK_MTR-station'
+const typeStation = 'STATION'
 
 const overlay = {
-    station: {
-        HKMTR,
-    }
+    typeStation
 }
 
 export default overlay
