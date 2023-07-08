@@ -6,6 +6,7 @@ import {
 import BaseForm from '../BaseForm'
 
 import constants from '../../../constant'
+import storage from '../../../scripts/storage'
 
 function CountryMapSelect({
     open,
@@ -18,6 +19,7 @@ function CountryMapSelect({
             return
         }
 
+        storage.changeCurrentMap('country', name)
         setMapName(name)
     }
 
