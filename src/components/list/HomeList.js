@@ -115,16 +115,6 @@ function HomeList({
                     >
                         <HomeButtonList setAnimateRedirectTo={setAnimateRedirectTo} />
                     </WrapperBox>
-                    {/* {yesterdaySchedules && yesterdaySchedules.length !== 0 && (
-                        <WrapperBox
-                            height={40}
-                            marginBottom={'15px'}
-                        >
-                            <YesterdayUncheckList
-                                onClickHandler={openYesterdayStatusForm}
-                            />
-                        </WrapperBox>
-                    )} */}
                     {todayMarkersImage.length !== 0 && (
                         <WrapperBox
                             height={100}
@@ -146,22 +136,21 @@ function HomeList({
                             eventtypes={eventtypes}
                         />
                     </WrapperBox>
-                    
-                    {/* {featuredMarkers.map((item, index) => (
-                        <WrapperBox
-                            height={250}
-                            marginBottom={'20px'}
-                            key={index}
-                        >
-                            <FeaturedMarkerRow
-                                row={item}
-                                onClickHandler={setSelectedMarker}
-                                eventtypes={eventtypes}
-                            />
-                        </WrapperBox>
-                    ))} */}
                 </RandomFadeIn>
             </div>
+            {yesterdaySchedules && yesterdaySchedules.length !== 0 && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: '2%',
+                    height: '50px',
+                    left: '5%',
+                    width: '90%',
+                }}>
+                    <YesterdayUncheckList
+                        onClickHandler={openYesterdayStatusForm}
+                    />
+                </div>
+            )}
             <AnimateRedirectOverlay redirectTo={animateRedirectTo} />
         </>
     )
