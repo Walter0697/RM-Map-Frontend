@@ -7,7 +7,7 @@ import useBoop from '../hooks/useBoop'
 
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 
-import TopBar from '../components/topbar/TopBar'
+import HomeTop from '../components/home/HomeTop'
 import HomeList from '../components/list/HomeList'
 import ScheduleArriveForm from '../components/schedule/ScheduleArriveForm'
 import AutoHideAlert from '../components/AutoHideAlert'
@@ -18,8 +18,6 @@ import ScheduleForm from '../components/form/ScheduleForm'
 function HomePage({
     roroadlists,
 }) {
-    const history = useHistory()
-
     // selected schedules
     const [ selectedSchedules, setSchedules ] = useState([])
     const [ updateAlert, confirmUpdated ] = useBoop(3000)
@@ -67,9 +65,7 @@ function HomePage({
                     position: 'relative',
                 }}
             >
-                <TopBar
-                    label='Home'
-                />
+                <HomeTop />
                 <HomeList
                     yesterdaySchedules={selectedSchedules}
                     setYesterdaySchedules={setSchedules}
@@ -109,7 +105,7 @@ function HomePage({
                     message={'Successfully create marker!'}
                     timing={3000}
                 />
-                <div 
+                {/* <div 
                     style={{
                         position: 'absolute',
                         top: '10%',
@@ -122,7 +118,7 @@ function HomePage({
                     >
                         <PlaylistAddCheckIcon />
                     </CircleIconButton>
-                </div>
+                </div> */}
             </div>
         </Base>
     )

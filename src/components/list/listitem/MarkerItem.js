@@ -57,7 +57,7 @@ function MarkerItem({
             { imageExist ? (
                 <Grid 
                     item xs={4}
-                    style={{ marginTop: '15px', overflow: 'hidden', paddingLeft: '15px' }}
+                    style={{ marginTop: '15px', overflow: 'hidden', paddingLeft: '15px', borderRadius: '5px' }}
                 >
                     <RoundImage 
                         height={'90px'}

@@ -84,6 +84,7 @@ function MovieItem({
                         <img
                             style={{
                                 width: '80%',
+                                borderRadius: '5px',
                             }}
                             src={item.image_link}
                         />

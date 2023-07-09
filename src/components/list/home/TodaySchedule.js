@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import {
     useSpring,
     animated,
@@ -8,6 +8,9 @@ import {
     Button,
 } from '@mui/material'
 
+import TodayIcon from '@mui/icons-material/Today'
+
+import constants from '../../../constant'
 import RoundImage from '../../wrapper/RoundImage'
 
 function TodaySchedule({
@@ -32,35 +35,30 @@ function TodaySchedule({
 
     return (
         <Button
-            variant='contained'
-            size='large'
             style={{
-                backgroundColor: '#48acdb',
+                backgroundColor: constants.colors.CardBackground,
                 height: '100%',
                 width: '100%',
-                boxShadow: '2px 2px 6px',
                 textTransform: 'none',
+                position: 'relative',
+                overflow: 'hidden',
             }}
             onClick={onClickHandler}
         >
-            <Grid container fullWidth>
-                <Grid 
-                    item xs={12} md={12} lg={12}
-                    style={{
-                        color: '#1c76d2',
-                    }}
-                >
-                    Today Schedules
-                </Grid>
+            <Grid container fullWidth style={{
+                paddingTop: '10px',
+            }}>
+                Today Schedules
                 <Grid item xs={12} md={12} lg={12}
                     style={{
                         height: '70px',
                         width: '100%',
+                        marginTop: '10px',
                     }}
                 >
                     <animated.div
                         style={{
-                            height: '100px',
+                            height: '60px',
                             width: '100%',
                             display: 'flex',
                             overflowX: 'auto',
@@ -73,28 +71,32 @@ function TodaySchedule({
                                 key={index}
                                 style={{
                                     width: '50px',
-                                    //overflow: 'hidden',
+                                    height: '50px',
                                     marginRight: '15px',
+                                    zIndex: 2,
                                 }}
                             >
-                                <div
-                                    style={{
-                                        height: '50px',
-                                        width: '50px',
-                                        overflow: 'hidden',
-                                    }}
-                                >
-                                    <RoundImage 
-                                        width={'50px'}
-                                        src={schedule.image_path}
-                                    />
-                                </div>
+                                <RoundImage 
+                                    width={'50px'}
+                                    height={'50px'}
+                                    src={schedule.image_path}
+                                />
                             </div>
                         ))}
                     </animated.div>
                     
                 </Grid>
             </Grid>
+            <div style={{
+                position: 'absolute',
+                left: '90%',
+                top: '65%',
+                scale: '3.8',
+                transform: 'rotate(343deg)',
+                zIndex: 1,
+            }}>
+                <TodayIcon sx={{ color: constants.colors.HomeButtonIcon }} />
+            </div>
         </Button>
     )
 }

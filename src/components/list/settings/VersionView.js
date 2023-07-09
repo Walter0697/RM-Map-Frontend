@@ -4,7 +4,7 @@ import {
     Button,
 } from '@mui/material'
 
-import {version} from '../../../../package.json'
+import { version } from '../../../../package.json'
 
 function VersionView({
     onClickHandler,

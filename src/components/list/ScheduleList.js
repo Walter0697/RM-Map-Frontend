@@ -102,6 +102,7 @@ function ScheduleItem({
                                     height: '80px',
                                     width: '80px',
                                     overflow: 'hidden',
+                                    borderRadius: '5px',
                                 }}
                             >
                                 <RoundImage 
@@ -293,6 +294,7 @@ function TodayList({
                                     height: '50px',
                                     width: '50px',
                                     overflow: 'hidden',
+                                    borderRadius: '5px',
                                 }}
                             >
                                 <RoundImage 

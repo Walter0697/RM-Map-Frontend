@@ -1,20 +1,32 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useHistory } from 'react-router-dom'
+import {
+    useSpring,
+} from '@react-spring/web'
 import { connect } from 'react-redux'
 
 import { useLazyQuery } from '@apollo/client'
 
 import dayjs from 'dayjs'
 
+import MapIcon from '@mui/icons-material/Map'
+
 import RandomFadeIn from '../wrapper/RandomFadeIn'
 import WrapperBox from '../wrapper/WrapperBox'
+import HomeButtonList from './home/HomeButtonList'
 import TodaySchedule from './home/TodaySchedule'
+import FeatureMarkerItem from './home/FeaturedMarkerItem'
+
+// DECPRECATED
 import FeaturedMarkerRow from './home/FeaturedMarkerRow'
 import YesterdayUncheckList from './home/YesterdayUncheckList'
 
+import AnimateRedirectOverlay from '../home/AnimateRedirectOverlay'
+import HomeButtonBase from './home/base/HomeButtonBase'
+
+import constants from '../../constant'
 import markerhelper from '../../scripts/marker'
 import filters from '../../scripts/filter'
-import actions from '../../store/actions'
 import graphql from '../../graphql'
 
 function HomeList({
@@ -25,62 +37,29 @@ function HomeList({
     markers,
     schedules,
     eventtypes,
-    featured,
-    updated_date,
     dispatch,
 }) {
     const history = useHistory()
 
+    const [ animateRedirectTo, setAnimateRedirectTo ] = useState(null)
+    const { delta } = useSpring({
+        config: {
+            mass: 80,
+            tension: 180,
+            friction: 60
+        },
+        from: { delta: 0 },
+        delta: 1,
+    })
+
     // graphql request
     const [ getTodayGQL, { data: todayData, loading: todayLoading, error: todayError } ] = useLazyQuery(graphql.users.today, { fetchPolicy: 'no-cache' })
-
-    const getFeaturedMarkers = (markers, eventtypes) => {
-        const filtered_markers = markerhelper.find.suggest(markers, eventtypes)
-        //const filtered_markers = markers.filter(s => s.status === '')
-        const featured_list = markerhelper.find.feature_list(filtered_markers, [])
-
-        const shuffle = featured_list.sort(() => Math.random() - 0.5)
-
-        let featured = []
-        let row = { left: null, right: null }
-
-        const itemLength = shuffle.length >= 4 ? 4 : shuffle.length
-        
-        for (let i = 0; i < itemLength; i++) {
-            if (!row.left) {
-                row.left = shuffle[i]
-            } else {
-                row.right = shuffle[i]
-                featured.push(row)
-                row = { left: null, right: null }
-            }
-        }
-        
-        if (row.left) {
-            featured.push(row)
-        }
-        
-        return featured
-    }
 
     // use memo
     const todayMarkersImage = useMemo(() => {
         if (!schedules) return []
         return filters.schedules.get_today_image(schedules, eventtypes)
     }, [schedules, eventtypes])
-
-    const featuredMarkers = useMemo(() => {
-        if (featured && dayjs().format('YYYY-MM-DD') === updated_date) {
-            return featured
-        } 
-
-        if (!markers || (markers && markers.length === 0)) return []
-        if (!eventtypes) return []
-        const list = getFeaturedMarkers(markers, eventtypes)
-        dispatch(actions.resetHomeFeatured(list))
-        return list
-
-    }, [featured, markers, eventtypes])
 
     useEffect(() => {
         getTodayGQL({ variables: { time: dayjs().format('YYYY-MM-DD') } })
@@ -103,7 +82,7 @@ function HomeList({
     }, [todayData, todayError])
 
     const onTodayScheduleClick = () => {
-        history.replace('/schedule/open')
+        setAnimateRedirectTo('/schedule/open')
     }
     
     return (
@@ -117,7 +96,26 @@ function HomeList({
                 overflow: 'auto',
             }}>
                 <RandomFadeIn>
-                    {yesterdaySchedules && yesterdaySchedules.length !== 0 && (
+                    <WrapperBox
+                        height={80}
+                        marginBottom={'15px'}
+                    >
+                        <HomeButtonBase 
+                            width={'100%'}
+                            label={'Markers'}
+                            fontSize={'20px'}
+                            iconScale={'5'}
+                            icon={<MapIcon sx={{ color: constants.colors.HomeButtonIcon}} />}
+                            onClickHandler={() => setAnimateRedirectTo('/markers')}
+                        />
+                    </WrapperBox>
+                    <WrapperBox
+                        height={80}
+                        marginBottom={'15px'}
+                    >
+                        <HomeButtonList setAnimateRedirectTo={setAnimateRedirectTo} />
+                    </WrapperBox>
+                    {/* {yesterdaySchedules && yesterdaySchedules.length !== 0 && (
                         <WrapperBox
                             height={40}
                             marginBottom={'15px'}
@@ -126,8 +124,7 @@ function HomeList({
                                 onClickHandler={openYesterdayStatusForm}
                             />
                         </WrapperBox>
-                    )}
-                    
+                    )} */}
                     {todayMarkersImage.length !== 0 && (
                         <WrapperBox
                             height={100}
@@ -139,8 +136,18 @@ function HomeList({
                             />
                         </WrapperBox>
                     )}
+
+                    <WrapperBox
+                        height={'auto'}
+                        marginBottom={'20px'}
+                    >
+                        <FeatureMarkerItem 
+                            onClickHandler={setSelectedMarker}
+                            eventtypes={eventtypes}
+                        />
+                    </WrapperBox>
                     
-                    {featuredMarkers.map((item, index) => (
+                    {/* {featuredMarkers.map((item, index) => (
                         <WrapperBox
                             height={250}
                             marginBottom={'20px'}
@@ -152,9 +159,10 @@ function HomeList({
                                 eventtypes={eventtypes}
                             />
                         </WrapperBox>
-                    ))}
+                    ))} */}
                 </RandomFadeIn>
             </div>
+            <AnimateRedirectOverlay redirectTo={animateRedirectTo} />
         </>
     )
   }
@@ -163,6 +171,4 @@ function HomeList({
     markers: state.marker.markers,
     eventtypes: state.marker.eventtypes,
     schedules: state.schedule.schedules,
-    featured: state.home.featured,
-    updated_date: state.home.updated_date,
 })) (HomeList)
