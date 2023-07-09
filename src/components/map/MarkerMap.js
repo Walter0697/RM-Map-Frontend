@@ -195,10 +195,6 @@ function MarkerMap({
         }
     }, [stations, showInMap])
 
-    const redirectToStationPage = () => {
-        history.replace('/station')
-    }
-
     return (
         <>
             {/* main layout */}
@@ -262,22 +258,6 @@ function MarkerMap({
                 <FilterCircleButton 
                     redirectPath={'/filter/map'}
                 />
-            </animated.div>
-
-            <animated.div
-                style={{
-                    position: 'absolute',
-                    visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
-                    opacity: mapOpacity,
-                    bottom: utilityButtonBottom,
-                    right: '20px',
-                }}
-            >
-                <CircleIconButton
-                    onClickHandler={redirectToStationPage}
-                >
-                    <TrainIcon />
-                </CircleIconButton>
             </animated.div>
 
             <animated.div

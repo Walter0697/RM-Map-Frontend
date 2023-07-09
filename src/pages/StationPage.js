@@ -148,7 +148,7 @@ function StationPage({
     return (
         <Base>
             <TopBar
-                onBackHandler={() => history.replace('/markers')}
+                onBackHandler={() => history.replace('/home')}
                 label='Station Page'
             />
             <div style={{

@@ -3,7 +3,7 @@ import Base from './Base'
 
 import useBoop from '../hooks/useBoop'
 
-import TopBar from '../components/topbar/TopBar'
+import HomeTop from '../components/home/HomeTop'
 import HomeList from '../components/list/HomeList'
 import ScheduleArriveForm from '../components/schedule/ScheduleArriveForm'
 import AutoHideAlert from '../components/AutoHideAlert'
@@ -51,9 +51,7 @@ function HomePage() {
                     position: 'relative',
                 }}
             >
-                <TopBar
-                    label='Home'
-                />
+                <HomeTop />
                 <HomeList
                     yesterdaySchedules={selectedSchedules}
                     setYesterdaySchedules={setSchedules}
@@ -93,6 +91,20 @@ function HomePage() {
                     message={'Successfully create marker!'}
                     timing={3000}
                 />
+                {/* <div 
+                    style={{
+                        position: 'absolute',
+                        top: '10%',
+                        right: '20px',
+                    }}
+                >
+                    <CircleIconButton
+                        onClickHandler={() => history.replace('/roroadlist')}
+                        badgeNumber={currentUncheckedList}
+                    >
+                        <PlaylistAddCheckIcon />
+                    </CircleIconButton>
+                </div> */}
             </div>
         </Base>
     )
