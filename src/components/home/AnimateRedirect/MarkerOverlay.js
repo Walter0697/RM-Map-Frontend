@@ -10,6 +10,7 @@ function MarkerOverlay({
     return (
         <animated.div style={{
             position: 'absolute',
+            zIndex: 900,
             top: delta.to({
                 range: [0, 1],
                 output: ['-30%', '130%'],
