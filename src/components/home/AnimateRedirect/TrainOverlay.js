@@ -12,6 +12,7 @@ function TrainOverlay({
             position: 'absolute',
             top: '50%',
             scale: '15',
+            zIndex: 900,
             left: delta.to({
                 range: [0, 1],
                 output: ['-30%', '130%'],

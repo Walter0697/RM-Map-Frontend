@@ -10,6 +10,7 @@ function PlaneOverlay({
     return (
         <animated.div style={{
             position: 'absolute',
+            zIndex: 900,
             scale: '15',
             top: delta.to({
                 range: [0, 1],

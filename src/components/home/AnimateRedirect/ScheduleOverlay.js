@@ -10,6 +10,7 @@ function ScheduleOverlay({
     return (
         <animated.div style={{
             position: 'absolute',
+            zIndex: 900,
             scale: delta.to({
                 range: [0, 1],
                 output: ['0', '5'],
