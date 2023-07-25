@@ -56,12 +56,15 @@ function CountryLocationItem({
 
     return (
         <Grid item xs={12} md={12} lg={12} style={{
-            marginTop: '50px',
+            paddingTop: '30px',
+            paddingBottom: '60px',
+            borderBottom: '3px solid #9f9f9f8f'
         }}>
             <Grid container spacing={2}>
                 {bigImageExist && (
                     <Grid item xs={5} style={{
                         position: 'relative',
+                        height: '100px',
                     }}>
                         <div style={{
                             position: 'absolute',

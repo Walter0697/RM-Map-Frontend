@@ -101,6 +101,7 @@ function LocationPreviewList({
                 paddingTop: '1px',
                 paddingLeft: '5px',
                 flexDirection: 'column',
+                overflow: 'hidden',
             }}
             onClick={onClick}
         >
