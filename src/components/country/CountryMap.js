@@ -120,8 +120,8 @@ function CountryMap({
                             let originX = e.clientX - bounds.left
                             let originY = e.clientY - bounds.top
                             const { x, y, scale } = transformRef.current
-                            const finalX = originX / scale - x
-                            const finalY = originY / scale - y
+                            const finalX = (originX / scale - x) / expectedWidth
+                            const finalY = (originY / scale - y) / expectedHeight
                             onMapClickHandler({ x: finalX, y: finalY })
                         }}
                     />
@@ -129,8 +129,8 @@ function CountryMap({
                         <div
                             style={{
                                 position: 'absolute',
-                                left: addingPosition.x - 5,
-                                top: addingPosition.y - 5,
+                                left: (addingPosition.x * expectedWidth) - 5,
+                                top: (addingPosition.y * expectedHeight) - 5,
                                 pointerEvents: 'none',
                             }}
                         >
@@ -140,8 +140,8 @@ function CountryMap({
 
                     {!isAdding && (
                         <>
-                            <CountryPointDot displayInfo={displayInfo1} pointerRef={pointerRef} />                   
-                            <CountryPointDot displayInfo={displayInfo2} pointerRef={pointerRef2} />      
+                            <CountryPointDot displayInfo={displayInfo1} pointerRef={pointerRef} height={expectedHeight} width={expectedWidth} />                   
+                            <CountryPointDot displayInfo={displayInfo2} pointerRef={pointerRef2} height={expectedHeight} width={expectedWidth} />                        
                         </>
                     )}
                     
@@ -155,7 +155,9 @@ function CountryMap({
                             onClickHandler={() => {
                                 onItemClickHandler(item)
                             }}
-                        />
+                            height={expectedHeight} 
+                            width={expectedWidth} 
+                        />                   
                     ))}
                      
                 </div>
@@ -180,6 +182,8 @@ function CountryMap({
 function CountryPointDot({
     displayInfo,
     pointerRef,
+    width,
+    height,
     onClickHandler,
 }) {
     if (!displayInfo) return false
@@ -188,21 +192,26 @@ function CountryPointDot({
             ref={pointerRef}
             style={{
                 position: 'absolute',
-                left: displayInfo.x,
-                top: displayInfo.y,
+                left: displayInfo.x * width,
+                top: displayInfo.y * height,
                 width: '12px',
                 height: '12px',            
             }}
-            onClick={onClickHandler}
+           
         >
-            <div style={{
-                width: '100%',
-                height: '100%',
-                backgroundColor: constants.colors.CountryLocationBorder,
-                border: `2px solid ${constants.colors.CardBackground}`,
-                borderRadius: '50%',
-                transform: 'translate(-50%, -50%)',
-            }}></div>
+            <div 
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: constants.colors.CountryLocationBorder,
+                    border: `2px solid ${constants.colors.CardBackground}`,
+                    borderRadius: '50%',
+                    transform: 'translate(-50%, -50%)',
+                }}
+                onClick={onClickHandler}
+            >
+
+            </div>
         </div>
     )
 }

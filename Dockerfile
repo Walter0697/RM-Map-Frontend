@@ -1,7 +1,10 @@
 FROM node:16.16.0 AS build-stage
 WORKDIR /app
-COPY . .
+
+COPY package*.json ./
 RUN yarn --network-timeout 100000
+
+COPY . .
 RUN yarn build
 
 FROM nginx:stable-alpine AS production-stage
