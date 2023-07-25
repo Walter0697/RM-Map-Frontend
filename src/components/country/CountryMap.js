@@ -34,6 +34,7 @@ function CountryMap({
     onItemClickHandler,
     onMapClickHandler,
     addingPosition,
+    isAdding,
 }) {
     const parentRef = useRef(null)
     const elementRef = useRef(null)
@@ -136,9 +137,15 @@ function CountryMap({
                             <ZoomInMapIcon fontSize='10px' color={'error'} />
                         </div>
                     )}
-                    <CountryPointDot displayInfo={displayInfo1} pointerRef={pointerRef} />                   
-                    <CountryPointDot displayInfo={displayInfo2} pointerRef={pointerRef2} />      
-                    {itemList.map((item, index) => (
+
+                    {!isAdding && (
+                        <>
+                            <CountryPointDot displayInfo={displayInfo1} pointerRef={pointerRef} />                   
+                            <CountryPointDot displayInfo={displayInfo2} pointerRef={pointerRef2} />      
+                        </>
+                    )}
+                    
+                    {!isAdding && itemList.map((item, index) => (
                         <CountryPointDot 
                             key={`${item.id}-${index}`}
                             displayInfo={{
@@ -149,7 +156,8 @@ function CountryMap({
                                 onItemClickHandler(item)
                             }}
                         />
-                    ))}     
+                    ))}
+                     
                 </div>
             </QuickPinchZoom>
             <div

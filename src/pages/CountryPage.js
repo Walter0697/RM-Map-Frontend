@@ -291,6 +291,7 @@ function CountryPage({
                     onItemClickHandler={onItemClickHandler}
                     onMapClickHandler={onMapClickHandler}
                     addingPosition={addingPosition}
+                    isAdding={isAdding}
                 />
                 <svg 
                     viewBox={viewBoxStr}
