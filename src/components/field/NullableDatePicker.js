@@ -4,11 +4,13 @@ import {
     InputAdornment,
     IconButton,
 } from '@mui/material'
-import {
-    LocalizationProvider,
-    DateTimePicker,
-} from '@mui/lab'
-import AdapterDateFns from '@mui/lab/AdapterDateFns'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers'
+// import {
+//     LocalizationProvider,
+//     DateTimePicker,
+// } from '@mui/lab'
+// import AdapterDateFns from '@mui/lab/AdapterDateFns'
 
 import ClearIcon from '@mui/icons-material/Clear'
 
@@ -28,6 +30,7 @@ function NullableDatePicker({
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DateTimePicker
+                slotProps={{ textField: { fullWidth: true } }}
                 renderInput={(props) => (
                     <TextField 
                         {...props} 
@@ -45,11 +48,10 @@ function NullableDatePicker({
                                         <ClearIcon />
                                     </IconButton>
                                 </InputAdornment>
-                            ))
+                            )),
                         }}
                     />
                 )}
-                fullWidth
                 minDate={noPast ? new Date() : null}
                 label={label}
                 value={value}
