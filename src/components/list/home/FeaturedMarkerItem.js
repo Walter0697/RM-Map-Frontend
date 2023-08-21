@@ -187,6 +187,7 @@ function FeatureMarkerItem({
 
     const currentList = useMemo(() => {
         if (!featuredMarkers) return []
+        if (!featuredMarkers[selected]) return []
         const output = []
         for (let i = 0; i < featuredMarkers[selected].length; i++) {
             const item = {
@@ -207,7 +208,7 @@ function FeatureMarkerItem({
                 continue
             }
 
-            if (featuredMarkers[current.identifier].length > 0) {
+            if (featuredMarkers[current.identifier] && featuredMarkers[current.identifier].length > 0) {
                 output.push(current)
             }
         }
