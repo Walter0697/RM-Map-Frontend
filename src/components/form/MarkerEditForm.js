@@ -107,8 +107,8 @@ function MarkerEditForm({
         setFormValue('price', marker.price)
         setFormValue('need_booking', marker.need_booking)
         setFormValue('permanent', marker.permanent)
-        setFormValue('from_time', marker.from_time ? dayjs.utc(marker.from_time).format('MM/DD/YYYY HH:mm') : null)
-        setFormValue('to_time', marker.to_time ? dayjs.utc(marker.to_time).format('MM/DD/YYYY HH:mm') : null)
+        setFormValue('from_time', marker.from_time ? new Date(dayjs.utc(marker.from_time).format('MM/DD/YYYY HH:mm')) : null)
+        setFormValue('to_time', marker.to_time ? new Date(dayjs.utc(marker.to_time).format('MM/DD/YYYY HH:mm')) : null)
         setWebsiteLink('')
         setImageCache({})
         rawImageCaches = {}
