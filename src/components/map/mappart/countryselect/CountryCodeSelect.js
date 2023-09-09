@@ -108,6 +108,7 @@ function CountryCodeSelect({
                 width: '55vw',
                 borderRadius: '5px',
                 pointerEvents: open ? 'auto' : 'none',
+                overflow: 'auto'
             }}
         >
             {countrycodes.map((code, index) => (
