@@ -4,7 +4,7 @@ import {
     Button,
 } from '@mui/material'
 
-import {version} from '../../../../package.json'
+import pkg from '../../../../package.json'
 
 function VersionView({
     onClickHandler,
@@ -22,7 +22,7 @@ function VersionView({
         >
             <Grid 
                 container fullWidth>
-                <Grid item xs={12}>Current Version : {version}</Grid>
+                <Grid item xs={12}>Current Version : {pkg.version}</Grid>
             </Grid>
         </Button>
     )
