@@ -3,6 +3,7 @@ import {
     Grid,
     Button,
 } from '@mui/material'
+import backend from '../../../constant/backend'
 
 import StarIcon from '@mui/icons-material/Star'
 import PinDropIcon from '@mui/icons-material/PinDrop'
@@ -59,7 +60,7 @@ function MarkerItem({
                 >
                     <img
                     height='90px'
-                    src={process.env.REACT_APP_IMAGE_LINK + item.image_link}
+                    src={backend.IMAGE_LINK + item.image_link}
                     onError={onImageFailedToLoad}
                     />
                 </Grid>
@@ -70,7 +71,7 @@ function MarkerItem({
                 >
                     <img
                     height='90px'
-                    src={process.env.REACT_APP_IMAGE_LINK + typeIcon}
+                    src={backend.IMAGE_LINK + typeIcon}
                     />
                 </Grid>
             )}
@@ -91,7 +92,7 @@ function MarkerItem({
                     }}
                     >
                         <ImageHeadText
-                            iconPath={process.env.REACT_APP_IMAGE_LINK + typeIcon}
+                            iconPath={backend.IMAGE_LINK + typeIcon}
                             iconSize='20px'
                             label={item.label}
                             labelSize='20px'

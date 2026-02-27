@@ -3,6 +3,7 @@ import {
     useSpring,
     animated,
 } from '@react-spring/web'
+import backend from '../../../constant/backend'
 import {
     Grid,
     Button,
@@ -84,7 +85,7 @@ function TodaySchedule({
                                 >
                                     <img 
                                         height='50px'
-                                        src={process.env.REACT_APP_IMAGE_LINK + schedule.image_path}
+                                        src={backend.IMAGE_LINK + schedule.image_path}
                                     />
                                 </div>
                             </div>

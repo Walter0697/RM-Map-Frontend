@@ -1,0 +1,116 @@
+name: Frontend Delivery
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    name: Build and Push Frontend Image
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate frontend version source
+        run: |
+          grep -q '"version"' package.json || {
+            echo "Could not find version in package.json" >&2
+            exit 1
+          }
+
+      - name: Extract image metadata
+        id: meta
+        run: |
+          VERSION=$(grep -Eo '"version"[[:space:]]*:[[:space:]]*"[^"]+"' package.json | head -n1 | sed -E 's/.*"([^"]+)"/\1/')
+          if [ -z "$VERSION" ]; then
+            echo "Frontend version extraction failed" >&2
+            exit 1
+          fi
+
+          IMAGE="ghcr.io/${{ github.repository_owner }}/rm-map-frontend"
+          SHA_TAG="${GITHUB_SHA::12}"
+
+          {
+            echo "version=$VERSION"
+            echo "image=$IMAGE"
+            echo "sha_tag=$SHA_TAG"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Resolve frontend build configuration
+        id: cfg
+        env:
+          SECRET_MAP_KEY: ${{ secrets.TOMTOM_MAP_APIKEY }}
+          VAR_MAP_KEY: ${{ vars.TOMTOM_MAP_APIKEY }}
+          SECRET_BACKEND_BASE_URL: ${{ secrets.FRONTEND_BACKEND_BASE_URL }}
+          VAR_BACKEND_BASE_URL: ${{ vars.FRONTEND_BACKEND_BASE_URL }}
+        run: |
+          map_key="$SECRET_MAP_KEY"
+          [ -n "$map_key" ] || map_key="$VAR_MAP_KEY"
+
+          backend_base_url="${SECRET_BACKEND_BASE_URL%/}"
+          [ -n "$backend_base_url" ] || backend_base_url="${VAR_BACKEND_BASE_URL%/}"
+
+          if [ -z "$map_key" ]; then
+            echo "Missing TomTom key. Set TOMTOM_MAP_APIKEY as repo secret or variable." >&2
+            exit 1
+          fi
+
+          if [ -z "$backend_base_url" ]; then
+            echo "Missing FRONTEND_BACKEND_BASE_URL (set as secret or variable)." >&2
+            exit 1
+          fi
+
+          graphql_backend="$backend_base_url/query"
+          auth_backend="$backend_base_url/auth"
+          apikey_backend="$auth_backend"
+          image_link="$backend_base_url"
+
+          {
+            echo "map_key=$map_key"
+            echo "backend_base_url=$backend_base_url"
+            echo "graphql_backend=$graphql_backend"
+            echo "auth_backend=$auth_backend"
+            echo "apikey_backend=$apikey_backend"
+            echo "image_link=$image_link"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          build-args: |
+            REACT_APP_MAP_APIKEY=${{ steps.cfg.outputs.map_key }}
+            REACT_APP_BACKEND_BASE_URL=${{ steps.cfg.outputs.backend_base_url }}
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha_tag }}
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
+            ${{ steps.meta.outputs.image }}:latest
+
+      - name: Publish summary
+        run: |
+          {
+            echo "### Frontend image published"
+            echo "- Image: \\`${{ steps.meta.outputs.image }}\\`"
+            echo "- Tags: \\`${{ steps.meta.outputs.sha_tag }}\\`, \\`${{ steps.meta.outputs.version }}\\`, \\`latest\\`"
+            echo "- Backend base URL: \\`${{ steps.cfg.outputs.backend_base_url }}\\`"
+            echo "- Derived GraphQL URL: \\`${{ steps.cfg.outputs.graphql_backend }}\\`"
+          } >> "$GITHUB_STEP_SUMMARY"

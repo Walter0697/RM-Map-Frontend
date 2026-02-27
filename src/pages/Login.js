@@ -26,6 +26,7 @@ import useOpacityTransition from '../hooks/useOpacityTransition'
 
 import actions from '../store/actions'
 import graphql from '../graphql'
+import backend from '../constant/backend'
 
 import styles from '../styles/login.module.css'
 
@@ -33,6 +34,14 @@ function Login({ jwt, dispatch }) {
     // for environment
     const detectMobile = useMobileDetect()
     const history = useHistory()
+    const authBackend = backend.AUTH_BACKEND
+    const callbackParams = useMemo(() => {
+        const url = new URL(window.location.href)
+        return {
+            token: url.searchParams.get('token'),
+            username: url.searchParams.get('username'),
+        }
+    }, [])
 
     // graphql request
     const [ loginGQL, { data: loginData, loading: loginLoading, error: loginError } ] = useMutation(graphql.auth.login, { errorPolicy: 'all' })
@@ -45,6 +54,8 @@ function Login({ jwt, dispatch }) {
         password: '',
     })
     const [ error, setError ] = useObject({})
+    const [ authMode, setAuthMode ] = useState('local-password')
+    const [ modeLoading, setModeLoading ] = useState(true)
 
     // to lock button from being pressed
     const [ sending, setSending ] = useState(false)
@@ -82,6 +93,51 @@ function Login({ jwt, dispatch }) {
         }
     }, [jwt])
 
+    useEffect(() => {
+        const callbackToken = callbackParams.token
+        const callbackUsername = callbackParams.username
+        if (callbackToken && callbackUsername) {
+            dispatch(actions.login(callbackToken, callbackUsername))
+            window.history.replaceState({}, document.title, '/login')
+        }
+    }, [dispatch, callbackParams])
+
+    useEffect(() => {
+        const loadMode = async () => {
+            if (jwt || (callbackParams.token && callbackParams.username)) {
+                setModeLoading(false)
+                return
+            }
+
+            if (!authBackend) {
+                setModeLoading(false)
+                return
+            }
+
+            try {
+                const response = await fetch(`${authBackend}/mode`)
+                const body = await response.json()
+                if (!response.ok) {
+                    setModeLoading(false)
+                    return
+                }
+
+                if (body.mode === 'oidc') {
+                    setAuthMode('oidc')
+                    window.location.assign(`${authBackend}/oidc/start`)
+                    return
+                }
+
+                setAuthMode('local-password')
+            } catch (e) {
+                setAuthMode('local-password')
+            }
+            setModeLoading(false)
+        }
+
+        loadMode()
+    }, [authBackend, jwt, callbackParams])
+
     // check login state to perform different action
     useEffect(() => {
         let timer = null
@@ -113,7 +169,7 @@ function Login({ jwt, dispatch }) {
     // handling graphql request result
     useEffect(() => {
         if (loginError) {
-            setError('password', error.message)
+            setError('password', loginError.message)
             setSending(false)
         }
 
@@ -175,6 +231,10 @@ function Login({ jwt, dispatch }) {
 
     // render layer for different shape of the input form
     const renderLayer = (state) => {
+        if (modeLoading || authMode === 'oidc') {
+            return <LinearProgress />
+        }
+
         switch (state) {
             case 'prompt':
                 return (

@@ -11,6 +11,7 @@ import {
     Grid,
     Slide,
 } from '@mui/material'
+import backend from '../../constant/backend'
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn'
@@ -127,7 +128,7 @@ function ScheduleItem({
                     {imageExist ? (
                         <img 
                             width='90%'
-                            src={process.env.REACT_APP_IMAGE_LINK + item.image_path}
+                            src={backend.IMAGE_LINK + item.image_path}
                             onError={onImageFailedToLoad}
                         /> 
                     ) : (

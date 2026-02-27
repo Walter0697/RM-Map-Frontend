@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import {
     Grid,
 } from '@mui/material'
+import backend from '../../../constant/backend'
 
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
@@ -28,7 +29,7 @@ function LocationPreview({
         if (!marker) return null
         if (marker?.type === 'marker') {
             if (marker?.item.image_link) {
-                return process.env.REACT_APP_IMAGE_LINK + marker.item.image_link
+                return backend.IMAGE_LINK + marker.item.image_link
             } else {
                 return typeIcon
             }
@@ -46,7 +47,7 @@ function LocationPreview({
         if (marker?.type === 'marker') {
             // find the type icon from the list to get the icon path
             const currentType = eventtypes.find(s => s.value === marker.item.type)
-            setIcon(process.env.REACT_APP_IMAGE_LINK + currentType.icon_path)
+            setIcon(backend.IMAGE_LINK + currentType.icon_path)
         }
     }, [marker])
 

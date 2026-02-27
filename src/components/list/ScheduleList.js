@@ -6,6 +6,7 @@ import {
     config,
     animated,
 } from '@react-spring/web'
+import backend from '../../constant/backend'
 import { 
     Grid,
     Button,
@@ -105,7 +106,7 @@ function ScheduleItem({
                             >
                                 <img
                                     height='80px'
-                                    src={process.env.REACT_APP_IMAGE_LINK + sche.image_path}
+                                    src={backend.IMAGE_LINK + sche.image_path}
                                 />
                             </div>
                         </div>
@@ -227,7 +228,7 @@ function TodayList({
                                         alignItems: 'center',
                                     }}>
                                         <img 
-                                            src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[0].image_path}
+                                            src={backend.IMAGE_LINK + bigImageMarkers[0].image_path}
                                             style={{
                                                 maxHeight: '150px',
                                                 width: '90%',
@@ -256,7 +257,7 @@ function TodayList({
                                         alignItems: 'center',
                                     }}>
                                         <img 
-                                            src={process.env.REACT_APP_IMAGE_LINK + bigImageMarkers[1].image_path}
+                                            src={backend.IMAGE_LINK + bigImageMarkers[1].image_path}
                                             style={{
                                                 maxHeight: '150px',
                                                 width: '90%',
@@ -300,7 +301,7 @@ function TodayList({
                             >
                                 <img 
                                     height='50px'
-                                    src={process.env.REACT_APP_IMAGE_LINK + sche.image_path}
+                                    src={backend.IMAGE_LINK + sche.image_path}
                                 />
                             </div>
                         </div>

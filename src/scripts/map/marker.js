@@ -2,6 +2,7 @@ import tt from '@tomtom-international/web-sdk-maps'
 import constants from '../../constant'
 import testing from '../../testing'
 import sprite from './sprite'
+import backend from '../../constant/backend'
 
 const getPinImage = (mappin_list, markertype, pintype) => {
     if (markertype) {
@@ -22,7 +23,7 @@ const getMapPin = (map, location, onMarkerClick, selected, key, markertype, pinS
     const pinImage = getPinImage(mappins, markertype, pinType)
     let pinImageLink = constants.pins.defaultPin
     if (pinImage) {
-        pinImageLink = process.env.REACT_APP_IMAGE_LINK + pinImage
+        pinImageLink = backend.IMAGE_LINK + pinImage
     }
     
     var div = document.createElement('div')
