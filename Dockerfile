@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM node:20-alpine AS build-stage
+FROM --platform=$BUILDPLATFORM node:20-alpine AS build-stage
 WORKDIR /app
 ARG REACT_APP_BACKEND_BASE_URL
 
@@ -12,7 +12,7 @@ RUN --mount=type=secret,id=react_app_map_apikey \
     REACT_APP_BACKEND_BASE_URL="$REACT_APP_BACKEND_BASE_URL" \
     yarn build
 
-FROM nginx:stable-alpine AS production-stage
+FROM --platform=$TARGETPLATFORM nginx:stable-alpine AS production-stage
 WORKDIR /var/
 COPY --from=build-stage /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
