@@ -99,8 +99,9 @@ jobs:
           file: ./Dockerfile
           push: true
           build-args: |
-            REACT_APP_MAP_APIKEY=${{ steps.cfg.outputs.map_key }}
             REACT_APP_BACKEND_BASE_URL=${{ steps.cfg.outputs.backend_base_url }}
+          secrets: |
+            react_app_map_apikey=${{ steps.cfg.outputs.map_key }}
           tags: |
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha_tag }}
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
@@ -110,8 +111,8 @@ jobs:
         run: |
           {
             echo "### Frontend image published"
-            echo "- Image: \\`${{ steps.meta.outputs.image }}\\`"
-            echo "- Tags: \\`${{ steps.meta.outputs.sha_tag }}\\`, \\`${{ steps.meta.outputs.version }}\\`, \\`latest\\`"
-            echo "- Backend base URL: \\`${{ steps.cfg.outputs.backend_base_url }}\\`"
-            echo "- Derived GraphQL URL: \\`${{ steps.cfg.outputs.graphql_backend }}\\`"
+            echo '- Image: `${{ steps.meta.outputs.image }}`'
+            echo '- Tags: `${{ steps.meta.outputs.sha_tag }}`, `${{ steps.meta.outputs.version }}`, `latest`'
+            echo '- Backend base URL: `${{ steps.cfg.outputs.backend_base_url }}`'
+            echo '- Derived GraphQL URL: `${{ steps.cfg.outputs.graphql_backend }}`'
           } >> "$GITHUB_STEP_SUMMARY"
