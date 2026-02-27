@@ -3,6 +3,7 @@ import {
     Grid,
     Button,
 } from '@mui/material'
+import backend from '../../../constant/backend'
 
 import markerhelper from '../../../scripts/marker'
 
@@ -62,7 +63,7 @@ function FeaturedMarker({
                     >
                         <img
                             width='80%'
-                            src={process.env.REACT_APP_IMAGE_LINK + imageLink}
+                            src={backend.IMAGE_LINK + imageLink}
                         />
                     </Grid>
                     <Grid

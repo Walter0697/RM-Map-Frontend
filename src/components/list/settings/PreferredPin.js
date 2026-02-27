@@ -3,6 +3,7 @@ import {
     Grid,
     Button,
 } from '@mui/material'
+import backend from '../../../constant/backend'
 
 import constants from '../../../constant'
 
@@ -49,7 +50,7 @@ function PreferredPin({
                                     }}
                                 >
                                     <img 
-                                        src={process.env.REACT_APP_IMAGE_LINK + pin.image_path}
+                                        src={backend.IMAGE_LINK + pin.image_path}
                                         width='70%'
                                     />
                                 </Grid>

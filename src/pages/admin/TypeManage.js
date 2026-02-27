@@ -4,6 +4,7 @@ import {
     Button,
     IconButton,
 } from '@mui/material'
+import backend from '../../constant/backend'
 
 import { useLazyQuery, useMutation } from '@apollo/client'
 
@@ -139,7 +140,7 @@ function TypeManage() {
                             >
                                 <img
                                     height='70px'
-                                    src={process.env.REACT_APP_IMAGE_LINK + item.icon_path}
+                                    src={backend.IMAGE_LINK + item.icon_path}
                                 />
                             </Grid>
                             <Grid item xs={6} md={6} lg={6}>

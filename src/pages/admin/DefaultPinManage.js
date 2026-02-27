@@ -4,6 +4,7 @@ import {
     Button,
     IconButton,
 } from '@mui/material'
+import backend from '../../constant/backend'
 
 import { useQuery, useLazyQuery } from '@apollo/client'
 
@@ -103,7 +104,7 @@ function DefaultPinManage() {
                                 >
                                     <img
                                     height='70px'
-                                    src={process.env.REACT_APP_IMAGE_LINK + item.pin.display_path}
+                                    src={backend.IMAGE_LINK + item.pin.display_path}
                                 />
                                 </Grid>
                             ) : (

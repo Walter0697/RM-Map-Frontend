@@ -20,6 +20,7 @@ import {
 import useBoop from '../../hooks/useBoop'
 
 import AdminTopBar from '../../components/topbar/AdminTopBar'
+import backend from '../../constant/backend'
 
 const availableScopes = [
     'markers:read',
@@ -33,8 +34,8 @@ const availableScopes = [
 ]
 
 function ApiKeyManage({ jwt }) {
-    const authBackend = process.env.REACT_APP_AUTH_BACKEND
-    const apiKeyBackend = process.env.REACT_APP_APIKEY_BACKEND || authBackend
+    const authBackend = backend.AUTH_BACKEND
+    const apiKeyBackend = backend.APIKEY_BACKEND || authBackend
 
     const [ loading, setLoading ] = useState(false)
     const [ items, setItems ] = useState([])
@@ -65,7 +66,7 @@ function ApiKeyManage({ jwt }) {
 
     const parseJsonError = async (resp) => {
         if (resp.status === 404) {
-            return '404 page not found. Backend route /auth/apikeys is unavailable. Restart backend with latest code or set REACT_APP_APIKEY_BACKEND.'
+            return '404 page not found. Backend route /auth/apikeys is unavailable. Restart backend with latest code or verify REACT_APP_BACKEND_BASE_URL.'
         }
         const text = await resp.text()
         if (!text) return `${resp.status} ${resp.statusText}`

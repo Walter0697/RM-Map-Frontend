@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import { connect } from 'react-redux'
 import { Grid } from '@mui/material'
+import backend from '../../constant/backend'
 
 import FilterContainer from './FilterContainer'
 import FilterTitle from './FilterTitle'
@@ -14,7 +15,7 @@ function EventTypeFilter({
 }) {
     const displayEventTypes = useMemo(() => {
         return eventtypes.filter(s => !s.hidden).map(s => ({
-            icon: process.env.REACT_APP_IMAGE_LINK + s.icon_path,
+            icon: backend.IMAGE_LINK + s.icon_path,
             label: s.label,
             value: s.value,
         }))

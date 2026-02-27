@@ -8,6 +8,7 @@ import {
     InputLabel,
     FormHelperText,
 } from '@mui/material'
+import backend from '../../../constant/backend'
 
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 
@@ -89,7 +90,7 @@ function PinForm({
 
     useEffect(() => {
         if (previewData) {
-            setPreview(process.env.REACT_APP_IMAGE_LINK + previewData.previewPin)
+            setPreview(backend.IMAGE_LINK + previewData.previewPin)
         }
 
         if (previewError) {

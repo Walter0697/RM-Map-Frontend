@@ -9,6 +9,7 @@ import {
     DialogActions,
     Slide,
 } from '@mui/material'
+import backend from '../../../constant/backend'
 import image from '../../../scripts/image'
 
 const TransitionFromLeft = (props) => {
@@ -55,7 +56,7 @@ function ImagePreview({
                             width: '100%',
                             height: '100%',
                         }}
-                        src={process.env.REACT_APP_IMAGE_LINK + imageInfo.value}
+                        src={backend.IMAGE_LINK + imageInfo.value}
                         alt={'preview'}
                     />
                 )

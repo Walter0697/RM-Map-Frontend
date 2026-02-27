@@ -5,6 +5,7 @@ import {
     Grid,
     Button,
 } from '@mui/material'
+import backend from '../../constant/backend'
 
 import { useLazyQuery } from '@apollo/client'
 
@@ -94,7 +95,7 @@ function MovieItem({
                             style={{
                                 width: '80%',
                             }}
-                            src={process.env.REACT_APP_IMAGE_LINK + movieTypeIcon}
+                            src={backend.IMAGE_LINK + movieTypeIcon}
                         />
                     )}
                     

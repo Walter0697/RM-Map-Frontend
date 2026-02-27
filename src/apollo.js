@@ -6,9 +6,10 @@ import {
 import { createUploadLink } from 'apollo-upload-client'
 import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
+import backend from './constant/backend'
 
 const httpLink = createUploadLink({
-    uri: process.env.REACT_APP_GRAPHQL_BACKEND,
+    uri: backend.GRAPHQL_BACKEND,
 })
 
 const authLink = setContext((_, { headers }) => {

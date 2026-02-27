@@ -26,6 +26,7 @@ import useOpacityTransition from '../hooks/useOpacityTransition'
 
 import actions from '../store/actions'
 import graphql from '../graphql'
+import backend from '../constant/backend'
 
 import styles from '../styles/login.module.css'
 
@@ -33,7 +34,7 @@ function Login({ jwt, dispatch }) {
     // for environment
     const detectMobile = useMobileDetect()
     const history = useHistory()
-    const authBackend = process.env.REACT_APP_AUTH_BACKEND
+    const authBackend = backend.AUTH_BACKEND
     const callbackParams = useMemo(() => {
         const url = new URL(window.location.href)
         return {

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import backend from '../constant/backend'
 
 const get_request = (url) => {
     return axios.get(url)
@@ -6,7 +7,7 @@ const get_request = (url) => {
 
 const public_request = (query) => {
     return axios({
-        url: process.env.REACT_APP_GRAPHQL_BACKEND, 
+        url: backend.GRAPHQL_BACKEND,
         method: 'post',
         data: {
             query,
@@ -24,7 +25,7 @@ const authorized_request = (query) => {
     if (!json.auth?.jwt) return false
 
     return axios({
-        url: process.env.REACT_APP_GRAPHQL_BACKEND, 
+        url: backend.GRAPHQL_BACKEND,
         method: 'post',
         data: {
             query,

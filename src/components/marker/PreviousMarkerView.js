@@ -11,6 +11,7 @@ import {
     Grid,
     Slide,
 } from '@mui/material'
+import backend from '../../constant/backend'
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 
@@ -55,7 +56,7 @@ function PreviousMarkerView({
         if (!marker) return
 
         const currentType = eventtypes.find(s => s.value === marker.type)
-        setIcon(process.env.REACT_APP_IMAGE_LINK + currentType.icon_path)
+        setIcon(backend.IMAGE_LINK + currentType.icon_path)
 
         listMarkerScheduleGQL({ variables: { id: marker.id } })
     }, [marker])
@@ -127,7 +128,7 @@ function PreviousMarkerView({
                                         <Grid item xs={12} md={12} lg={12}>
                                             <img
                                                 width='100%'
-                                                src={process.env.REACT_APP_IMAGE_LINK + marker.image_link}                                            
+                                                src={backend.IMAGE_LINK + marker.image_link}                                            
                                             />
                                         </Grid>
                                     )}

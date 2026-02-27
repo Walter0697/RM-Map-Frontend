@@ -3,6 +3,7 @@ import { useQuery, useMutation } from '@apollo/client'
 import {
     Grid,
 } from '@mui/material'
+import backend from '../../../constant/backend'
 
 import BaseForm from '../BaseForm'
 
@@ -97,7 +98,7 @@ function PreferredPinForm({
                                     {item.label}  
                                     <img
                                         width='100%'
-                                        src={process.env.REACT_APP_IMAGE_LINK + item.display_path}
+                                        src={backend.IMAGE_LINK + item.display_path}
                                     />  
                                 </div>
                             </Grid>
