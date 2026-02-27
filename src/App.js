@@ -28,6 +28,7 @@ import MarkerFilterPage from './pages/MarkerFilterPage'
 import TypeManage from './pages/admin/TypeManage'
 import PinManage from './pages/admin/PinManage'
 import DefaultPinManage from './pages/admin/DefaultPinManage'
+import ApiKeyManage from './pages/admin/ApiKeyManage'
 
 import InitData from './InitData'
 
@@ -58,6 +59,7 @@ function App() {
             <Route path='/admin/type' component={TypeManage} />
             <Route path='/admin/pin' component={PinManage} />
             <Route path='/admin/defaultpin' component={DefaultPinManage} />
+            <Route path='/admin/apikey' component={ApiKeyManage} />
           </Switch>
         )} />
         <InitData />
