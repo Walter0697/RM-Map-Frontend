@@ -3,3 +3,4 @@ node_modules
 /tmp
 example.env
 title.png
+/build

@@ -113,6 +113,8 @@ jobs:
             REACT_APP_BACKEND_BASE_URL=${{ steps.cfg.outputs.backend_base_url }}
           secrets: |
             react_app_map_apikey=${{ steps.cfg.outputs.map_key }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha_tag }}
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
