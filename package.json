@@ -18,7 +18,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@tomtom-international/web-sdk-maps": "^6.25.0",
     "@tomtom-international/web-sdk-services": "^6.25.0",
-    "apollo-upload-client": "^16.0.0",
+    "apollo-upload-client": "^18.0.1",
     "axios": "^1.13.5",
     "country-flag-emoji": "^1.0.3",
     "date-fns": "^4.1.0",
