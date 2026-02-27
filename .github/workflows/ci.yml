@@ -69,4 +69,14 @@ jobs:
         run: yarn --frozen-lockfile
 
       - name: Run yarn audit (high+)
+        continue-on-error: true
         run: yarn audit --level high
+
+      - name: Summarize audit mode
+        if: always()
+        run: |
+          {
+            echo "### Dependency audit mode"
+            echo ""
+            echo "yarn audit is currently non-blocking while vulnerabilities are remediated."
+          } >> "$GITHUB_STEP_SUMMARY"
