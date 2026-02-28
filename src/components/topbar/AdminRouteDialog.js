@@ -104,6 +104,13 @@ function AdminRouteDialog({
                         active={location.pathname === '/admin/apikey'}
                         directTo={directTo}
                     />
+                    <RouteBox
+                        label='Train Station'
+                        description='Map image, pins, lines, and JSON export'
+                        route='/admin/station'
+                        active={location.pathname === '/admin/station'}
+                        directTo={directTo}
+                    />
                 </Stack>
             </DialogContent>
         </Dialog>

@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import { useLazyQuery } from '@apollo/client'
+import {
+    FormControl,
+    MenuItem,
+    Select,
+} from '@mui/material'
 
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import RotateLeftIcon from '@mui/icons-material/RotateLeft'
@@ -16,13 +21,13 @@ import CircleIconButton from '../components/field/CircleIconButton'
 import TopBar from '../components/topbar/TopBar'
 import AutoHideAlert from '../components/AutoHideAlert'
 import StationSettingForm from '../components/form/station/StationSettingForm'
+import backend from '../constant/backend'
 
 import MTRImage from '../images/station/hkmtr2.jpeg'
 
 import actions from '../store/actions'
 import graphql from '../graphql'
 
-const currentMap = 'HK_MTR'
 const currentDimension = {
     width: 2000,
     height: 1322,
@@ -31,6 +36,7 @@ const currentDimension = {
 function StationPage({
     stations,
     dispatch,
+    jwt,
 }) {
     const history = useHistory()
 
@@ -52,10 +58,23 @@ function StationPage({
 
     const [ messageDisplay, activateMessage ] = useBoop(3000)
     const [ currentMessage, setMessage ] = useState(null)
+    const [ currentMap, setCurrentMap ] = useState('HK_MTR')
+
+    const availableMaps = useMemo(() => {
+        const set = new Set((stations || []).map((item) => item.map_name).filter(Boolean))
+        if (set.size === 0) return ['HK_MTR']
+        return Array.from(set.values()).sort()
+    }, [stations])
+
+    useEffect(() => {
+        if (!availableMaps.includes(currentMap)) {
+            setCurrentMap(availableMaps[0])
+        }
+    }, [availableMaps, currentMap])
 
     const displayStations = useMemo(() => {
         return stations.filter(s => s.map_name === currentMap)
-    }, [stations])
+    }, [stations, currentMap])
 
     const [ selectedStation, setSelected ] = useState(null)
     const selectedInfo = useMemo(() => {
@@ -76,12 +95,38 @@ function StationPage({
     const pinchZoomRef = useRef(null)
 
     const [ openSettingForm, setOpenSettingForm ] = useState(false)
+    const [ mapImage, setMapImage ] = useState(MTRImage)
 
     useEffect(() => {
         if (pinchZoomRef && pinchZoomRef.current) {
             reset()
         }
     }, [pinchZoomRef])
+
+    useEffect(() => {
+        const fetchMapAsset = async () => {
+            if (!jwt) return
+            try {
+                const resp = await fetch(backend.withBasePath(`station-maps/${currentMap}`), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
+                })
+                if (!resp.ok) return
+                const payload = await resp.json()
+                if (payload?.image_path) {
+                    setMapImage(`${backend.IMAGE_LINK}${payload.image_path}`)
+                    return
+                }
+            } catch (error) {
+                console.warn('failed to load station map asset metadata', error)
+            }
+            setMapImage(MTRImage)
+        }
+
+        fetchMapAsset()
+    }, [jwt, currentMap])
 
     const onLocationClick = (item) => {
         setSelected(item)
@@ -143,6 +188,28 @@ function StationPage({
                     style={{ 
                         position: 'absolute',
                         top: '3%',
+                        right: '90px',
+                        minWidth: '180px',
+                    }}
+                >
+                    <FormControl fullWidth size='small'>
+                        <Select
+                            value={currentMap}
+                            onChange={(e) => setCurrentMap(e.target.value)}
+                            sx={{ backgroundColor: '#fff' }}
+                        >
+                            {availableMaps.map((mapName) => (
+                                <MenuItem key={mapName} value={mapName}>
+                                    {mapName}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </div>
+                <div
+                    style={{ 
+                        position: 'absolute',
+                        top: '3%',
                         right: '30px',
                     }}
                 >
@@ -164,7 +231,7 @@ function StationPage({
                     }}
                 >
                     <StationMap 
-                        mapImage={MTRImage}
+                        mapImage={mapImage}
                         stations={displayStations}
                         dimension={currentDimension}
                         pinchZoomRef={pinchZoomRef}
@@ -220,4 +287,5 @@ function StationPage({
 
 export default connect(state => ({
     stations: state.station.stations,
+    jwt: state.auth.jwt,
 })) (StationPage)
