@@ -1,5 +1,6 @@
 import axios from 'axios'
 import backend from '../constant/backend'
+import store from '../store'
 
 const get_request = (url) => {
     return axios.get(url)
@@ -19,10 +20,16 @@ const public_request = (query) => {
 }
 
 const authorized_request = (query) => {
-    const state = localStorage.getItem('reduxState')
-    if (!state) return false
-    const json = JSON.parse(state)
-    if (!json.auth?.jwt) return false
+    let token = store.getState()?.auth?.jwt || ''
+
+    if (!token) {
+        const state = localStorage.getItem('reduxState')
+        if (!state) return false
+        const json = JSON.parse(state)
+        token = json.auth?.jwt || ''
+    }
+
+    if (!token) return false
 
     return axios({
         url: backend.GRAPHQL_BACKEND,
@@ -32,7 +39,7 @@ const authorized_request = (query) => {
         },
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': json.auth.jwt,
+            'Authorization': token,
         }
     })
 }
