@@ -1,25 +1,32 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { connect } from 'react-redux'
 import {
-    Grid,
+    Alert,
+    Box,
     Button,
-    TextField,
-    FormControlLabel,
-    Checkbox,
-    Typography,
     Card,
     CardContent,
+    Chip,
     Divider,
-    Stack,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     FormControl,
+    FormControlLabel,
+    Checkbox,
+    Grid,
     InputLabel,
-    Select,
     MenuItem,
+    Select,
+    Stack,
+    TextField,
+    Typography,
 } from '@mui/material'
 
 import useBoop from '../../hooks/useBoop'
 
-import AdminTopBar from '../../components/topbar/AdminTopBar'
+import AdminPageShell from '../../components/admin/AdminPageShell'
 import backend from '../../constant/backend'
 
 const availableScopes = [
@@ -53,6 +60,8 @@ function ApiKeyManage({ jwt }) {
 
     const [ latestToken, setLatestToken ] = useState('')
     const [ latestTokenName, setLatestTokenName ] = useState('')
+    const [ createDialogOpen, setCreateDialogOpen ] = useState(false)
+    const formFieldSx = { width: { xs: '100%', md: 300 } }
 
     const [ alertOpen, triggerAlert ] = useBoop(2500)
     const [ alertMessage, setAlertMessage ] = useState('')
@@ -63,6 +72,7 @@ function ApiKeyManage({ jwt }) {
         if (!form.actor_user_id.trim()) return false
         return form.scopes.length > 0
     }, [form])
+    const allScopesSelected = form.scopes.length === availableScopes.length
 
     const parseJsonError = async (resp) => {
         if (resp.status === 404) {
@@ -167,7 +177,7 @@ function ApiKeyManage({ jwt }) {
     }
 
     const onCreate = async () => {
-        if (!canCreate || !apiKeyBackend || !jwt) return
+        if (!canCreate || !apiKeyBackend || !jwt) return false
 
         setLoading(true)
         setErrorMessage('')
@@ -193,7 +203,7 @@ function ApiKeyManage({ jwt }) {
             if (!resp.ok) {
                 const errText = await parseJsonError(resp)
                 setErrorMessage(`Failed to create API key: ${errText}`)
-                return
+                return false
             }
             const body = await resp.json()
             setLatestToken(body.token || '')
@@ -207,35 +217,10 @@ function ApiKeyManage({ jwt }) {
             })
             await fetchOptions()
             await fetchKeys()
+            return true
         } catch (e) {
             setErrorMessage(`Failed to create API key: ${e.message}`)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const onRevoke = async (id) => {
-        if (!window.confirm('Revoke this API key?')) return
-        if (!apiKeyBackend || !jwt) return
-        setLoading(true)
-        setErrorMessage('')
-        try {
-            const resp = await fetch(`${apiKeyBackend}/apikeys/${id}/revoke`, {
-                method: 'POST',
-                headers: {
-                    Authorization: jwt,
-                },
-            })
-            if (!resp.ok) {
-                const errText = await parseJsonError(resp)
-                setErrorMessage(`Failed to revoke API key: ${errText}`)
-                return
-            }
-            setAlertMessage('API key revoked')
-            triggerAlert()
-            await fetchKeys()
-        } catch (e) {
-            setErrorMessage(`Failed to revoke API key: ${e.message}`)
+            return false
         } finally {
             setLoading(false)
         }
@@ -271,6 +256,33 @@ function ApiKeyManage({ jwt }) {
         }
     }
 
+    const onDelete = async (id, name) => {
+        if (!window.confirm(`Permanently delete API key "${name}"? This cannot be undone.`)) return
+        if (!apiKeyBackend || !jwt) return
+        setLoading(true)
+        setErrorMessage('')
+        try {
+            const resp = await fetch(`${apiKeyBackend}/apikeys/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: jwt,
+                },
+            })
+            if (!resp.ok) {
+                const errText = await parseJsonError(resp)
+                setErrorMessage(`Failed to delete API key: ${errText}`)
+                return
+            }
+            setAlertMessage('API key deleted')
+            triggerAlert()
+            await fetchKeys()
+        } catch (e) {
+            setErrorMessage(`Failed to delete API key: ${e.message}`)
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const copyLatestToken = async () => {
         if (!latestToken) return
         try {
@@ -282,225 +294,317 @@ function ApiKeyManage({ jwt }) {
         }
     }
 
-    return (
-        <>
-            <AdminTopBar
-                label={'API Key Manage'}
-                alertOpen={alertOpen}
-                alertMessage={alertMessage}
-            />
-            <Grid
-                container
-                spacing={2}
-                style={{
-                    marginTop: '10px',
-                    marginLeft: '1%',
-                    width: '98%',
-                    marginBottom: '20px',
-                }}
-            >
-                <Grid item xs={12} md={12} lg={12}>
-                    <Card>
-                        <CardContent>
-                            <Typography variant='h6'>Create API Key</Typography>
-                            <Grid container spacing={2} style={{ marginTop: '5px' }}>
-                                <Grid item xs={12} md={4}>
-                                    <TextField
-                                        fullWidth
-                                        label='Key Name'
-                                        value={form.name}
-                                        onChange={onFormChange('name')}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={4}>
-                                    <FormControl fullWidth>
-                                        <InputLabel id='relation-select-label'>Relation</InputLabel>
-                                        <Select
-                                            labelId='relation-select-label'
-                                            label='Relation'
-                                            value={form.relation_id}
-                                            onChange={onFormChange('relation_id')}
-                                        >
-                                            {relations.map((item) => (
-                                                <MenuItem key={item.id} value={String(item.id)}>
-                                                    {item.display} (#{item.id})
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} md={4}>
-                                    <FormControl fullWidth>
-                                        <InputLabel id='actor-select-label'>Actor User</InputLabel>
-                                        <Select
-                                            labelId='actor-select-label'
-                                            label='Actor User'
-                                            value={form.actor_user_id}
-                                            onChange={onFormChange('actor_user_id')}
-                                        >
-                                            {users.map((item) => (
-                                                <MenuItem key={item.id} value={String(item.id)}>
-                                                    {item.username} ({item.role}) #{item.id}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        type='datetime-local'
-                                        label='Expires At (optional)'
-                                        value={form.expires_at}
-                                        onChange={onFormChange('expires_at')}
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <Typography variant='body2' style={{ marginBottom: '8px' }}>
-                                        Scopes
-                                    </Typography>
-                                    <Stack direction='row' spacing={1} flexWrap='wrap'>
-                                        {availableScopes.map((scope) => (
-                                            <FormControlLabel
-                                                key={scope}
-                                                control={(
-                                                    <Checkbox
-                                                        checked={form.scopes.includes(scope)}
-                                                        onChange={onScopeChange(scope)}
-                                                    />
-                                                )}
-                                                label={scope}
-                                            />
-                                        ))}
-                                    </Stack>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Button
-                                        variant='contained'
-                                        disabled={!canCreate || loading}
-                                        onClick={onCreate}
-                                    >
-                                        Create API Key
-                                    </Button>
-                                    <Button
-                                        variant='outlined'
-                                        style={{ marginLeft: '10px' }}
-                                        disabled={loading}
-                                        onClick={fetchKeys}
-                                    >
-                                        Refresh
-                                    </Button>
-                                    <Button
-                                        variant='outlined'
-                                        style={{ marginLeft: '10px' }}
-                                        disabled={loading}
-                                        onClick={fetchOptions}
-                                    >
-                                        Refresh Options
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                        </CardContent>
-                    </Card>
-                </Grid>
+    const onOpenCreateDialog = () => setCreateDialogOpen(true)
+    const onCloseCreateDialog = () => setCreateDialogOpen(false)
+    const onSelectAllScopes = () => {
+        setForm({
+            ...form,
+            scopes: [...availableScopes],
+        })
+    }
+    const onClearAllScopes = () => {
+        setForm({
+            ...form,
+            scopes: [],
+        })
+    }
 
-                {latestToken ? (
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Card style={{ border: '1px solid #f0b400' }}>
-                            <CardContent>
-                                <Typography variant='h6'>New Secret (show once)</Typography>
-                                <Typography variant='body2' color='textSecondary'>
-                                    Save this now for <b>{latestTokenName}</b>. You cannot retrieve it again later.
-                                </Typography>
+    const formatDateTime = (value) => {
+        if (!value) return '-'
+        const date = new Date(value)
+        if (Number.isNaN(date.getTime())) return value
+        return date.toLocaleString()
+    }
+
+    return (
+        <AdminPageShell
+            title='API Key Manage'
+            description='Manage machine credentials for integrations and automation.'
+            alertOpen={alertOpen}
+            alertMessage={alertMessage}
+            actions={(
+                <>
+                    <Button
+                        className='admin-action-button'
+                        variant='contained'
+                        onClick={onOpenCreateDialog}
+                    >
+                        New API Key
+                    </Button>
+                    <Button
+                        className='admin-action-button'
+                        variant='outlined'
+                        onClick={fetchKeys}
+                        disabled={loading}
+                    >
+                        Refresh Keys
+                    </Button>
+                    <Button
+                        className='admin-action-button'
+                        variant='outlined'
+                        onClick={fetchOptions}
+                        disabled={loading}
+                    >
+                        Refresh Options
+                    </Button>
+                </>
+            )}
+        >
+            {errorMessage ? (
+                <Alert severity='error'>{errorMessage}</Alert>
+            ) : null}
+
+            {latestToken ? (
+                <Card className='admin-panel' sx={{ borderColor: '#d4a106', borderWidth: 2 }}>
+                    <CardContent>
+                        <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>New secret (visible once)</Typography>
+                        <Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
+                            Save this token now for <b>{latestTokenName}</b>. It cannot be retrieved later.
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            multiline
+                            minRows={2}
+                            sx={{ mt: 1.25, fontFamily: 'monospace' }}
+                            value={latestToken}
+                            InputProps={{ readOnly: true }}
+                        />
+                        <Button
+                            className='admin-action-button'
+                            variant='contained'
+                            sx={{ mt: 1.25 }}
+                            onClick={copyLatestToken}
+                        >
+                            Copy Token
+                        </Button>
+                    </CardContent>
+                </Card>
+            ) : null}
+
+            <Card className='admin-panel'>
+                <CardContent>
+                    <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                        <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>Active keys</Typography>
+                        <Chip label={`${items.length} key(s)`} size='small' />
+                    </Stack>
+                    <Divider sx={{ my: 1.25 }} />
+
+                    {items.length === 0 ? (
+                        <Typography variant='body2' color='text.secondary'>
+                            {loading ? 'Loading keys...' : 'No API keys found.'}
+                        </Typography>
+                    ) : (
+                        <Stack spacing={0.75}>
+                            {items.map((item) => {
+                                const isRevoked = item.status === 'revoked'
+                                const itemScopes = Array.isArray(item.scopes) ? item.scopes : []
+                                const visibleScopes = itemScopes.slice(0, 3)
+                                const hiddenScopesCount = Math.max(itemScopes.length - visibleScopes.length, 0)
+                                return (
+                                    <Card key={item.id} variant='outlined' sx={{ borderRadius: 1.5 }}>
+                                        <CardContent sx={{ py: 0.9, '&:last-child': { pb: 0.9 } }}>
+                                            <Box
+                                                sx={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) 220px 170px' },
+                                                    gap: 1,
+                                                    alignItems: 'center',
+                                                }}
+                                            >
+                                                <Box sx={{ minWidth: 0 }}>
+                                                    <Stack direction='row' spacing={0.75} alignItems='center' sx={{ mb: 0.25 }}>
+                                                        <Typography variant='subtitle2' sx={{ fontWeight: 700 }}>
+                                                            {item.name}
+                                                        </Typography>
+                                                        <Chip
+                                                            size='small'
+                                                            color={isRevoked ? 'default' : 'success'}
+                                                            label={item.status || 'active'}
+                                                        />
+                                                    </Stack>
+                                                    <Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
+                                                        Prefix: <Box component='span' sx={{ fontFamily: 'monospace' }}>{item.prefix || '-'}</Box>
+                                                    </Typography>
+                                                    <Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
+                                                        Relation #{item.relation_id} | Actor #{item.actor_user_id}
+                                                    </Typography>
+                                                    <Stack direction='row' spacing={0.5} flexWrap='wrap' sx={{ mt: 0.5 }}>
+                                                        {visibleScopes.map((scope) => (
+                                                            <Chip key={scope} size='small' variant='outlined' label={scope} />
+                                                        ))}
+                                                        {hiddenScopesCount > 0 ? (
+                                                            <Chip size='small' variant='outlined' label={`+${hiddenScopesCount} more`} />
+                                                        ) : null}
+                                                    </Stack>
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
+                                                        Last used: {formatDateTime(item.last_used_at)}
+                                                    </Typography>
+                                                    <Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
+                                                        Expires: {formatDateTime(item.expires_at)}
+                                                    </Typography>
+                                                </Box>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                                                    }}
+                                                >
+                                                    <Stack direction='row' spacing={0.75} justifyContent='flex-end'>
+                                                        <Button
+                                                            className='admin-action-button'
+                                                            variant='outlined'
+                                                            size='small'
+                                                            disabled={loading || isRevoked}
+                                                            onClick={() => onRotate(item.id, item.name)}
+                                                        >
+                                                            Rotate
+                                                        </Button>
+                                                        <Button
+                                                            className='admin-action-button'
+                                                            variant='outlined'
+                                                            color='error'
+                                                            size='small'
+                                                            disabled={loading}
+                                                            onClick={() => onDelete(item.id, item.name)}
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                    </Stack>
+                                                </Box>
+                                            </Box>
+                                        </CardContent>
+                                    </Card>
+                                )
+                            })}
+                        </Stack>
+                    )}
+                </CardContent>
+            </Card>
+            <Dialog
+                fullWidth
+                maxWidth='md'
+                open={createDialogOpen}
+                onClose={onCloseCreateDialog}
+            >
+                <DialogTitle>Generate New API Key</DialogTitle>
+                <DialogContent dividers>
+                    <Stack spacing={2} sx={{ pt: 1 }}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} md={6}>
                                 <TextField
                                     fullWidth
-                                    multiline
-                                    minRows={2}
-                                    style={{ marginTop: '10px' }}
-                                    value={latestToken}
-                                    InputProps={{ readOnly: true }}
+                                    sx={formFieldSx}
+                                    label='Key Name'
+                                    value={form.name}
+                                    onChange={onFormChange('name')}
+                                    placeholder='e.g. deploy-bot-prod'
                                 />
-                                <Button
-                                    variant='outlined'
-                                    style={{ marginTop: '10px' }}
-                                    onClick={copyLatestToken}
-                                >
-                                    Copy Token
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                ) : null}
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    type='datetime-local'
+                                    sx={formFieldSx}
+                                    label='Expiration (optional)'
+                                    value={form.expires_at}
+                                    onChange={onFormChange('expires_at')}
+                                    InputLabelProps={{ shrink: true }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <FormControl fullWidth sx={formFieldSx}>
+                                    <InputLabel id='relation-select-label'>Relation</InputLabel>
+                                    <Select
+                                        labelId='relation-select-label'
+                                        label='Relation'
+                                        value={form.relation_id}
+                                        onChange={onFormChange('relation_id')}
+                                    >
+                                        {relations.map((item) => (
+                                            <MenuItem key={item.id} value={String(item.id)}>
+                                                {item.display} (#{item.id})
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <FormControl fullWidth sx={formFieldSx}>
+                                    <InputLabel id='actor-select-label'>Actor User</InputLabel>
+                                    <Select
+                                        labelId='actor-select-label'
+                                        label='Actor User'
+                                        value={form.actor_user_id}
+                                        onChange={onFormChange('actor_user_id')}
+                                    >
+                                        {users.map((item) => (
+                                            <MenuItem key={item.id} value={String(item.id)}>
+                                                {item.username} ({item.role}) #{item.id}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                        </Grid>
 
-                <Grid item xs={12} md={12} lg={12}>
-                    <Card>
-                        <CardContent>
-                            <Typography variant='h6'>Existing API Keys</Typography>
-                            <Divider style={{ marginTop: '8px', marginBottom: '8px' }} />
-                            {errorMessage ? (
-                                <Typography color='error' style={{ marginBottom: '10px' }}>
-                                    {errorMessage}
-                                </Typography>
-                            ) : null}
-                            {items.length === 0 ? (
-                                <Typography variant='body2' color='textSecondary'>
-                                    {loading ? 'Loading...' : 'No API keys found.'}
-                                </Typography>
-                            ) : null}
-                            {items.map((item) => (
-                                <Card key={item.id} style={{ marginTop: '10px', backgroundColor: '#f8fbff' }}>
-                                    <CardContent>
-                                        <Grid container spacing={1}>
-                                            <Grid item xs={12} md={9}>
-                                                <Typography variant='subtitle1'>
-                                                    {item.name} ({item.status})
-                                                </Typography>
-                                                <Typography variant='body2' color='textSecondary'>
-                                                    Prefix: {item.prefix}
-                                                </Typography>
-                                                <Typography variant='body2' color='textSecondary'>
-                                                    Scopes: {Array.isArray(item.scopes) ? item.scopes.join(', ') : '-'}
-                                                </Typography>
-                                                <Typography variant='body2' color='textSecondary'>
-                                                    Relation ID: {item.relation_id} | Actor User ID: {item.actor_user_id}
-                                                </Typography>
-                                                <Typography variant='body2' color='textSecondary'>
-                                                    Last Used: {item.last_used_at || '-'}
-                                                </Typography>
-                                                <Typography variant='body2' color='textSecondary'>
-                                                    Expires At: {item.expires_at || '-'}
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item xs={12} md={3}>
-                                                <Button
-                                                    fullWidth
-                                                    variant='outlined'
-                                                    disabled={loading || item.status === 'revoked'}
-                                                    onClick={() => onRotate(item.id, item.name)}
-                                                >
-                                                    Rotate
-                                                </Button>
-                                                <Button
-                                                    fullWidth
-                                                    variant='outlined'
-                                                    color='error'
-                                                    style={{ marginTop: '8px' }}
-                                                    disabled={loading || item.status === 'revoked'}
-                                                    onClick={() => onRevoke(item.id)}
-                                                >
-                                                    Revoke
-                                                </Button>
-                                            </Grid>
-                                        </Grid>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </CardContent>
-                    </Card>
-                </Grid>
-            </Grid>
-        </>
+                        <Box>
+                            <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1 }}>
+                                <Typography variant='subtitle2'>Scopes</Typography>
+                                <Stack direction='row' spacing={1}>
+                                    <Button
+                                        size='small'
+                                        variant='text'
+                                        disabled={allScopesSelected}
+                                        onClick={onSelectAllScopes}
+                                    >
+                                        Add All
+                                    </Button>
+                                    <Button
+                                        size='small'
+                                        variant='text'
+                                        disabled={form.scopes.length === 0}
+                                        onClick={onClearAllScopes}
+                                    >
+                                        Clear All
+                                    </Button>
+                                </Stack>
+                            </Stack>
+                            <Stack spacing={0.25}>
+                                {availableScopes.map((scope) => (
+                                    <Box key={scope} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
+                                        <FormControlLabel
+                                            control={(
+                                                <Checkbox
+                                                    checked={form.scopes.includes(scope)}
+                                                    onChange={onScopeChange(scope)}
+                                                />
+                                            )}
+                                            label={scope}
+                                            sx={{ width: '100%', minHeight: 40, m: 0 }}
+                                        />
+                                    </Box>
+                                ))}
+                            </Stack>
+                        </Box>
+                    </Stack>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={onCloseCreateDialog}>Cancel</Button>
+                    <Button
+                        variant='contained'
+                        disabled={!canCreate || loading}
+                        onClick={async () => {
+                            const created = await onCreate()
+                            if (created) onCloseCreateDialog()
+                        }}
+                    >
+                        Generate API Key
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </AdminPageShell>
     )
 }
 

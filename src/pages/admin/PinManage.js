@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import {
-    Grid,
+    Box,
     Button,
+    Card,
+    CardContent,
+    Grid,
     IconButton,
+    Stack,
+    Typography,
 } from '@mui/material'
 import backend from '../../constant/backend'
 
@@ -14,7 +19,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 
-import AdminTopBar from '../../components/topbar/AdminTopBar'
+import AdminPageShell from '../../components/admin/AdminPageShell'
 import PinForm from '../../components/form/admin/PinForm'
 
 import graphql from '../../graphql'
@@ -100,102 +105,87 @@ function PinManage() {
     }
     
     return (
-        <>
-            <AdminTopBar
-                label={'Pin Manage'}
-                alertOpen={createAlert}
-                alertMessage={createMessage}
-            />
-            <Grid 
-                container
-                spacing={2}
-                style={{
-                    marginTop: '10px',
-                    marginLeft: '1%',
-                    width: '98%',
-                }}
-            >
-                <Grid
-                    item xs={12} md={12} lg={12}
-                    style={{
-                        marginBottom: '15%',
-                    }}    
+        <AdminPageShell
+            title='Pin Manage'
+            description='Manage pin images, map bounds, and display behavior.'
+            alertOpen={createAlert}
+            alertMessage={createMessage}
+            actions={(
+                <Button
+                    className='admin-action-button'
+                    variant='contained'
+                    startIcon={<AddCircleIcon />}
+                    onClick={onCreateFormOpen}
                 >
-                    <Button 
-                        variant="outlined" 
-                        startIcon={<AddCircleIcon />}
-                        onClick={onCreateFormOpen}    
+                    Add New
+                </Button>
+            )}
+        >
+            <Stack spacing={1.5}>
+                {pinList.map((item, index) => (
+                    <Card
+                        key={index}
+                        className='admin-panel'
+                        sx={{ backgroundColor: '#eef8ff' }}
                     >
-                        Add New
-                    </Button>
-                </Grid>
-                { pinList.map(( item, index ) => (
-                    <Grid
-                        item xs={12} md={12} lg={12}
-                        style={{
-                            backgroundColor: '#dbfdff',
-                            marginBottom: '10px',
-                            marginLeft: '10px',
-                            marginRight: '10px',
-                            borderRadius: '5px',
-                            height: '100px',
-                        }}
-                        key={index}   
-                    >
-                         <Grid container fullWidth>
-                            <Grid 
-                                item xs={4} md={4} lg={4}
+                        <CardContent sx={{ py: 1.25, '&:last-child': { pb: 1.25 } }}>
+                            <Box
+                                sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: { xs: '1fr', md: '120px minmax(0, 1fr) 110px' },
+                                    gap: 1,
+                                    alignItems: 'center',
+                                }}
                             >
-                                <img
-                                    height='70px'
-                                    src={backend.IMAGE_LINK + item.image_path}
-                                />
-                            </Grid>
-                            <Grid item xs={6} md={6} lg={6}>
-                                <Grid container fullWidth>
-                                    <Grid item xs={12}
+                                <Box sx={{ minHeight: 72, display: 'flex', alignItems: 'center' }}>
+                                    <img
+                                        src={backend.IMAGE_LINK + item.image_path}
                                         style={{
-                                            fontweight: '600',
-                                            fontSize: '20px',
-                                            marginBottom: '5px',
+                                            maxWidth: '100%',
+                                            maxHeight: 70,
+                                            width: 'auto',
+                                            height: 'auto',
+                                            display: 'block',
                                         }}
-                                    >
+                                    />
+                                </Box>
+                                <Box sx={{ minWidth: 0 }}>
+                                    <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
                                         {item.label}
-                                    </Grid>
-                                    <Grid item xs={12}
-                                        style={{
-                                            fontSize: '12px',
-                                            color: 'grey',
-                                        }}
-                                    >
+                                    </Typography>
+                                    <Typography variant='body2' color='text.secondary'>
                                         topleft: {item.top_left_x}, {item.top_left_y}
-                                    </Grid>
-                                    <Grid item xs={12}
-                                        style={{
-                                            fontSize: '12px',
-                                            color: 'grey',
-                                        }}
-                                    >
+                                    </Typography>
+                                    <Typography variant='body2' color='text.secondary'>
                                         bottomright: {item.bottom_right_x}, {item.bottom_right_y}
-                                    </Grid>
-                                </Grid>
-                            </Grid>
-                            <Grid item xs={2} md={2} lg={2}>
-                                <IconButton
-                                    onClick={() => onUpdateFormOpen(item)}
-                                >
-                                    <EditIcon /> 
-                                </IconButton>
-                                <IconButton
-                                    onClick={() => onRemoveButtonClick(item)}
-                                >
-                                    <DeleteIcon sx={{ color: 'red' }}/> 
-                                </IconButton>
-                            </Grid>
-                        </Grid>
-                    </Grid>
+                                    </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+                                    <Stack
+                                        direction='row'
+                                        justifyContent='flex-end'
+                                    >
+                                        <IconButton
+                                            className='admin-icon-button'
+                                            onClick={() => onUpdateFormOpen(item)}
+                                            aria-label={`edit ${item.label}`}
+                                        >
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton
+                                            className='admin-icon-button'
+                                            onClick={() => onRemoveButtonClick(item)}
+                                            aria-label={`delete ${item.label}`}
+                                        >
+                                            <DeleteIcon sx={{ color: 'error.main' }} />
+                                        </IconButton>
+                                    </Stack>
+                                </Box>
+                            </Box>
+                        </CardContent>
+                    </Card>
                 ))}
-            </Grid>
+            </Stack>
             <PinForm
                 open={createFormOpen}
                 handleClose={() => setFormOpen(false)}
@@ -204,7 +194,7 @@ function PinManage() {
                 typeList={typeList}
                 pin={selectedPin}
             />
-        </>
+        </AdminPageShell>
     )
 }
 

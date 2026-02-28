@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import {
+    Box,
+    Card,
+    CardContent,
     Grid,
-    Button,
     IconButton,
+    Stack,
+    Typography,
 } from '@mui/material'
 import backend from '../../constant/backend'
 
@@ -12,7 +16,7 @@ import useBoop from '../../hooks/useBoop'
 
 import EditIcon from '@mui/icons-material/Edit'
 
-import AdminTopBar from '../../components/topbar/AdminTopBar'
+import AdminPageShell from '../../components/admin/AdminPageShell'
 import DefaultPinForm from '../../components/form/admin/DefaultPinForm'
 
 import graphql from '../../graphql'
@@ -69,79 +73,69 @@ function DefaultPinManage() {
     }
 
     return (
-        <>
-            <AdminTopBar
-                label={'Default Pin Manage'}
-                alertOpen={createAlert}
-                alertMessage={createMessage}
-            />
-            <Grid
-                container
-                spacing={2}
-                style={{
-                    marginTop: '10px',
-                    marginLeft: '1%',
-                    width: '98%',
-                }}
-            >
-                { defaultList.map(( item, index) => (
-                    <Grid
-                        item xs={12} md={12} lg={12}
-                        style={{
-                            backgroundColor: '#dbfdff',
-                            marginBottom: '10px',
-                            marginLeft: '10px',
-                            marginRight: '10px',
-                            borderRadius: '5px',
-                            height: '100px',
-                        }}
+        <AdminPageShell
+            title='Default Pin Manage'
+            description='Set fallback pin assignments used by each default slot.'
+            alertOpen={createAlert}
+            alertMessage={createMessage}
+        >
+            <Stack spacing={1.5}>
+                {defaultList.map((item, index) => (
+                    <Card
                         key={index}
+                        className='admin-panel'
+                        sx={{ backgroundColor: '#eef8ff' }}
                     >
-                        <Grid container fullWidth>
-                            { item.pin?.display_path ? (
-                                <Grid 
-                                    item xs={4} md={4} lg={4}
-                                >
-                                    <img
-                                    height='70px'
-                                    src={backend.IMAGE_LINK + item.pin.display_path}
-                                />
-                                </Grid>
-                            ) : (
-                                <Grid item xs={4} md={4} lg={4}></Grid>
-                            )}
-                            <Grid  item xs={6} md={6} lg={6}>
-                                <Grid container fullWidth>
-                                    <Grid item xs={12}
-                                        style={{
-                                            fontweight: '600',
-                                            fontSize: '20px',
-                                            marginBottom: '5px',
-                                        }}
-                                    >
+                        <CardContent sx={{ py: 1.25, '&:last-child': { pb: 1.25 } }}>
+                            <Box
+                                sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: { xs: '1fr', md: '120px minmax(0, 1fr) 90px' },
+                                    gap: 1,
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Box sx={{ minHeight: 72, display: 'flex', alignItems: 'center' }}>
+                                    {item.pin?.display_path ? (
+                                        <img
+                                            src={backend.IMAGE_LINK + item.pin.display_path}
+                                            style={{
+                                                maxWidth: '100%',
+                                                maxHeight: 70,
+                                                width: 'auto',
+                                                height: 'auto',
+                                                display: 'block',
+                                            }}
+                                        />
+                                    ) : null}
+                                </Box>
+                                <Box sx={{ minWidth: 0 }}>
+                                    <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
                                         {item.label}
-                                    </Grid>
-                                    <Grid item xs={12}
-                                        style={{
-                                            fontSize: '15px',
-                                            color: 'grey',
-                                        }}
-                                    >
+                                    </Typography>
+                                    <Typography variant='body2' color='text.secondary'>
                                         {item.pin?.label ? item.pin.label : '<USING DEFAULT>'}
-                                    </Grid>
-                                </Grid>
-                            </Grid>
-                            <Grid item xs={2} md={2} lg={2}>
-                                <IconButton
-                                    onClick={() => onUpdateFormOpen(item)}
-                                >
-                                    <EditIcon /> 
-                                </IconButton>
-                            </Grid>
-                        </Grid>
-                    </Grid>
+                                    </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+                                    <Stack
+                                        direction='row'
+                                        justifyContent='flex-end'
+                                    >
+                                        <IconButton
+                                            className='admin-icon-button'
+                                            onClick={() => onUpdateFormOpen(item)}
+                                            aria-label={`edit ${item.label}`}
+                                        >
+                                            <EditIcon />
+                                        </IconButton>
+                                    </Stack>
+                                </Box>
+                            </Box>
+                        </CardContent>
+                    </Card>
                 ))}
-            </Grid>
+            </Stack>
             <DefaultPinForm
                 open={editFormOpen}
                 handleClose={() => setFormOpen(false)}
@@ -149,7 +143,7 @@ function DefaultPinManage() {
                 pinList={pinList}
                 defaultPin={selectedDefault}
             />
-        </>
+        </AdminPageShell>
     )
 }
 

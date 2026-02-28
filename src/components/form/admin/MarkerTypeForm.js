@@ -6,6 +6,9 @@ import {
     Button,
     FormControl,
     FormHelperText,
+    Paper,
+    Stack,
+    Typography,
 } from '@mui/material'
 
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
@@ -52,6 +55,7 @@ function MarkerTypeForm({
     const [ submitting, setSubmitting ] = useState(false)
 
     const [ alertMessage, setAlertMessage ] = useState(null)
+    const fieldSx = { width: { xs: '100%', md: 300 } }
 
     useEffect(() => {
         setSubmitting(false)
@@ -222,54 +226,86 @@ function MarkerTypeForm({
                 loading={submitting || createLoading || editLoading}
                 alertMessage={alertMessage}
                 clearAlertMessage={() => setAlertMessage(null)}
+                displayMode='panel'
             >
-                <Grid container spacing={2}>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            required
-                            label='label'
-                            value={formValue.label}
-                            onChange={(e) => onValueChangeHandler('label', e.target.value)}
-                            error={!!error.label}
-                            helperText={error.label}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            required
-                            label='value'
-                            value={formValue.value}
-                            onChange={(e) => onValueChangeHandler('value', e.target.value)}
-                            error={!!error.value}
-                            helperText={error.value}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            required
-                            label='priority'
-                            value={formValue.priority}
-                            onChange={(e) => onNumberChangeHandler('priority', e.target.value)}
-                            error={!!error.priority}
-                            helperText={error.priority}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
+                <Stack spacing={2}>
+                    <Paper variant='outlined' sx={{ p: 2 }}>
+                        <Typography variant='subtitle1' sx={{ mb: 1.5, fontWeight: 700 }}>
+                            Basic Information
+                        </Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    variant='outlined'
+                                    fullWidth
+                                    sx={fieldSx}
+                                    required
+                                    label='label'
+                                    value={formValue.label}
+                                    onChange={(e) => onValueChangeHandler('label', e.target.value)}
+                                    error={!!error.label}
+                                    helperText={error.label}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    variant='outlined'
+                                    fullWidth
+                                    sx={fieldSx}
+                                    required
+                                    label='value'
+                                    value={formValue.value}
+                                    onChange={(e) => onValueChangeHandler('value', e.target.value)}
+                                    error={!!error.value}
+                                    helperText={error.value}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    variant='outlined'
+                                    fullWidth
+                                    sx={fieldSx}
+                                    required
+                                    label='priority'
+                                    value={formValue.priority}
+                                    onChange={(e) => onNumberChangeHandler('priority', e.target.value)}
+                                    error={!!error.priority}
+                                    helperText={error.priority}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Selectable
+                                    label='hidden'
+                                    value={formValue.hidden}
+                                    onValueChange={(e) => onValueChangeHandler('hidden', e.target.value)}
+                                    noDefault
+                                    errorMessage={''}
+                                    sx={fieldSx}
+                                    list={[
+                                        { value: false, label: 'no' },
+                                        { value: true, label: 'yes' },
+                                    ]}
+                                    valueKey={'value'}
+                                    textKey={'label'}
+                                />
+                            </Grid>
+                        </Grid>
+                    </Paper>
+
+                    <Paper variant='outlined' sx={{ p: 2 }}>
+                        <Typography variant='subtitle1' sx={{ mb: 1.5, fontWeight: 700 }}>
+                            Icon Upload
+                        </Typography>
                         <input type='file' id='upload-image' style={{ display: 'none' }} onChange={handleImageChange} />
                         <label htmlFor='upload-image'>
-                            <FormControl variant='outlined' fullWidth>
+                            <FormControl variant='outlined' fullWidth sx={fieldSx}>
                                 <Button 
                                     id='upload-image-button'
                                     variant='outlined'
                                     component='span'
                                     fullWidth
                                     startIcon={<InsertDriveFileIcon />}
+                                    sx={{ minHeight: 44 }}
                                 >
                                     Upload Image
                                 </Button>
@@ -278,35 +314,19 @@ function MarkerTypeForm({
                                 </FormHelperText>
                             </FormControl>
                         </label>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Selectable
-                            label='hidden'
-                            value={formValue.hidden}
-                            onValueChange={(e) => onValueChangeHandler('hidden', e.target.value)}
-                            noDefault
-                            errorMessage={''}
-                            list={[
-                                { value: false, label: 'no' },
-                                { value: true, label: 'yes' },
-                            ]}
-                            valueKey={'value'}
-                            textKey={'label'}
-                        />
-                    </Grid>
+                    </Paper>
+
                     { markerType && (
-                        <Grid item xs={12} md={6} lg={6}
-                            style={{
-                                fontSize: '10px',
-                                color: 'grey',
-                            }}
-                        >
-                            <span style={{ display: 'block' }}>Created By {markerType.created_by.username} at {dayjs.utc(markerType.created_at).format('YYYY-MM-DD HH:mm')}</span>
-                            <span style={{ display: 'block' }}>Updated By {markerType.updated_by.username} at {dayjs.utc(markerType.updated_at).format('YYYY-MM-DD HH:mm')}</span>
-                        </Grid>
+                        <Paper variant='outlined' sx={{ p: 2 }}>
+                            <Typography variant='subtitle2' color='text.secondary'>
+                                Created By {markerType.created_by.username} at {dayjs.utc(markerType.created_at).format('YYYY-MM-DD HH:mm')}
+                            </Typography>
+                            <Typography variant='subtitle2' color='text.secondary'>
+                                Updated By {markerType.updated_by.username} at {dayjs.utc(markerType.updated_at).format('YYYY-MM-DD HH:mm')}
+                            </Typography>
+                        </Paper>
                     )}
-                    
-                </Grid>
+                </Stack>
             </BaseForm>
         </>
     )

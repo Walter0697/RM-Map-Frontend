@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import {
-    Grid,
-    TextField,
-    Button,
-    FormControl,
-    InputLabel,
-    FormHelperText,
+    Box,
+    Card,
+    CardContent,
+    Stack,
+    Typography,
 } from '@mui/material'
 import backend from '../../../constant/backend'
 
@@ -74,39 +73,84 @@ function DefaultPinForm({
                 loading={submitting}
                 alertMessage={alertMessage}
                 clearAlertMessage={() => setAlertMessage(null)}
+                displayMode='panel'
             >
-                <Grid container spacing={2}>
-                    {
-                        pinList.map(( item, index ) => (
-                            <Grid 
-                                item xs={6} md={6} lg={6}
-                                key={index}
-                                style={{
-                                    marginBottom: '15px',
-                                    borderRadius: '5px',
-                                    paddingLeft: '5px',
-                                    paddingRight: '5px',
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        width: '100%',
-                                        backgroundColor: '#dbfdff',
-                                        padding: '5px',
-                                        border: (selectedPin === item.id) ? '3px solid red' : '3px solid black',
-                                    }}
+                <Stack spacing={1.5}>
+                    <Typography variant='body2' color='text.secondary'>
+                        Select one pin as the default value for this slot.
+                    </Typography>
+                    <Box
+                        sx={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                            gap: 1.25,
+                        }}
+                    >
+                        {pinList.map((item, index) => (
+                            <Box key={index}>
+                                <Card
+                                    variant='outlined'
                                     onClick={() => setSelected(item.id)}
+                                    sx={{
+                                        cursor: 'pointer',
+                                        borderWidth: 2,
+                                        borderColor: selectedPin === item.id ? 'primary.main' : 'divider',
+                                        height: 190,
+                                        display: 'flex',
+                                    }}
                                 >
-                                    {item.label}  
-                                    <img
-                                        width='100%'
-                                        src={backend.IMAGE_LINK + item.display_path}
-                                    />  
-                                </div>
-                            </Grid>
-                        ))
-                    }
-                </Grid>
+                                    <CardContent
+                                        sx={{
+                                            p: 1.25,
+                                            '&:last-child': { pb: 1.25 },
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            width: '100%',
+                                        }}
+                                    >
+                                        <Typography
+                                            variant='subtitle2'
+                                            sx={{
+                                                mb: 1,
+                                                minHeight: 34,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                fontSize: 13,
+                                            }}
+                                        >
+                                            {item.label}
+                                        </Typography>
+                                        <Stack
+                                            sx={{
+                                                flex: 1,
+                                                border: '1px solid',
+                                                borderColor: 'divider',
+                                                borderRadius: 1,
+                                                bgcolor: '#f8fbff',
+                                                p: 1,
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                overflow: 'hidden',
+                                            }}
+                                        >
+                                            <img
+                                                src={backend.IMAGE_LINK + item.display_path}
+                                                style={{
+                                                    maxWidth: '100%',
+                                                    maxHeight: '100%',
+                                                    width: 'auto',
+                                                    height: 'auto',
+                                                    objectFit: 'contain',
+                                                    display: 'block',
+                                                }}
+                                            />
+                                        </Stack>
+                                    </CardContent>
+                                </Card>
+                            </Box>
+                        ))}
+                    </Box>
+                </Stack>
             </BaseForm>
         </>
     )
