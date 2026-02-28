@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router'
-import { useLazyQuery, useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client'
 import {
     useSpring,
     config,
@@ -11,6 +11,7 @@ import {
     Box,
     Grid,
     TextField,
+    Typography,
     LinearProgress,
 } from '@mui/material'
 import { 
@@ -122,13 +123,7 @@ function Login({ jwt, dispatch }) {
                     return
                 }
 
-                if (body.mode === 'oidc') {
-                    setAuthMode('oidc')
-                    window.location.assign(`${authBackend}/oidc/start`)
-                    return
-                }
-
-                setAuthMode('local-password')
+                setAuthMode(body.mode === 'oidc' ? 'oidc' : 'local-password')
             } catch (e) {
                 setAuthMode('local-password')
             }
@@ -229,10 +224,38 @@ function Login({ jwt, dispatch }) {
         loginGQL({ variables: { username: loginInfo.username, password: loginInfo.password }})
     }
 
+    const loginWithOIDCHandler = () => {
+        if (!authBackend) return
+        window.location.assign(`${authBackend}/oidc/start`)
+    }
+
     // render layer for different shape of the input form
     const renderLayer = (state) => {
-        if (modeLoading || authMode === 'oidc') {
+        if (modeLoading) {
             return <LinearProgress />
+        }
+
+        if (authMode === 'oidc') {
+            return (
+                <Grid container direction="column" spacing={2}>
+                    <Grid item xs={12}>
+                        <Typography variant="body1" align="center">
+                            Login is handled by OIDC in this environment.
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <LoadingButton
+                            fullWidth
+                            variant="outlined"
+                            onClick={loginWithOIDCHandler}
+                            endIcon={<LockOpenIcon />}
+                            size="large"
+                        >
+                            LOGIN WITH OIDC
+                        </LoadingButton>
+                    </Grid>
+                </Grid>
+            )
         }
 
         switch (state) {

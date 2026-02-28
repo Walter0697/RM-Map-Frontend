@@ -4,7 +4,7 @@ const trimLeftSlash = (value) => (value || '').replace(/^\/+/, '')
 const BACKEND_BASE_URL = trimRightSlash(process.env.REACT_APP_BACKEND_BASE_URL || '')
 
 const withBasePath = (path) => {
-  if (!BACKEND_BASE_URL) return ''
+  if (!BACKEND_BASE_URL) return `/${trimLeftSlash(path)}`
   return `${BACKEND_BASE_URL}/${trimLeftSlash(path)}`
 }
 

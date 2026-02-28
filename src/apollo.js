@@ -7,25 +7,35 @@ import { createUploadLink } from 'apollo-upload-client'
 import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
 import backend from './constant/backend'
+import store from './store'
 
 const httpLink = createUploadLink({
     uri: backend.GRAPHQL_BACKEND,
 })
 
 const authLink = setContext((_, { headers }) => {
-    const state = localStorage.getItem('reduxState')
-    let token = null
-    if (state) {
-        const json = JSON.parse(state)
-        if (json.auth?.jwt) {
-            token = json.auth.jwt
+    let token = store.getState()?.auth?.jwt || ''
+
+    if (!token) {
+        const persistedAuth = localStorage.getItem('rm_auth')
+        if (persistedAuth) {
+            const json = JSON.parse(persistedAuth)
+            token = json.jwt || ''
         }
     }
-    
+
+    if (!token) {
+        const state = localStorage.getItem('reduxState')
+        if (state) {
+            const json = JSON.parse(state)
+            token = json.auth?.jwt || ''
+        }
+    }
+
     return {
         headers: {
             ...headers,
-            authorization: token ? token : '',
+            authorization: token || '',
         }
     }
 })

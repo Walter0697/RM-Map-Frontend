@@ -97,6 +97,7 @@ function CountryCodeSelect({
 
     return (
         <animated.div
+            data-testid='country-code-menu'
             style={{
                 backgroundColor: '#83c0ff',
                 color: '#0808c1',
@@ -106,6 +107,9 @@ function CountryCodeSelect({
                 opacity: listOpacity,
                 width: '55vw',
                 borderRadius: '5px',
+                overflow: 'hidden',
+                pointerEvents: open ? 'auto' : 'none',
+                zIndex: 2,
             }}
         >
             {countrycodes.map((code, index) => (

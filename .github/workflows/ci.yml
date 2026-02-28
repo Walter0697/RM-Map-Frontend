@@ -3,13 +3,30 @@ name: Frontend CI
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches: [beer]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  build:
-    name: Frontend Build (yarn build)
+  dependency-review:
+    name: Dependency Review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+
+  test-and-build:
+    name: Frontend Test and Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,8 +41,42 @@ jobs:
       - name: Install dependencies
         run: yarn --frozen-lockfile
 
+      - name: Run unit tests
+        env:
+          CI: true
+        run: yarn test --watch=false --passWithNoTests
+
       - name: Build frontend
         env:
           REACT_APP_BACKEND_BASE_URL: http://localhost:1998
           REACT_APP_MAP_APIKEY: ci-placeholder-key
         run: yarn build
+
+  dependency-audit:
+    name: Dependency Vulnerability Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Run yarn audit (high+)
+        continue-on-error: true
+        run: yarn audit --level high
+
+      - name: Summarize audit mode
+        if: always()
+        run: |
+          {
+            echo "### Dependency audit mode"
+            echo ""
+            echo "yarn audit is currently non-blocking while vulnerabilities are remediated."
+          } >> "$GITHUB_STEP_SUMMARY"

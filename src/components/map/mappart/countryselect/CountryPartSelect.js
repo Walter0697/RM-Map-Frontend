@@ -13,6 +13,7 @@ function CountryPartOption({
     isSelected,
     countryPartName,
     onClick,
+    testId,
 }) {
     return (
         <div
@@ -27,6 +28,7 @@ function CountryPartOption({
             }}
         >
              <div 
+                data-testid={testId}
                 style={{
                     height: '30px',
                     width: '90%',
@@ -113,6 +115,7 @@ function CountryPartSelect({
 
     return (
         <animated.div
+            data-testid='country-part-menu'
             style={{
                 backgroundColor: '#83c0ff',
                 color: '#0808c1',
@@ -124,13 +127,15 @@ function CountryPartSelect({
                 width: '55vw',
                 borderRadius: '5px',
                 overflow: 'auto',
-                pointerEvents: 'auto',
+                pointerEvents: open ? 'auto' : 'none',
+                zIndex: 2,
             }}
         >
             <CountryPartOption 
                     isSelected={!selectedCountryPart}
                     countryPartName={'All Areas'}
                     onClick={onAllAreaClick}
+                    testId='country-part-option-all'
                 />
             {selectableParts.map((option, index) => (
                 <CountryPartOption 
@@ -138,6 +143,7 @@ function CountryPartSelect({
                     isSelected={option === selectedCountryPart}
                     countryPartName={option}
                     onClick={onCountryPartClick}
+                    testId={`country-part-option-${index}`}
                 />
             ))}
         </animated.div>
