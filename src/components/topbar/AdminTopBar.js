@@ -1,26 +1,16 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router'
 import {
-    IconButton,
+    Avatar,
     AppBar,
     Toolbar,
     Box,
+    Stack,
     Typography,
 } from '@mui/material'
-import { makeStyles } from '@mui/styles'
 
-import MenuIcon from '@mui/icons-material/Menu'
-
-import AdminRouteDialog from './AdminRouteDialog'
 import AutoHideAlert from '../AutoHideAlert'
-
-const useStyles = makeStyles(() => ({
-    abRoot: {
-      backgroundColor: '#11abdb',
-    },
-  })
-)
 
 function AdminTopBar({
     username,   // from redux
@@ -28,10 +18,7 @@ function AdminTopBar({
     alertOpen,
     alertMessage,
 }) {
-    const classes = useStyles()
     const history = useHistory()
-
-    const [ routeOpen, setRouteOpen ] = useState(false)
     
     useEffect(() => {
         if (!username) {
@@ -44,33 +31,51 @@ function AdminTopBar({
             <Box sx={{ flexGrow: 1}}>
                 <AppBar 
                     position='static' 
-                    classes={{
-                        root: classes.abRoot,
+                    sx={{
+                        background: 'linear-gradient(90deg, #0f8dbc 0%, #146a99 100%)',
+                        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.15)',
                     }}
                 >
-                    <Toolbar>
-                        <IconButton
-                             size='large'
-                             edge='start'
-                             color='inherit'
-                             sx={{ mr: 2 }}
-                             onClick={() => setRouteOpen(true)}
+                    <Toolbar sx={{ minHeight: { xs: 58, sm: 62 } }}>
+                        <Stack
+                            direction='row'
+                            alignItems='center'
+                            justifyContent='space-between'
+                            sx={{ width: '100%' }}
                         >
-                            <MenuIcon />
-                        </IconButton>
-                        <Typography variant='h6' component='div' sx={{ flexGrow: 1 }}>
-                            {label}
-                        </Typography>
-                        <Typography variant='h7' component='div' sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                            {username}
-                        </Typography>
+                            <Typography variant='h6' component='div' sx={{ fontWeight: 700 }}>
+                                {label}
+                            </Typography>
+                            <Stack
+                                direction='row'
+                                spacing={1}
+                                alignItems='center'
+                            >
+                                <Avatar
+                                    sx={{
+                                        width: 34,
+                                        height: 34,
+                                        fontSize: 14,
+                                        bgcolor: 'rgba(255,255,255,0.2)',
+                                        color: 'common.white',
+                                    }}
+                                >
+                                    {username ? username.slice(0, 1).toUpperCase() : '?'}
+                                </Avatar>
+                                <Typography
+                                    variant='body2'
+                                    sx={{
+                                        fontWeight: 600,
+                                        display: { xs: 'none', sm: 'block' },
+                                    }}
+                                >
+                                    {username}
+                                </Typography>
+                            </Stack>
+                        </Stack>
                     </Toolbar>
                 </AppBar>
             </Box>
-            <AdminRouteDialog
-                open={routeOpen}
-                handleClose={() => setRouteOpen(false)}
-            />
             <AutoHideAlert
                 open={alertOpen}
                 type={'success'}

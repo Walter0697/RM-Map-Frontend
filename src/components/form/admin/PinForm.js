@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useMutation } from '@apollo/client'
 import {
+    Box,
     Grid,
     TextField,
     Button,
     FormControl,
-    InputLabel,
     FormHelperText,
+    Paper,
+    Stack,
+    Typography,
 } from '@mui/material'
 import backend from '../../../constant/backend'
 
@@ -58,20 +61,21 @@ function PinForm({
     const [ submitting, setSubmitting ] = useState(false)
     
     const [ alertMessage, setAlertMessage ] = useState(null)
+    const fieldSx = { width: { xs: '100%', md: 300 } }
 
     const canPreview = useMemo(() => {
-        if (!formValue.imageUpload) return false
+        if (!formValue.imageUpload && !pin?.image_path) return false
         if (!selectedTypeId) return false
         return true
-    }, [ formValue, selectedTypeId ])
+    }, [ formValue, selectedTypeId, pin ])
 
     const previewMessage = useMemo(() => {
-        if (!formValue.imageUpload) return 'cannot preview, no image uploaded'
+        if (!formValue.imageUpload && !pin?.image_path) return 'cannot preview, no image available'
         if (!selectedTypeId) return 'cannot preview, marker type not selected'
         // if (formValue.top_left_x >= formValue.bottom_right_x) return 'x value invalid'
         // if (formValue.top_left_y >= formValue.bottom_right_y) return 'y value invalid'
         return ''
-    }, [ formValue, selectedTypeId ])
+    }, [ formValue, selectedTypeId, pin ])
 
     useEffect(() => {
         setSubmitting(false)
@@ -153,16 +157,50 @@ function PinForm({
         }
     }
 
-    const onPreviewGenerate = () => {
+    const getPreviewUpload = async () => {
+        if (formValue.imageUpload?.upload) {
+            return formValue.imageUpload.upload
+        }
+
+        if (!pin?.image_path) return null
+
+        const existingImageUrl = backend.IMAGE_LINK + pin.image_path
+        const response = await fetch(existingImageUrl)
+        if (!response.ok) {
+            throw new Error('failed to load current image for preview')
+        }
+        const blob = await response.blob()
+        return new File([blob], pin.image_path.split('/').pop() || 'pin-preview.png', {
+            type: blob.type || 'image/png',
+        })
+    }
+
+    const onPreviewGenerate = async () => {
         if (!canPreview) return
-        previewPinGQL({ variables: {
-            top_left_x: formValue.top_left_x,
-            top_left_y: formValue.top_left_y,
-            bottom_right_x: formValue.bottom_right_x,
-            bottom_right_y: formValue.bottom_right_y,
-            image_upload: formValue.imageUpload.upload,
-            type_id: selectedTypeId,
-        }})
+        try {
+            const uploadFile = await getPreviewUpload()
+            if (!uploadFile) {
+                setAlertMessage({
+                    type: 'error',
+                    message: 'No image available for preview',
+                })
+                return
+            }
+
+            previewPinGQL({ variables: {
+                top_left_x: formValue.top_left_x,
+                top_left_y: formValue.top_left_y,
+                bottom_right_x: formValue.bottom_right_x,
+                bottom_right_y: formValue.bottom_right_y,
+                image_upload: uploadFile,
+                type_id: selectedTypeId,
+            }})
+        } catch (e) {
+            setAlertMessage({
+                type: 'error',
+                message: `Failed to generate preview: ${e.message}`,
+            })
+        }
     }
 
     const onSubmitHandler = (e) => {
@@ -264,152 +302,190 @@ function PinForm({
                 loading={submitting}
                 alertMessage={alertMessage}
                 clearAlertMessage={() => setAlertMessage(null)}
+                displayMode='panel'
             >
-                <Grid container spacing={2}>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            required
-                            label='label'
-                            value={formValue.label}
-                            onChange={(e) => onValueChangeHandler('label', e.target.value)}
-                            error={!!error.label}
-                            helperText={error.label}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <input type='file' id='upload-image' style={{ display: 'none' }} onChange={handleImageChange} />
-                        <label htmlFor='upload-image'>
-                            <FormControl variant='outlined' fullWidth>
-                                <Button
-                                    id='upload-image-button'
+                <Stack spacing={2}>
+                    <Paper variant='outlined' sx={{ p: 2 }}>
+                        <Typography variant='subtitle1' sx={{ mb: 1.5, fontWeight: 700 }}>
+                            Basic Information
+                        </Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                                <TextField
                                     variant='outlined'
-                                    component='span'
                                     fullWidth
-                                    startIcon={<InsertDriveFileIcon />}
-                                >
-                                    Upload Image    
-                                </Button> 
-                                <FormHelperText htmlFor={'upload-image-button'} error={error.imageUpload}>
-                                    {imageUploadMessage}
-                                </FormHelperText>
-                            </FormControl>
-                        </label>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <InputLabel>Top Left Corner</InputLabel>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <FormControl variant='outlined' fullWidth>
-                            <Grid container fullWidth>
-                                <Grid item xs={6} md={6} lg={6}>
-                                    <TextField
-                                        variant='outlined'
-                                        fullWidth
-                                        required
-                                        label='x'
-                                        value={formValue.top_left_x}
-                                        onChange={(e) => onNumberChangeHandler('top_left_x', e.target.value)}
-                                        error={!!error.top_left_x}
-                                        helperText={error.top_left_x}
-                                    />
-                                </Grid>
-                                <Grid item xs={6} md={6} lg={6}>
-                                    <TextField
-                                        variant='outlined'
-                                        fullWidth
-                                        required
-                                        label='y'
-                                        value={formValue.top_left_y}
-                                        onChange={(e) => onNumberChangeHandler('top_left_y', e.target.value)}
-                                        error={!!error.top_left_y}
-                                        helperText={error.top_left_y}
-                                    />
-                                </Grid>
+                                    sx={fieldSx}
+                                    required
+                                    label='label'
+                                    value={formValue.label}
+                                    onChange={(e) => onValueChangeHandler('label', e.target.value)}
+                                    error={!!error.label}
+                                    helperText={error.label}
+                                />
                             </Grid>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <InputLabel>Bottom Right Corner</InputLabel>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <FormControl variant='outlined' fullWidth>
-                            <Grid container fullWidth>
-                                <Grid item xs={6} md={6} lg={6}>
-                                    <TextField
-                                        variant='outlined'
-                                        fullWidth
-                                        required
-                                        label='x'
-                                        value={formValue.bottom_right_x}
-                                        onChange={(e) => onNumberChangeHandler('bottom_right_x', e.target.value)}
-                                        error={!!error.bottom_right_x}
-                                        helperText={error.bottom_right_x}
-                                    />
-                                </Grid>
-                                <Grid item xs={6} md={6} lg={6}>
-                                    <TextField
-                                        variant='outlined'
-                                        fullWidth
-                                        required
-                                        label='y'
-                                        value={formValue.bottom_right_y}
-                                        onChange={(e) => onNumberChangeHandler('bottom_right_y', e.target.value)}
-                                        error={!!error.bottom_right_y}
-                                        helperText={error.bottom_right_y}
-                                    />
-                                </Grid>
+                            <Grid item xs={12}>
+                                <input type='file' id='upload-image' style={{ display: 'none' }} onChange={handleImageChange} />
+                                <label htmlFor='upload-image'>
+                                    <FormControl variant='outlined' fullWidth sx={fieldSx}>
+                                        <Button
+                                            id='upload-image-button'
+                                            variant='outlined'
+                                            component='span'
+                                            fullWidth
+                                            startIcon={<InsertDriveFileIcon />}
+                                            sx={{ minHeight: 44 }}
+                                        >
+                                            Upload Image    
+                                        </Button> 
+                                        <FormHelperText htmlFor={'upload-image-button'} error={error.imageUpload}>
+                                            {imageUploadMessage}
+                                        </FormHelperText>
+                                    </FormControl>
+                                </label>
                             </Grid>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <InputLabel>Preview</InputLabel>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Selectable
-                            label='type'
-                            value={selectedTypeId}
-                            onValueChange={onPreviewTypeChangeHandler}
-                            noDefault
-                            errorMessage={error.preview}
-                            list={typeList}
-                            valueKey={'id'}
-                            textKey={'label'}
-                        />
-                    </Grid>
-                    { previewMessage && (
-                        <Grid item xs={12} md={12} lg={12}>
-                            <InputLabel>{previewMessage}</InputLabel>
                         </Grid>
-                    )}
-                    { canPreview && (
-                        <Grid item xs={12} md={12} lg={12}>
-                            <InputLabel onClick={onPreviewGenerate}>Click here to preview</InputLabel>
+                    </Paper>
+
+                    <Paper variant='outlined' sx={{ p: 2 }}>
+                        <Typography variant='subtitle1' sx={{ mb: 1.5, fontWeight: 700 }}>
+                            Map Coordinates
+                        </Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    variant='outlined'
+                                    fullWidth
+                                    sx={fieldSx}
+                                    required
+                                    label='top left x'
+                                    value={formValue.top_left_x}
+                                    onChange={(e) => onNumberChangeHandler('top_left_x', e.target.value)}
+                                    error={!!error.top_left_x}
+                                    helperText={error.top_left_x}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    variant='outlined'
+                                    fullWidth
+                                    sx={fieldSx}
+                                    required
+                                    label='top left y'
+                                    value={formValue.top_left_y}
+                                    onChange={(e) => onNumberChangeHandler('top_left_y', e.target.value)}
+                                    error={!!error.top_left_y}
+                                    helperText={error.top_left_y}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    variant='outlined'
+                                    fullWidth
+                                    sx={fieldSx}
+                                    required
+                                    label='bottom right x'
+                                    value={formValue.bottom_right_x}
+                                    onChange={(e) => onNumberChangeHandler('bottom_right_x', e.target.value)}
+                                    error={!!error.bottom_right_x}
+                                    helperText={error.bottom_right_x}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    variant='outlined'
+                                    fullWidth
+                                    sx={fieldSx}
+                                    required
+                                    label='bottom right y'
+                                    value={formValue.bottom_right_y}
+                                    onChange={(e) => onNumberChangeHandler('bottom_right_y', e.target.value)}
+                                    error={!!error.bottom_right_y}
+                                    helperText={error.bottom_right_y}
+                                />
+                            </Grid>
                         </Grid>
-                    )}
-                    { previewURL && (
-                        <Grid item xs={12} md={12} lg={12} fullWidth>
-                            <img 
-                                src={previewURL}
-                                style={{
-                                    width: '100%',
-                                }}
-                            />
+                    </Paper>
+
+                    <Paper variant='outlined' sx={{ p: 2 }}>
+                        <Typography variant='subtitle1' sx={{ mb: 1.5, fontWeight: 700 }}>
+                            Preview
+                        </Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                                <Stack spacing={0.75} sx={fieldSx}>
+                                    <Selectable
+                                        label='type'
+                                        value={selectedTypeId}
+                                        onValueChange={onPreviewTypeChangeHandler}
+                                        noDefault={false}
+                                        defaultSelectValue=''
+                                        defaultSelectText='Select marker type'
+                                        errorMessage={error.preview}
+                                        list={typeList}
+                                        valueKey={'id'}
+                                        textKey={'label'}
+                                    />
+                                    <Typography variant='caption' color='text.secondary'>
+                                        {previewMessage || 'Select a marker type to preview overlay on the pin image.'}
+                                    </Typography>
+                                </Stack>
+                            </Grid>
+                            { canPreview && (
+                                <Grid item xs={12}>
+                                    <Button
+                                        variant='outlined'
+                                        onClick={onPreviewGenerate}
+                                        sx={{ minHeight: 44 }}
+                                    >
+                                        Generate Preview
+                                    </Button>
+                                </Grid>
+                            )}
+                            { previewURL && (
+                                <Grid item xs={12}>
+                                    <Box
+                                        sx={{
+                                            ...fieldSx,
+                                            height: 190,
+                                            border: '1px solid',
+                                            borderColor: 'divider',
+                                            borderRadius: 1,
+                                            bgcolor: '#f8fbff',
+                                            p: 1,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            overflow: 'hidden',
+                                        }}
+                                    >
+                                        <img
+                                            src={previewURL}
+                                            style={{
+                                                maxWidth: '100%',
+                                                maxHeight: '100%',
+                                                width: 'auto',
+                                                height: 'auto',
+                                                objectFit: 'contain',
+                                                display: 'block',
+                                            }}
+                                        />
+                                    </Box>
+                                </Grid>
+                            )}
                         </Grid>
-                    )}
+                    </Paper>
+
                     { pin && (
-                        <Grid item xs={12} md={6} lg={6}
-                            style={{
-                                fontSize: '10px',
-                                color: 'grey',
-                            }}
-                        >
-                            <span style={{ display: 'block' }}>Created By {pin.created_by.username} at {dayjs.utc(pin.created_at).format('YYYY-MM-DD HH:mm')}</span>
-                            <span style={{ display: 'block' }}>Updated By {pin.updated_by.username} at {dayjs.utc(pin.updated_at).format('YYYY-MM-DD HH:mm')}</span>
-                        </Grid>
+                        <Paper variant='outlined' sx={{ p: 2 }}>
+                            <Typography variant='subtitle2' color='text.secondary'>
+                                Created By {pin.created_by.username} at {dayjs.utc(pin.created_at).format('YYYY-MM-DD HH:mm')}
+                            </Typography>
+                            <Typography variant='subtitle2' color='text.secondary'>
+                                Updated By {pin.updated_by.username} at {dayjs.utc(pin.updated_at).format('YYYY-MM-DD HH:mm')}
+                            </Typography>
+                        </Paper>
                     )}
-                </Grid>
+                </Stack>
             </BaseForm>
         </>
     )
