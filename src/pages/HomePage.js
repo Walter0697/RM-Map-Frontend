@@ -1,25 +1,16 @@
-import React, { useState, useMemo } from 'react'
-import { useHistory } from 'react-router-dom'
-import { connect } from 'react-redux'
+import React, { useState } from 'react'
 import Base from './Base'
 
 import useBoop from '../hooks/useBoop'
-
-import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 
 import TopBar from '../components/topbar/TopBar'
 import HomeList from '../components/list/HomeList'
 import ScheduleArriveForm from '../components/schedule/ScheduleArriveForm'
 import AutoHideAlert from '../components/AutoHideAlert'
-import CircleIconButton from '../components/field/CircleIconButton'
 import MarkerView from '../components/marker/MarkerView'
 import ScheduleForm from '../components/form/ScheduleForm'
 
-function HomePage({
-    roroadlists,
-}) {
-    const history = useHistory()
-
+function HomePage() {
     // selected schedules
     const [ selectedSchedules, setSchedules ] = useState([])
     const [ updateAlert, confirmUpdated ] = useBoop(3000)
@@ -32,13 +23,6 @@ function HomePage({
     // if the selected marker is set to be schedule
     const [ scheduleFormOpen, setScheduleFormOpen ] = useState(false)
     const [ createAlert, confirmCreated ] = useBoop(3000)
-
-    const currentUncheckedList = useMemo(() => {
-        if (!roroadlists) return null
-        const filtered = roroadlists.filter(s => !s.checked)
-        if (filtered.length === 0) return null
-        return filtered.length
-    }, [roroadlists])
 
     const openScheduleStatusForm = () => {
         if (selectedSchedules && selectedSchedules.length !== 0) {
@@ -109,25 +93,9 @@ function HomePage({
                     message={'Successfully create marker!'}
                     timing={3000}
                 />
-                <div 
-                    style={{
-                        position: 'absolute',
-                        top: '10%',
-                        right: '20px',
-                    }}
-                >
-                    <CircleIconButton
-                        onClickHandler={() => history.replace('/roroadlist')}
-                        badgeNumber={currentUncheckedList}
-                    >
-                        <PlaylistAddCheckIcon />
-                    </CircleIconButton>
-                </div>
             </div>
         </Base>
     )
 }
 
-export default connect((state) => ({
-    roroadlists: state.roroadlist.roroadlists,
-})) (HomePage)
+export default HomePage

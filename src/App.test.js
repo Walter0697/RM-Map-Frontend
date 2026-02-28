@@ -1,3 +1,7 @@
+test('test runner is configured', () => {
+  expect(true).toBe(true)
+})
+
 import time from './scripts/generic/time';
 import text from './scripts/generic/text';
 

@@ -10,7 +10,6 @@ import movies from './movie'
 import releasenotes from './releasenote'
 import scrappers from './scrapper'
 import stations from './station'
-import roroadlists from './roroadlist'
 
 const graphql = {
     auth,
@@ -25,7 +24,6 @@ const graphql = {
     releasenotes,
     scrappers,
     stations,
-    roroadlists,
 }
 
 export default graphql

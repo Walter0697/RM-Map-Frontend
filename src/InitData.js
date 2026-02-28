@@ -16,7 +16,6 @@ function InitData({ jwt, dispatch }) {
     const [ listScheduleGQL, { data: scheduleData } ] = useLazyQuery(graphql.schedules.list, { fetchPolicy: 'no-cache' })
     const [ listStationGQL, { data: stationData } ] = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
     const [ listMovieGQL, { data: movieData } ] = useLazyQuery(graphql.movies.list, { fetchPolicy: 'no-cache' })
-    const [ listRoroadListGQL, { data: roroadListData } ] = useLazyQuery(graphql.roroadlists.list, { fetchPolicy: 'no-cache' })
     const [ listCountryCodeMapGQL, { data: countryCodeData } ] = useLazyQuery(graphql.markers.country_code, { fetchPolicy: 'no-cache' })
 
     useEffect(() => {
@@ -27,7 +26,6 @@ function InitData({ jwt, dispatch }) {
             listScheduleGQL({ variables: { time: dayjs().format('YYYY-MM-DD') } })
             listStationGQL()
             listMovieGQL()
-            listRoroadListGQL()
             listCountryCodeMapGQL()
         }
     }, [jwt])  
@@ -103,12 +101,6 @@ function InitData({ jwt, dispatch }) {
             dispatch(actions.resetMovies(movieData.movies))
         }
     }, [movieData]) // we dont care about the error, we just update if we got data
-
-    useEffect(() => {
-        if (roroadListData) {
-            dispatch(actions.resetRoroadLists(roroadListData.roroadlists))
-        }
-    }, [roroadListData]) // we dont care about the error, we just update if we got data
 
     useEffect(() => {
         if (countryCodeData) {

@@ -11,9 +11,7 @@ import TheatersIcon from '@mui/icons-material/Theaters'     // movie
 import StarIcon from '@mui/icons-material/Star'             // favourite movie
 import TrainIcon from '@mui/icons-material/Train'           // station
 import FilterAltIcon from '@mui/icons-material/FilterAlt'   // filter
-import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck' // roroadlist
 
-import DoneAllIcon from '@mui/icons-material/DoneAll'       // previous roroadlist
 import AvTimerIcon from '@mui/icons-material/AvTimer'       // expired marker
 import FlagIcon from '@mui/icons-material/Flag'             // previous marker
 import MovieIcon from '@mui/icons-material/Movie'           // watched movie
@@ -115,18 +113,6 @@ function BottomBar({
     }, [location.pathname])
 
     const HomeButton = useMemo(() => {
-        if (location.pathname === '/roroadlist') {
-            return (
-                <SubBarIcon 
-                    route={'/roroadlist'}
-                    parentRoute={'/home'}
-                    path={location.pathname}
-                    activeIcon={<PlaylistAddCheckIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
-            )
-        }
-
         return (
             <BarIcon
                 route={'/home'}
@@ -151,17 +137,6 @@ function BottomBar({
     }, [])
 
     const SettingButton = useMemo(() => {
-        if (location.pathname === '/previousroroadlist') {
-            return (
-                <SubBarIcon 
-                    route={'/previousroroadlist'}
-                    parentRoute={'/home'}
-                    path={location.pathname}
-                    activeIcon={<DoneAllIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
-            )
-        }
         if (location.pathname === '/previous') {
             return (
                 <SubBarIcon 
