@@ -6,7 +6,6 @@ import release from './release'
 import station from './station'
 import filter from './filter'
 import movie from './movie'
-import roroadlist from './roroadlist'
 import country from './country'
 
 const reducers = {
@@ -18,7 +17,6 @@ const reducers = {
     station,
     filter,
     movie,
-    roroadlist,
     country,
 }
 

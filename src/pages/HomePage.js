@@ -91,20 +91,6 @@ function HomePage() {
                     message={'Successfully create marker!'}
                     timing={3000}
                 />
-                {/* <div 
-                    style={{
-                        position: 'absolute',
-                        top: '10%',
-                        right: '20px',
-                    }}
-                >
-                    <CircleIconButton
-                        onClickHandler={() => history.replace('/roroadlist')}
-                        badgeNumber={currentUncheckedList}
-                    >
-                        <PlaylistAddCheckIcon />
-                    </CircleIconButton>
-                </div> */}
             </div>
         </Base>
     )

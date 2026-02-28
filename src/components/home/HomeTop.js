@@ -1,7 +1,7 @@
 import React from 'react'
 
 import Logo from '../../images/logo.png'
-import { version } from '../../../package.json'
+import pkg from '../../../package.json'
 
 import constants from '../../constant'
 
@@ -21,7 +21,7 @@ function HomeTop() {
                 fontWeight: 'bold',
                 fontStyle: 'italic',
                 color: constants.colors.HomeTitleFontColor,
-            }}>RoRoad Map</div>
+            }}>Map Marker</div>
             <div style={{
                 fontSize: '10px',
                 marginLeft: '10px',
@@ -29,7 +29,7 @@ function HomeTop() {
                 padding: '3px 10px 3px 10px',
                 borderRadius: '50px',
                 backgroundColor: constants.colors.VersionBadgeBackground,
-            }}>v{version}</div>
+            }}>v{pkg.version}</div>
         </div>
     )
 }
