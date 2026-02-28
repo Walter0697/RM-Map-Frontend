@@ -4,6 +4,7 @@ import {
     Grid,
 } from '@mui/material'
 import backend from '../../../constant/backend'
+import constants from '../../../constant'
 
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
@@ -35,8 +36,12 @@ function LocationPreview({
             }
             return null
         } else {
-            const image = maphelper.sprite.getPinSprite(marker?.type) 
-            return image
+            let imageValue = null
+            switch (marker?.type) {
+                case constants.overlay.typeStation:
+                    imageValue = maphelper.sprite.getPinSprite(marker?.type, marker?.item?.map_name)
+            }
+            return imageValue
         }
         return null
     }, [marker, typeIcon])

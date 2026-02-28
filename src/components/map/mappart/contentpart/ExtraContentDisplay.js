@@ -10,11 +10,14 @@ function ExtraContentDisplay({
 }) {
     const displayImage = useMemo(() => {
         if (!extraContent) return null
-        const image = maphelper.sprite.getPinSprite(extraContent?.type)
-        return image
+        switch (extraContent?.type) {
+            case constants.overlay.typeStation:
+                return maphelper.sprite.getPinSprite(extraContent?.type, extraContent?.item?.map_name)
+        }
+        return null
     }, [extraContent])
 
-    if (extraContent?.type === constants.overlay.station.HKMTR) {
+    if (extraContent?.type === constants.overlay.typeStation) {
         return (
             <StationContentDisplay 
                 icon={displayImage}

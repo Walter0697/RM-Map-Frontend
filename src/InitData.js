@@ -17,6 +17,9 @@ function InitData({ jwt, dispatch }) {
     const [ listStationGQL, { data: stationData } ] = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
     const [ listMovieGQL, { data: movieData } ] = useLazyQuery(graphql.movies.list, { fetchPolicy: 'no-cache' })
     const [ listCountryCodeMapGQL, { data: countryCodeData } ] = useLazyQuery(graphql.markers.country_code, { fetchPolicy: 'no-cache' })
+    const [ listCountryPointGQL, { data: countryPointData } ] = useLazyQuery(graphql.countries.listCountryPoint, { fetchPolicy: 'no-cache' })
+    const [ listCountryLocationGQL, { data: countryLocationData } ] = useLazyQuery(graphql.countries.listCountryLocation, { fetchPolicy: 'no-cache' })
+    const [ listReleaseNoteGQL, { data: releaseNotesData }]  = useLazyQuery(graphql.releasenotes.list, { fetchPolicy: 'no-cache' })
 
     useEffect(() => {
         if (jwt) {
@@ -27,6 +30,9 @@ function InitData({ jwt, dispatch }) {
             listStationGQL()
             listMovieGQL()
             listCountryCodeMapGQL()
+            listCountryPointGQL()
+            listCountryLocationGQL()
+            listReleaseNoteGQL()
         }
     }, [jwt])  
     // this only runs once on purpose, 
@@ -107,6 +113,24 @@ function InitData({ jwt, dispatch }) {
             dispatch(actions.resetCountryCodes(countryCodeData.countrycodemap))
         }
     }, [countryCodeData])
+
+    useEffect(() => {
+        if (countryPointData) {
+            dispatch(actions.resetCountryPoints(countryPointData.countrypoints))
+        }
+    }, [countryPointData])
+
+    useEffect(() => {
+        if (countryLocationData) {
+            dispatch(actions.resetCountryLocations(countryLocationData.countrylocations))
+        }
+    }, [countryLocationData])
+
+    useEffect(() => {
+        if (releaseNotesData) {
+            dispatch(actions.updateReleaseList(releaseNotesData.releasenotes))
+        }
+    }, [releaseNotesData])
 
     return false    // do not return any view for this component
 }

@@ -6,27 +6,24 @@ import { useLazyQuery } from '@apollo/client'
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import RotateLeftIcon from '@mui/icons-material/RotateLeft'
 import SettingsIcon from '@mui/icons-material/Settings'
+import PublicIcon from '@mui/icons-material/Public'
 
 import useBoop from '../hooks/useBoop'
 
 import Base from './Base'
 import StationMap from '../components/station/StationMap'
 import StationInfo from '../components/station/StationInfo'
+import StationSettingForm from '../components/form/station/StationSettingForm'
+import StationMapSelect from '../components/form/station/StationMapSelect'
+
 import CircleIconButton from '../components/field/CircleIconButton'
 import TopBar from '../components/topbar/TopBar'
 import AutoHideAlert from '../components/AutoHideAlert'
-import StationSettingForm from '../components/form/station/StationSettingForm'
 
-import MTRImage from '../images/station/hkmtr2.jpeg'
-
+import constants from '../constant'
+import storage from '../scripts/storage'
 import actions from '../store/actions'
 import graphql from '../graphql'
-
-const currentMap = 'HK_MTR'
-const currentDimension = {
-    width: 2000,
-    height: 1322,
-}
 
 function StationPage({
     stations,
@@ -50,12 +47,49 @@ function StationPage({
         }
     }, [listData, listError])
 
+    // map related 
+    const [ mapName, setMapName] = useState('HK_MTR')
+    useEffect(() => {
+        const defaultMap = storage.getCurrentMap('station')
+        if (defaultMap) {
+            setMapName(defaultMap)
+        }
+    }, [])
+
+    const stationMapInfo = useMemo(() => {
+        const stationMap = constants.country.stationList.find(s => s.identifier === mapName)
+       return stationMap
+    }, [mapName])
+
+    const currentDimension = useMemo(() => {
+        if (!stationMapInfo) {
+            return {
+                width: 0,
+                height: 0,
+            }
+        }
+        return stationMapInfo.dimension
+    }, [stationMapInfo])
+
+    const stationImage = useMemo(() => {
+        if (!stationMapInfo) return null
+        return stationMapInfo.image
+    }, [stationMapInfo])
+
+    const stationLabel = useMemo(() => {
+        if (!stationMapInfo) return null
+        return stationMapInfo.label
+    }, [stationMapInfo])
+
+    // for changing map
+    const [ openMapChange, setOpenMapChange ] = useState(false)
+
     const [ messageDisplay, activateMessage ] = useBoop(3000)
     const [ currentMessage, setMessage ] = useState(null)
 
     const displayStations = useMemo(() => {
-        return stations.filter(s => s.map_name === currentMap)
-    }, [stations])
+        return stations.filter(s => s.map_name === mapName)
+    }, [stations, mapName])
 
     const [ selectedStation, setSelected ] = useState(null)
     const selectedInfo = useMemo(() => {
@@ -108,18 +142,17 @@ function StationPage({
     }
 
     const refresh = () => {
-        console.log('calling')
         listStationGQL()
     }
 
     return (
         <Base>
             <TopBar
-                onBackHandler={() => history.replace('/markers')}
+                onBackHandler={() => history.replace('/home')}
                 label='Station Page'
             />
             <div style={{
-                height: '90%',
+                height: '80%',
                 width: '100%',
                 paddingTop: '10px',
                 overflow: 'hidden',
@@ -138,6 +171,22 @@ function StationPage({
                     >
                         <RotateLeftIcon />
                     </CircleIconButton>
+                </div>
+                <div style={{
+                    position: 'absolute',
+                    top: '3%',
+                    left: '25%',
+                    height: '40px',
+                    width: '50%',
+                    backgroundColor: constants.colors.CardBackground,
+                    color: 'white',
+                    borderRadius: '5px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    boxShadow: '2px 2px 6px',
+                }}>
+                    {stationLabel}
                 </div>
                 <div
                     style={{ 
@@ -164,7 +213,7 @@ function StationPage({
                     }}
                 >
                     <StationMap 
-                        mapImage={MTRImage}
+                        mapImage={stationImage}
                         stations={displayStations}
                         dimension={currentDimension}
                         pinchZoomRef={pinchZoomRef}
@@ -183,7 +232,7 @@ function StationPage({
                     }}
                 >
                     <StationInfo
-                        currentMap={currentMap}
+                        currentMap={mapName}
                         identifier={selectedStation}
                         station={selectedInfo}
                         onStationUpdate={onLocationStateChange}
@@ -203,10 +252,29 @@ function StationPage({
                         <CenterFocusStrongIcon />
                     </CircleIconButton>
                 </div>
+                <div
+                    style={{ 
+                        position: 'absolute',
+                        bottom: '5%',
+                        right: '30px',
+                    }}
+                >
+                    <CircleIconButton
+                        onClickHandler={() => setOpenMapChange(true)}
+                    >
+                        <PublicIcon />
+                    </CircleIconButton>
+                </div>
             </div>
             <StationSettingForm 
                 open={openSettingForm}
                 handleClose={() => setOpenSettingForm(false)}
+            />
+            <StationMapSelect 
+                open={openMapChange}
+                handleClose={() => setOpenMapChange(false)}
+                mapName={mapName}
+                setMapName={setMapName}
             />
             <AutoHideAlert
                 open={messageDisplay}

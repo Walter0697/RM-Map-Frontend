@@ -37,6 +37,7 @@ function CountryPartOption({
                     justifyContent: 'center',
                     alignItems: 'center',
                     borderRadius: '5px',
+                    pointerEvents: open ? 'auto' : 'none',
                 }}
                 onClick={() => onClick(countryPartName)}
             >
@@ -128,7 +129,6 @@ function CountryPartSelect({
                 borderRadius: '5px',
                 overflow: 'auto',
                 pointerEvents: open ? 'auto' : 'none',
-                zIndex: 2,
             }}
         >
             <CountryPartOption 
