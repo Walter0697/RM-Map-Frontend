@@ -23,6 +23,14 @@ const authorized_request = (query) => {
     let token = store.getState()?.auth?.jwt || ''
 
     if (!token) {
+        const persistedAuth = localStorage.getItem('rm_auth')
+        if (persistedAuth) {
+            const json = JSON.parse(persistedAuth)
+            token = json.jwt || ''
+        }
+    }
+
+    if (!token) {
         const state = localStorage.getItem('reduxState')
         if (!state) return false
         const json = JSON.parse(state)
