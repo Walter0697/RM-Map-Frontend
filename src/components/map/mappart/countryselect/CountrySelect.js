@@ -19,6 +19,7 @@ function CountrySelect({
 }) {
     const location = useLocation()
 
+    // Dropdown interaction is driven by explicit open/closed state hooks.
     const [ countryCodeOpen, setCountryCodeOpen ] = useState(false)
     const [ countryPartOpen, setCountryPartOpen ] = useState(false)
 
@@ -65,7 +66,13 @@ function CountrySelect({
     const emoji = countryFlagEmoji.get(filtercountry?.countryCode ?? 'HK')
 
     return (
-        <>
+        <div
+            data-testid='country-select-root'
+            style={{
+                position: 'relative',
+                pointerEvents: 'none',
+            }}
+        >
             <div
                 style={{
                     backgroundColor: '#83c0ff',
@@ -80,6 +87,7 @@ function CountrySelect({
                 }}
             >
                 <Button 
+                    data-testid='country-code-trigger'
                     style={{
                         width: '30%',
                         padding: '3px',
@@ -101,6 +109,7 @@ function CountrySelect({
                     }}>{emoji && emoji.emoji}</div>
                 </Button>
                 <Button 
+                    data-testid='country-part-trigger'
                     style={{
                         width: '70%',
                         padding: '3px',
@@ -130,7 +139,7 @@ function CountrySelect({
                 open={countryPartOpen}
                 setClose={() => setCountryPartOpen(false)}
             />
-        </>
+        </div>
     )
 }
 
