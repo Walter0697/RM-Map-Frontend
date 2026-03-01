@@ -16,6 +16,7 @@ function StationInfo({
     station,
     onStationUpdate,
     onStationError,
+    onLineClick,
     dispatch,
 }) {
     const [ updateStationGQL, { data: updateData, loading: updateLoading, error: updateError } ] = useMutation(graphql.stations.update_active, { errorPolicy: 'all' }) 
@@ -107,8 +108,11 @@ function StationInfo({
                                         marginBottom: '5px',
                                         display: 'flex',
                                         alignItems: 'center',
+                                        cursor: onLineClick ? 'pointer' : 'default',
                                     }}
-                                    key={`info${index}`}>
+                                    key={`info${index}`}
+                                    onClick={() => onLineClick && onLineClick(l)}
+                                >
                                     <div
                                         style={{
                                             display: 'inline-block',

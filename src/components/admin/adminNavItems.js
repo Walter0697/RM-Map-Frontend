@@ -19,6 +19,11 @@ const adminNavItems = [
         description: 'Automation client credentials',
         path: '/admin/apikey',
     },
+    {
+        label: 'Train Station',
+        description: 'Map image, pins, lines, and JSON export',
+        path: '/admin/station',
+    },
 ]
 
 export default adminNavItems

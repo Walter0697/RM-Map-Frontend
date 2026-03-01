@@ -29,6 +29,7 @@ import TypeManage from './pages/admin/TypeManage'
 import PinManage from './pages/admin/PinManage'
 import DefaultPinManage from './pages/admin/DefaultPinManage'
 import ApiKeyManage from './pages/admin/ApiKeyManage'
+import TrainStationManage from './pages/admin/TrainStationManage'
 
 import InitData from './InitData'
 
@@ -60,6 +61,7 @@ function App() {
             <Route path='/admin/pin' component={PinManage} />
             <Route path='/admin/defaultpin' component={DefaultPinManage} />
             <Route path='/admin/apikey' component={ApiKeyManage} />
+            <Route path='/admin/station/:mapName?' component={TrainStationManage} />
           </Switch>
         )} />
         <InitData />

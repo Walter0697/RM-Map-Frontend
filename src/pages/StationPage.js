@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router-dom'
-import { useLazyQuery } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
 
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import RotateLeftIcon from '@mui/icons-material/RotateLeft'
 import SettingsIcon from '@mui/icons-material/Settings'
-import PublicIcon from '@mui/icons-material/Public'
 
 import useBoop from '../hooks/useBoop'
 
@@ -19,6 +21,7 @@ import StationMapSelect from '../components/form/station/StationMapSelect'
 import CircleIconButton from '../components/field/CircleIconButton'
 import TopBar from '../components/topbar/TopBar'
 import AutoHideAlert from '../components/AutoHideAlert'
+import backend from '../constant/backend'
 
 import constants from '../constant'
 import storage from '../scripts/storage'
@@ -28,11 +31,12 @@ import graphql from '../graphql'
 function StationPage({
     stations,
     dispatch,
+    jwt,
 }) {
     const history = useHistory()
 
-    // graphql request
-    const [ listStationGQL, { data: listData, loading: listLoading, error: listError } ] = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
+    const [ listStationGQL, { data: listData, error: listError } ] = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
+    const [ updateStationGQL ] = useMutation(graphql.stations.update_active, { errorPolicy: 'all' })
 
     useEffect(() => {
         if (listData) {
@@ -47,8 +51,7 @@ function StationPage({
         }
     }, [listData, listError])
 
-    // map related 
-    const [ mapName, setMapName] = useState('HK_MTR')
+    const [ mapName, setMapName ] = useState('HK_MTR')
     useEffect(() => {
         const defaultMap = storage.getCurrentMap('station')
         if (defaultMap) {
@@ -57,16 +60,12 @@ function StationPage({
     }, [])
 
     const stationMapInfo = useMemo(() => {
-        const stationMap = constants.country.stationList.find(s => s.identifier === mapName)
-       return stationMap
+        return constants.country.stationList.find((item) => item.identifier === mapName)
     }, [mapName])
 
     const currentDimension = useMemo(() => {
         if (!stationMapInfo) {
-            return {
-                width: 0,
-                height: 0,
-            }
+            return { width: 2000, height: 1322 }
         }
         return stationMapInfo.dimension
     }, [stationMapInfo])
@@ -81,35 +80,40 @@ function StationPage({
         return stationMapInfo.label
     }, [stationMapInfo])
 
-    // for changing map
     const [ openMapChange, setOpenMapChange ] = useState(false)
 
     const [ messageDisplay, activateMessage ] = useBoop(3000)
     const [ currentMessage, setMessage ] = useState(null)
 
     const displayStations = useMemo(() => {
-        return stations.filter(s => s.map_name === mapName)
+        return stations.filter((item) => item.map_name === mapName)
     }, [stations, mapName])
 
     const [ selectedStation, setSelected ] = useState(null)
     const selectedInfo = useMemo(() => {
         if (!selectedStation) return null
-        const station = displayStations.find(s => s.identifier === selectedStation)
+        const station = displayStations.find((item) => item.identifier === selectedStation)
         if (station) {
             const line = JSON.parse(station.line_info)
             return {
                 name: station.local_name,
                 label: station.label,
-                line: line,
+                line,
                 active: station.active,
             }
         }
         return null
-    }, [ selectedStation, displayStations ])
+    }, [selectedStation, displayStations])
 
     const pinchZoomRef = useRef(null)
 
     const [ openSettingForm, setOpenSettingForm ] = useState(false)
+    const [ mapImage, setMapImage ] = useState(stationImage)
+    const [ mapIcon, setMapIcon ] = useState(null)
+    const [ openLineStations, setOpenLineStations ] = useState(false)
+    const [ selectedLine, setSelectedLine ] = useState(null)
+    const [ lineScrollHint, setLineScrollHint ] = useState({ left: false, right: false })
+    const lineScrollRef = useRef(null)
 
     useEffect(() => {
         if (pinchZoomRef && pinchZoomRef.current) {
@@ -117,25 +121,177 @@ function StationPage({
         }
     }, [pinchZoomRef])
 
+    useEffect(() => {
+        const fetchMapAsset = async () => {
+            if (!jwt || !mapName) {
+                setMapImage(stationImage)
+                setMapIcon(null)
+                return
+            }
+            try {
+                const resp = await fetch(backend.withBasePath(`station-maps/${mapName}`), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
+                })
+                if (!resp.ok) {
+                    setMapImage(stationImage)
+                    setMapIcon(null)
+                    return
+                }
+                const payload = await resp.json()
+                if (payload?.image_path) {
+                    setMapImage(`${backend.IMAGE_LINK}${payload.image_path}`)
+                } else {
+                    setMapImage(stationImage)
+                }
+                if (payload?.icon_path) {
+                    setMapIcon(`${backend.IMAGE_LINK}${payload.icon_path}`)
+                } else {
+                    setMapIcon(null)
+                }
+            } catch (error) {
+                console.warn('failed to load station map asset metadata', error)
+                setMapIcon(null)
+                setMapImage(stationImage)
+            }
+        }
+
+        fetchMapAsset()
+    }, [jwt, mapName, stationImage])
+
     const onLocationClick = (item) => {
         setSelected(item)
     }
 
     const onLocationStateChange = (active) => {
         if (active) {
-            setMessage({ type: 'success', message: 'successfully add record'})
+            setMessage({ type: 'success', message: 'successfully add record' })
         } else {
-            setMessage({ type: 'success', message: 'successfully remove record'})
+            setMessage({ type: 'success', message: 'successfully remove record' })
         }
         activateMessage()
         setSelected(null)
     }
 
     const onLocationError = (message) => {
-        setMessage({ type: 'error', message: message })
+        setMessage({ type: 'error', message })
         activateMessage()
         setSelected(null)
     }
+
+    const updateStationState = async (targetIdentifier, active) => {
+        if (!targetIdentifier || !mapName) return
+        if (!active && !confirm(`are you sure to remove ${targetIdentifier}'s record?`)) return
+        try {
+            const result = await updateStationGQL({
+                variables: {
+                    identifier: targetIdentifier,
+                    map_name: mapName,
+                    active,
+                },
+            })
+            const updated = result?.data?.updateStation
+            if (!updated) return
+            dispatch(actions.updateStation(updated.identifier, updated.map_name, updated.active))
+            setMessage({ type: 'success', message: updated.active ? 'successfully add record' : 'successfully remove record' })
+            activateMessage()
+        } catch (error) {
+            setMessage({ type: 'error', message: error.message })
+            activateMessage()
+        }
+    }
+
+    const onLineClick = (line) => {
+        setSelectedLine(line)
+        setOpenLineStations(true)
+    }
+
+    const normalizeLine = (line) => ({
+        id: line?.id || '',
+        name: line?.name || '',
+        localName: line?.localName || '',
+        colour: line?.colour || '',
+        position: Number(line?.position || 0),
+    })
+
+    const isSameLine = (a, b) => {
+        if (!a || !b) return false
+        const left = normalizeLine(a)
+        const right = normalizeLine(b)
+        if (left.id && right.id && String(left.id) === String(right.id)) return true
+        if (left.name && right.name && left.name === right.name) return true
+        if (left.localName && right.localName && left.localName === right.localName) return true
+        return (
+            left.name === right.name
+            && left.localName === right.localName
+            && left.colour === right.colour
+        )
+    }
+
+    const lineStations = useMemo(() => {
+        if (!selectedLine || !displayStations) return []
+        const pick = []
+        displayStations.forEach((station) => {
+            let lines = []
+            try {
+                lines = JSON.parse(station.line_info || '[]')
+            } catch {
+                lines = []
+            }
+            const matched = lines.find((line) => isSameLine(line, selectedLine))
+            if (matched) {
+                const connectingLines = lines
+                    .filter((line) => !isSameLine(line, selectedLine))
+                    .map((line) => normalizeLine(line))
+                    .filter((line, index, arr) => (
+                        arr.findIndex((item) => (
+                            item.name === line.name
+                            && item.localName === line.localName
+                            && item.colour === line.colour
+                        )) === index
+                    ))
+                pick.push({
+                    ...station,
+                    linePosition: Number(matched.position || 0),
+                    connectingLines,
+                })
+            }
+        })
+        return pick.sort((a, b) => a.linePosition - b.linePosition)
+    }, [displayStations, selectedLine])
+
+    const selectedLineColour = useMemo(() => {
+        if (selectedLine?.colour) return selectedLine.colour
+        const withColour = lineStations.find((item) => item.connectingLines?.length >= 0)
+        return withColour?.colour || '#666'
+    }, [selectedLine, lineStations])
+
+    const updateLineScrollHint = () => {
+        const el = lineScrollRef.current
+        if (!el) {
+            setLineScrollHint({ left: false, right: false })
+            return
+        }
+        const maxScrollLeft = Math.max(0, el.scrollWidth - el.clientWidth)
+        const left = el.scrollLeft > 1
+        const right = el.scrollLeft < (maxScrollLeft - 1)
+        setLineScrollHint({ left, right })
+    }
+
+    useEffect(() => {
+        if (!openLineStations) return
+        const id = window.requestAnimationFrame(() => {
+            updateLineScrollHint()
+        })
+        const onResize = () => updateLineScrollHint()
+        window.addEventListener('resize', onResize)
+        return () => {
+            window.cancelAnimationFrame(id)
+            window.removeEventListener('resize', onResize)
+        }
+    }, [openLineStations, lineStations])
 
     const reset = () => {
         pinchZoomRef.current.scaleTo({ x: 0, y: 0, scale: 1 })
@@ -158,17 +314,8 @@ function StationPage({
                 overflow: 'hidden',
                 position: 'relative',
             }}>
-                {/* top bar button */}
-                <div
-                    style={{ 
-                        position: 'absolute',
-                        top: '3%',
-                        left: '30px',
-                    }}
-                >
-                    <CircleIconButton
-                        onClickHandler={refresh}
-                    >
+                <div style={{ position: 'absolute', top: '3%', left: '30px' }}>
+                    <CircleIconButton onClickHandler={refresh}>
                         <RotateLeftIcon />
                     </CircleIconButton>
                 </div>
@@ -185,92 +332,76 @@ function StationPage({
                     justifyContent: 'center',
                     alignItems: 'center',
                     boxShadow: '2px 2px 6px',
-                }}>
+                    gap: '8px',
+                    cursor: 'pointer',
+                }}
+                onClick={() => setOpenMapChange(true)}
+                >
+                    {mapIcon ? (
+                        <img
+                            src={mapIcon}
+                            alt='Map icon'
+                            style={{
+                                width: '24px',
+                                height: '24px',
+                                objectFit: 'contain',
+                                backgroundColor: '#ffffff',
+                                borderRadius: '4px',
+                                padding: '2px',
+                            }}
+                        />
+                    ) : null}
                     {stationLabel}
                 </div>
-                <div
-                    style={{ 
-                        position: 'absolute',
-                        top: '3%',
-                        right: '30px',
-                    }}
-                >
-                    <CircleIconButton
-                        onClickHandler={() => setOpenSettingForm(true)}
-                    >
+                <div style={{ position: 'absolute', top: '3%', right: '30px' }}>
+                    <CircleIconButton onClickHandler={() => setOpenSettingForm(true)}>
                         <SettingsIcon />
                     </CircleIconButton>
                 </div>
-                {/* map zoom pinch view */}
-                <div 
-                    style={{
-                        top: '12%',
-                        height: '50%',
-                        width: '100%',
-                        position: 'absolute',
-                        display: 'flex',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <StationMap 
-                        mapImage={stationImage}
+                <div style={{
+                    top: '12%',
+                    height: '50%',
+                    width: '100%',
+                    position: 'absolute',
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}>
+                    <StationMap
+                        mapImage={mapImage || stationImage}
                         stations={displayStations}
                         dimension={currentDimension}
                         pinchZoomRef={pinchZoomRef}
                         onItemClickHandler={onLocationClick}
                     />
                 </div>
-                {/* station info view */}
-                <div 
-                    style={{
-                        height: '34%',
-                        top: '55%',
-                        width: '100%',
-                        position: 'absolute',
-                        display: 'flex',
-                        justifyContent: 'center',
-                    }}
-                >
+                <div style={{
+                    height: '34%',
+                    top: '55%',
+                    width: '100%',
+                    position: 'absolute',
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}>
                     <StationInfo
                         currentMap={mapName}
                         identifier={selectedStation}
                         station={selectedInfo}
                         onStationUpdate={onLocationStateChange}
                         onStationError={onLocationError}
+                        onLineClick={onLineClick}
                     />
                 </div>
-                <div
-                    style={{ 
-                        position: 'absolute',
-                        top: '15%',
-                        right: '30px',
-                    }}
-                >
-                    <CircleIconButton
-                        onClickHandler={reset}
-                    >
+                <div style={{ position: 'absolute', top: '15%', right: '30px' }}>
+                    <CircleIconButton onClickHandler={reset}>
                         <CenterFocusStrongIcon />
                     </CircleIconButton>
                 </div>
-                <div
-                    style={{ 
-                        position: 'absolute',
-                        bottom: '5%',
-                        right: '30px',
-                    }}
-                >
-                    <CircleIconButton
-                        onClickHandler={() => setOpenMapChange(true)}
-                    >
-                        <PublicIcon />
-                    </CircleIconButton>
-                </div>
             </div>
-            <StationSettingForm 
+            <StationSettingForm
                 open={openSettingForm}
                 handleClose={() => setOpenSettingForm(false)}
             />
-            <StationMapSelect 
+            <StationMapSelect
                 open={openMapChange}
                 handleClose={() => setOpenMapChange(false)}
                 mapName={mapName}
@@ -279,13 +410,212 @@ function StationPage({
             <AutoHideAlert
                 open={messageDisplay}
                 type={currentMessage ? currentMessage.type : ''}
-                message={currentMessage ? currentMessage.message: ''}
+                message={currentMessage ? currentMessage.message : ''}
                 timing={2000}
             />
+            <Dialog
+                open={openLineStations}
+                onClose={() => setOpenLineStations(false)}
+                fullWidth
+                maxWidth='lg'
+            >
+                <DialogTitle>
+                    {selectedLine ? `${selectedLine.localName || selectedLine.name}` : 'Line Stations'}
+                </DialogTitle>
+                <DialogContent>
+                    <div style={{ padding: '2px 0' }}>
+                        <div style={{ position: 'relative', marginTop: '20px' }}>
+                            {lineScrollHint.left ? (
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        top: '-16px',
+                                        left: '0',
+                                        fontSize: '11px',
+                                        color: '#666',
+                                        lineHeight: 1,
+                                        pointerEvents: 'none',
+                                        zIndex: 2,
+                                    }}
+                                >
+                                    {'<'}
+                                </div>
+                            ) : null}
+                            {lineScrollHint.right ? (
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        top: '-16px',
+                                        right: '0',
+                                        fontSize: '11px',
+                                        color: '#666',
+                                        lineHeight: 1,
+                                        pointerEvents: 'none',
+                                        zIndex: 2,
+                                    }}
+                                >
+                                    {'>'}
+                                </div>
+                            ) : null}
+                            <div
+                                ref={lineScrollRef}
+                                onScroll={updateLineScrollHint}
+                                style={{
+                                    overflowX: 'auto',
+                                    overflowY: 'hidden',
+                                    paddingBottom: '2px',
+                                }}
+                            >
+                            <div
+                                style={{
+                                    position: 'relative',
+                                    minWidth: `${Math.max(lineStations.length * 78, 380)}px`,
+                                    height: '132px',
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    justifyContent: 'flex-start',
+                                    gap: '0px',
+                                }}
+                            >
+                                {lineStations.length > 1 ? (
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            left: '2px',
+                                            right: '2px',
+                                            top: '49px',
+                                            height: '4px',
+                                            borderRadius: '2px',
+                                            backgroundColor: selectedLineColour,
+                                            zIndex: 0,
+                                        }}
+                                    />
+                                ) : null}
+                                {lineStations.map((station) => (
+                                    <div
+                                        key={`${station.map_name}_${station.identifier}`}
+                                        style={{
+                                            width: '78px',
+                                            minWidth: '78px',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            height: '100%',
+                                            position: 'relative',
+                                            zIndex: 1,
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                marginTop: '0',
+                                                width: '100%',
+                                                minHeight: '38px',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    fontWeight: 700,
+                                                    fontSize: '12px',
+                                                    textAlign: 'center',
+                                                    width: '100%',
+                                                    overflowWrap: 'anywhere',
+                                                    lineHeight: 1.15,
+                                                }}
+                                            >
+                                                {station.local_name}
+                                            </div>
+                                            <div
+                                                onClick={() => updateStationState(station.identifier, !station.active)}
+                                                style={{
+                                                    marginTop: '2px',
+                                                    lineHeight: 0,
+                                                    cursor: 'pointer',
+                                                }}
+                                                title={station.active ? 'Cancel record' : 'Add record'}
+                                            >
+                                                {station.active ? (
+                                                    <CheckCircleIcon sx={{ fontSize: 18, color: '#2e7d32' }} />
+                                                ) : (
+                                                    <RadioButtonUncheckedIcon sx={{ fontSize: 18, color: '#b71c1c' }} />
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div
+                                            style={{
+                                                width: '18px',
+                                                height: '18px',
+                                                borderRadius: '50%',
+                                                border: '2px solid #fff',
+                                                backgroundColor: selectedLineColour,
+                                                boxShadow: '0 0 0 1px rgba(0,0,0,0.25)',
+                                                position: 'absolute',
+                                                top: '42px',
+                                                left: '50%',
+                                                transform: 'translateX(-50%)',
+                                            }}
+                                        />
+                                        <div
+                                            style={{
+                                                marginTop: '58px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                flexWrap: 'wrap',
+                                                gap: '4px',
+                                                padding: '0 2px',
+                                                minHeight: '26px',
+                                            }}
+                                        >
+                                            {station.connectingLines?.map((line, index) => (
+                                                <div
+                                                    key={`${station.identifier}-line-${index}`}
+                                                    style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                        fontSize: '10px',
+                                                        lineHeight: 1,
+                                                        backgroundColor: '#f3f3f3',
+                                                        borderRadius: '10px',
+                                                        padding: '2px 6px',
+                                                        maxWidth: '100%',
+                                                    }}
+                                                    title={line.name || line.localName}
+                                                >
+                                                    <span
+                                                        style={{
+                                                            width: '8px',
+                                                            height: '8px',
+                                                            borderRadius: '50%',
+                                                            backgroundColor: line.colour || '#666',
+                                                            flexShrink: 0,
+                                                        }}
+                                                    />
+                                                    <span style={{ overflowWrap: 'anywhere' }}>
+                                                        {line.localName || line.name}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenLineStations(false)}>Close</Button>
+                </DialogActions>
+            </Dialog>
         </Base>
     )
 }
 
 export default connect(state => ({
     stations: state.station.stations,
-})) (StationPage)
+    jwt: state.auth.jwt,
+}))(StationPage)
