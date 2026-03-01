@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Grid } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 import {
     useSpring,
     config,

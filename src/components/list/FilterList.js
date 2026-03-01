@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
-import { Grid } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 
 import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
@@ -146,17 +146,19 @@ function FilterList({
         <div style={{
             height: height,
             width: '100%',
-            paddingTop: '10%',
-            paddingBottom: '10%',
-            overflowY: 'hidden',
+            paddingTop: '16px',
+            overflow: 'hidden',
             position: 'relative',
+            boxSizing: 'border-box',
         }}>
             <div style={{
                 height: '100%',
                 width: '100%',
-                paddingBottom: '10%',
+                padding: '0 10px 12px 10px',
+                paddingTop: '56px',
+                boxSizing: 'border-box',
                 overflowY: 'auto',
-                position: 'absolute',
+                position: 'relative',
             }}>
                 <BottomUpTrail>
                     <WrapperBox
@@ -276,8 +278,9 @@ function FilterList({
             <div 
                 style={{
                     position: 'absolute',
-                    top: '5%',
-                    right: '20px',
+                    top: '12px',
+                    right: '16px',
+                    zIndex: 2,
                 }}
             >
                 <CircleIconButton

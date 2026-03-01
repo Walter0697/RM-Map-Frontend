@@ -123,14 +123,30 @@ function LocationPreview({
                 }}    
                 onClick={showMarkerView}
             >
-                <Grid container>
+                <Grid
+                    container
+                    style={{
+                        height: '100%',
+                        alignItems: 'center',
+                        flexWrap: 'nowrap',
+                    }}
+                >
                     { displayImage && (
-                        <Grid item xs={4} md={4} lg={4}>
-                            <img 
+                        <Grid item xs={4} md={4} lg={4}
+                            style={{
+                                height: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <img
                                 style={{
                                     marginLeft: '10px',
+                                    maxHeight: '92%',
+                                    maxWidth: '92%',
+                                    objectFit: 'contain',
                                 }}
-                                width='80%'
                                 src={displayImage}
                             />
                         </Grid>

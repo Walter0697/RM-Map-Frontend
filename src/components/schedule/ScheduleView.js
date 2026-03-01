@@ -124,10 +124,15 @@ function ScheduleItem({
                         }}
                     />
                 </Grid>
-                <Grid item xs={5} fullWidth>
+                <Grid item xs={4} fullWidth>
                     {imageExist ? (
                         <img 
-                            width='90%'
+                            style={{
+                                width: '100%',
+                                maxHeight: '100px',
+                                objectFit: 'cover',
+                                borderRadius: '6px',
+                            }}
                             src={backend.IMAGE_LINK + item.image_path}
                             onError={onImageFailedToLoad}
                         /> 
@@ -135,18 +140,20 @@ function ScheduleItem({
                         <div
                             style={{
                                 height: '100px',
-                                width: '90%',
-                                backgroundColor: 'red',
+                                width: '100%',
+                                backgroundColor: '#a3bdd8',
+                                borderRadius: '6px',
                             }}
                         ></div>
                     )}
                 </Grid>
-                <Grid item xs={7} fullWidth>
+                <Grid item xs={8} fullWidth style={{ minWidth: 0 }}>
                     <div
                         style={{
-                            fontSize: '18px',
+                            fontSize: '17px',
                             color: 'black',
                             fontWeight: 'bold',
+                            overflowWrap: 'anywhere',
                         }}
                     >
                         {item.label}
@@ -155,6 +162,12 @@ function ScheduleItem({
                         style={{
                             fontSize: '13px',
                             color: '#455295',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical',
+                            overflowWrap: 'anywhere',
                         }}
                     >
                     {item.description}
@@ -330,7 +343,7 @@ function ScheduleView({
                                 </Grid>
                             </Grid>
                         </DialogTitle>
-                        <DialogContent dividiers>
+                        <DialogContent dividers>
                             <Grid container spacing={2}>
                                 {sortedList.map((schedule, index) => (
                                     <Grid item xs={12} key={index} fullWidth>

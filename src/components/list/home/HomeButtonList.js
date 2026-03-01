@@ -1,7 +1,5 @@
 import React from 'react'
-import {
-    Grid,
-} from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 
 import TrainIcon from '@mui/icons-material/Train'
 import FlightIcon from '@mui/icons-material/Flight' 
@@ -16,19 +14,19 @@ function HomeButtonList({
     return (
             <Grid container spacing={0} style={{
                 height: '100%',
+                width: '100%',
             }}>
-                <Grid item xs={6}>
+                <Grid item xs={6} style={{ paddingRight: '4px' }}>
                     <HomeButtonBase 
-                        width={'95%'}
+                        width={'100%'}
                         label={'Train Station Map'}
                         icon={<TrainIcon sx={{ color: constants.colors.HomeButtonIcon}} />}
                         onClickHandler={() => setAnimateRedirectTo('/station')}
                     />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={6} style={{ paddingLeft: '4px' }}>
                     <HomeButtonBase 
-                        width={'95%'}
-                        left={'5%'}
+                        width={'100%'}
                         label={'Country Map'}
                         icon={<FlightIcon sx={{ color: constants.colors.HomeButtonIcon}} />}
                         onClickHandler={() => setAnimateRedirectTo('/country')}

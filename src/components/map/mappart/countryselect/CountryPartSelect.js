@@ -52,6 +52,8 @@ function CountryPartSelect({
     setClose,
     countryparts,
     filtercountry,
+    menuWidth,
+    menuMaxWidth,
     dispatch,
 }) {
     const selectableParts = useMemo(() => {
@@ -125,7 +127,8 @@ function CountryPartSelect({
                 top: '60px',
                 height: listHeight,
                 opacity: listOpacity,
-                width: '55vw',
+                width: menuWidth ?? '100%',
+                maxWidth: menuMaxWidth ?? '100%',
                 borderRadius: '5px',
                 overflow: 'auto',
                 pointerEvents: open ? 'auto' : 'none',

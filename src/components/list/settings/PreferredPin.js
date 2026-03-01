@@ -21,6 +21,9 @@ function PreferredPin({
                 height: '100%',
                 width: '100%',
                 boxShadow: '2px 2px 6px',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                alignContent: 'stretch',
             }}
         >
             { preferredPinList && preferredPinList.map((pin, index) => (
@@ -29,7 +32,9 @@ function PreferredPin({
                     fullWidth
                     key={index}
                     style={{
-                        padding: '5px',
+                        padding: '6px',
+                        minHeight: '50%',
+                        display: 'flex',
                     }}
                 >
                     <Button 
@@ -37,42 +42,60 @@ function PreferredPin({
                         style={{
                             height: '100%',
                             width: '100%',
+                            textTransform: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                         }}
                         onClick={() => openPreferredPinChange(pin)}
                     >
                         {pin.exist ? (
-                            <Grid container fullWidth>
+                            <Grid container fullWidth style={{ minHeight: '150px' }}>
                                 <Grid 
                                     item xs={12} 
                                     fullWidth
                                     style={{
-                                        height: '150px',
+                                        height: '110px',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
                                     }}
                                 >
                                     <img 
                                         src={backend.IMAGE_LINK + pin.image_path}
-                                        width='70%'
+                                        style={{
+                                            maxHeight: '100px',
+                                            maxWidth: '82%',
+                                            objectFit: 'contain',
+                                        }}
                                     />
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid item xs={12} style={{ fontWeight: '600' }}>
                                     {pin.label}
                                 </Grid>
                             </Grid>
                         ) : (
-                            <Grid container fullWidth>
+                            <Grid container fullWidth style={{ minHeight: '150px' }}>
                                 <Grid 
                                     item xs={12} 
                                     fullWidth
                                     style={{
-                                        height: '150px',
+                                        height: '110px',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
                                     }}
                                 >
                                     <img 
                                         src={constants.pins.defaultPin}
-                                        width='70%'
+                                        style={{
+                                            maxHeight: '100px',
+                                            maxWidth: '82%',
+                                            objectFit: 'contain',
+                                        }}
                                     />
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid item xs={12} style={{ fontWeight: '600' }}>
                                     {pin.label}
                                 </Grid>
                             </Grid>

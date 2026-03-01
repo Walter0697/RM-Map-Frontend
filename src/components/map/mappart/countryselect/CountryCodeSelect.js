@@ -62,6 +62,8 @@ function CountryCodeSelect({
     setClose,
     countrycodes,
     filtercountry,
+    menuWidth,
+    menuMaxWidth,
     dispatch,
 }) {
 
@@ -105,7 +107,8 @@ function CountryCodeSelect({
                 top: '60px',
                 height: listHeight,
                 opacity: listOpacity,
-                width: '55vw',
+                width: menuWidth ?? '100%',
+                maxWidth: menuMaxWidth ?? '100%',
                 borderRadius: '5px',
                 pointerEvents: open ? 'auto' : 'none',
                 overflow: 'auto'
