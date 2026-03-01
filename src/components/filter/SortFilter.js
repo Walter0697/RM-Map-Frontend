@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Grid } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 
 import FilterContainer from './FilterContainer'
 import FilterTitle from './FilterTitle'

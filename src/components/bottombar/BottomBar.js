@@ -9,12 +9,14 @@ import SettingsIcon from '@mui/icons-material/Settings'
 
 import TheatersIcon from '@mui/icons-material/Theaters'     // movie
 import StarIcon from '@mui/icons-material/Star'             // favourite movie
-import TrainIcon from '@mui/icons-material/Train'           // station
 import FilterAltIcon from '@mui/icons-material/FilterAlt'   // filter
 
 import AvTimerIcon from '@mui/icons-material/AvTimer'       // expired marker
 import FlagIcon from '@mui/icons-material/Flag'             // previous marker
 import MovieIcon from '@mui/icons-material/Movie'           // watched movie
+
+import FlightIcon from '@mui/icons-material/Flight'         // country map      
+import TrainIcon from '@mui/icons-material/Train'           // station
 
 import BarIcon from './BarIcon'
 import SubBarIcon from './SubBarIcon'
@@ -77,18 +79,6 @@ function BottomBar({
     }, [location.pathname])
 
     const MarkerButton = useMemo(() => {
-        if (location.pathname === '/station') {
-            return (
-                <SubBarIcon 
-                    route={'/station'}
-                    parentRoute={'/markers'}
-                    path={location.pathname}
-                    activeIcon={<TrainIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                    setPath={changeTab}
-                />
-            )
-        }
-
         if (location.pathname === '/filter/list' || location.pathname === '/filter/map') {
             return (
                 <SubBarIcon 
@@ -113,6 +103,28 @@ function BottomBar({
     }, [location.pathname])
 
     const HomeButton = useMemo(() => {
+        if (location.pathname === '/station') {
+            return (
+                <SubBarIcon 
+                    route={'/station'}
+                    parentRoute={'/home'}
+                    path={location.pathname}
+                    activeIcon={<TrainIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+        if (location.pathname === '/country') {
+            return (
+                <SubBarIcon 
+                    route={'/country'}
+                    parentRoute={'/home'}
+                    path={location.pathname}
+                    activeIcon={<FlightIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
         return (
             <BarIcon
                 route={'/home'}

@@ -33,7 +33,7 @@ function ScheduleEditForm({
     const [ formValue, setFormValue, resetFormValue ] = useObject({
         label: '',
         description: '',
-        selected_time: null,
+        selected_time: dayjs().toDate(),
     }) 
 
     const [ error, setError ] = useObject({})
@@ -51,7 +51,7 @@ function ScheduleEditForm({
 
         setFormValue('label', schedule.label)
         setFormValue('description', schedule.description)
-        setFormValue('selected_time', dayjs.utc(schedule.selected_date).format('MM/DD/YYYY HH:mm'))
+        setFormValue('selected_time', new Date(dayjs.utc(schedule.selected_date).format('MM/DD/YYYY HH:mm')))
 
     }, [schedule])
 

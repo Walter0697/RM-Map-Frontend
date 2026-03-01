@@ -76,7 +76,7 @@ const fillVariableForMarker = (m) => {
 }
 
 const convertAPIValueToMapXY = (type, item) => {
-    if (type === constants.overlay.station.HKMTR) {
+    if (type === constants.overlay.typeStation) {
         return {
             lat: item.map_x,
             lon: item.map_y,

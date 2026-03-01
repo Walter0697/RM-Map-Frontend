@@ -10,6 +10,7 @@ import movies from './movie'
 import releasenotes from './releasenote'
 import scrappers from './scrapper'
 import stations from './station'
+import countries from './country'
 
 const graphql = {
     auth,
@@ -24,6 +25,7 @@ const graphql = {
     releasenotes,
     scrappers,
     stations,
+    countries,
 }
 
 export default graphql

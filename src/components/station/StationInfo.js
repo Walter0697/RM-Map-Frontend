@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
-import {
-    Grid,
-} from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 import { useMutation } from '@apollo/client'
 
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt'
 import WrongLocationIcon from '@mui/icons-material/WrongLocation'
 
+import constants from '../../constant'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
 
@@ -58,43 +57,56 @@ function StationInfo({
     return (
         <div 
             style={{
-                backgroundColor: '#48acdb',
+                backgroundColor: constants.colors.CardBackground,
                 height: '100%',
                 width: '90%',
                 boxShadow: '2px 2px 6px',
                 textTransform: 'none',
-                padding: '10px',
+                padding: '12px',
                 color: 'white',
                 borderRadius: '10px',
+                overflow: 'hidden',
             }}
         >
             <Grid container fullWidth
                 style={{
                     height: '100%',
+                    alignContent: 'flex-start',
                 }}
             >
                 {station ? (
                     <>
-                        <Grid item xs={4} md={4} lg={4}>
+                        <Grid item xs={12} md={5} lg={5}>
                             <Grid container>
                                 <Grid item xs={12} style={{
                                     fontSize: '20px',
                                     fontWeight: '500',
+                                    overflowWrap: 'anywhere',
                                 }}>
                                     {station.name}
                                 </Grid>
                                 <Grid item xs={12} style={{
                                     fontSize: '15px',
+                                    color: '#d7e3ff',
+                                    overflowWrap: 'anywhere',
                                 }}>
                                     {station.label}
                                 </Grid>
                             </Grid>
                         </Grid>
-                        <Grid item xs={4} md={4} lg={4}>
+                        <Grid item xs={7} md={4} lg={4}
+                            style={{
+                                maxHeight: '100%',
+                                overflowY: 'auto',
+                                paddingRight: '8px',
+                            }}
+                        >
                             {station.line.map((l, index) => (
                                 <div 
                                     style={{
                                         marginBottom: '5px',
+                                        display: 'flex',
+                                        alignItems: 'center',
                                     }}
                                     key={`info${index}`}>
                                     <div
@@ -110,40 +122,44 @@ function StationInfo({
                                     <div style={{
                                         display: 'inline-block',
                                         paddingLeft: '5px',
+                                        minWidth: 0,
                                     }}>
                                         <div style={{
                                             fontSize: '12px',
+                                            overflowWrap: 'anywhere',
                                         }}>{l.localName}</div>
                                         <div style={{
                                             fontSize: '8px',
+                                            color: '#d7e3ff',
+                                            overflowWrap: 'anywhere',
                                         }}>{l.name}</div>
                                     </div>
                                 </div>
                             ))}
                         </Grid>
-                        <Grid item xs={4} md={4} lg={4}>
+                        <Grid item xs={5} md={3} lg={3}>
                             <div 
                                 style={{
-                                    position: 'relative',
                                     height: '100%',
                                     width: '100%',
                                     display: 'flex',
                                     justifyContent: 'center',
+                                    alignItems: 'center',
                                 }}
                             >
                                 {station.active ? (
-                                    <Grid container fullWidth>
+                                    <Grid container fullWidth style={{ alignContent: 'center' }}>
                                         <Grid 
                                             item xs={12} 
                                             style={{
                                                 color: 'green',
                                                 fontWeight: '700',
-                                                fontSize: '20px',
-                                                paddingTop: '10px',
+                                                fontSize: '18px',
                                                 width: '100%',
                                                 display: 'flex',
                                                 justifyContent: 'center',
-                                                paddingBottom: '10px',
+                                                paddingBottom: '6px',
+                                                textAlign: 'center',
                                             }}
                                         >
                                             Arrived
@@ -157,16 +173,17 @@ function StationInfo({
                                         >
                                             <WrongLocationIcon sx={{
                                                 color: 'red',
-                                                fontSize: '60px',
+                                                fontSize: '48px',
                                             }}/>
                                             
                                         </Grid>
                                         <Grid item xs={12}
                                             style={{
-                                                fontSize: '12px',
+                                                fontSize: '11px',
                                                 display: 'flex',
                                                 justifyContent: 'center',
                                                 color: 'red',
+                                                textAlign: 'center',
                                             }}
                                         >
                                             Cancel record?
@@ -174,18 +191,18 @@ function StationInfo({
                                         
                                     </Grid>
                                 ) : (
-                                    <Grid container fullWidth>
+                                    <Grid container fullWidth style={{ alignContent: 'center' }}>
                                         <Grid 
                                             item xs={12} 
                                             style={{
                                                 color: 'red',
                                                 fontWeight: '700',
                                                 fontSize: '15px',
-                                                paddingTop: '10px',
                                                 width: '100%',
                                                 display: 'flex',
                                                 justifyContent: 'center',
-                                                paddingBottom: '10px',
+                                                paddingBottom: '6px',
+                                                textAlign: 'center',
                                             }}
                                         >
                                             Will be there
@@ -199,15 +216,16 @@ function StationInfo({
                                         >
                                             <AddLocationAltIcon sx={{
                                                 color: 'green',
-                                                fontSize: '60px',
+                                                fontSize: '48px',
                                             }}/>
                                         </Grid>
                                         <Grid item xs={12}
                                             style={{
-                                                fontSize: '12px',
+                                                fontSize: '11px',
                                                 display: 'flex',
                                                 justifyContent: 'center',
                                                 color: 'green',
+                                                textAlign: 'center',
                                             }}
                                         >
                                             Add record!

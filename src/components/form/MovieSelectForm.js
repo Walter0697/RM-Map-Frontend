@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
 import {
-    Grid,
     Button,
 } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 
 import StarIcon from '@mui/icons-material/Star'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'

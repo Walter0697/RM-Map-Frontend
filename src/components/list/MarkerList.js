@@ -75,11 +75,17 @@ function MarkerList({
                       height={'120px'}
                       marginBottom='10px'
                     >
-                      <MarkerItem
-                        item={item}
-                        typeIcon={eventtypes.find(s => s.value === item.type).icon_path}
-                        onClickHandler={() => setSelectedById(item.id)}
-                      />
+                      {(() => {
+                        const currentType = eventtypes.find(s => s.value === item.type)
+                        const typeIcon = currentType?.icon_path || ''
+                        return (
+                          <MarkerItem
+                            item={item}
+                            typeIcon={typeIcon}
+                            onClickHandler={() => setSelectedById(item.id)}
+                          />
+                        )
+                      })()}
                     </WrapperBox>
                   ))}
                 </BottomUpTrail>

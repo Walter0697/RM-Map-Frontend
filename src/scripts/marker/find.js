@@ -1,10 +1,13 @@
+import constants from '../../constant'
 import generic from '../generic'
 import text from './text'
 import dayjs from 'dayjs'
 
+const featureListNum = 4
+
 const getActiveMarker = (markers) => {
     // by status
-    const byStatus = markers.filter(s => s.status === '' || s.status === 'scheduled')
+    const byStatus = markers.filter(s => s.status === '' || s.status === constants.identifiers.markerStatusScheduled)
 
     // ignore expired markers
     const now = dayjs().add(-1, 'day')
@@ -28,26 +31,80 @@ const getSuggestMarker = (markers, eventtypes) => {
     return nonHidden
 }
 
-const getFeaturedList = (markers, ignored_featured) => {
-    let featured_list = []
+const getFeaturedByType = (markers, type) => {
+    switch(type) {
+        case constants.identifiers.featureMarkerUpcoming:
+            return upcomingEnd(markers)
+        case constants.identifiers.featureMarkerLongTimeCreated:
+            return longTimeCreated(markers)
+        case constants.identifiers.featureMarkerFeelingLucky:
+            return feelingLucky(markers)
+        case constants.identifiers.featureMarkerShortTime:
+            return shortTime(markers)
+        case constants.identifiers.featureMarkerRestaurant:
+            return restaurantType(markers)
+        case constants.identifiers.featureMarkerExpensive:
+            return expensiveSpend(markers)
+        default:
+            return null
+    }
+    return null
+}
+
+const getFeaturedListByType = (markers, type) => {
+    const featured_list = []
+    const current_list = []
+    for (let i = 0; i < featureListNum; i++) {
+        const featured = getFeaturedByType(markers, type)
+        if (featured && !current_list.includes(featured.marker.id)) {
+            featured_list.push(featured)
+            current_list.push(featured.marker.id)
+        }
+    }
+
+    return featured_list
+}
+
+const getFeaturedList = (markers) => {
+    const featured_list = []
+    const current_list = []
+
     const ue = upcomingEnd(markers)
-    if (ue && !ignored_featured.includes(ue.type)) featured_list.push(ue)
+    if (ue) {
+        featured_list.push(ue)
+        current_list.push(ue.marker.id)
+    }
+    
     const lt = longTimeCreated(markers)
-    if (lt && !ignored_featured.includes(lt.type))  featured_list.push(lt)
+    if (lt && !current_list.includes(lt.marker.id)) {
+        featured_list.push(lt)
+        current_list.push(lt.marker.id)
+    }
+
     const fl = feelingLucky(markers)
-    if (fl && !ignored_featured.includes(fl.type)) featured_list.push(fl)
+    if (fl && !current_list.includes(fl.marker.id)) {
+        featured_list.push(fl)
+        current_list.push(fl.marker.id)
+    }
+
     const st = shortTime(markers)
-    if (st && !ignored_featured.includes(st.type))  featured_list.push(st)
+    if (st && !current_list.includes(st.marker.id)) {
+        featured_list.push(st)
+        current_list.push(st.marker.id)
+    }
+
     const rt = restaurantType(markers)
-    if (rt && !ignored_featured.includes(rt.type))  featured_list.push(rt)
-    const es = expensiveSpend(markers)
-    if (es && !ignored_featured.includes(es.type)) featured_list.push(es)
+    if (rt && !current_list.includes(rt.marker.id)) {
+        featured_list.push(rt)
+        current_list.push(rt.marker.id)
+    }
 
     return featured_list
 }
 
 const upcomingEnd = (markers) => {
     const hasToTimeList = markers.filter(s => s.to_time !== null)
+    if (hasToTimeList.length === 0) return null
 
     const sorted = hasToTimeList.sort((a, b) => {
         if (dayjs(a.to_time).isAfter(dayjs(b.to_time))) {
@@ -55,35 +112,33 @@ const upcomingEnd = (markers) => {
         }
         return -1
     })
-
-    if (sorted.length === 0) return null
  
     const allowed_index = Math.ceil(sorted.length * 0.1)
     const index = generic.math.rand(allowed_index)
 
     return {
-        type: 'upcoming',
-        label: text.feature_text('upcoming'),
+        type: constants.identifiers.featureMarkerUpcoming,
+        label: text.feature_text(constants.identifiers.featureMarkerUpcoming),
         marker: sorted[index]
     }
 }
 
 const longTimeCreated = (markers) => {
+    if (markers.length === 0) return null
+
     const sorted = markers.sort((a, b) => {
         if (dayjs(a.created_at).isAfter(dayjs(b.created_at))) {
             return 1
         }
         return -1
     })
-
-    if (sorted.length === 0) return null
  
     const allowed_index = Math.ceil(sorted.length * 0.1)
     const index = generic.math.rand(allowed_index)
 
     return {
-        type: 'longtime',
-        label: text.feature_text('longtime'),
+        type: constants.identifiers.featureMarkerLongTimeCreated,
+        label: text.feature_text(constants.identifiers.featureMarkerLongTimeCreated),
         marker: sorted[index]
     }
 }
@@ -93,37 +148,36 @@ const feelingLucky = (markers) => {
     
     const index = generic.math.rand(markers.length)
     return {
-        type: 'lucky',
-        label: text.feature_text('lucky'),
+        type: constants.identifiers.featureMarkerFeelingLucky,
+        label: text.feature_text(constants.identifiers.featureMarkerFeelingLucky),
         marker: markers[index]
     }
 }
 
 const shortTime = (markers) => {
-    const filtered = markers.filter(s => s.estimate_time === 'short')
+    const filtered = markers.filter(s => s.estimate_time === constants.identifiers.estimateTimeShort)
 
     if (filtered.length === 0) return null
 
     const index = generic.math.rand(filtered.length)
 
     return {
-        type: 'shorttime',
-        label: text.feature_text('shorttime'),
+        type: constants.identifiers.featureMarkerShortTime,
+        label: text.feature_text(constants.identifiers.featureMarkerShortTime),
         marker: filtered[index],
     }
 }
 
-// MIGHT CHANGE since marker type is dynamic
 const restaurantType = (markers) => {
-    const filtered = markers.filter(s => s.type === 'restaurant')
+    const filtered = markers.filter(s => s.type === constants.identifiers.restaurantTypeIdentifier)
 
     if (filtered.length === 0) return null
 
     const index = generic.math.rand(filtered.length)
 
     return {
-        type: 'restaurant',
-        label: text.feature_text('restaurant'),
+        type: constants.identifiers.featureMarkerRestaurant,
+        label: text.feature_text(constants.identifiers.featureMarkerRestaurant),
         marker: filtered[index],
     }
 }
@@ -136,8 +190,8 @@ const expensiveSpend = (markers) => {
     const index = generic.math.rand(filtered.length)
 
     return {
-        type: 'expensive',
-        label: text.feature_text('expensive'),
+        type: constants.identifiers.featureMarkerExpensive,
+        label: text.feature_text(constants.identifiers.featureMarkerExpensive),
         marker: filtered[index],
     }
 }
@@ -146,6 +200,7 @@ const find = {
     active: getActiveMarker,
     suggest: getSuggestMarker,
     feature_list: getFeaturedList,
+    feature_list_by_type: getFeaturedListByType,
     upcomingEnd,
     longTimeCreated,
     feelingLucky,

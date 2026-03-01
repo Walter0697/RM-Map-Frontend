@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { connect } from 'react-redux'
-import { Grid } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 import backend from '../../constant/backend'
 
 import FilterContainer from './FilterContainer'

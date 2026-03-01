@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import {
-    Grid,
     TextField,
 } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 
 import countryFlagEmoji from 'country-flag-emoji'
 import AsyncSelect from 'react-select/async'
@@ -92,15 +92,17 @@ function SearchStreetForm({
         >
             <Grid container spacing={2}>
                 <Grid item xs={12} md={12} lg={12}>
-                    <AsyncSelect 
-                        cacheOptions
-                        defaultOptions
-                        value={selectedCountry}
-                        onChange={setCountryFromSelect}
-                        loadOptions={loadCountryOptions} 
-                        menuPortalTarget={document.body} 
-                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                    />
+                    <div style={{ width: '100%' }}>
+                        <AsyncSelect 
+                            cacheOptions
+                            defaultOptions
+                            value={selectedCountry}
+                            onChange={setCountryFromSelect}
+                            loadOptions={loadCountryOptions} 
+                            menuPortalTarget={document.body} 
+                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                        />
+                    </div>
                 </Grid>
                 <Grid item xs={12} md={12} lg={12}>
                     <TextField

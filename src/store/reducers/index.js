@@ -6,6 +6,7 @@ import release from './release'
 import station from './station'
 import filter from './filter'
 import movie from './movie'
+import country from './country'
 
 const reducers = {
     auth,
@@ -16,6 +17,7 @@ const reducers = {
     station,
     filter,
     movie,
+    country,
 }
 
 export default reducers

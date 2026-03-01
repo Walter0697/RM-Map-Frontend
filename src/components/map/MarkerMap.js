@@ -189,15 +189,11 @@ function MarkerMap({
 
     useEffect(() => {
         if (showInMap.markerMap) {
-            setExtraLocationInformation(constants.overlay.station.HKMTR, stations)
+            setExtraLocationInformation(constants.overlay.typeStation, stations)
         } else {
-            setExtraLocationInformation(constants.overlay.station.HKMTR, [])
+            setExtraLocationInformation(constants.overlay.typeStation, [])
         }
     }, [stations, showInMap])
-
-    const redirectToStationPage = () => {
-        history.replace('/station')
-    }
 
     return (
         <>
@@ -262,22 +258,6 @@ function MarkerMap({
                 <FilterCircleButton 
                     redirectPath={'/filter/map'}
                 />
-            </animated.div>
-
-            <animated.div
-                style={{
-                    position: 'absolute',
-                    visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
-                    opacity: mapOpacity,
-                    bottom: utilityButtonBottom,
-                    right: '20px',
-                }}
-            >
-                <CircleIconButton
-                    onClickHandler={redirectToStationPage}
-                >
-                    <TrainIcon />
-                </CircleIconButton>
             </animated.div>
 
             <animated.div

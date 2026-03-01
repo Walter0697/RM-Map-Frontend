@@ -9,9 +9,10 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
-    Grid,
+    Box,
     Slide,
 } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 import backend from '../../constant/backend'
 
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
@@ -49,6 +50,7 @@ function MarkerView({
     marker,
     editMarker,
     eventtypes,
+    noStar,
     dispatch,
 }) {
     const history = useHistory()
@@ -73,7 +75,11 @@ function MarkerView({
 
         // find the type icon from the list to get the icon path
         const currentType = eventtypes.find(s => s.value === marker.type)
-        setIcon(backend.IMAGE_LINK + currentType.icon_path)
+        if (currentType?.icon_path) {
+            setIcon(backend.IMAGE_LINK + currentType.icon_path)
+        } else {
+            setIcon(null)
+        }
 
         setDeleting(-1)
 
@@ -161,41 +167,45 @@ function MarkerView({
                 { marker && (
                     <>
                         <DialogTitle>
-                            <Grid container spacing={1}>
-                                <Grid item xs={3} md={3} lg={3}>
-                                    <CircleIconButton
-                                        onClickHandler={openSchedule}
-                                        disabled={marker.status === 'scheduled'}
+                            <Grid container spacing={1.5}>
+                                <Grid item xs={12}>
+                                    <Box
+                                        data-testid='marker-view-top-actions'
+                                        sx={{
+                                            width: '100%',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            gap: 0.5,
+                                            flexWrap: 'nowrap',
+                                        }}
                                     >
-                                        <CalendarTodayIcon />
-                                    </CircleIconButton>
+                                        <Box sx={{ minWidth: 44, display: 'flex', justifyContent: 'flex-start' }}>
+                                            {openSchedule && (
+                                                <CircleIconButton
+                                                    onClickHandler={openSchedule}
+                                                    disabled={marker.status === 'scheduled'}
+                                                >
+                                                    <CalendarTodayIcon />
+                                                </CircleIconButton>
+                                            )}
+                                        </Box>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, justifyContent: 'flex-end', marginLeft: 'auto' }}>
+                                            <CircleIconButton
+                                                onClickHandler={() => setPreviewOpen(true)}
+                                            >
+                                                <InsertPhotoIcon />
+                                            </CircleIconButton>
+                                            {!noStar && (
+                                                <FavouriteIcon
+                                                    active={isFav}
+                                                    onClickHandler={toggleMarkerFavourite}
+                                                />
+                                            )}
+                                        </Box>
+                                    </Box>
                                 </Grid>
-                                <Grid item xs={3} md={3} lg={3}>
-                                </Grid>
-                                <Grid item xs={3} md={3} lg={3}
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: 'flex-end',
-                                    }}
-                                >
-                                    <CircleIconButton
-                                        onClickHandler={() => setPreviewOpen(true)}
-                                    >
-                                        <InsertPhotoIcon />
-                                    </CircleIconButton>
-                                </Grid>
-                                <Grid item xs={3} md={3} lg={3}
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: 'flex-end',
-                                    }}
-                                >
-                                    <FavouriteIcon 
-                                        active={isFav}
-                                        onClickHandler={toggleMarkerFavourite}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={12} lg={12}
+                                <Grid item xs={12}
                                     style={{
                                         width: '100%',
                                         overflowX: 'auto',
@@ -204,7 +214,7 @@ function MarkerView({
                                     <ImageHeadText
                                         iconPath={typeIcon}
                                         iconSize='35px'
-                                        label={marker.label}
+                                        label={marker.label || marker.local_name || 'Marker'}
                                         labelSize='25px'
                                         labelColor='black'
                                     />
@@ -220,6 +230,11 @@ function MarkerView({
                                         <Grid item xs={12} md={12} lg={12}>
                                             <img
                                                 width='100%'
+                                                style={{
+                                                    maxHeight: '42vh',
+                                                    objectFit: 'contain',
+                                                    borderRadius: '8px',
+                                                }}
                                                 src={backend.IMAGE_LINK + marker.image_link}                                            
                                             />
                                         </Grid>

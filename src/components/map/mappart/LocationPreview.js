@@ -4,6 +4,7 @@ import {
     Grid,
 } from '@mui/material'
 import backend from '../../../constant/backend'
+import constants from '../../../constant'
 
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
@@ -35,8 +36,12 @@ function LocationPreview({
             }
             return null
         } else {
-            const image = maphelper.sprite.getPinSprite(marker?.type) 
-            return image
+            let imageValue = null
+            switch (marker?.type) {
+                case constants.overlay.typeStation:
+                    imageValue = maphelper.sprite.getPinSprite(marker?.type, marker?.item?.map_name)
+            }
+            return imageValue
         }
         return null
     }, [marker, typeIcon])
@@ -118,14 +123,30 @@ function LocationPreview({
                 }}    
                 onClick={showMarkerView}
             >
-                <Grid container>
+                <Grid
+                    container
+                    style={{
+                        height: '100%',
+                        alignItems: 'center',
+                        flexWrap: 'nowrap',
+                    }}
+                >
                     { displayImage && (
-                        <Grid item xs={4} md={4} lg={4}>
-                            <img 
+                        <Grid item xs={4} md={4} lg={4}
+                            style={{
+                                height: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <img
                                 style={{
                                     marginLeft: '10px',
+                                    maxHeight: '92%',
+                                    maxWidth: '92%',
+                                    objectFit: 'contain',
                                 }}
-                                width='80%'
                                 src={displayImage}
                             />
                         </Grid>

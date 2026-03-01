@@ -28,6 +28,7 @@ function NullableDatePicker({
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DateTimePicker
+                slotProps={{ textField: { fullWidth: true } }}
                 renderInput={(props) => (
                     <TextField 
                         {...props} 
@@ -45,11 +46,10 @@ function NullableDatePicker({
                                         <ClearIcon />
                                     </IconButton>
                                 </InputAdornment>
-                            ))
+                            )),
                         }}
                     />
                 )}
-                fullWidth
                 minDate={noPast ? new Date() : null}
                 label={label}
                 value={value}

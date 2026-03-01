@@ -24,7 +24,6 @@ import MarkerEditForm from '../components/form/MarkerEditForm'
 import AutoHideAlert from '../components/AutoHideAlert'
 import CountrySelect from '../components/map/mappart/countryselect/CountrySelect'
 
-import filters from '../scripts/filter'
 import search from '../scripts/search'
 
 import styles from '../styles/list.module.css'
@@ -240,7 +239,9 @@ function MarkerPage({
                     transform: fakeTranform.to({ range: [0.0, 0.5, 1.0], output: ['rotateY(0deg)', 'rotateY(180deg)', 'rotateY(0deg)']}),
                     position: 'absolute',
                     top: '5%',
-                    left: '30%',
+                    left: '22%',
+                    width: '68%',
+                    maxWidth: '700px',
                 }}
             >
                 <CountrySelect />
