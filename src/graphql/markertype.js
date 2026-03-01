@@ -40,6 +40,7 @@ const previewList = gql`
         markertypes{
             id
             label
+            icon_path
         }
     }
 `
