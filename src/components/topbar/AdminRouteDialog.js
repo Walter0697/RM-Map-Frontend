@@ -111,6 +111,13 @@ function AdminRouteDialog({
                         active={location.pathname === '/admin/station'}
                         directTo={directTo}
                     />
+                    <RouteBox
+                        label='Permanent Cleanup'
+                        description='Search, delete, and schedule cleanup actions'
+                        route='/admin/cleanup'
+                        active={location.pathname === '/admin/cleanup'}
+                        directTo={directTo}
+                    />
                 </Stack>
             </DialogContent>
         </Dialog>

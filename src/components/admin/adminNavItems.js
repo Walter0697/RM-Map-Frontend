@@ -24,6 +24,11 @@ const adminNavItems = [
         description: 'Map image, pins, lines, and JSON export',
         path: '/admin/station',
     },
+    {
+        label: 'Permanent Cleanup',
+        description: 'Search, delete, and schedule marker/schedule cleanup',
+        path: '/admin/cleanup',
+    },
 ]
 
 export default adminNavItems
