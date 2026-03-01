@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import {
-    Grid,
     Button,
 } from '@mui/material'
 import backend from '../../../constant/backend'
@@ -32,6 +31,12 @@ function MarkerItem({
         setImageExist(false)
     }
 
+    const shortDescription = (() => {
+        const text = item?.description || ''
+        if (text.length <= 56) return text
+        return `${text.slice(0, 56)}...`
+    })()
+
     return (
         <Button
             variant='contained'
@@ -41,57 +46,80 @@ function MarkerItem({
                 backgroundColor: constant.StaticColour.CardBackground,
                 borderRadius: '5px',
                 height: '100%',
+                minHeight: '120px',
                 width: '100%',
                 boxShadow: '2px 2px 6px',
                 alignItems: 'flex-start',
                 textTransform: 'none',
                 padding: '0',
                 border: item.status === 'scheduled' ? `3px solid ${constant.StaticColour.ScheduledBorder}` : '',
+                justifyContent: 'flex-start',
             }}
             onClick={onClickHandler}
         >
-            <Grid
-                container
-                fullWidth
+            <div
+                style={{
+                    height: '100%',
+                    width: '100%',
+                    display: 'flex',
+                }}
             >
             { imageExist ? (
-                <Grid 
-                    item xs={4}
-                    style={{ marginTop: '15px', overflow: 'hidden', paddingLeft: '15px', borderRadius: '5px' }}
-                >
-                    <img
-                    height='90px'
-                    src={backend.IMAGE_LINK + item.image_link}
-                    onError={onImageFailedToLoad}
-                    />
-                </Grid>
-            ) : (
-                <Grid 
-                    item xs={4}
-                    style={{ marginTop: '15px', overflow: 'hidden', paddingLeft: '15px' }}
-                >
-                    <img
-                    height='90px'
-                    src={backend.IMAGE_LINK + typeIcon}
-                    />
-                </Grid>
-            )}
-                <Grid 
-                    item 
-                    xs={8}
+                <div
                     style={{
-                        marginTop: '15px',
-                        paddingLeft: '15px',
-                    }}
-                >
-                <Grid container fullWidth>
-                    <Grid 
-                    item xs={12} md={12} lg={12} fullWidth
-                    style={{
+                        overflow: 'hidden',
+                        width: '34%',
+                        minWidth: '110px',
+                        maxWidth: '130px',
+                        paddingLeft: '12px',
+                        borderRadius: '5px',
                         display: 'flex',
-                        alignItems: 'baseline',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                     }}
-                    >
+                >
+                    <img
+                        style={{
+                            width: '100%',
+                            height: '88px',
+                            objectFit: 'cover',
+                            borderRadius: '6px',
+                        }}
+                        src={backend.IMAGE_LINK + item.image_link}
+                        onError={onImageFailedToLoad}
+                    />
+                </div>
+            ) : (
+                <div
+                    style={{
+                        overflow: 'hidden',
+                        width: '34%',
+                        minWidth: '110px',
+                        maxWidth: '130px',
+                        paddingLeft: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <img
+                        style={{
+                            maxHeight: '84px',
+                            maxWidth: '92%',
+                            objectFit: 'contain',
+                        }}
+                        src={backend.IMAGE_LINK + typeIcon}
+                    />
+                </div>
+            )}
+                <div
+                    style={{
+                        padding: '12px 12px 10px 12px',
+                        minWidth: 0,
+                        flex: 1,
+                    }}
+                >
+                <div style={{ display: 'flex', alignItems: 'baseline' }}>
                         <ImageHeadText
                             iconPath={backend.IMAGE_LINK + typeIcon}
                             iconSize='20px'
@@ -99,45 +127,40 @@ function MarkerItem({
                             labelSize='20px'
                             labelColor='black'
                         />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12} fullWidth>
+                </div>
                     <div
                         style={{
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        color: '#455295',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            color: '#1f2a50',
+                            textAlign: 'left',
                         }}
                     >
                         {item.address}
                     </div>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12} fullWidth>
-                        <div
-                            style={{
-                            whiteSpace: 'nowrap',
+                    <div
+                        style={{
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             marginTop: '5px',
                             marginRight: '10px',
                             color: '#071c8d',
-                            display: 'flex',
-                            flexDirection: 'flex-start',
+                            whiteSpace: 'nowrap',
                             width: '95%',
-                            }}
-                        >
-                            {item.permanent && (
-                                <PinDropIcon />
-                            )} 
-                            {item.need_booking && (
-                                <LocalPhoneIcon />
-                            )} 
-                            {item.description}
-                        </div>
-                    </Grid>
-                </Grid>
-            </Grid>
-        </Grid>
+                            textAlign: 'left',
+                        }}
+                    >
+                        {item.permanent && (
+                            <PinDropIcon />
+                        )} 
+                        {item.need_booking && (
+                            <LocalPhoneIcon />
+                        )} 
+                        {shortDescription}
+                    </div>
+                </div>
+            </div>
         {item.is_fav && (
             <div
                 style={{ 

@@ -99,6 +99,9 @@ describe('CountrySelect interaction guard', () => {
         expect(partTrigger.style.pointerEvents).toBe('auto')
         expect(codeMenu.style.pointerEvents).toBe('none')
         expect(partMenu.style.pointerEvents).toBe('none')
+        expect(root.getAttribute('style')).toContain('width: 100%;')
+        expect(codeMenu.getAttribute('style')).toContain('width: 100%;')
+        expect(partMenu.getAttribute('style')).toContain('width: 100%;')
 
         unmount()
     })

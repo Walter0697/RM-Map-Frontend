@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { 
-    Grid,
     TextField,
     Button,
 } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 
 import BaseForm from './BaseForm'
 
@@ -144,7 +144,7 @@ function MovieSearchForm({
                 open={open}
                 handleClose={handleClose}
                 title={'Movie search'}
-                maxWidth={'lg'}
+                maxWidth={'sm'}
                 handleSubmit={handleConfirm}
                 cancelText={'Cancel'}
                 createText={'Confirm'}

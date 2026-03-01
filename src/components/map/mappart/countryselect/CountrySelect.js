@@ -18,6 +18,10 @@ function CountrySelect({
     dispatch,
 }) {
     const location = useLocation()
+    const selectorWidth = '100%'
+    const selectorMaxWidth = '100%'
+    const codeButtonWidth = '32%'
+    const partButtonWidth = '68%'
 
     // Dropdown interaction is driven by explicit open/closed state hooks.
     const [ countryCodeOpen, setCountryCodeOpen ] = useState(false)
@@ -71,6 +75,8 @@ function CountrySelect({
             style={{
                 position: 'relative',
                 pointerEvents: 'none',
+                width: selectorWidth,
+                maxWidth: selectorMaxWidth,
             }}
         >
             <div
@@ -78,7 +84,7 @@ function CountrySelect({
                     backgroundColor: '#83c0ff',
                     color: '#0808c1',
                     height: '50px',
-                    width: '60vw',
+                    width: '100%',
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -89,7 +95,7 @@ function CountrySelect({
                 <Button 
                     data-testid='country-code-trigger'
                     style={{
-                        width: '30%',
+                        width: codeButtonWidth,
                         padding: '3px',
                         paddingRight: '0px',
                         display: 'flex',
@@ -111,7 +117,7 @@ function CountrySelect({
                 <Button 
                     data-testid='country-part-trigger'
                     style={{
-                        width: '70%',
+                        width: partButtonWidth,
                         padding: '3px',
                         display: 'flex',
                         justifyContent: 'center',
@@ -134,10 +140,14 @@ function CountrySelect({
             <CountryCodeSelect 
                 open={countryCodeOpen}
                 setClose={() => setCountryCodeOpen(false)}
+                menuWidth={selectorWidth}
+                menuMaxWidth={selectorMaxWidth}
             />
             <CountryPartSelect
                 open={countryPartOpen}
                 setClose={() => setCountryPartOpen(false)}
+                menuWidth={selectorWidth}
+                menuMaxWidth={selectorMaxWidth}
             />
         </div>
     )

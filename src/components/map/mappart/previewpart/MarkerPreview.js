@@ -20,6 +20,7 @@ function MarkerPreview({
             style={{
                 paddingLeft: '20px',
                 paddingRight: '20px',
+                minWidth: 0,
             }}  
         >
             <Grid container>
@@ -43,6 +44,12 @@ function MarkerPreview({
                     style={{
                         fontSize: '15px',
                         color: 'grey',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflowWrap: 'anywhere',
                     }}
                 >
                     {address}

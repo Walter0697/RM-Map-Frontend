@@ -1,9 +1,9 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import {
-    Grid,
     Button,
 } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 import dayjs from 'dayjs'
 
 import useBoop from '../../../hooks/useBoop'
@@ -26,17 +26,10 @@ function CountryLocationItem({
     const [ smallImageExist, setSmallImageExist ] = useState(false)
 
     useEffect(() => {
-        if (location.bigImage) {
-            setBigImageExist(true)
-        } else {
-            setBigImageExist(false)
-        }
-
-        if (location.smallImage) {
-            setSmallImageExist(true)
-        } else {
-            setSmallImageExist(false)
-        }
+        setBigImage(location.bigImage || null)
+        setSmallImage(location.smallImage || null)
+        setBigImageExist(!!location.bigImage)
+        setSmallImageExist(!!location.smallImage)
     }, [location])
 
     const onBigImageFailedToLoad = () => {
@@ -65,17 +58,25 @@ function CountryLocationItem({
                     <Grid item xs={5} style={{
                         position: 'relative',
                         height: '100px',
+                        overflow: 'hidden',
                     }}>
                         <div style={{
                             position: 'absolute',
                             top: '0%',
                             left: '0%',
-                            width: '100%',
+                            width: '90%',
                             height: '100%',
+                            overflow: 'hidden',
+                            borderRadius: '6px',
                         }}>
                             <RoundImage    
-                                width='90%'
                                 src={bigImage}
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    display: 'block',
+                                }}
                                 onError={onBigImageFailedToLoad}
                             />
                         </div>
@@ -87,10 +88,17 @@ function CountryLocationItem({
                                 right: '0%',
                                 width: '30%',
                                 height: '30%',
+                                overflow: 'hidden',
+                                borderRadius: '4px',
                             }}>
                                 <RoundImage
-                                    width='100%'
                                     src={smallImage}
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                        display: 'block',
+                                    }}
                                     onError={onSmallImageFailedToLoad}
                                 />
                             </div>

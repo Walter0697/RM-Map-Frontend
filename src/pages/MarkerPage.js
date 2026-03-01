@@ -239,7 +239,9 @@ function MarkerPage({
                     transform: fakeTranform.to({ range: [0.0, 0.5, 1.0], output: ['rotateY(0deg)', 'rotateY(180deg)', 'rotateY(0deg)']}),
                     position: 'absolute',
                     top: '5%',
-                    left: '30%',
+                    left: '22%',
+                    width: '68%',
+                    maxWidth: '700px',
                 }}
             >
                 <CountrySelect />

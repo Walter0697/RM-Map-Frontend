@@ -70,7 +70,8 @@ function SettingList({
           />
         </WrapperBox>
         <WrapperBox
-          height={400}
+          minHeight={320}
+          height={'auto'}
           marginBottom={'30px'}
         >
           <PreferredPin

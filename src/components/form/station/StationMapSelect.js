@@ -1,7 +1,5 @@
 import React from 'react'
-import {
-    Grid,
-} from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 
 import BaseForm from '../BaseForm'
 
@@ -28,6 +26,7 @@ function StationMapSelect({
             open={open}
             handleClose={handleClose}
             title="Select Map"
+            maxWidth='sm'
             handleSubmit={null}
         >
             <Grid container spacing={2}>
@@ -39,6 +38,7 @@ function StationMapSelect({
                                 padding: '10px',
                                 background: '#9ff4ffcc',
                                 cursor: 'pointer',
+                                minHeight: '72px',
                             }}
                             onClick={() => onSelectionClickHandler(stationMap.identifier)}
                         >
@@ -49,7 +49,12 @@ function StationMapSelect({
                             }}>
                                 <img
                                     src={stationMap.image}
-                                    height={'50px'}
+                                    style={{
+                                        maxHeight: '50px',
+                                        width: 'auto',
+                                        maxWidth: '100%',
+                                        objectFit: 'contain',
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={8} sx={{

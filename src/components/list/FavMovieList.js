@@ -1,9 +1,7 @@
 import React, { useMemo } from 'react'
 import { connect } from 'react-redux'
-import {
-    Grid,
-    Button,
-} from '@mui/material'
+import { Button } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 import backend from '../../constant/backend'
 import dayjs from 'dayjs'
 
@@ -37,6 +35,7 @@ function MovieItem({
                 backgroundColor: '#48acdb',
                 borderRadius: '5px',
                 height: '100%',
+                minHeight: '162px',
                 width: '100%',
                 boxShadow: '2px 2px 6px',
                 alignItems: 'flex-start',
@@ -51,23 +50,34 @@ function MovieItem({
                 fullWidth
                 style={{
                     height: '100%',
+                    flexWrap: 'nowrap',
                 }}
             >
                 <Grid 
-                    item xs={5}
-                    style={{ marginTop: '15px'}}
+                    item xs={4}
+                    style={{
+                        padding: '12px 8px 12px 12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
                 >
                     {item.image_path ? (
                         <img
                             style={{
-                                width: '80%',
+                                width: '90px',
+                                height: '136px',
+                                objectFit: 'cover',
+                                borderRadius: '5px',
                             }}
                             src={backend.IMAGE_LINK + item.image_path}
                         />
                     ) : (
                         <img 
                             style={{
-                                width: '80%',
+                                width: '90px',
+                                maxHeight: '136px',
+                                objectFit: 'contain',
                             }}
                             src={backend.IMAGE_LINK + movieTypeIcon}
                         />
@@ -75,29 +85,37 @@ function MovieItem({
                     
                 </Grid>
                 <Grid 
-                    item xs={7}
+                    item xs={8}
                     style={{
                         height: '100%',
                         display: 'flex',
-                        alignItems: 'center',
+                        alignItems: 'flex-start',
                         justifyContent: 'center',
                         flexDirection: 'column',
-                        marginTop: '40px',
+                        padding: '12px 12px 12px 8px',
+                        minWidth: 0,
                     }}
                 >
                     <div
                         style={{
                             fontSize: '18px',
                             color: 'black',
+                            fontWeight: '600',
+                            width: '100%',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            textAlign: 'left',
                         }}
                     >
                         {item.label}
                     </div>
                     <div style={{
-                        fontSize: '10px',
+                        fontSize: '12px',
                         color: '#455295',
+                        textAlign: 'left',
                     }}>
-                        {item.release_date}
+                        {item.release_date || 'No release date'}
                     </div>
                 </Grid>
             </Grid>

@@ -21,7 +21,7 @@ function HomeTop() {
                 fontWeight: 'bold',
                 fontStyle: 'italic',
                 color: constants.colors.HomeTitleFontColor,
-            }}>Map Marker</div>
+            }}>RoroadMap</div>
             <div style={{
                 fontSize: '10px',
                 marginLeft: '10px',
