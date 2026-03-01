@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useMutation } from '@apollo/client'
 import {
-    Box,
     Grid,
     TextField,
     Button,
@@ -18,7 +17,7 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import useObject from '../../../hooks/useObject'
 
 import BaseForm from '../BaseForm'
-import Selectable from '../../field/Selectable'
+import PinPlacementCanvas from './PinPlacementCanvas'
 
 import graphql from '../../../graphql'
 
@@ -38,7 +37,6 @@ function PinForm({
     // graphql request
     const [ createPinGQL, { data: createData, loading: createLoading, error: createError } ] = useMutation(graphql.pins.create, { errorPolicy: 'all' })
     const [ editPinGQL, { data: editData, loading: editLoading, error: editError } ] = useMutation(graphql.pins.edit, { errorPolicy: 'all' })
-    const [ previewPinGQL, { data: previewData, loading: previewLoading, error: previewError } ] = useMutation(graphql.pins.preview, { errorPolicy: 'all' })
 
     const [ formValue, setFormValue, resetFormValue ] = useObject({
         label: '',
@@ -46,13 +44,13 @@ function PinForm({
         top_left_y: 0,
         bottom_right_x: 0,
         bottom_right_y: 0,
-        imageUplaod: null,
+        imageUpload: null,
     })
     const [ error, setError ] = useObject({})
 
     // preview related
     const [ selectedTypeId, setTypeId ] = useState('')
-    const [ previewURL, setPreview ] = useState('')
+    const [ canvasImageURL, setCanvasImageURL ] = useState('')
 
     // handling image information
     const [ imageUploadMessage, setImageMessage ] = useState('please upload an image first')
@@ -63,24 +61,22 @@ function PinForm({
     const [ alertMessage, setAlertMessage ] = useState(null)
     const fieldSx = { width: { xs: '100%', md: 300 } }
 
-    const canPreview = useMemo(() => {
-        if (!formValue.imageUpload && !pin?.image_path) return false
-        if (!selectedTypeId) return false
-        return true
-    }, [ formValue, selectedTypeId, pin ])
+    const selectedType = useMemo(() => {
+        if (!selectedTypeId) return null
+        return typeList.find((item) => String(item.id) === String(selectedTypeId)) ?? null
+    }, [selectedTypeId, typeList])
 
-    const previewMessage = useMemo(() => {
-        if (!formValue.imageUpload && !pin?.image_path) return 'cannot preview, no image available'
-        if (!selectedTypeId) return 'cannot preview, marker type not selected'
-        // if (formValue.top_left_x >= formValue.bottom_right_x) return 'x value invalid'
-        // if (formValue.top_left_y >= formValue.bottom_right_y) return 'y value invalid'
-        return ''
-    }, [ formValue, selectedTypeId, pin ])
+    const selectedTypeIconURL = useMemo(() => {
+        if (!selectedType?.icon_path) return ''
+        if (/^https?:\/\//i.test(selectedType.icon_path)) {
+            return selectedType.icon_path
+        }
+        return `${backend.IMAGE_LINK}${selectedType.icon_path}`
+    }, [selectedType])
 
     useEffect(() => {
         setSubmitting(false)
         setTypeId('')
-        setPreview('')
         resetFormValue()
         setImageMessage('please upload an image first')
         if (pin) {
@@ -93,16 +89,20 @@ function PinForm({
     }, [pin, open])
 
     useEffect(() => {
-        if (previewData) {
-            setPreview(backend.IMAGE_LINK + previewData.previewPin)
+        if (formValue.imageUpload?.upload) {
+            const objectURL = URL.createObjectURL(formValue.imageUpload.upload)
+            setCanvasImageURL(objectURL)
+            return () => URL.revokeObjectURL(objectURL)
         }
 
-        if (previewError) {
-            console.log(previewError)
+        if (pin?.image_path) {
+            setCanvasImageURL(backend.IMAGE_LINK + pin.image_path)
+            return
         }
-    }, [previewData, previewError])
 
-  
+        setCanvasImageURL('')
+    }, [formValue.imageUpload, pin])
+
     useEffect(() => {
         if (createData) {
             onCreated && onCreated()
@@ -142,8 +142,11 @@ function PinForm({
         setError(field, '')
     }
 
-    const onPreviewTypeChangeHandler = (e) => {
-        setTypeId(e.target.value)
+    const onCanvasGeometryChange = (nextGeometry) => {
+        setFormValue('top_left_x', nextGeometry.top_left_x)
+        setFormValue('top_left_y', nextGeometry.top_left_y)
+        setFormValue('bottom_right_x', nextGeometry.bottom_right_x)
+        setFormValue('bottom_right_y', nextGeometry.bottom_right_y)
     }
 
     // handle image upload
@@ -154,52 +157,6 @@ function PinForm({
             })
             
             setError('imageUpload', false)
-        }
-    }
-
-    const getPreviewUpload = async () => {
-        if (formValue.imageUpload?.upload) {
-            return formValue.imageUpload.upload
-        }
-
-        if (!pin?.image_path) return null
-
-        const existingImageUrl = backend.IMAGE_LINK + pin.image_path
-        const response = await fetch(existingImageUrl)
-        if (!response.ok) {
-            throw new Error('failed to load current image for preview')
-        }
-        const blob = await response.blob()
-        return new File([blob], pin.image_path.split('/').pop() || 'pin-preview.png', {
-            type: blob.type || 'image/png',
-        })
-    }
-
-    const onPreviewGenerate = async () => {
-        if (!canPreview) return
-        try {
-            const uploadFile = await getPreviewUpload()
-            if (!uploadFile) {
-                setAlertMessage({
-                    type: 'error',
-                    message: 'No image available for preview',
-                })
-                return
-            }
-
-            previewPinGQL({ variables: {
-                top_left_x: formValue.top_left_x,
-                top_left_y: formValue.top_left_y,
-                bottom_right_x: formValue.bottom_right_x,
-                bottom_right_y: formValue.bottom_right_y,
-                image_upload: uploadFile,
-                type_id: selectedTypeId,
-            }})
-        } catch (e) {
-            setAlertMessage({
-                type: 'error',
-                message: `Failed to generate preview: ${e.message}`,
-            })
         }
     }
 
@@ -348,6 +305,31 @@ function PinForm({
 
                     <Paper variant='outlined' sx={{ p: 2 }}>
                         <Typography variant='subtitle1' sx={{ mb: 1.5, fontWeight: 700 }}>
+                            Pin Placement Canvas
+                        </Typography>
+                        <PinPlacementCanvas
+                            imageSrc={canvasImageURL}
+                            iconSrc={selectedTypeIconURL}
+                            markerTypes={typeList}
+                            selectedTypeId={selectedTypeId}
+                            onSelectedTypeIdChange={setTypeId}
+                            iconSources={typeList.map((type) => {
+                                if (!type?.icon_path) return ''
+                                if (/^https?:\/\//i.test(type.icon_path)) return type.icon_path
+                                return `${backend.IMAGE_LINK}${type.icon_path}`
+                            }).filter(Boolean)}
+                            geometry={{
+                                top_left_x: Number(formValue.top_left_x || 0),
+                                top_left_y: Number(formValue.top_left_y || 0),
+                                bottom_right_x: Number(formValue.bottom_right_x || 0),
+                                bottom_right_y: Number(formValue.bottom_right_y || 0),
+                            }}
+                            onGeometryChange={onCanvasGeometryChange}
+                        />
+                    </Paper>
+
+                    <Paper variant='outlined' sx={{ p: 2 }}>
+                        <Typography variant='subtitle1' sx={{ mb: 1.5, fontWeight: 700 }}>
                             Map Coordinates
                         </Typography>
                         <Grid container spacing={2}>
@@ -403,75 +385,6 @@ function PinForm({
                                     helperText={error.bottom_right_y}
                                 />
                             </Grid>
-                        </Grid>
-                    </Paper>
-
-                    <Paper variant='outlined' sx={{ p: 2 }}>
-                        <Typography variant='subtitle1' sx={{ mb: 1.5, fontWeight: 700 }}>
-                            Preview
-                        </Typography>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                                <Stack spacing={0.75} sx={fieldSx}>
-                                    <Selectable
-                                        label='type'
-                                        value={selectedTypeId}
-                                        onValueChange={onPreviewTypeChangeHandler}
-                                        noDefault={false}
-                                        defaultSelectValue=''
-                                        defaultSelectText='Select marker type'
-                                        errorMessage={error.preview}
-                                        list={typeList}
-                                        valueKey={'id'}
-                                        textKey={'label'}
-                                    />
-                                    <Typography variant='caption' color='text.secondary'>
-                                        {previewMessage || 'Select a marker type to preview overlay on the pin image.'}
-                                    </Typography>
-                                </Stack>
-                            </Grid>
-                            { canPreview && (
-                                <Grid item xs={12}>
-                                    <Button
-                                        variant='outlined'
-                                        onClick={onPreviewGenerate}
-                                        sx={{ minHeight: 44 }}
-                                    >
-                                        Generate Preview
-                                    </Button>
-                                </Grid>
-                            )}
-                            { previewURL && (
-                                <Grid item xs={12}>
-                                    <Box
-                                        sx={{
-                                            ...fieldSx,
-                                            height: 190,
-                                            border: '1px solid',
-                                            borderColor: 'divider',
-                                            borderRadius: 1,
-                                            bgcolor: '#f8fbff',
-                                            p: 1,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            overflow: 'hidden',
-                                        }}
-                                    >
-                                        <img
-                                            src={previewURL}
-                                            style={{
-                                                maxWidth: '100%',
-                                                maxHeight: '100%',
-                                                width: 'auto',
-                                                height: 'auto',
-                                                objectFit: 'contain',
-                                                display: 'block',
-                                            }}
-                                        />
-                                    </Box>
-                                </Grid>
-                            )}
                         </Grid>
                     </Paper>
 
