@@ -34,6 +34,7 @@ const list = gql`
             id
             label
             image_path
+            display_path
             top_left_x
             top_left_y
             bottom_right_x
