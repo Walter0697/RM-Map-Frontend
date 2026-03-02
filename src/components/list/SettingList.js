@@ -11,6 +11,7 @@ import ReleaseNoteButton from './settings/ReleaseNoteButton'
 import PreviousMarkerButton from './settings/PreviousMarkerButton'
 import ExpiredMarkerButton from './settings/ExpiredMarkerButton'
 import WatchedMovieListButton from './settings/WatchedMovieListButton'
+import PreviewDisplayPinButton from './settings/PreviewDisplayPinButton'
 
 import WrapperBox from '../wrapper/WrapperBox'
 import SectionHeader from './settings/SectionHeader'
@@ -18,6 +19,7 @@ import SectionHeader from './settings/SectionHeader'
 import TagIcon from '@mui/icons-material/Tag'
 import MapIcon from '@mui/icons-material/Map'
 import TheatersIcon from '@mui/icons-material/Theaters'
+import VisibilityIcon from '@mui/icons-material/Visibility'
 
 import * as serviceWorkerRegistration from '../../serviceWorkerRegistration'
 
@@ -29,6 +31,8 @@ function SettingList({
   latestVersionRelease,
   seenRelease,
   openReleaseNote,
+  previewPinLabel,
+  openPreviewDisplayPinForm,
 }) {
   const history = useHistory()
 
@@ -129,6 +133,24 @@ function SettingList({
         >
             <ExpiredMarkerButton
                 onClickHandler={onExpiredMarkerClick}
+            />
+        </WrapperBox>
+        <WrapperBox
+          height={50}
+          marginBottom={'15px'}
+        >
+          <SectionHeader
+            title={'Preview'}
+            icon={<VisibilityIcon />}
+          />
+        </WrapperBox>
+        <WrapperBox
+            height={30}
+            marginBottom={'30px'}
+        >
+            <PreviewDisplayPinButton
+                pinLabel={previewPinLabel}
+                onClickHandler={openPreviewDisplayPinForm}
             />
         </WrapperBox>
         <WrapperBox
