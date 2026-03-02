@@ -28,6 +28,7 @@ import useBoop from '../../hooks/useBoop'
 
 import AdminPageShell from '../../components/admin/AdminPageShell'
 import backend from '../../constant/backend'
+import httpScript from '../../scripts/http'
 
 const availableScopes = [
     'markers:read',
@@ -49,6 +50,8 @@ function ApiKeyManage({ jwt }) {
     const [ users, setUsers ] = useState([])
     const [ relations, setRelations ] = useState([])
     const [ errorMessage, setErrorMessage ] = useState('')
+    const [ healthErrorMessage, setHealthErrorMessage ] = useState('')
+    const [ authHealth, setAuthHealth ] = useState(null)
 
     const [ form, setForm ] = useState({
         name: '',
@@ -75,6 +78,9 @@ function ApiKeyManage({ jwt }) {
     const allScopesSelected = form.scopes.length === availableScopes.length
 
     const parseJsonError = async (resp) => {
+        if (resp.status === 503) {
+            return httpScript.AUTH_STATE_UNAVAILABLE_UI_MESSAGE
+        }
         if (resp.status === 404) {
             return '404 page not found. Backend route /auth/apikeys is unavailable. Restart backend with latest code or verify REACT_APP_BACKEND_BASE_URL.'
         }
@@ -88,6 +94,28 @@ function ApiKeyManage({ jwt }) {
             return text
         }
         return text
+    }
+
+    const fetchAuthHealth = async () => {
+        if (!authBackend || !jwt) return
+        setHealthErrorMessage('')
+        try {
+            const resp = await fetch(`${authBackend}/health`, {
+                method: 'GET',
+                headers: {
+                    Authorization: jwt,
+                },
+            })
+            if (!resp.ok) {
+                const errText = await parseJsonError(resp)
+                setHealthErrorMessage(`Failed to load auth health: ${errText}`)
+                return
+            }
+            const body = await resp.json()
+            setAuthHealth(body)
+        } catch (e) {
+            setHealthErrorMessage(`Failed to load auth health: ${httpScript.toAuthAwareErrorMessage(e, 'Unknown error')}`)
+        }
     }
 
     const fetchKeys = async () => {
@@ -153,6 +181,10 @@ function ApiKeyManage({ jwt }) {
     useEffect(() => {
         fetchOptions()
     }, [apiKeyBackend, jwt])
+
+    useEffect(() => {
+        fetchAuthHealth()
+    }, [authBackend, jwt])
 
     const onFormChange = (field) => (e) => {
         setForm({
@@ -347,12 +379,67 @@ function ApiKeyManage({ jwt }) {
                     >
                         Refresh Options
                     </Button>
+                    <Button
+                        className='admin-action-button'
+                        variant='outlined'
+                        onClick={fetchAuthHealth}
+                        disabled={loading}
+                    >
+                        Refresh Auth Health
+                    </Button>
                 </>
             )}
         >
             {errorMessage ? (
                 <Alert severity='error'>{errorMessage}</Alert>
             ) : null}
+            {healthErrorMessage ? (
+                <Alert severity='warning'>{healthErrorMessage}</Alert>
+            ) : null}
+
+            <Card className='admin-panel'>
+                <CardContent>
+                    <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                        <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>Auth state health</Typography>
+                        <Chip label={authHealth?.status || 'unknown'} size='small' />
+                    </Stack>
+                    <Divider sx={{ my: 1.25 }} />
+                    <Grid container spacing={1.5}>
+                        <Grid item xs={12} md={3}>
+                            <Typography variant='body2' color='text.secondary'>Mode</Typography>
+                            <Typography variant='body1'>{authHealth?.mode || '-'}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            <Typography variant='body2' color='text.secondary'>Auth-state migration</Typography>
+                            <Typography variant='body1'>{authHealth?.authState?.migrationMode || '-'}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            <Typography variant='body2' color='text.secondary'>Redis enabled</Typography>
+                            <Typography variant='body1'>{String(!!authHealth?.authState?.redisEnabled)}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            <Typography variant='body2' color='text.secondary'>Session TTL (sec)</Typography>
+                            <Typography variant='body1'>{authHealth?.authState?.sessionTTL ?? '-'}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            <Typography variant='body2' color='text.secondary'>Validate count</Typography>
+                            <Typography variant='body1'>{authHealth?.authState?.metrics?.validateCount ?? '-'}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            <Typography variant='body2' color='text.secondary'>Fallback count</Typography>
+                            <Typography variant='body1'>{authHealth?.authState?.metrics?.validateFallbackCount ?? '-'}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            <Typography variant='body2' color='text.secondary'>Validate errors</Typography>
+                            <Typography variant='body1'>{authHealth?.authState?.metrics?.validateErrorCount ?? '-'}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            <Typography variant='body2' color='text.secondary'>Revocation errors</Typography>
+                            <Typography variant='body1'>{authHealth?.authState?.metrics?.revocationErrorCount ?? '-'}</Typography>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
 
             {latestToken ? (
                 <Card className='admin-panel' sx={{ borderColor: '#d4a106', borderWidth: 2 }}>
