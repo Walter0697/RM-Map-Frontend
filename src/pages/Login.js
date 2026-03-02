@@ -28,6 +28,7 @@ import useOpacityTransition from '../hooks/useOpacityTransition'
 import actions from '../store/actions'
 import graphql from '../graphql'
 import backend from '../constant/backend'
+import httpScript from '../scripts/http'
 
 import styles from '../styles/login.module.css'
 
@@ -164,7 +165,7 @@ function Login({ jwt, dispatch }) {
     // handling graphql request result
     useEffect(() => {
         if (loginError) {
-            setError('password', loginError.message)
+            setError('password', httpScript.toAuthAwareErrorMessage(loginError, 'Login failed'))
             setSending(false)
         }
 

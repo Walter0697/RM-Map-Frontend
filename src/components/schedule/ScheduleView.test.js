@@ -3,6 +3,7 @@ import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import { createRoot } from 'react-dom/client'
 import { act } from 'react'
+import dayjs from 'dayjs'
 
 import ScheduleView from './ScheduleView'
 
@@ -23,7 +24,7 @@ function rootReducer(state = { auth: { jwt: '' } }, action) {
 describe('ScheduleView layout contracts', () => {
     test('renders schedule content and arrived action for today', () => {
         const store = configureStore({ reducer: rootReducer })
-        const today = new Date().toISOString().slice(0, 10)
+        const today = dayjs().format('YYYY-MM-DD')
         const schedules = [
             {
                 id: 1,
