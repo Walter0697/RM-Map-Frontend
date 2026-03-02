@@ -29,6 +29,11 @@ const adminNavItems = [
         description: 'Search, delete, and schedule marker/schedule cleanup',
         path: '/admin/cleanup',
     },
+    {
+        label: 'API Usage',
+        description: 'External provider usage and trends',
+        path: '/admin/api-usage',
+    },
 ]
 
 export default adminNavItems
