@@ -8,9 +8,11 @@ import TopBar from '../components/topbar/TopBar'
 import SettingList from '../components/list/SettingList'
 import RelationSearchForm from '../components/form/settings/RelationSearchForm'
 import PreferredPinForm from '../components/form/settings/PreferredPinForm'
+import PreviewDisplayPinForm from '../components/form/settings/PreviewDisplayPinForm'
 import ReleaseNoteForm from '../components/form/settings/ReleaseNoteForm'
 
 import constants from '../constant'
+import backend from '../constant/backend'
 import actions from '../store/actions'
 import graphql from '../graphql'
 
@@ -19,10 +21,12 @@ function SettingPage({
     seen,
     list,    
     dispatch,
+    jwt,
 }) {
     // form open state
     const [ isRelationFormOpen, setRelationFormOpen ] = useState(false)
     const [ isPreferredPinFormOpen, setPreferredPinFormOpen ] = useState(false)
+    const [ isPreviewDisplayPinFormOpen, setPreviewDisplayPinFormOpen ] = useState(false)
     const [ isReleaseNoteOpen, setReleaseNoteOpen ] = useState(false)
 
     // selected open item
@@ -31,6 +35,10 @@ function SettingPage({
     // user information
     const [ relationUser, setRelation ] = useState(null) // TODO: default value would be from localstorage
     const [ pinPreference, setPinPreference ] = useState(null)
+    const [ previewDisplayPin, setPreviewDisplayPin ] = useState({
+        pin_id: null,
+        pin_label: '',
+    })
 
     // graphql request
     const { data: preferenceData, loading: preferenceLoading, error: preferenceError } = useQuery(graphql.users.preference, { errorPolicy: 'all', fetchPolicy: 'no-cache' })
@@ -99,6 +107,30 @@ function SettingPage({
         }
     }, [mappinsData])
 
+    useEffect(() => {
+        const fetchPreviewPin = async () => {
+            if (!jwt) return
+            try {
+                const response = await fetch(backend.withBasePath('settings/preview-pin'), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
+                })
+                if (!response.ok) return
+                const data = await response.json()
+                setPreviewDisplayPin({
+                    pin_id: data.pin_id || null,
+                    pin_label: data.pin_label || '',
+                })
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        fetchPreviewPin()
+    }, [jwt])
+
     const openPreferredPinForm = (pin) => {
         setPreferredPin(pin)
         setPreferredPinFormOpen(true)
@@ -107,6 +139,14 @@ function SettingPage({
     const closePreferredPinForm = () => {
         setPreferredPin(null)
         setPreferredPinFormOpen(false)
+    }
+
+    const openPreviewDisplayPinForm = () => {
+        setPreviewDisplayPinFormOpen(true)
+    }
+
+    const closePreviewDisplayPinForm = () => {
+        setPreviewDisplayPinFormOpen(false)
     }
 
     const onChangePreferredPin = (pin) => {
@@ -134,6 +174,14 @@ function SettingPage({
         })
         setPinPreference(pinList)
         listMappinsGQL()
+    }
+
+    const onChangePreviewDisplayPin = (payload) => {
+        setPreviewDisplayPin({
+            pin_id: payload?.pin_id || null,
+            pin_label: payload?.pin_label || '',
+        })
+        setPreviewDisplayPinFormOpen(false)
     }
 
     const openRelationForm = () => {
@@ -170,6 +218,8 @@ function SettingPage({
                 latestVersionRelease={latest ? latest.version : ''}
                 seenRelease={seen}
                 openReleaseNote={openReleaseNote}
+                previewPinLabel={previewDisplayPin.pin_label}
+                openPreviewDisplayPinForm={openPreviewDisplayPinForm}
             />
             <RelationSearchForm
                 open={isRelationFormOpen}
@@ -186,6 +236,13 @@ function SettingPage({
                 open={isReleaseNoteOpen}
                 handleClose={closeReleaseNote}
             />
+            <PreviewDisplayPinForm
+                open={isPreviewDisplayPinFormOpen}
+                handleClose={closePreviewDisplayPinForm}
+                jwt={jwt}
+                currentPinId={previewDisplayPin.pin_id}
+                onUpdated={onChangePreviewDisplayPin}
+            />
         </Base>
     )
 }
@@ -194,4 +251,5 @@ export default connect(state => ({
     list: state.release.list,
     seen: state.release.seen,
     latest: state.release.latest,
+    jwt: state.auth.jwt,
 })) (SettingPage)

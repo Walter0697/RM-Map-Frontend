@@ -39,6 +39,7 @@ const availableScopes = [
     'stations:write',
     'settings:read',
     'settings:write',
+    'static-preview:generate',
 ]
 
 function ApiKeyManage({ jwt }) {
