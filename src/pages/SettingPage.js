@@ -38,11 +38,13 @@ function SettingPage({
     const [ previewDisplayPin, setPreviewDisplayPin ] = useState({
         pin_id: null,
         pin_label: '',
+        pin_image_path: '',
     })
 
     // graphql request
     const { data: preferenceData, loading: preferenceLoading, error: preferenceError } = useQuery(graphql.users.preference, { errorPolicy: 'all', fetchPolicy: 'no-cache' })
     const { data: releaseData, loading: releaseLoading, error: releaseError } = useQuery(graphql.releasenotes.list, { errorPolicy: 'all', fetchPolicy: 'no-cache' })
+    const { data: pinSelectData } = useQuery(graphql.pins.select, { errorPolicy: 'all', fetchPolicy: 'no-cache' })
     // for updating the release note if there is a new one
     const [ latestReleaseGQL, { data: latestReleaseData, loading: latestReleaseLoading, error: latestReleaseError } ] = useLazyQuery(graphql.releasenotes.latest, { fetchPolicy: 'no-cache' })
     // for updating the map pins after changing the preferred pin
@@ -122,6 +124,7 @@ function SettingPage({
                 setPreviewDisplayPin({
                     pin_id: data.pin_id || null,
                     pin_label: data.pin_label || '',
+                    pin_image_path: '',
                 })
             } catch (error) {
                 console.log(error)
@@ -180,9 +183,26 @@ function SettingPage({
         setPreviewDisplayPin({
             pin_id: payload?.pin_id || null,
             pin_label: payload?.pin_label || '',
+            pin_image_path: '',
         })
         setPreviewDisplayPinFormOpen(false)
     }
+
+    useEffect(() => {
+        if (!previewDisplayPin?.pin_id) {
+            setPreviewDisplayPin((prev) => ({
+                ...prev,
+                pin_image_path: '',
+            }))
+            return
+        }
+        if (!pinSelectData?.pins) return
+        const selectedPin = pinSelectData.pins.find((item) => item.id === previewDisplayPin.pin_id)
+        setPreviewDisplayPin((prev) => ({
+            ...prev,
+            pin_image_path: selectedPin?.display_path || '',
+        }))
+    }, [pinSelectData, previewDisplayPin.pin_id])
 
     const openRelationForm = () => {
         setRelationFormOpen(true)
@@ -219,6 +239,7 @@ function SettingPage({
                 seenRelease={seen}
                 openReleaseNote={openReleaseNote}
                 previewPinLabel={previewDisplayPin.pin_label}
+                previewPinImagePath={previewDisplayPin.pin_image_path}
                 openPreviewDisplayPinForm={openPreviewDisplayPinForm}
             />
             <RelationSearchForm
