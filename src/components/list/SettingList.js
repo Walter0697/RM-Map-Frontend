@@ -32,6 +32,7 @@ function SettingList({
   seenRelease,
   openReleaseNote,
   previewPinLabel,
+  previewPinImagePath,
   openPreviewDisplayPinForm,
 }) {
   const history = useHistory()
@@ -150,6 +151,7 @@ function SettingList({
         >
             <PreviewDisplayPinButton
                 pinLabel={previewPinLabel}
+                pinImagePath={previewPinImagePath}
                 onClickHandler={openPreviewDisplayPinForm}
             />
         </WrapperBox>
