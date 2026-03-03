@@ -7,6 +7,7 @@ import {
     Button,
     Card,
     CardContent,
+    Divider,
     FormControl,
     Grid,
     InputLabel,
@@ -31,6 +32,31 @@ const defaultRange = () => {
 const pct = (num, total) => {
     if (!total) return '0.0%'
     return `${((num / total) * 100).toFixed(1)}%`
+}
+
+const metricColor = {
+    total: '#1f6feb',
+    success: '#2e7d32',
+    error: '#d32f2f',
+    latency: '#6a4fb3',
+}
+
+const providerPalette = ['#1f6feb', '#2e7d32', '#8e24aa', '#ef6c00', '#00838f', '#c2185b']
+
+const numberFmt = (value) => Number(value || 0).toLocaleString()
+
+const buildSparkline = (points, width = 560, height = 140, padding = 14) => {
+    if (!Array.isArray(points) || points.length === 0) return ''
+    const maxValue = points.reduce((max, item) => Math.max(max, Number(item.total_calls || 0)), 1)
+    const innerWidth = width - padding * 2
+    const innerHeight = height - padding * 2
+    return points.map((item, index) => {
+        const x = points.length === 1
+            ? padding + innerWidth / 2
+            : padding + (index / (points.length - 1)) * innerWidth
+        const y = padding + innerHeight - (Number(item.total_calls || 0) / maxValue) * innerHeight
+        return `${x},${y}`
+    }).join(' ')
 }
 
 function ExternalAPIUsageManage({ jwt }) {
@@ -135,10 +161,26 @@ function ExternalAPIUsageManage({ jwt }) {
     const overall = summary && summary.overall ? summary.overall : null
     const maxTrend = trends.reduce((max, item) => Math.max(max, Number(item.total_calls || 0)), 0)
     const providerValue = provider === 'all' || providers.some((item) => item.id === provider) ? provider : 'all'
+    const totalCalls = Number(overall?.total_calls || 0)
+    const successCount = Number(overall?.success_count || 0)
+    const errorCount = Number(overall?.error_count || 0)
+    const avgLatency = Number(overall?.avg_latency_ms || 0)
+    const successPctRaw = totalCalls > 0 ? (successCount / totalCalls) * 100 : 0
+    const errorPctRaw = totalCalls > 0 ? (errorCount / totalCalls) * 100 : 0
+    const usedPct = Math.min(100, successPctRaw + errorPctRaw)
+    const donutBackground = `conic-gradient(${metricColor.success} 0 ${successPctRaw}%, ${metricColor.error} ${successPctRaw}% ${usedPct}%, #d9e3ee ${usedPct}% 100%)`
+    const sortedProviders = [...providerRows].sort((a, b) => Number(b.total_calls || 0) - Number(a.total_calls || 0))
+    const avgCallsPerBucket = trends.length > 0
+        ? (trends.reduce((sum, item) => sum + Number(item.total_calls || 0), 0) / trends.length).toFixed(1)
+        : '0.0'
+    const peakBucket = trends.length > 0
+        ? trends.reduce((prev, current) => (Number(current.total_calls || 0) > Number(prev.total_calls || 0) ? current : prev), trends[0])
+        : null
+    const sparkline = buildSparkline(trends)
 
     return (
         <AdminPageShell
-            title='External API Usage'
+            title='External API Usage [UI-CHECK-2026-03-03]'
             description='Audit-based usage analytics for managed external providers'
             actions={(
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
@@ -156,7 +198,7 @@ function ExternalAPIUsageManage({ jwt }) {
 
             <Card className='admin-panel'>
                 <CardContent>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
                         <Grid item xs={12} md={3}>
                             <FormControl fullWidth size='small'>
                                 <InputLabel id='api-usage-provider'>Provider</InputLabel>
@@ -217,37 +259,153 @@ function ExternalAPIUsageManage({ jwt }) {
                 </CardContent>
             </Card>
 
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={3}>
-                    <Card className='admin-panel'><CardContent><Typography variant='overline'>Total Calls</Typography><Typography variant='h5'>{overall ? overall.total_calls : 0}</Typography></CardContent></Card>
-                </Grid>
-                <Grid item xs={12} md={3}>
-                    <Card className='admin-panel'><CardContent><Typography variant='overline'>Success Rate</Typography><Typography variant='h5'>{overall ? pct(overall.success_count, overall.total_calls) : '0.0%'}</Typography></CardContent></Card>
-                </Grid>
-                <Grid item xs={12} md={3}>
-                    <Card className='admin-panel'><CardContent><Typography variant='overline'>Error Rate</Typography><Typography variant='h5'>{overall ? pct(overall.error_count, overall.total_calls) : '0.0%'}</Typography></CardContent></Card>
-                </Grid>
-                <Grid item xs={12} md={3}>
-                    <Card className='admin-panel'><CardContent><Typography variant='overline'>Avg Latency (ms)</Typography><Typography variant='h5'>{overall ? Number(overall.avg_latency_ms || 0).toFixed(1) : '0.0'}</Typography></CardContent></Card>
-                </Grid>
-            </Grid>
+            <Card className='admin-panel'>
+                <CardContent>
+                    <Typography variant='h6' sx={{ mb: 1.5 }}>Usage Summary</Typography>
+                    <Box
+                        sx={{
+                            width: '100%',
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                            gap: 2,
+                        }}
+                    >
+                        <Box sx={{ border: '1px solid #d7e0ea', borderRadius: 2, px: 2.25, py: 1.75, background: 'linear-gradient(135deg, #f7fbff 0%, #ffffff 100%)' }}>
+                            <Typography variant='overline' sx={{ color: metricColor.total }}>Total Calls</Typography>
+                            <Typography variant='h5'>{numberFmt(totalCalls)}</Typography>
+                            <Typography variant='caption' color='text.secondary'>Volume in selected range</Typography>
+                        </Box>
+                        <Box sx={{ border: '1px solid #d7e0ea', borderRadius: 2, px: 2.25, py: 1.75, background: 'linear-gradient(135deg, #f6fff8 0%, #ffffff 100%)' }}>
+                            <Typography variant='overline' sx={{ color: metricColor.success }}>Success Rate</Typography>
+                            <Typography variant='h5'>{pct(successCount, totalCalls)}</Typography>
+                            <Typography variant='caption' color='text.secondary'>{numberFmt(successCount)} successful calls</Typography>
+                        </Box>
+                        <Box sx={{ border: '1px solid #d7e0ea', borderRadius: 2, px: 2.25, py: 1.75, background: 'linear-gradient(135deg, #fff8f8 0%, #ffffff 100%)' }}>
+                            <Typography variant='overline' sx={{ color: metricColor.error }}>Error Rate</Typography>
+                            <Typography variant='h5'>{pct(errorCount, totalCalls)}</Typography>
+                            <Typography variant='caption' color='text.secondary'>{numberFmt(errorCount)} failed calls</Typography>
+                        </Box>
+                        <Box sx={{ border: '1px solid #d7e0ea', borderRadius: 2, px: 2.25, py: 1.75, background: 'linear-gradient(135deg, #f9f7ff 0%, #ffffff 100%)' }}>
+                            <Typography variant='overline' sx={{ color: metricColor.latency }}>Avg Latency (ms)</Typography>
+                            <Typography variant='h5'>{avgLatency.toFixed(1)}</Typography>
+                            <Typography variant='caption' color='text.secondary'>Mean response time</Typography>
+                        </Box>
+                    </Box>
+                </CardContent>
+            </Card>
+
+            <Box
+                sx={{
+                    width: '100%',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                    gap: 2,
+                }}
+            >
+                <Card className='admin-panel' sx={{ height: '100%' }}>
+                    <CardContent>
+                        <Typography variant='h6' sx={{ mb: 2 }}>Usage Split</Typography>
+                        <Stack direction='row' spacing={2} alignItems='center' justifyContent='center'>
+                            <Box
+                                sx={{
+                                    width: 150,
+                                    height: 150,
+                                    borderRadius: '50%',
+                                    background: donutBackground,
+                                    position: 'relative',
+                                    flexShrink: 0,
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        inset: 18,
+                                        borderRadius: '50%',
+                                        backgroundColor: '#ffffff',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'column',
+                                        border: '1px solid #d7e0ea',
+                                    }}
+                                >
+                                    <Typography variant='caption' color='text.secondary'>Total</Typography>
+                                    <Typography variant='h6'>{numberFmt(totalCalls)}</Typography>
+                                </Box>
+                            </Box>
+                            <Stack spacing={1.25} sx={{ minWidth: 160 }}>
+                                <Box>
+                                    <Typography variant='body2'>Success</Typography>
+                                    <Typography variant='h6' sx={{ color: metricColor.success }}>{pct(successCount, totalCalls)}</Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant='body2'>Error</Typography>
+                                    <Typography variant='h6' sx={{ color: metricColor.error }}>{pct(errorCount, totalCalls)}</Typography>
+                                </Box>
+                            </Stack>
+                        </Stack>
+                    </CardContent>
+                </Card>
+                <Card className='admin-panel' sx={{ height: '100%' }}>
+                    <CardContent>
+                        <Typography variant='h6' sx={{ mb: 1.5 }}>Range Snapshot</Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={4}>
+                                <Typography variant='caption' color='text.secondary'>Buckets</Typography>
+                                <Typography variant='h6'>{numberFmt(trends.length)}</Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                                <Typography variant='caption' color='text.secondary'>Avg Calls / Bucket</Typography>
+                                <Typography variant='h6'>{avgCallsPerBucket}</Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                                <Typography variant='caption' color='text.secondary'>Peak Bucket</Typography>
+                                <Typography variant='h6'>{peakBucket ? numberFmt(peakBucket.total_calls) : '0'}</Typography>
+                            </Grid>
+                        </Grid>
+                        {peakBucket ? (
+                            <Typography variant='body2' color='text.secondary' sx={{ mt: 1.5 }}>
+                                Peak at {new Date(peakBucket.bucket_start).toLocaleString()}
+                            </Typography>
+                        ) : null}
+                    </CardContent>
+                </Card>
+            </Box>
 
             <Card className='admin-panel'>
                 <CardContent>
                     <Typography variant='h6' sx={{ mb: 2 }}>Trend</Typography>
                     {loading ? <Typography color='text.secondary'>Loading trend data...</Typography> : null}
                     {!loading && trends.length === 0 ? <Typography color='text.secondary'>No trend data available for the selected filters.</Typography> : null}
-                    <Stack spacing={1}>
+                    {trends.length > 0 ? (
+                        <Box sx={{ mb: 2 }}>
+                            <svg viewBox='0 0 560 140' width='100%' height='160' role='img' aria-label='trend-line-chart'>
+                                <rect x='0' y='0' width='560' height='140' fill='#f5f8fc' rx='10' />
+                                <polyline
+                                    points={sparkline}
+                                    fill='none'
+                                    stroke={metricColor.total}
+                                    strokeWidth='3'
+                                    strokeLinejoin='round'
+                                    strokeLinecap='round'
+                                />
+                            </svg>
+                        </Box>
+                    ) : null}
+                    <Stack spacing={1.25}>
                         {trends.map((item) => {
                             const totalCalls = Number(item.total_calls || 0)
                             const widthPct = maxTrend > 0 ? Math.max(5, (totalCalls / maxTrend) * 100) : 5
+                            const successWidthPct = totalCalls > 0 ? (Number(item.success_count || 0) / totalCalls) * 100 : 0
+                            const errorWidthPct = totalCalls > 0 ? (Number(item.error_count || 0) / totalCalls) * 100 : 0
                             return (
-                                <Box key={item.bucket_start}>
+                                <Box key={item.bucket_start} sx={{ border: '1px solid #e3eaf2', borderRadius: 1.5, p: 1 }}>
                                     <Typography variant='caption' color='text.secondary'>
                                         {new Date(item.bucket_start).toLocaleString()} | Calls: {totalCalls} | Success: {item.success_count} | Error: {item.error_count}
                                     </Typography>
-                                    <Box sx={{ height: 8, borderRadius: 8, backgroundColor: '#e8edf4', overflow: 'hidden', mt: 0.5 }}>
-                                        <Box sx={{ height: '100%', width: `${widthPct}%`, backgroundColor: '#1f6feb' }} />
+                                    <Box sx={{ height: 9, borderRadius: 8, backgroundColor: '#e8edf4', overflow: 'hidden', mt: 0.75, width: `${widthPct}%` }}>
+                                        <Box sx={{ height: '100%', width: `${successWidthPct}%`, backgroundColor: metricColor.success, float: 'left' }} />
+                                        <Box sx={{ height: '100%', width: `${errorWidthPct}%`, backgroundColor: metricColor.error, float: 'left' }} />
                                     </Box>
                                 </Box>
                             )
@@ -262,14 +420,26 @@ function ExternalAPIUsageManage({ jwt }) {
                     {loading ? <Typography color='text.secondary'>Loading providers...</Typography> : null}
                     {!loading && providerRows.length === 0 ? <Typography color='text.secondary'>No provider summary rows available.</Typography> : null}
                     <Stack spacing={1.5}>
-                        {providerRows.map((item) => (
-                            <Box key={item.provider} sx={{ border: '1px solid #d7e0ea', borderRadius: 1.5, px: 1.5, py: 1 }}>
-                                <Typography variant='subtitle2'>{item.provider_label} ({item.provider})</Typography>
-                                <Typography variant='body2' color='text.secondary'>
-                                    Calls: {item.total_calls} | Success: {item.success_count} | Error: {item.error_count} | Avg latency: {Number(item.avg_latency_ms || 0).toFixed(1)}ms
-                                </Typography>
-                            </Box>
-                        ))}
+                        {sortedProviders.map((item, index) => {
+                            const rowTotal = Number(item.total_calls || 0)
+                            const sharePct = totalCalls > 0 ? (rowTotal / totalCalls) * 100 : 0
+                            const barColor = providerPalette[index % providerPalette.length]
+                            return (
+                                <Box key={item.provider} sx={{ border: '1px solid #d7e0ea', borderRadius: 1.5, px: 1.5, py: 1.25 }}>
+                                    <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                                        <Typography variant='subtitle2'>{item.provider_label} ({item.provider})</Typography>
+                                        <Typography variant='subtitle2' sx={{ color: barColor }}>{sharePct.toFixed(1)}%</Typography>
+                                    </Stack>
+                                    <Box sx={{ mt: 0.6, height: 8, borderRadius: 8, backgroundColor: '#edf2f7', overflow: 'hidden' }}>
+                                        <Box sx={{ height: '100%', width: `${Math.max(4, sharePct)}%`, backgroundColor: barColor }} />
+                                    </Box>
+                                    <Divider sx={{ my: 1 }} />
+                                    <Typography variant='body2' color='text.secondary'>
+                                        Calls: {numberFmt(item.total_calls)} | Success: {numberFmt(item.success_count)} | Error: {numberFmt(item.error_count)} | Avg latency: {Number(item.avg_latency_ms || 0).toFixed(1)}ms
+                                    </Typography>
+                                </Box>
+                            )
+                        })}
                     </Stack>
                 </CardContent>
             </Card>
