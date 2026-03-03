@@ -31,6 +31,7 @@ import DefaultPinManage from './pages/admin/DefaultPinManage'
 import ApiKeyManage from './pages/admin/ApiKeyManage'
 import TrainStationManage from './pages/admin/TrainStationManage'
 import PermanentCleanupManage from './pages/admin/PermanentCleanupManage'
+import ExternalAPIUsageManage from './pages/admin/ExternalAPIUsageManage'
 
 import InitData from './InitData'
 
@@ -64,6 +65,7 @@ function App() {
             <Route path='/admin/apikey' component={ApiKeyManage} />
             <Route path='/admin/station/:mapName?' component={TrainStationManage} />
             <Route path='/admin/cleanup' component={PermanentCleanupManage} />
+            <Route path='/admin/api-usage' component={ExternalAPIUsageManage} />
           </Switch>
         )} />
         <InitData />

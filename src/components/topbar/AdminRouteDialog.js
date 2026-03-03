@@ -118,6 +118,13 @@ function AdminRouteDialog({
                         active={location.pathname === '/admin/cleanup'}
                         directTo={directTo}
                     />
+                    <RouteBox
+                        label='API Usage'
+                        description='External API usage summary and trends'
+                        route='/admin/api-usage'
+                        active={location.pathname === '/admin/api-usage'}
+                        directTo={directTo}
+                    />
                 </Stack>
             </DialogContent>
         </Dialog>
