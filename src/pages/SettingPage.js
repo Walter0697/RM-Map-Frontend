@@ -16,6 +16,25 @@ import backend from '../constant/backend'
 import actions from '../store/actions'
 import graphql from '../graphql'
 
+function validateIOSShortcutInstallURL(rawURL) {
+    if (!rawURL || typeof rawURL !== 'string') return ''
+    const trimmed = rawURL.trim()
+    if (!trimmed) return ''
+
+    try {
+        const parsed = new URL(trimmed)
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+            return ''
+        }
+        if (!parsed.hostname) {
+            return ''
+        }
+        return trimmed
+    } catch (error) {
+        return ''
+    }
+}
+
 function SettingPage({ 
     latest,
     seen,
@@ -40,6 +59,7 @@ function SettingPage({
         pin_label: '',
         pin_image_path: '',
     })
+    const [ iosShortcutInstallURL, setIOSShortcutInstallURL ] = useState('')
 
     // graphql request
     const { data: preferenceData, loading: preferenceLoading, error: preferenceError } = useQuery(graphql.users.preference, { errorPolicy: 'all', fetchPolicy: 'no-cache' })
@@ -110,7 +130,7 @@ function SettingPage({
     }, [mappinsData])
 
     useEffect(() => {
-        const fetchPreviewPin = async () => {
+        const fetchSettingsConfig = async () => {
             if (!jwt) return
             try {
                 const response = await fetch(backend.withBasePath('settings/preview-pin'), {
@@ -119,20 +139,45 @@ function SettingPage({
                         Authorization: jwt,
                     },
                 })
-                if (!response.ok) return
-                const data = await response.json()
-                setPreviewDisplayPin({
-                    pin_id: data.pin_id || null,
-                    pin_label: data.pin_label || '',
-                    pin_image_path: '',
+                if (response.ok) {
+                    const data = await response.json()
+                    setPreviewDisplayPin({
+                        pin_id: data.pin_id || null,
+                        pin_label: data.pin_label || '',
+                        pin_image_path: '',
+                    })
+                }
+
+                const shortcutResponse = await fetch(backend.withBasePath('settings/ios-shortcut-install-url'), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
                 })
+                if (shortcutResponse.ok) {
+                    const shortcutData = await shortcutResponse.json()
+                    setIOSShortcutInstallURL(validateIOSShortcutInstallURL(shortcutData?.ios_shortcut_install_url))
+                } else {
+                    setIOSShortcutInstallURL('')
+                }
             } catch (error) {
                 console.log(error)
+                setIOSShortcutInstallURL('')
             }
         }
 
-        fetchPreviewPin()
+        fetchSettingsConfig()
     }, [jwt])
+
+    const openIOSShortcutInstall = () => {
+        const validatedURL = validateIOSShortcutInstallURL(iosShortcutInstallURL)
+        if (!validatedURL) return
+
+        const opened = window.open(validatedURL, '_blank', 'noopener,noreferrer')
+        if (opened) {
+            opened.opener = null
+        }
+    }
 
     const openPreferredPinForm = (pin) => {
         setPreferredPin(pin)
@@ -241,6 +286,8 @@ function SettingPage({
                 previewPinLabel={previewDisplayPin.pin_label}
                 previewPinImagePath={previewDisplayPin.pin_image_path}
                 openPreviewDisplayPinForm={openPreviewDisplayPinForm}
+                showIOSShortcutInstallCTA={!!validateIOSShortcutInstallURL(iosShortcutInstallURL)}
+                openIOSShortcutInstall={openIOSShortcutInstall}
             />
             <RelationSearchForm
                 open={isRelationFormOpen}

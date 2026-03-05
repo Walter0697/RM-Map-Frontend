@@ -34,6 +34,11 @@ const adminNavItems = [
         description: 'External provider usage and trends',
         path: '/admin/api-usage',
     },
+    {
+        label: 'System Settings',
+        description: 'Runtime integration configuration',
+        path: '/admin/system-settings',
+    },
 ]
 
 export default adminNavItems
