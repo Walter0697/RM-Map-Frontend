@@ -125,6 +125,13 @@ function AdminRouteDialog({
                         active={location.pathname === '/admin/api-usage'}
                         directTo={directTo}
                     />
+                    <RouteBox
+                        label='System Settings'
+                        description='Runtime integration configuration'
+                        route='/admin/system-settings'
+                        active={location.pathname === '/admin/system-settings'}
+                        directTo={directTo}
+                    />
                 </Stack>
             </DialogContent>
         </Dialog>

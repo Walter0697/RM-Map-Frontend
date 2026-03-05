@@ -12,6 +12,7 @@ import PreviousMarkerButton from './settings/PreviousMarkerButton'
 import ExpiredMarkerButton from './settings/ExpiredMarkerButton'
 import WatchedMovieListButton from './settings/WatchedMovieListButton'
 import PreviewDisplayPinButton from './settings/PreviewDisplayPinButton'
+import IOSShortcutInstallButton from './settings/IOSShortcutInstallButton'
 
 import WrapperBox from '../wrapper/WrapperBox'
 import SectionHeader from './settings/SectionHeader'
@@ -20,6 +21,7 @@ import TagIcon from '@mui/icons-material/Tag'
 import MapIcon from '@mui/icons-material/Map'
 import TheatersIcon from '@mui/icons-material/Theaters'
 import VisibilityIcon from '@mui/icons-material/Visibility'
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone'
 
 import * as serviceWorkerRegistration from '../../serviceWorkerRegistration'
 
@@ -34,6 +36,8 @@ function SettingList({
   previewPinLabel,
   previewPinImagePath,
   openPreviewDisplayPinForm,
+  showIOSShortcutInstallCTA,
+  openIOSShortcutInstall,
 }) {
   const history = useHistory()
 
@@ -155,6 +159,27 @@ function SettingList({
                 onClickHandler={openPreviewDisplayPinForm}
             />
         </WrapperBox>
+        {showIOSShortcutInstallCTA ? (
+          <>
+            <WrapperBox
+              height={50}
+              marginBottom={'15px'}
+            >
+              <SectionHeader
+                title={'Integrations'}
+                icon={<PhoneIphoneIcon />}
+              />
+            </WrapperBox>
+            <WrapperBox
+              height={30}
+              marginBottom={'30px'}
+            >
+              <IOSShortcutInstallButton
+                onClickHandler={openIOSShortcutInstall}
+              />
+            </WrapperBox>
+          </>
+        ) : null}
         <WrapperBox
           height={50}
           marginBottom={'15px'}
