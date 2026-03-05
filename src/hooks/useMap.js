@@ -8,6 +8,37 @@ import constants from '../constant'
 
 import apis from '../apis'
 
+const applyDarkThemeToMap = (mapInstance) => {
+    if (!mapInstance || !mapInstance.getStyle) return
+    const layers = mapInstance.getStyle()?.layers || []
+    layers.forEach(layer => {
+        if (!layer?.id || !layer?.type) return
+        try {
+            if (layer.type === 'background') {
+                mapInstance.setPaintProperty(layer.id, 'background-color', '#0b1220')
+                mapInstance.setPaintProperty(layer.id, 'background-opacity', 1)
+            } else if (layer.type === 'fill') {
+                mapInstance.setPaintProperty(layer.id, 'fill-color', '#1b2436')
+                mapInstance.setPaintProperty(layer.id, 'fill-opacity', 0.9)
+            } else if (layer.type === 'line') {
+                mapInstance.setPaintProperty(layer.id, 'line-color', '#6f819a')
+                mapInstance.setPaintProperty(layer.id, 'line-opacity', 0.9)
+            } else if (layer.type === 'symbol') {
+                mapInstance.setPaintProperty(layer.id, 'text-color', '#dbe7f7')
+                mapInstance.setPaintProperty(layer.id, 'text-halo-color', '#0b1220')
+                mapInstance.setPaintProperty(layer.id, 'text-halo-width', 1.1)
+            } else if (layer.type === 'raster') {
+                mapInstance.setPaintProperty(layer.id, 'raster-saturation', -0.55)
+                mapInstance.setPaintProperty(layer.id, 'raster-brightness-max', 0.6)
+                mapInstance.setPaintProperty(layer.id, 'raster-brightness-min', 0.16)
+                mapInstance.setPaintProperty(layer.id, 'raster-contrast', 0.25)
+            }
+        } catch (err) {
+            // Some layers do not support every paint property; skip safely.
+        }
+    })
+}
+
 function useMap(
     mapRef,
     defaultLocation,
@@ -15,6 +46,9 @@ function useMap(
     centerFailHandler,
     mappins,
 ) {
+    const rawMapStyle = (process.env.REACT_APP_MAP_STYLE || '').trim()
+    const mapStyle = /^https?:\/\//.test(rawMapStyle) ? rawMapStyle : ''
+    const darkThemeEnabled = (process.env.REACT_APP_MAP_DARK_THEME || 'true').toLowerCase() !== 'false'
     // keep tracking on the location from the api
     const [ mapLocation, setMapLocation ] = useObject({
         lon: defaultLocation.longitude,
@@ -56,16 +90,31 @@ function useMap(
 
     // initialize the map
     useEffect(() => {
-        let map = tt.map({
+        const options = {
             key: process.env.REACT_APP_MAP_APIKEY,
             container: mapRef.current,
             center: [mapLocation.lon, mapLocation.lat],
             zoom: zoom,
-        })
+        }
+        if (mapStyle) {
+            options.style = mapStyle
+        }
+        let map = tt.map(options)
+        const applyTheme = () => {
+            if (darkThemeEnabled) {
+                applyDarkThemeToMap(map)
+            }
+        }
+        map.on('load', applyTheme)
+        map.on('styledata', applyTheme)
         setMap(map)
         setLocationToMarker()
 
-        return () => map.remove()
+        return () => {
+            map.off('load', applyTheme)
+            map.off('styledata', applyTheme)
+            map.remove()
+        }
     }, [])
 
     // move current location to toward location
