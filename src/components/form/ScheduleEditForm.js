@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
 import {
-    Grid,
+    Stack,
     TextField,
 } from '@mui/material'
 
 import useObject from '../../hooks/useObject'
 
 import BaseForm from './BaseForm'
-import NullableDatePicker from '../field/NullableDatePicker'
 
 import generic from '../../scripts/generic'
 import actions from '../../store/actions'
@@ -18,6 +17,23 @@ import graphql from '../../graphql'
 import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
 dayjs.extend(dayjsPluginUTC)
+
+function toDateTimeLocalValue(value) {
+    if (!value || Number.isNaN(value.getTime?.())) return ''
+    const year = value.getFullYear()
+    const month = `${value.getMonth() + 1}`.padStart(2, '0')
+    const day = `${value.getDate()}`.padStart(2, '0')
+    const hour = `${value.getHours()}`.padStart(2, '0')
+    const minute = `${value.getMinutes()}`.padStart(2, '0')
+    return `${year}-${month}-${day}T${hour}:${minute}`
+}
+
+function parseDateTimeLocalValue(raw) {
+    if (!raw) return null
+    const parsed = new Date(raw)
+    if (Number.isNaN(parsed.getTime())) return null
+    return parsed
+}
 
 function ScheduleEditForm({
     open,
@@ -123,47 +139,40 @@ function ScheduleEditForm({
                 alertMessage={alertMessage}
                 clearAlertMessage={() => setAlertMessage(null)}
             >
-                <Grid container spacing={2}>
-                    <Grid item xs={12} md={12} lg={12}>
-                        Marker Name: <span 
-                            style={{ fontWeight: 'bold' }}>
-                            {schedule?.marker?.label}
-                        </span>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            required
-                            label='label'
-                            value={formValue.label}
-                            onChange={(e) => onValueChangeHandler('label', e.target.value)}
-                            error={!!error.label}
-                            helperText={error.label}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <NullableDatePicker
-                            label={'selected time'}
-                            required
-                            noPast
-                            value={formValue.selected_time}
-                            onValueChange={(e) => onValueChangeHandler('selected_time', e)}
-                            errorMessage={error.selected_time}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            label='description'
-                            value={formValue.description}
-                            onChange={(e) => onValueChangeHandler('description', e.target.value)}
-                            error={!!error.description}
-                            helperText={error.description}
-                        />
-                    </Grid>
-                </Grid>
+                <Stack spacing={2}>
+                    <TextField
+                        variant='outlined'
+                        fullWidth
+                        required
+                        label='label'
+                        value={formValue.label}
+                        onChange={(e) => onValueChangeHandler('label', e.target.value)}
+                        error={!!error.label}
+                        helperText={error.label}
+                    />
+                    <TextField
+                        type='datetime-local'
+                        variant='outlined'
+                        fullWidth
+                        required
+                        label='selected time'
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{ min: toDateTimeLocalValue(new Date()) }}
+                        value={toDateTimeLocalValue(formValue.selected_time)}
+                        onChange={(e) => onValueChangeHandler('selected_time', parseDateTimeLocalValue(e.target.value))}
+                        error={!!error.selected_time}
+                        helperText={error.selected_time}
+                    />
+                    <TextField
+                        variant='outlined'
+                        fullWidth
+                        label='description'
+                        value={formValue.description}
+                        onChange={(e) => onValueChangeHandler('description', e.target.value)}
+                        error={!!error.description}
+                        helperText={error.description}
+                    />
+                </Stack>
             </BaseForm>
         </>
     )

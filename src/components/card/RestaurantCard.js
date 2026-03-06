@@ -20,13 +20,23 @@ function RestaurantCard({
         }
         return {}
     }, [restaurant])
+    const metricRowStyle = {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+        width: '100%',
+        textAlign: 'center',
+        paddingTop: '2px',
+        paddingBottom: '2px',
+    }
 
     return (
         <Button
             variant='contained'
             size='large'
             style={{
-                pointEvent: 'none',
+                pointerEvents: 'none',
                 backgroundColor: '#83c0ff',
                 color: '#0808c1',
                 width: '100%',
@@ -38,16 +48,19 @@ function RestaurantCard({
                 padding: '0',
                 paddingTop: '10px',
                 paddingBottom: '10px',
+                boxSizing: 'border-box',
+                overflow: 'hidden',
             }}
         >
-            <Grid container spacing={1}>
+            <Grid container spacing={0} style={{ width: '100%', margin: 0 }}>
                 <Grid item xs={12} md={12} lg={12}
                     style={{
                         fontWeight: 'bold',
                         fontSize: '18px',
                         justifyContent: 'flex-start',
                         display: 'flex',
-                        paddingLeft: '30px',
+                        paddingLeft: '12px',
+                        paddingRight: '12px',
                     }}
                 >
                     {restaurant.name}
@@ -55,6 +68,9 @@ function RestaurantCard({
                 <Grid item xs={12} md={12} lg={12}
                     style={{
                         wordWrap: 'break-word',
+                        textAlign: 'left',
+                        paddingLeft: '12px',
+                        paddingRight: '12px',
                     }}
                 >
                     {restaurant.address}
@@ -63,6 +79,9 @@ function RestaurantCard({
                     <Grid item xs={12} md={12} lg={12}
                         style={{
                             color: '#6e6ee4',
+                            textAlign: 'left',
+                            paddingLeft: '12px',
+                            paddingRight: '12px',
                         }}
                     >
                         {restaurant.direction}
@@ -70,59 +89,39 @@ function RestaurantCard({
                 )}
                 {restaurant.telephone && (
                     <Grid item xs={12} md={12} lg={12}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
+                        style={metricRowStyle}
                     >
-                        <LocalPhoneIcon sx={{ marginRight: '10px'}} />
-                        {restaurant.telephone} 
+                        <LocalPhoneIcon />
+                        <span>{restaurant.telephone}</span>
                     </Grid>
                 )}
                 {restaurant.price_range && (
                     <Grid item xs={12} md={12} lg={12}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
+                        style={metricRowStyle}
                     >
-                        <AttachMoneyIcon sx={{ marginRight: '10px'}} />
-                        {restaurant.price_range} 
+                        <AttachMoneyIcon />
+                        <span>{restaurant.price_range}</span>
                     </Grid>
                 )}
                 {rating && (
                     <>
-                        <Grid item xs={4} md={4} lg={4}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
+                        <Grid item xs={12} md={12} lg={12}
+                            style={metricRowStyle}
                         >
-                            <InsertEmoticonIcon sx={{ marginRight: '10px'}} />
-                            {rating.like}
+                            <InsertEmoticonIcon />
+                            <span>Like: {rating.like}</span>
                         </Grid>
-                        <Grid item xs={4} md={4} lg={4}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
+                        <Grid item xs={12} md={12} lg={12}
+                            style={metricRowStyle}
                         >
-                            <SentimentDissatisfiedIcon sx={{ marginRight: '10px'}} />
-                            {rating.average}
+                            <SentimentDissatisfiedIcon />
+                            <span>Average: {rating.average}</span>
                         </Grid>
-                        <Grid item xs={4} md={4} lg={4}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
+                        <Grid item xs={12} md={12} lg={12}
+                            style={metricRowStyle}
                         >
-                            <MoodBadIcon sx={{ marginRight: '10px'}} />
-                            {rating.dislike}
+                            <MoodBadIcon />
+                            <span>Dislike: {rating.dislike}</span>
                         </Grid>
                     </>
                 )}

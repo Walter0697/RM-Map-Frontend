@@ -78,7 +78,23 @@ describe('SystemSettingsManage', () => {
                 ok: true,
                 status: 200,
                 json: async () => ({
+                    easy_threshold_minutes: 20,
+                    difficult_threshold_minutes: 45,
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
                     ios_shortcut_install_url: 'https://www.icloud.com/shortcuts/new',
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    easy_threshold_minutes: 18,
+                    difficult_threshold_minutes: 42,
                 }),
             })
 
@@ -91,9 +107,15 @@ describe('SystemSettingsManage', () => {
         const input = container.querySelector('input[placeholder=\"https://www.icloud.com/shortcuts/...\"]')
         expect(input).toBeTruthy()
         expect(input.value).toBe('https://www.icloud.com/shortcuts/old')
+        const easyInput = container.querySelector('input[placeholder=\"20\"]')
+        const difficultInput = container.querySelector('input[placeholder=\"45\"]')
+        expect(easyInput.value).toBe('20')
+        expect(difficultInput.value).toBe('45')
 
         act(() => {
             setInputValue(input, 'https://www.icloud.com/shortcuts/new')
+            setInputValue(easyInput, '18')
+            setInputValue(difficultInput, '42')
         })
         clickByText(container, 'button', 'Save', true)
 
@@ -101,11 +123,18 @@ describe('SystemSettingsManage', () => {
             await flushPromises()
         })
 
-        const saveCall = global.fetch.mock.calls[1]
-        expect(saveCall[0]).toContain('/admin/settings/ios-shortcut-install-url')
-        expect(saveCall[1].method).toBe('PUT')
-        expect(saveCall[1].body).toContain('https://www.icloud.com/shortcuts/new')
-        expect(document.body.textContent).toContain('Saved iOS shortcut install URL.')
+        const shortcutSaveCall = global.fetch.mock.calls[2]
+        expect(shortcutSaveCall[0]).toContain('/admin/settings/ios-shortcut-install-url')
+        expect(shortcutSaveCall[1].method).toBe('PUT')
+        expect(shortcutSaveCall[1].body).toContain('https://www.icloud.com/shortcuts/new')
+
+        const thresholdSaveCall = global.fetch.mock.calls[3]
+        expect(thresholdSaveCall[0]).toContain('/admin/settings/schedule-travel-thresholds')
+        expect(thresholdSaveCall[1].method).toBe('PUT')
+        expect(thresholdSaveCall[1].body).toContain('"easy_threshold_minutes":18')
+        expect(thresholdSaveCall[1].body).toContain('"difficult_threshold_minutes":42')
+
+        expect(document.body.textContent).toContain('Saved system settings.')
     })
 
     test('shows backend validation error when save fails', async () => {
@@ -115,6 +144,14 @@ describe('SystemSettingsManage', () => {
                 status: 200,
                 json: async () => ({
                     ios_shortcut_install_url: '',
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    easy_threshold_minutes: 20,
+                    difficult_threshold_minutes: 45,
                 }),
             })
             .mockResolvedValueOnce({
@@ -139,5 +176,41 @@ describe('SystemSettingsManage', () => {
         })
 
         expect(document.body.textContent).toContain('ios_shortcut_install_url must be a valid absolute http or https URL')
+    })
+
+    test('disables save when thresholds are invalid', async () => {
+        global.fetch
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    ios_shortcut_install_url: '',
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    easy_threshold_minutes: 20,
+                    difficult_threshold_minutes: 45,
+                }),
+            })
+
+        const { container } = createRenderedPage()
+        await act(async () => {
+            await flushPromises()
+        })
+
+        const easyInput = container.querySelector('input[placeholder=\"20\"]')
+        const difficultInput = container.querySelector('input[placeholder=\"45\"]')
+        act(() => {
+            setInputValue(easyInput, '60')
+            setInputValue(difficultInput, '45')
+        })
+
+        const saveButton = Array.from(container.querySelectorAll('button')).find((button) => (button.textContent || '').trim() === 'Save')
+        expect(saveButton).toBeTruthy()
+        expect(saveButton.disabled).toBe(true)
+        expect(document.body.textContent).toContain('Invalid thresholds')
     })
 })
