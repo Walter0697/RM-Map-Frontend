@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { connect } from 'react-redux'
+import { Virtuoso } from 'react-virtuoso'
 import {
     useSpring,
     config,
@@ -14,9 +15,7 @@ import {
 
 import useBoop from '../../hooks/useBoop'
 
-import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
-import AutoUpdateTop from './AutoUpdateTop'
 
 import generic from '../../scripts/generic'
 import filters from '../../scripts/filter'
@@ -24,8 +23,6 @@ import filters from '../../scripts/filter'
 import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
 dayjs.extend(dayjsPluginUTC)
-
-const loadingBoxHeight = 300
 
 function ScheduleItem({
     item,
@@ -360,24 +357,34 @@ function ScheduleList({
     openScheduleView,
     eventtypes,
     schedules,
+    schedulesOverride,
+    onReachEnd,
+    hasMore,
+    loadingMore,
+    loadingError,
+    onRetry,
+    staleData,
+    offlineCached,
+    onRefreshTop,
+    refreshing,
 }) {
     // generic utility
     const location = useLocation()
+    const refreshArmedRef = useRef(false)
+    const [ scrollerEl, setScrollerEl ] = useState(null)
+    const [ refreshUI, setRefreshUI ] = useState('hidden')
 
-    const listRef = useRef(null)
-    const itemListRef = useRef(null)
-
-    const [ bottomPaddingBox, setPaddingHeight ] = useState(0)
+    const scheduleSource = schedulesOverride && schedulesOverride.length >= 0 ? schedulesOverride : schedules
 
     const today_schedules = useMemo(() => {
-        if (!schedules) return []
-        return filters.schedules.get_today_image(schedules, eventtypes)
-    }, [schedules, eventtypes])
+        if (!scheduleSource) return []
+        return filters.schedules.get_today_image(scheduleSource, eventtypes)
+    }, [scheduleSource, eventtypes])
 
     const upcoming_schedules = useMemo(() => {
-        if (!schedules) return []
+        if (!scheduleSource) return []
         
-        const upcoming_list = filters.schedules.get_upcoming(schedules)
+        const upcoming_list = filters.schedules.get_upcoming(scheduleSource)
         
         // use dictionary for grouping the schedules into each day
         let result = {}
@@ -395,14 +402,14 @@ function ScheduleList({
 
         // sorted the array according to date
         const sorted = result_arr.sort((a, b) => {
-            if (dayjs(a[0]).isAfter(dayjs[b[0]])) {
+            if (dayjs(a[0]).isAfter(dayjs(b[0]))) {
                 return -1
             }
             return 1
         })
 
         return sorted
-    }, [schedules])
+    }, [scheduleSource])
 
     useEffect(() => {
         let timeout = null
@@ -416,71 +423,156 @@ function ScheduleList({
         return () => timeout && window.clearTimeout(timeout)
     }, [])
 
+    const listRows = useMemo(() => {
+        const rows = [{ kind: 'today' }]
+        if (upcoming_schedules.length !== 0) {
+            rows.push({ kind: 'header', label: 'Upcoming schedule...' })
+        }
+        upcoming_schedules.forEach((item) => {
+            rows.push({
+                kind: 'schedule',
+                date: item[0],
+                items: item[1],
+            })
+        })
+        return rows
+    }, [upcoming_schedules])
+
+    const footerContent = useMemo(() => {
+        if (loadingMore) return <div style={{ paddingBottom: '16px' }}>Loading more schedules...</div>
+        if (loadingError) {
+            return (
+                <div style={{ paddingBottom: '16px' }}>
+                    Failed to load more schedules.
+                    {onRetry && (
+                        <button type='button' onClick={onRetry} style={{ marginLeft: '8px' }}>
+                            Retry
+                        </button>
+                    )}
+                </div>
+            )
+        }
+        if (offlineCached) return <div style={{ paddingBottom: '16px' }}>Offline: showing cached list data.</div>
+        if (staleData) return <div style={{ paddingBottom: '16px' }}>Showing cached schedule data.</div>
+        return null
+    }, [loadingMore, loadingError, onRetry, staleData, offlineCached])
+
+    useEffect(() => {
+        if (!scrollerEl) return
+        const onScroll = () => {
+            const top = scrollerEl.scrollTop || 0
+            if (top > 80 && !refreshArmedRef.current) {
+                refreshArmedRef.current = true
+                console.log('[RM-PAGED][schedules_list] refresh:armed')
+            }
+            if (top <= 2 && refreshArmedRef.current && onRefreshTop && !loadingMore) {
+                refreshArmedRef.current = false
+                setRefreshUI('refreshing')
+                console.log('[RM-PAGED][schedules_list] refresh:trigger')
+                onRefreshTop()
+            }
+        }
+        scrollerEl.addEventListener('scroll', onScroll, { passive: true })
+        return () => scrollerEl.removeEventListener('scroll', onScroll)
+    }, [scrollerEl, onRefreshTop, loadingMore, refreshing])
+
+    useEffect(() => {
+        if (refreshing) {
+            setRefreshUI('refreshing')
+            return
+        }
+        if (refreshUI === 'refreshing') {
+            const timer = window.setTimeout(() => {
+                setRefreshUI('hidden')
+            }, 350)
+            return () => window.clearTimeout(timer)
+        }
+    }, [refreshing, refreshUI])
+
     return (
         <>
             <div
-                ref={listRef}
                 style={{
                     position: 'absolute',
                     height: '90%',
                     width: '95%',
                     paddingLeft: '5%',
                     paddingTop: '20px',
-                    overflow: 'auto',
                 }}
             >
-                <AutoUpdateTop
-                    topHeight={loadingBoxHeight}
-                    items={schedules}
-                    listRef={listRef}
-                    itemListRef={itemListRef}
-                    setBottomPaddingHeight={setPaddingHeight}
-                />
-                <div ref={itemListRef}>
-                    <BottomUpTrail>
-                        <WrapperBox
-                            height={400}
-                            marginBottom={'20px'}
-                        >
-                            <TodayList
-                                list={today_schedules}
-                                onClickHandler={openScheduleView}
-                            />
-                        </WrapperBox>
-
-                        {upcoming_schedules.length !== 0 && (
-                            <div style={{
-                                height: '50px',
-                                width: '100%',
-                                color: '#455295',
-                                fontWeight: '500',
-                                fontSize: '20px',
-                                paddingLeft: '5%',
-                            }}> 
-                                Upcoming schedule...
-                            </div>
-                        )}
-                        
-                        {upcoming_schedules.map((item, index) => (
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '4px',
+                        left: '50%',
+                        transform: refreshUI === 'refreshing' ? 'translate(-50%, 0)' : 'translate(-50%, -120%)',
+                        opacity: refreshUI === 'refreshing' ? 1 : 0,
+                        transition: 'all 220ms ease',
+                        background: '#4ea6d8',
+                        color: '#fff',
+                        borderRadius: '999px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        padding: '6px 12px',
+                        zIndex: 3,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+                        pointerEvents: 'none',
+                    }}
+                >
+                    Refreshing list...
+                </div>
+                <Virtuoso
+                    style={{ height: '100%', width: '100%' }}
+                    data={listRows}
+                    scrollerRef={setScrollerEl}
+                    endReached={() => {
+                        if (!hasMore || loadingMore || !onReachEnd) return
+                        onReachEnd()
+                    }}
+                    components={{
+                        Footer: () => footerContent,
+                    }}
+                    itemContent={(_, row) => {
+                        if (row.kind === 'today') {
+                            return (
+                                <WrapperBox
+                                    height={400}
+                                    marginBottom={'20px'}
+                                >
+                                    <TodayList
+                                        list={today_schedules}
+                                        onClickHandler={openScheduleView}
+                                    />
+                                </WrapperBox>
+                            )
+                        }
+                        if (row.kind === 'header') {
+                            return (
+                                <div style={{
+                                    height: '50px',
+                                    width: '100%',
+                                    color: '#455295',
+                                    fontWeight: '500',
+                                    fontSize: '20px',
+                                    paddingLeft: '5%',
+                                }}>
+                                    {row.label}
+                                </div>
+                            )
+                        }
+                        return (
                             <WrapperBox
-                                key={index}
                                 height={150}
                                 marginBottom={'10px'}
                             >
-                                <ScheduleItem 
-                                    item={item[1]}
-                                    selected_date={item[0]}
+                                <ScheduleItem
+                                    item={row.items}
+                                    selected_date={row.date}
                                     eventtypes={eventtypes}
-                                    onClickHandler={openScheduleView}   
+                                    onClickHandler={openScheduleView}
                                 />
                             </WrapperBox>
-                        ))}
-                    </BottomUpTrail>
-                </div>
-                <div
-                    style={{
-                    height: bottomPaddingBox,
-                    width: '100%',
+                        )
                     }}
                 />
             </div>

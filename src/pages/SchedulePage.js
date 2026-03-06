@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { useLazyQuery } from '@apollo/client'
+import dayjs from 'dayjs'
 
 import Base from './Base'
 
@@ -9,6 +11,9 @@ import ScheduleView from '../components/schedule/ScheduleView'
 import ScheduleArriveForm from '../components/schedule/ScheduleArriveForm'
 import ScheduleEditForm from '../components/form/ScheduleEditForm'
 import AutoHideAlert from '../components/AutoHideAlert'
+import graphql from '../graphql'
+import usePagedDataController from '../hooks/usePagedDataController'
+import telemetry from '../scripts/telemetry'
 
 function SchedulePage() {
     // selected schedules
@@ -48,10 +53,55 @@ function SchedulePage() {
         confirmedEdited()
     }
 
+    const [ listPagedScheduleGQL ] = useLazyQuery(graphql.schedules.paged, { fetchPolicy: 'no-cache' })
+    const pagedScheduleController = usePagedDataController({
+        resource: 'schedules_list',
+        queryIdentity: { time: dayjs().format('YYYY-MM-DD') },
+        fetchPage: async (cursor) => {
+            const response = await listPagedScheduleGQL({
+                variables: {
+                    time: dayjs().format('YYYY-MM-DD'),
+                    limit: 30,
+                    cursor: cursor || null,
+                }
+            })
+            const payload = response?.data?.pagedschedules || {}
+            return {
+                items: payload.items || [],
+                nextCursor: payload.next_cursor || null,
+            }
+        }
+    })
+
+    React.useEffect(() => {
+        pagedScheduleController.refresh()
+        telemetry.debugLog('schedules_list', 'refresh:initial')
+    }, [])
+
+    const scheduleItems = pagedScheduleController.items
+
+    React.useEffect(() => {
+        telemetry.debugLog('schedules_list', 'items:update', {
+            count: scheduleItems.length,
+            nextCursor: pagedScheduleController.nextCursor,
+            loading: pagedScheduleController.loading,
+        })
+    }, [scheduleItems.length, pagedScheduleController.nextCursor, pagedScheduleController.loading])
+
     return (
         <Base>
             <ScheduleList
                 openScheduleView={setScheduleView}
+                schedulesOverride={scheduleItems}
+                onReachEnd={pagedScheduleController.loadMore}
+                onRefreshTop={pagedScheduleController.refresh}
+                hasMore={!!pagedScheduleController.nextCursor}
+                loadingMore={pagedScheduleController.loading}
+                refreshing={pagedScheduleController.refreshing}
+                loadingError={pagedScheduleController.error}
+                onRetry={pagedScheduleController.retry}
+                staleData={pagedScheduleController.stale}
+                offlineCached={pagedScheduleController.offlineCached}
             />
             <ScheduleView
                 open={!!selectedDate}

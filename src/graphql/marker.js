@@ -45,6 +45,70 @@ const list = gql`
     }
 `
 
+const viewport_page = gql`
+    query listViewportMarkerGQL(
+        $west: Float!,
+        $south: Float!,
+        $east: Float!,
+        $north: Float!,
+        $zoom: Int,
+        $cursor: String,
+        $limit: Int
+    ) {
+        viewportmarkers(params: {
+            west: $west,
+            south: $south,
+            east: $east,
+            north: $north,
+            zoom: $zoom,
+            cursor: $cursor,
+            limit: $limit,
+        }) {
+            next_cursor
+            items {
+                id
+                type
+                description
+                latitude
+                longitude
+                label
+                address
+                link
+                image_link
+                estimate_time
+                permanent
+                need_booking
+                price
+                status
+                country_code
+                country_part
+                to_time
+                from_time
+                is_fav
+                restaurant {
+                    id
+                    name
+                    source
+                    source_id
+                    price_range
+                    restaurant_type
+                    address
+                    rating
+                    direction
+                    telephone
+                    introduction
+                    opening_hours
+                    payment_method
+                    seat_number
+                    website
+                    other_info
+                }
+                created_at
+            }
+        }
+    }
+`
+
 const create = gql`
     mutation createMarkerGQL($label: String!, 
                           $type: String!,
@@ -370,6 +434,7 @@ const country_code = gql`
 
 const markers = {
     list,
+    viewport_page,
     create,
     update_fav,
     previous,

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useLocation } from 'react-router-dom'
+import { useLazyQuery } from '@apollo/client'
 import Base from './Base'
 
 import {
@@ -27,6 +28,9 @@ import CountrySelect from '../components/map/mappart/countryselect/CountrySelect
 import search from '../scripts/search'
 
 import styles from '../styles/list.module.css'
+import graphql from '../graphql'
+import usePagedDataController from '../hooks/usePagedDataController'
+import telemetry from '../scripts/telemetry'
 
 function MarkerPage({ 
     markers,
@@ -47,6 +51,7 @@ function MarkerPage({
     const [ editAlert, confirmEdited ] = useBoop(3000)
 
     const [ editedTrigger, setEditTrigger ] = useState(nanoid())
+    const [ listPagedMarkerGQL ] = useLazyQuery(graphql.markers.viewport_page, { fetchPolicy: 'no-cache' })
 
     // if it is showing list or map
     const [ showingList, setShowingList ] = useState((suffix && suffix === '/list') ? true : false)
@@ -86,15 +91,60 @@ function MarkerPage({
     //     return list
     // }, [markers, finalFilterValue, filterOption, customFilterValue, showingList, eventtypes, editAlert])
 
+    const pagedMarkerController = usePagedDataController({
+        resource: 'markers_list',
+        queryIdentity: { scope: 'world' },
+        fetchPage: async (cursor) => {
+            const response = await listPagedMarkerGQL({
+                variables: {
+                    west: -180,
+                    south: -90,
+                    east: 180,
+                    north: 90,
+                    limit: 30,
+                    cursor: cursor || null,
+                }
+            })
+            const payload = response?.data?.viewportmarkers || {}
+            return {
+                items: payload.items || [],
+                nextCursor: payload.next_cursor || null,
+            }
+        }
+    })
+
+    useEffect(() => {
+        pagedMarkerController.refresh()
+        telemetry.debugLog('markers_list', 'refresh:initial')
+    }, [])
+
+    const markerSource = useMemo(() => {
+        return pagedMarkerController.items
+    }, [pagedMarkerController.items])
+
     const filteredMarkers = useMemo(() => {
-        return search.filter.parse(markers, filterlist, eventtypes, filtercountry)
-    }, [markers, filterlist, eventtypes, filtercountry, editedTrigger])
+        return search.filter.parse(markerSource, filterlist, eventtypes, filtercountry)
+    }, [markerSource, filterlist, eventtypes, filtercountry, editedTrigger])
 
     useEffect(() => {
         if (editAlert) {
             setEditTrigger(nanoid())
         }
     }, [editAlert])
+
+    useEffect(() => {
+        telemetry.debugLog('markers_list', 'items:update', {
+            count: filteredMarkers.length,
+            nextCursor: pagedMarkerController.nextCursor,
+            loading: pagedMarkerController.loading,
+        })
+    }, [filteredMarkers.length, pagedMarkerController.nextCursor, pagedMarkerController.loading])
+
+    useEffect(() => {
+        telemetry.debugLog('marker_page', 'view:switch', {
+            view: showingList ? 'list' : 'map',
+        })
+    }, [showingList])
 
     // const [ showFilterInListView, showFilter ] = useState(false)
 
@@ -113,7 +163,7 @@ function MarkerPage({
 
     const setSelectedById = (id) => {
         let selected = null
-        markers.forEach(m => {
+        markerSource.forEach(m => {
             if (m.id === id) {
                 selected = m
                 return
@@ -133,6 +183,11 @@ function MarkerPage({
         setSelected(null)
         setEditing(false)
         confirmEdited()
+    }
+
+    const onSelectMarker = (marker) => {
+        if (!marker) return
+        setSelected(marker)
     }
 
     const onScheduleCreated = () => {
@@ -160,8 +215,9 @@ function MarkerPage({
                     <MarkerMap 
                         showingList={showingList}
                         toListView={() => setShowingList(true)}
-                        markers={filteredMarkers || []}
+                        markers={markers || []}
                         setSelectedById={setSelectedById}
+                        setSelectedMarker={onSelectMarker}
                         // filterOption={filterOption} // for filter option
                         // filterValue={filterValue}   // for filter temporary value setter and getter
                         // setFilterValue={setFilterValue}  
@@ -187,6 +243,15 @@ function MarkerPage({
                         showingList={showingList}
                         markers={filteredMarkers || []}
                         setSelectedById={setSelectedById}
+                        onReachEnd={pagedMarkerController.loadMore}
+                        onRefreshTop={pagedMarkerController.refresh}
+                        hasMore={!!pagedMarkerController.nextCursor}
+                        loadingMore={pagedMarkerController.loading}
+                        refreshing={pagedMarkerController.refreshing}
+                        onRetry={pagedMarkerController.retry}
+                        loadingError={pagedMarkerController.error}
+                        staleData={pagedMarkerController.stale}
+                        offlineCached={pagedMarkerController.offlineCached}
                         // filterOption={filterOption} // for filter option
                         // filterValue={filterValue}   // for filter temporary value setter and getter
                         // setFilterValue={setFilterValue}  

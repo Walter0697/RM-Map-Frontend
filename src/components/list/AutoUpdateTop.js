@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { connect } from 'react-redux'
 import { useLazyQuery } from '@apollo/client'
 
@@ -29,6 +29,7 @@ function AutoUpdateTop({
     // state variable
     const [ enteringPhrase, setEntering ] = useState(false)
     const [ currentScroll, setScrollTop ] = useState(0)
+    const initializedRef = useRef(false)
     
     const updateDataFromServer = () => {
         isRequested(true)
@@ -61,18 +62,24 @@ function AutoUpdateTop({
         }
 
         if (listRef.current) {
-            listRef.current.scrollTop = topHeight + 1
+            if (!initializedRef.current) {
+                listRef.current.scrollTop = topHeight + 1
+                initializedRef.current = true
+            }
             listRef.current.addEventListener('scroll', onScroll)
         }
 
+        return () => listRef.current && listRef.current.removeEventListener('scroll', onScroll)
+    }, [listRef, topHeight])
+
+    useEffect(() => {
+        if (!listRef.current || !itemListRef.current) return
         if (itemListRef.current.clientHeight > listRef.current.clientHeight + topHeight) {
             setBottomPaddingHeight(0)
         } else {
             setBottomPaddingHeight(listRef.current.clientHeight - itemListRef.current.clientHeight + topHeight)
         }
-
-        return () => listRef.current && listRef.current.removeEventListener('scroll', onScroll)
-    }, [listRef, items])
+    }, [listRef, itemListRef, topHeight, items, setBottomPaddingHeight])
 
     useEffect(() => {
         let timer = null
