@@ -263,6 +263,25 @@ export const resetCurrentShow = (currentShowPoints) => {
     }
 }
 
+export const setDeepLinkIntent = (intent) => {
+    return {
+        type: constants.SET_DEEP_LINK_INTENT,
+        intent,
+    }
+}
+
+export const clearDeepLinkIntent = () => {
+    return {
+        type: constants.CLEAR_DEEP_LINK_INTENT,
+    }
+}
+
+export const incrementDeepLinkReplay = () => {
+    return {
+        type: constants.INCREMENT_DEEP_LINK_REPLAY,
+    }
+}
+
 const actions = {
     login,
     logout,
@@ -301,6 +320,9 @@ const actions = {
     addCountryLocation,
     resetCountryLocations,
     resetCurrentShow,
+    setDeepLinkIntent,
+    clearDeepLinkIntent,
+    incrementDeepLinkReplay,
 }
 
 export default actions

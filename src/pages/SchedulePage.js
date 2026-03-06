@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { connect } from 'react-redux'
 import { useLazyQuery } from '@apollo/client'
 import dayjs from 'dayjs'
 
@@ -14,12 +15,19 @@ import AutoHideAlert from '../components/AutoHideAlert'
 import graphql from '../graphql'
 import usePagedDataController from '../hooks/usePagedDataController'
 import telemetry from '../scripts/telemetry'
+import deepLinkScript from '../scripts/deepLink'
+import actions from '../store/actions'
 
-function SchedulePage() {
+function SchedulePage({
+    schedules,
+    pendingDeepLink,
+    dispatch,
+}) {
     // selected schedules
     const [ selectedSchedules, setSchedules ] = useState([])
     const [ selectedDate, setSelectedDate ] = useState(null)
     const [ updateAlert, confirmUpdated ] = useBoop(3000)
+    const [ deepLinkOpenFailed, setDeepLinkOpenFailed ] = useBoop(3000)
 
     const [ editingSchedule, setEditing ] = useState(null)
     const [ editAlert, confirmedEdited ] = useBoop(3000)
@@ -88,6 +96,48 @@ function SchedulePage() {
         })
     }, [scheduleItems.length, pagedScheduleController.nextCursor, pagedScheduleController.loading])
 
+    React.useEffect(() => {
+        if (!pendingDeepLink) return
+        if (pendingDeepLink.resourceType !== deepLinkScript.resources.schedule) return
+
+        const scheduleId = deepLinkScript.parsePositiveIntId(pendingDeepLink.id)
+        if (!scheduleId) {
+            dispatch(actions.clearDeepLinkIntent())
+            setDeepLinkOpenFailed()
+            return
+        }
+
+        const selected = scheduleItems.find(s => s.id === scheduleId)
+            || schedules.find(s => s.id === scheduleId)
+
+        if (selected) {
+            const selectedDate = dayjs(selected.selected_date).format('YYYY-MM-DD')
+            setScheduleView([selected], selectedDate)
+            dispatch(actions.clearDeepLinkIntent())
+            return
+        }
+
+        if (pagedScheduleController.loading || pagedScheduleController.refreshing) {
+            return
+        }
+
+        if (pagedScheduleController.nextCursor) {
+            pagedScheduleController.loadMore()
+            return
+        }
+
+        dispatch(actions.clearDeepLinkIntent())
+        setDeepLinkOpenFailed()
+    }, [
+        pendingDeepLink,
+        scheduleItems,
+        schedules,
+        pagedScheduleController.loading,
+        pagedScheduleController.refreshing,
+        pagedScheduleController.nextCursor,
+        dispatch,
+    ])
+
     return (
         <Base>
             <ScheduleList
@@ -135,8 +185,17 @@ function SchedulePage() {
                 message={'Successfully edit schedule!'}
                 timing={3000}
             />
+            <AutoHideAlert
+                open={deepLinkOpenFailed}
+                type={'error'}
+                message={'Requested schedule cannot be opened. Showing schedule list instead.'}
+                timing={3000}
+            />
         </Base>
     )
 }
 
-export default SchedulePage
+export default connect(state => ({
+    schedules: state.schedule.schedules,
+    pendingDeepLink: state.deepLink.pending,
+}))(SchedulePage)

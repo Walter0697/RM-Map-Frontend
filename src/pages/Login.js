@@ -29,10 +29,11 @@ import actions from '../store/actions'
 import graphql from '../graphql'
 import backend from '../constant/backend'
 import httpScript from '../scripts/http'
+import deepLinkScript from '../scripts/deepLink'
 
 import styles from '../styles/login.module.css'
 
-function Login({ jwt, dispatch }) {
+function Login({ jwt, pendingDeepLink, dispatch }) {
     // for environment
     const detectMobile = useMobileDetect()
     const history = useHistory()
@@ -91,9 +92,16 @@ function Login({ jwt, dispatch }) {
     // if jwt exists, just redirect to home screen
     useEffect(() => {
         if (jwt) {
-            history.replace('/home')
+            const nav = deepLinkScript.resolvePostLoginNavigation(pendingDeepLink)
+            if (nav.shouldIncrementReplay) {
+                dispatch(actions.incrementDeepLinkReplay())
+            }
+            if (nav.shouldClearIntent) {
+                dispatch(actions.clearDeepLinkIntent())
+            }
+            history.replace(nav.path)
         }
-    }, [jwt])
+    }, [jwt, pendingDeepLink, dispatch, history])
 
     useEffect(() => {
         const callbackToken = callbackParams.token
@@ -360,4 +368,5 @@ function Login({ jwt, dispatch }) {
 
 export default connect(state => ({
     jwt: state.auth.jwt,
+    pendingDeepLink: state.deepLink.pending,
 }))(Login)

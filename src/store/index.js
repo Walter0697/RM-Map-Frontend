@@ -25,12 +25,24 @@ const getPersistedAuthState = () => {
   }
 }
 
+const getPersistedDeepLinkState = () => {
+  const pending = readJSON(sessionStorage.getItem('rm_deeplink_intent'))
+  if (!pending) return {}
+  return {
+    deepLink: {
+      pending,
+    },
+  }
+}
+
 if (process.env.REACT_APP_ENV === 'development') {
   const persistedAuthState = getPersistedAuthState()
+  const persistedDeepLinkState = getPersistedDeepLinkState()
   const devState = readJSON(localStorage.getItem('reduxState'), {})
   const defaultValues = {
     ...devState,
     ...persistedAuthState,
+    ...persistedDeepLinkState,
   }
 
   const showDevTools = process.env.REACT_APP_ENV === 'development'
@@ -42,7 +54,10 @@ if (process.env.REACT_APP_ENV === 'development') {
     localStorage.setItem('reduxState', JSON.stringify(store.getState()))
   })
 } else {
-  store = createStore(combinedReducers, getPersistedAuthState())
+  store = createStore(combinedReducers, {
+    ...getPersistedAuthState(),
+    ...getPersistedDeepLinkState(),
+  })
 }
 
 store.subscribe(() => {
@@ -52,6 +67,13 @@ store.subscribe(() => {
     jwt: auth.jwt || '',
     username: auth.username || '',
   }))
+
+  const pendingDeepLink = state?.deepLink?.pending || null
+  if (pendingDeepLink) {
+    sessionStorage.setItem('rm_deeplink_intent', JSON.stringify(pendingDeepLink))
+  } else {
+    sessionStorage.removeItem('rm_deeplink_intent')
+  }
 })
 
 export default store
