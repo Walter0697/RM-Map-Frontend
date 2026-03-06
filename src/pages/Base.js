@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router'
 import { useLocation } from 'react-router-dom'
@@ -36,14 +36,23 @@ function Base({
     // graphql request
     const [ meGQL, { error: meError }]  = useLazyQuery(graphql.auth.me, { errorPolicy: 'all', fetchPolicy: 'no-cache' })
     const [ authStatusMessage, setAuthStatusMessage ] = useState('')
+    const consumedDeepLinkPathRef = useRef(null)
 
     // variable for blinking animation when switching pages
     const [ blink, refresh ] = useBoop(300)
 
     useEffect(() => {
         const parsedIntent = deepLinkScript.parsePath(location.pathname)
-        if (!parsedIntent) return
-        if (pendingDeepLink && pendingDeepLink.path === parsedIntent.path) return
+        if (!parsedIntent) {
+            consumedDeepLinkPathRef.current = null
+            return
+        }
+        if (consumedDeepLinkPathRef.current === parsedIntent.path) return
+        if (pendingDeepLink && pendingDeepLink.path === parsedIntent.path) {
+            consumedDeepLinkPathRef.current = parsedIntent.path
+            return
+        }
+        consumedDeepLinkPathRef.current = parsedIntent.path
         dispatch(actions.setDeepLinkIntent(parsedIntent))
     }, [location.pathname, pendingDeepLink, dispatch])
 
