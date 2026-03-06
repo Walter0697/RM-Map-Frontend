@@ -31,12 +31,16 @@ import styles from '../styles/list.module.css'
 import graphql from '../graphql'
 import usePagedDataController from '../hooks/usePagedDataController'
 import telemetry from '../scripts/telemetry'
+import deepLinkScript from '../scripts/deepLink'
+import actions from '../store/actions'
 
 function MarkerPage({ 
     markers,
     eventtypes,
     filterlist,
     filtercountry,
+    pendingDeepLink,
+    dispatch,
 }) {
     const location = useLocation()
     const suffix = location.pathname.replace('/markers', '')
@@ -52,6 +56,7 @@ function MarkerPage({
 
     const [ editedTrigger, setEditTrigger ] = useState(nanoid())
     const [ listPagedMarkerGQL ] = useLazyQuery(graphql.markers.viewport_page, { fetchPolicy: 'no-cache' })
+    const [ deepLinkOpenFailed, setDeepLinkOpenFailed ] = useBoop(3000)
 
     // if it is showing list or map
     const [ showingList, setShowingList ] = useState((suffix && suffix === '/list') ? true : false)
@@ -145,6 +150,49 @@ function MarkerPage({
             view: showingList ? 'list' : 'map',
         })
     }, [showingList])
+
+    useEffect(() => {
+        if (!pendingDeepLink) return
+        if (pendingDeepLink.resourceType !== deepLinkScript.resources.marker) return
+
+        setShowingList(true)
+
+        const markerId = deepLinkScript.parsePositiveIntId(pendingDeepLink.id)
+        if (!markerId) {
+            dispatch(actions.clearDeepLinkIntent())
+            setDeepLinkOpenFailed()
+            return
+        }
+
+        const selected = markerSource.find(s => s.id === markerId)
+            || markers.find(s => s.id === markerId)
+
+        if (selected) {
+            onSelectMarker(selected)
+            dispatch(actions.clearDeepLinkIntent())
+            return
+        }
+
+        if (pagedMarkerController.loading || pagedMarkerController.refreshing) {
+            return
+        }
+
+        if (pagedMarkerController.nextCursor) {
+            pagedMarkerController.loadMore()
+            return
+        }
+
+        dispatch(actions.clearDeepLinkIntent())
+        setDeepLinkOpenFailed()
+    }, [
+        pendingDeepLink,
+        markerSource,
+        markers,
+        pagedMarkerController.loading,
+        pagedMarkerController.refreshing,
+        pagedMarkerController.nextCursor,
+        dispatch,
+    ])
 
     // const [ showFilterInListView, showFilter ] = useState(false)
 
@@ -343,6 +391,12 @@ function MarkerPage({
                 message={'Successfully edit marker!'}
                 timing={3000}
             />
+            <AutoHideAlert
+                open={deepLinkOpenFailed}
+                type={'error'}
+                message={'Requested marker cannot be opened. Showing marker list instead.'}
+                timing={3000}
+            />
         </Base>
     )
 }
@@ -351,5 +405,6 @@ export default connect(state => ({
     markers: state.marker.markers,
     eventtypes: state.marker.eventtypes,
     filterlist: state.filter.list,
-    filtercountry: state.marker.filtercountry
+    filtercountry: state.marker.filtercountry,
+    pendingDeepLink: state.deepLink.pending,
 })) (MarkerPage)

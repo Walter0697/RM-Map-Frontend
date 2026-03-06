@@ -7,6 +7,7 @@ import station from './station'
 import filter from './filter'
 import movie from './movie'
 import country from './country'
+import deepLink from './deepLink'
 
 const reducers = {
     auth,
@@ -18,6 +19,7 @@ const reducers = {
     filter,
     movie,
     country,
+    deepLink,
 }
 
 export default reducers
