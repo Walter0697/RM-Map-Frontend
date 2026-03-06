@@ -29,34 +29,69 @@ function validateShortcutURL(value) {
     }
 }
 
+function parsePositiveInteger(value) {
+    const trimmed = `${value ?? ''}`.trim()
+    if (!trimmed) return null
+    if (!/^\d+$/.test(trimmed)) return null
+    const parsed = Number(trimmed)
+    if (!Number.isInteger(parsed) || parsed <= 0) return null
+    return parsed
+}
+
 function SystemSettingsManage({ jwt }) {
     const [ loading, setLoading ] = useState(false)
     const [ saving, setSaving ] = useState(false)
     const [ errorMessage, setErrorMessage ] = useState('')
     const [ successMessage, setSuccessMessage ] = useState('')
     const [ shortcutURL, setShortcutURL ] = useState('')
+    const [ easyThresholdMinutes, setEasyThresholdMinutes ] = useState('')
+    const [ difficultThresholdMinutes, setDifficultThresholdMinutes ] = useState('')
     const trimmedShortcutURL = shortcutURL.trim()
     const hasShortcutURL = trimmedShortcutURL !== ''
     const isShortcutURLValid = validateShortcutURL(trimmedShortcutURL)
+    const parsedEasyThresholdMinutes = parsePositiveInteger(easyThresholdMinutes)
+    const parsedDifficultThresholdMinutes = parsePositiveInteger(difficultThresholdMinutes)
+    const areThresholdsPresent = parsedEasyThresholdMinutes !== null && parsedDifficultThresholdMinutes !== null
+    const areThresholdsOrdered = areThresholdsPresent && parsedEasyThresholdMinutes < parsedDifficultThresholdMinutes
+    const areThresholdsValid = areThresholdsPresent && areThresholdsOrdered
+    const hasThresholdValues = `${easyThresholdMinutes}`.trim() !== '' || `${difficultThresholdMinutes}`.trim() !== ''
 
     const fetchSetting = async () => {
         if (!jwt) return
         setLoading(true)
         setErrorMessage('')
         try {
-            const response = await fetch(backend.withBasePath('admin/settings/ios-shortcut-install-url'), {
-                method: 'GET',
-                headers: {
-                    Authorization: jwt,
-                },
-            })
-            if (!response.ok) {
-                const text = await response.text()
-                setErrorMessage(text || `Failed to load setting (${response.status})`)
+            const [ shortcutResponse, thresholdResponse ] = await Promise.all([
+                fetch(backend.withBasePath('admin/settings/ios-shortcut-install-url'), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
+                }),
+                fetch(backend.withBasePath('admin/settings/schedule-travel-thresholds'), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
+                }),
+            ])
+            if (!shortcutResponse.ok) {
+                const text = await shortcutResponse.text()
+                setErrorMessage(text || `Failed to load shortcut setting (${shortcutResponse.status})`)
                 return
             }
-            const data = await response.json()
-            setShortcutURL(data?.ios_shortcut_install_url || '')
+            if (!thresholdResponse.ok) {
+                const text = await thresholdResponse.text()
+                setErrorMessage(text || `Failed to load travel thresholds (${thresholdResponse.status})`)
+                return
+            }
+
+            const shortcutData = await shortcutResponse.json()
+            setShortcutURL(shortcutData?.ios_shortcut_install_url || '')
+
+            const thresholdData = await thresholdResponse.json()
+            setEasyThresholdMinutes(`${thresholdData?.easy_threshold_minutes ?? ''}`)
+            setDifficultThresholdMinutes(`${thresholdData?.difficult_threshold_minutes ?? ''}`)
         } catch (error) {
             setErrorMessage(httpScript.toAuthAwareErrorMessage(error, 'Failed to load setting'))
         } finally {
@@ -74,7 +109,7 @@ function SystemSettingsManage({ jwt }) {
         setErrorMessage('')
         setSuccessMessage('')
         try {
-            const response = await fetch(backend.withBasePath('admin/settings/ios-shortcut-install-url'), {
+            const shortcutResponse = await fetch(backend.withBasePath('admin/settings/ios-shortcut-install-url'), {
                 method: 'PUT',
                 headers: {
                     Authorization: jwt,
@@ -84,14 +119,36 @@ function SystemSettingsManage({ jwt }) {
                     ios_shortcut_install_url: shortcutURL,
                 }),
             })
-            if (!response.ok) {
-                const text = await response.text()
-                setErrorMessage(text || `Failed to save setting (${response.status})`)
+            if (!shortcutResponse.ok) {
+                const text = await shortcutResponse.text()
+                setErrorMessage(text || `Failed to save shortcut setting (${shortcutResponse.status})`)
                 return
             }
-            const data = await response.json()
-            setShortcutURL(data?.ios_shortcut_install_url || '')
-            setSuccessMessage('Saved iOS shortcut install URL.')
+
+            const thresholdResponse = await fetch(backend.withBasePath('admin/settings/schedule-travel-thresholds'), {
+                method: 'PUT',
+                headers: {
+                    Authorization: jwt,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    easy_threshold_minutes: parsedEasyThresholdMinutes,
+                    difficult_threshold_minutes: parsedDifficultThresholdMinutes,
+                }),
+            })
+            if (!thresholdResponse.ok) {
+                const text = await thresholdResponse.text()
+                setErrorMessage(text || `Failed to save travel thresholds (${thresholdResponse.status})`)
+                return
+            }
+
+            const shortcutData = await shortcutResponse.json()
+            setShortcutURL(shortcutData?.ios_shortcut_install_url || '')
+
+            const thresholdData = await thresholdResponse.json()
+            setEasyThresholdMinutes(`${thresholdData?.easy_threshold_minutes ?? ''}`)
+            setDifficultThresholdMinutes(`${thresholdData?.difficult_threshold_minutes ?? ''}`)
+            setSuccessMessage('Saved system settings.')
         } catch (error) {
             setErrorMessage(httpScript.toAuthAwareErrorMessage(error, 'Failed to save setting'))
         } finally {
@@ -112,7 +169,7 @@ function SystemSettingsManage({ jwt }) {
                         className='admin-action-button'
                         variant='contained'
                         onClick={onSave}
-                        disabled={loading || saving || (hasShortcutURL && !isShortcutURLValid)}
+                        disabled={loading || saving || (hasShortcutURL && !isShortcutURLValid) || !areThresholdsValid}
                     >
                         Save
                     </Button>
@@ -174,20 +231,62 @@ function SystemSettingsManage({ jwt }) {
                         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                             <Button
                                 className='admin-action-button'
-                                variant='contained'
-                                onClick={onSave}
-                                disabled={loading || saving || (hasShortcutURL && !isShortcutURLValid)}
-                            >
-                                Save
-                            </Button>
-                            <Button
-                                className='admin-action-button'
-                                variant='text'
+                                variant='outlined'
                                 onClick={() => window.open(trimmedShortcutURL, '_blank', 'noopener,noreferrer')}
                                 disabled={!isShortcutURLValid}
                             >
                                 Open Preview
                             </Button>
+                        </Stack>
+
+                        <Divider />
+
+                        <Box
+                            sx={{
+                                p: 1.5,
+                                borderRadius: 1.5,
+                                background: 'linear-gradient(90deg, #e9fff2 0%, #f8fffb 100%)',
+                                border: '1px solid #c7f1d7',
+                            }}
+                        >
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent='space-between' alignItems={{ xs: 'flex-start', sm: 'center' }}>
+                                <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
+                                    Schedule Travel Difficulty Thresholds
+                                </Typography>
+                                <Chip
+                                    size='small'
+                                    color={hasThresholdValues ? (areThresholdsValid ? 'success' : 'warning') : 'default'}
+                                    label={hasThresholdValues ? (areThresholdsValid ? 'Configured' : 'Invalid thresholds') : 'Not configured'}
+                                />
+                            </Stack>
+                            <Typography variant='body2' color='text.secondary' sx={{ mt: 0.75 }}>
+                                Controls difficulty bands for travel-time classification. Easy must be lower than difficult.
+                            </Typography>
+                        </Box>
+
+                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                                fullWidth
+                                type='number'
+                                label='Easy Threshold (minutes)'
+                                placeholder='20'
+                                value={easyThresholdMinutes}
+                                onChange={(event) => setEasyThresholdMinutes(event.target.value)}
+                                disabled={loading || saving}
+                                error={hasThresholdValues && !areThresholdsValid}
+                                helperText={hasThresholdValues && !areThresholdsValid ? 'Enter a positive integer lower than Difficult threshold.' : 'Durations at or below this are labeled easy.'}
+                            />
+                            <TextField
+                                fullWidth
+                                type='number'
+                                label='Difficult Threshold (minutes)'
+                                placeholder='45'
+                                value={difficultThresholdMinutes}
+                                onChange={(event) => setDifficultThresholdMinutes(event.target.value)}
+                                disabled={loading || saving}
+                                error={hasThresholdValues && !areThresholdsValid}
+                                helperText={hasThresholdValues && !areThresholdsValid ? 'Enter a positive integer greater than Easy threshold.' : 'Durations above this are labeled difficult.'}
+                            />
                         </Stack>
                     </Stack>
                 </CardContent>
