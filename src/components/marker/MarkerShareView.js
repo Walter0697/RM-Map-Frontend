@@ -60,12 +60,8 @@ function MarkerShareView({
                 files: filesArray,
                 text: shareText,
             }
-            try {
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(shareText)
-                }
-            } catch (e) {
-                console.log(e)
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(shareText).catch(() => null)
             }
             
             navigator.share(shareData)

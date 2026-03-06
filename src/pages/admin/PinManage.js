@@ -71,9 +71,6 @@ function PinManage() {
             setList(pinData.pins)
         }
 
-        if (pinError) {
-            console.log(pinError)
-        }
     }, [pinData, pinError])
 
     useEffect(() => {
@@ -82,7 +79,6 @@ function PinManage() {
         }
 
         if (removeError) {
-            console.log(removeError)
             listPinGQL()
         }
     }, [removeData, removeError])
@@ -92,9 +88,6 @@ function PinManage() {
             setTypeList(typeData.markertypes)
         }
 
-        if (typeError) {
-            console.log(typeError)
-        }
     }, [typeData, typeError])
 
     useEffect(() => {

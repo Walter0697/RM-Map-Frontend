@@ -81,10 +81,6 @@ function RelationSearchForm({
             } 
         }
 
-        if (relationError) {
-            // TODO: handle error to pop up alert
-            console.log(relationError)
-        }
     }, [relationData, relationError])
 
     const onSubmitHandler = () => {

@@ -180,7 +180,7 @@ function ExternalAPIUsageManage({ jwt }) {
 
     return (
         <AdminPageShell
-            title='External API Usage [UI-CHECK-2026-03-03]'
+            title='External API Usage'
             description='Audit-based usage analytics for managed external providers'
             actions={(
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>

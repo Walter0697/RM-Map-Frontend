@@ -38,9 +38,6 @@ function PreferredPinForm({
             setPinList(pinData.pins)
         }
 
-        if (pinError) {
-            console.log(pinError)
-        }
     }, [pinData, pinError])
 
     useEffect(() => {
@@ -48,9 +45,6 @@ function PreferredPinForm({
             onCreated && onCreated(updateData)
         }
 
-        if (updateError) {
-            console.log(updateError)
-        }
     }, [updateData, updateError])
 
     const onSubmitHandler = () => {

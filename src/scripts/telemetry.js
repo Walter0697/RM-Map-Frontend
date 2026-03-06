@@ -1,13 +1,4 @@
 const metricState = {}
-const LOG_PREFIX = '[RM-PAGED]'
-
-const isDebugLoggingEnabled = () => {
-    if (typeof window === 'undefined') return false
-    const forced = window.localStorage?.getItem('rm_debug_paging')
-    if (forced === '1') return true
-    if (forced === '0') return false
-    return process.env.NODE_ENV !== 'production'
-}
 
 const ensureMetric = (name) => {
     if (!metricState[name]) {
@@ -51,14 +42,7 @@ export const getTelemetrySnapshot = () => {
     return JSON.parse(JSON.stringify(metricState))
 }
 
-export const debugLog = (scope, message, payload = null) => {
-    if (!isDebugLoggingEnabled()) return
-    if (payload === null) {
-        console.log(`${LOG_PREFIX}[${scope}] ${message}`)
-        return
-    }
-    console.log(`${LOG_PREFIX}[${scope}] ${message}`, payload)
-}
+export const debugLog = () => {}
 
 export default {
     trackRequestMetric,

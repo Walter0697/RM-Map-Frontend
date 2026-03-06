@@ -98,9 +98,6 @@ function SettingPage({
             setPinPreference(pinList)
         } 
 
-        if (preferenceError) {
-            console.log(preferenceError)
-        }
     }, [preferenceData, preferenceError])
 
     useEffect(() => {
@@ -108,9 +105,6 @@ function SettingPage({
             latestReleaseGQL()
         }
 
-        if (releaseError) {
-            console.log(releaseError)
-        }
     }, [releaseData, releaseError])
 
     useEffect(() => {
@@ -118,9 +112,6 @@ function SettingPage({
             dispatch(actions.updateReleaseLatest(latestReleaseData.latestreleasenote))
         }
 
-        if (latestReleaseError) {
-            console.log(latestReleaseError)
-        }
     }, [latestReleaseData, latestReleaseError])
 
     useEffect(() => {
@@ -160,8 +151,7 @@ function SettingPage({
                 } else {
                     setIOSShortcutInstallURL('')
                 }
-            } catch (error) {
-                console.log(error)
+            } catch {
                 setIOSShortcutInstallURL('')
             }
         }

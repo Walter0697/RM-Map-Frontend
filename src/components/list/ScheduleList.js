@@ -463,12 +463,10 @@ function ScheduleList({
             const top = scrollerEl.scrollTop || 0
             if (top > 80 && !refreshArmedRef.current) {
                 refreshArmedRef.current = true
-                console.log('[RM-PAGED][schedules_list] refresh:armed')
             }
             if (top <= 2 && refreshArmedRef.current && onRefreshTop && !loadingMore) {
                 refreshArmedRef.current = false
                 setRefreshUI('refreshing')
-                console.log('[RM-PAGED][schedules_list] refresh:trigger')
                 onRefreshTop()
             }
         }

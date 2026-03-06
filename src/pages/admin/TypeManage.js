@@ -47,12 +47,7 @@ function TypeManage() {
 
     useEffect(() => {
         if (typeData) {
-            console.log(typeData)
             setList(typeData.markertypes)
-        }
-
-        if (typeError) {
-            console.log(typeError)
         }
     }, [typeData, typeError])
     
@@ -62,7 +57,6 @@ function TypeManage() {
         }
 
         if (removeError) {
-            console.log(removeError)
             listMarkerTypeGQL()
         }
     }, [removeData, removeError])
