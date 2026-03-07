@@ -284,8 +284,16 @@ function ReleaseNotesManage({ jwt }) {
             {errorMessage ? <Alert severity='error'>{errorMessage}</Alert> : null}
             {successMessage ? <Alert severity='success'>{successMessage}</Alert> : null}
 
-            <Grid container spacing={2} sx={{ width: '100%' }}>
-                <Grid item xs={12} md={12}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    gap: 2,
+                    width: '100%',
+                    alignItems: 'stretch',
+                }}
+            >
+                <Box sx={{ width: { xs: '100%', md: 300 }, flexShrink: 0 }}>
                     <Card className='admin-panel'>
                         <CardContent>
                             <Stack spacing={1.25}>
@@ -318,10 +326,10 @@ function ReleaseNotesManage({ jwt }) {
                             </Stack>
                         </CardContent>
                     </Card>
-                </Grid>
+                </Box>
 
-                <Grid item xs={12} md={12}>
-                    <Card className='admin-panel'>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Card className='admin-panel' sx={{ width: '100%' }}>
                         <CardContent>
                             <Stack spacing={2}>
                                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -418,8 +426,8 @@ function ReleaseNotesManage({ jwt }) {
                             </Stack>
                         </CardContent>
                     </Card>
-                </Grid>
-            </Grid>
+                </Box>
+            </Box>
         </AdminPageShell>
     )
 }
