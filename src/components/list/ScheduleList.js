@@ -763,7 +763,7 @@ function ScheduleList({
                         }
                         return (
                             <WrapperBox
-                                height={170}
+                                height={150}
                                 marginBottom={'6px'}
                             >
                                 <ScheduleItem
