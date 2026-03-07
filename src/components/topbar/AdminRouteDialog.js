@@ -132,6 +132,13 @@ function AdminRouteDialog({
                         active={location.pathname === '/admin/system-settings'}
                         directTo={directTo}
                     />
+                    <RouteBox
+                        label='Release Notes'
+                        description='Draft, edit, and publish release announcements'
+                        route='/admin/release-notes'
+                        active={location.pathname === '/admin/release-notes'}
+                        directTo={directTo}
+                    />
                 </Stack>
             </DialogContent>
         </Dialog>
