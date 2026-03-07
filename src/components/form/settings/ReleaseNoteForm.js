@@ -40,6 +40,43 @@ const parseReleaseNotes = (rawValue) => {
         .filter((line) => line !== '')
 }
 
+const normalizeSemver = (input) => {
+    const value = `${input || ''}`.trim().toLowerCase().replace(/^v/, '')
+    if (!value) return ''
+    const noBuild = value.split('+')[0]
+    const main = noBuild.split('-')[0]
+    const segments = main.split('.')
+    if (segments.length < 3 || segments.slice(0, 3).some((item) => !/^\d+$/.test(item))) return ''
+    return noBuild
+}
+
+const compareSemver = (a, b) => {
+    const normalizeParts = (value) => {
+        const normalized = normalizeSemver(value)
+        const [main, pre = ''] = normalized.split('-', 2)
+        const numbers = main.split('.').slice(0, 3).map((item) => Number(item))
+        return { normalized, numbers, pre }
+    }
+
+    const left = normalizeParts(a)
+    const right = normalizeParts(b)
+    if (!left.normalized && !right.normalized) {
+        return `${a || ''}`.localeCompare(`${b || ''}`)
+    }
+    if (!left.normalized) return -1
+    if (!right.normalized) return 1
+
+    for (let index = 0; index < 3; index += 1) {
+        if (left.numbers[index] > right.numbers[index]) return 1
+        if (left.numbers[index] < right.numbers[index]) return -1
+    }
+
+    if (!left.pre && !right.pre) return 0
+    if (!left.pre) return 1
+    if (!right.pre) return -1
+    return left.pre.localeCompare(right.pre)
+}
+
 function ReleaseNoteItem({
     open,
     handleClose,
@@ -148,11 +185,9 @@ function ReleaseNoteForm({
     const [ selectedVersion, setVersion ] = useState(null)
 
     const previousList = useMemo(() => {
-        let output = []
-        list.forEach(s => {
-            output.unshift(s)
-        })
-        return output.filter(s => s.version !== latest.version)
+        return [...list]
+            .filter((s) => s.version !== latest.version)
+            .sort((a, b) => compareSemver(b.version, a.version))
     }, [list, latest])
 
     useEffect(() => {
