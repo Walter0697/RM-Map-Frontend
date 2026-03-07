@@ -21,8 +21,6 @@ import backend from '../../constant/backend'
 import AdminPageShell from '../../components/admin/AdminPageShell'
 import appPackage from '../../../package.json'
 
-const CONTENT_FORMATS = ['markdown', 'html']
-
 function normalizeSemver(input) {
     const value = `${input || ''}`.trim().toLowerCase().replace(/^v/, '')
     if (!value) return ''
@@ -82,10 +80,10 @@ function ReleaseNotesManage({ jwt }) {
     const [selectedVersion, setSelectedVersion] = useState('')
     const [version, setVersion] = useState('')
     const [content, setContent] = useState('')
-    const [contentFormat, setContentFormat] = useState('markdown')
     const [notesFormat, setNotesFormat] = useState('md')
     const [publishState, setPublishState] = useState('draft')
     const [imageRefs, setImageRefs] = useState([])
+    const [iconRef, setIconRef] = useState('')
     const [saving, setSaving] = useState(false)
     const [loading, setLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
@@ -108,10 +106,10 @@ function ReleaseNotesManage({ jwt }) {
         setSelectedVersion('')
         setVersion('')
         setContent('')
-        setContentFormat('markdown')
         setNotesFormat('md')
         setPublishState('draft')
         setImageRefs([])
+        setIconRef('')
     }
 
     const applyItem = (item) => {
@@ -119,10 +117,10 @@ function ReleaseNotesManage({ jwt }) {
         setSelectedVersion(item.version || '')
         setVersion(item.version || '')
         setContent(item.content || '')
-        setContentFormat(item.content_format || 'markdown')
         setNotesFormat(item.notes_format || 'md')
         setPublishState(item.publish_state || 'draft')
         setImageRefs(Array.isArray(item.image_refs) ? item.image_refs : [])
+        setIconRef(item.icon_ref || '')
     }
 
     const parseResponseError = async (resp) => {
@@ -194,8 +192,9 @@ function ReleaseNotesManage({ jwt }) {
                 body: JSON.stringify({
                     version: version.trim(),
                     content,
-                    content_format: contentFormat,
+                    content_format: 'markdown',
                     notes_format: notesFormat,
+                    icon_ref: iconRef,
                     publish_state: publishState,
                     image_refs: imageRefs,
                 }),
@@ -257,14 +256,13 @@ function ReleaseNotesManage({ jwt }) {
             if (!imageRefs.includes(path)) {
                 setImageRefs((previous) => [...previous, path])
             }
+            if (!iconRef) {
+                setIconRef(path)
+            }
             if (notesFormat === 'json') {
                 setNotesFormat('md')
             }
-            if (contentFormat === 'markdown') {
-                setContent((previous) => `${previous}${previous ? '\n' : ''}![release-note-image](${payload.url || `/image${path}`})`)
-            } else {
-                setContent((previous) => `${previous}${previous ? '\n' : ''}<img src="${payload.url || `/image${path}`}" alt="release-note-image" />`)
-            }
+            setContent((previous) => `${previous}${previous ? '\n' : ''}![release-note-image](${payload.url || `/image${path}`})`)
             setSuccessMessage('Image uploaded and inserted into content.')
         } catch (error) {
             setErrorMessage(error.message)
@@ -287,7 +285,7 @@ function ReleaseNotesManage({ jwt }) {
             {successMessage ? <Alert severity='success'>{successMessage}</Alert> : null}
 
             <Grid container spacing={2}>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md={3}>
                     <Card className='admin-panel'>
                         <CardContent>
                             <Stack spacing={1.25}>
@@ -301,9 +299,9 @@ function ReleaseNotesManage({ jwt }) {
                                         sx={{ justifyContent: 'space-between' }}
                                     >
                                         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            {item.image_urls?.[0] ? (
+                                            {item.icon_url ? (
                                                 <img
-                                                    src={item.image_urls[0]}
+                                                    src={item.icon_url}
                                                     alt='release-note-icon'
                                                     style={{ width: 20, height: 20, borderRadius: 4, objectFit: 'cover' }}
                                                 />
@@ -322,13 +320,14 @@ function ReleaseNotesManage({ jwt }) {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} md={8}>
+                <Grid item xs={12} md={9}>
                     <Card className='admin-panel'>
                         <CardContent>
                             <Stack spacing={2}>
                                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                                     <Chip label={`App baseline: ${baselineVersion || 'unknown'}`} />
                                     <Chip label={isVersionProgressed ? 'Version OK' : 'Version blocked'} color={isVersionProgressed ? 'success' : 'warning'} />
+                                    <Chip label={`Current state: ${publishState || 'draft'}`} color={publishState === 'published' ? 'success' : 'default'} />
                                 </Box>
 
                                 <TextField
@@ -348,35 +347,6 @@ function ReleaseNotesManage({ jwt }) {
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6}>
                                         <FormControl fullWidth>
-                                            <InputLabel id='release-note-format'>Content Format</InputLabel>
-                                            <Select
-                                                labelId='release-note-format'
-                                                value={contentFormat}
-                                                label='Content Format'
-                                                onChange={(event) => setContentFormat(event.target.value)}
-                                            >
-                                                {CONTENT_FORMATS.map((format) => (
-                                                    <MenuItem key={format} value={format}>{format}</MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item xs={12} md={6}>
-                                        <FormControl fullWidth>
-                                            <InputLabel id='release-note-state'>Publish State</InputLabel>
-                                            <Select
-                                                labelId='release-note-state'
-                                                value={publishState}
-                                                label='Publish State'
-                                                onChange={(event) => setPublishState(event.target.value)}
-                                            >
-                                                <MenuItem value='draft'>draft</MenuItem>
-                                                <MenuItem value='published'>published</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item xs={12} md={6}>
-                                        <FormControl fullWidth>
                                             <InputLabel id='release-note-notes-format'>Notes Storage</InputLabel>
                                             <Select
                                                 labelId='release-note-notes-format'
@@ -389,17 +359,32 @@ function ReleaseNotesManage({ jwt }) {
                                             </Select>
                                         </FormControl>
                                     </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <FormControl fullWidth>
+                                            <InputLabel id='release-note-icon-ref'>Icon</InputLabel>
+                                            <Select
+                                                labelId='release-note-icon-ref'
+                                                value={iconRef}
+                                                label='Icon'
+                                                onChange={(event) => setIconRef(event.target.value)}
+                                            >
+                                                <MenuItem value=''>No icon</MenuItem>
+                                                {imageRefs.map((item) => (
+                                                    <MenuItem key={item} value={item}>{item}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
                                 </Grid>
 
                                 <TextField
                                     label='Content'
                                     multiline
-                                    minRows={16}
+                                    minRows={24}
                                     value={content}
                                     onChange={(event) => setContent(event.target.value)}
-                                    helperText={contentFormat === 'markdown'
-                                        ? 'Markdown source. Uploaded images insert markdown syntax.'
-                                        : 'HTML source. Uploaded images insert <img> tags.'}
+                                    helperText='Markdown/source text. Uploaded images insert markdown syntax.'
+                                    sx={{ '& .MuiInputBase-inputMultiline': { minHeight: '55vh !important' } }}
                                     fullWidth
                                 />
 
@@ -411,6 +396,16 @@ function ReleaseNotesManage({ jwt }) {
                                     <Button className='admin-action-button' variant='outlined' onClick={() => setPublishedState('draft')} disabled={selectedID === 'new' || saving}>Move To Draft</Button>
                                     <Button className='admin-action-button' variant='contained' onClick={() => setPublishedState('published')} disabled={selectedID === 'new' || saving || !isVersionProgressed}>Publish</Button>
                                 </Stack>
+                                {iconRef ? (
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Typography variant='subtitle2'>Selected Icon:</Typography>
+                                        <img
+                                            src={iconRef.startsWith('http') ? iconRef : `/image${iconRef}`}
+                                            alt='selected-release-note-icon'
+                                            style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', border: '1px solid #ddd' }}
+                                        />
+                                    </Box>
+                                ) : null}
 
                                 {imageRefs.length > 0 ? (
                                     <Stack spacing={0.5}>
