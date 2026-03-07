@@ -122,6 +122,10 @@ function ScheduleItem({
                 width: '100%',
                 boxShadow: '2px 2px 6px',
                 textTransform: 'none',
+                justifyContent: 'flex-start',
+                alignItems: 'flex-start',
+                paddingLeft: '12px',
+                paddingRight: '12px',
             }}
             onClick={scheduleItemOnClick}
         >
@@ -165,7 +169,7 @@ function ScheduleItem({
                         <div key={index}
                             style={{
                                 width: '50px',
-                                marginRight: '15px',
+                                marginRight: '8px',
                             }}
                         >
                             <div
@@ -760,7 +764,7 @@ function ScheduleList({
                         return (
                             <WrapperBox
                                 height={170}
-                                marginBottom={'10px'}
+                                marginBottom={'6px'}
                             >
                                 <ScheduleItem
                                     item={row.items}
