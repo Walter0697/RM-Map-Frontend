@@ -77,13 +77,6 @@ const compareSemver = (a, b) => {
     return left.pre.localeCompare(right.pre)
 }
 
-const buildVersionLabel = (version, icon) => {
-    const base = `${version || ''}`.trim()
-    const suffix = `${icon || ''}`.trim()
-    if (!base) return ''
-    return suffix ? `${base}.${suffix}` : base
-}
-
 function ReleaseNoteItem({
     open,
     handleClose,
@@ -244,7 +237,7 @@ function ReleaseNoteForm({
                                         fontSize: '25px',
                                     }}
                                 >
-                                    Ver. {buildVersionLabel(latest.version, latest.icon)}
+                                    Ver. {latest.version}
                                     {latest.icon ? <><span> </span><VersionIcon icon={latest.icon} sx={{ fontSize: '20px' }}/></> : null}
                                 </Grid>
                                 <Grid item xs={12} md={12} lg={12}
@@ -307,7 +300,7 @@ function ReleaseNoteForm({
                                 }}
                                 onClick={() => setVersion(release.version)}
                             >
-                                ver. {buildVersionLabel(release.version, release.icon)}
+                                ver. {release.version}
                                 {release.icon ? <><span> </span><VersionIcon icon={release.icon} sx={{ fontSize: '15px' }}/></> : null}
                             </Grid>
                         ))}

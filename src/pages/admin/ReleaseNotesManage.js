@@ -97,13 +97,6 @@ function parseJsonContentLines(input) {
     return fallback.length > 0 ? fallback : ['']
 }
 
-function buildVersionLabel(version, icon) {
-    const base = `${version || ''}`.trim()
-    const suffix = `${icon || ''}`.trim()
-    if (!base) return ''
-    return suffix ? `${base}.${suffix}` : base
-}
-
 function ReleaseNotesManage({ jwt }) {
     const baselineVersion = useMemo(() => normalizeSemver(appPackage.version || ''), [])
     const [items, setItems] = useState([])
@@ -434,7 +427,7 @@ function ReleaseNotesManage({ jwt }) {
                                         sx={{ justifyContent: 'space-between' }}
                                     >
                                         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <span>{buildVersionLabel(item.version, item.icon_ref)}</span>
+                                            <span>{item.version}</span>
                                             {item.icon_ref ? <VersionIcon icon={item.icon_ref} sx={{ fontSize: 18 }} /> : null}
                                         </span>
                                         <span style={{ display: 'flex', gap: 6 }}>
