@@ -50,6 +50,77 @@ const list = gql`
     }
 `
 
+const paged = gql`
+    query listPagedScheduleGQL(
+        $time: String!,
+        $status: String,
+        $marker_id: Int,
+        $label: String,
+        $search: String,
+        $from: String,
+        $to: String,
+        $cursor: String,
+        $limit: Int
+    ) {
+        pagedschedules(params: {
+            time: $time,
+            status: $status,
+            marker_id: $marker_id,
+            label: $label,
+            search: $search,
+            from: $from,
+            to: $to,
+            cursor: $cursor,
+            limit: $limit,
+        }) {
+            next_cursor
+            items {
+                id
+                label
+                description
+                status
+                selected_date
+                marker {
+                    id
+                    label
+                    latitude
+                    longitude
+                    address
+                    image_link
+                    link
+                    type
+                    restaurant {
+                        id
+                        name
+                        source
+                        source_id
+                        price_range
+                        restaurant_type
+                        address
+                        rating
+                        direction
+                        telephone
+                        introduction
+                        opening_hours
+                        payment_method
+                        seat_number
+                        website
+                        other_info
+                    }
+                }
+                movie {
+                    id
+                    reference_id
+                    label
+                    release_date
+                    image_path
+                    is_fav
+                }
+            }
+        }
+    }
+`
+
 const create = gql`
     mutation createScheduleGQL( $label: String!,
                         $description: String!,
@@ -244,6 +315,7 @@ const remove = gql`
 
 const schedules = {
     list,
+    paged,
     create,
     update_status,
     by_marker,

@@ -45,9 +45,6 @@ function DefaultPinManage() {
             setList(defaultData.defaultpins)
         }
 
-        if (defaultError) {
-            console.log(defaultError)
-        }
     }, [defaultData, defaultError])
 
     useEffect(() => {
@@ -55,9 +52,6 @@ function DefaultPinManage() {
             setPinList(pinData.pins)
         }
 
-        if (pinError) {
-            console.log(pinError)
-        }
     }, [pinData, pinError])
 
     const onUpdateFormOpen = (item) => {

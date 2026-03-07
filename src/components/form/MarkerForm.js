@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { connect } from 'react-redux'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import {
-    Grid,
+    Box,
+    Stack,
     TextField,
     Button,
+    ButtonGroup,
     FormControl,
     FormLabel,
     Menu,
@@ -70,6 +72,7 @@ function MarkerForm({
     let rawImageCaches = {}
     const [ imageCache, setImageCache ] = useState({})
     const [ imageVersion, setImageVersion ] = useState(null)
+    const uploadInputRef = useRef(null)
 
     const [ copiedValue, setCopiedValue ] = useState('')
     const [ scrapperData, setScrapperData ] = useState(null) 
@@ -157,7 +160,15 @@ function MarkerForm({
     }, [scrapImageData, scrapImageLoading])
 
     const getClipboardMessage = async () => {
-        const text = await navigator.clipboard.readText()
+        if (!navigator?.clipboard?.readText) {
+            return
+        }
+        let text = ''
+        try {
+            text = await navigator.clipboard.readText()
+        } catch (error) {
+            return
+        }
         const info = scrapper.validate(text)
         if (info) {
             if (confirm(`we detected that your clipboard has information for ${info}. Do you want to use it for this marker?`)) {
@@ -342,24 +353,20 @@ function MarkerForm({
                 alertMessage={alertMessage}
                 clearAlertMessage={() => setAlertMessage(null)}
             >
-                <Grid container spacing={2}>
-                    <Grid item xs={12} md={12} lg={12}>
+                <Stack spacing={2}>
+                    <TextField
+                        variant='outlined'
+                        fullWidth
+                        required
+                        label='label'
+                        value={formValue.label}
+                        onChange={(e) => onValueChangeHandler('label', e.target.value)}
+                        error={!!error.label}
+                        helperText={error.label}
+                    />
+                    <Box sx={{ display: 'flex', gap: 1 }}>
                         <TextField
-                            variant='outlined'
-                            fullWidth
-                            required
-                            label='label'
-                            value={formValue.label}
-                            onChange={(e) => onValueChangeHandler('label', e.target.value)}
-                            error={!!error.label}
-                            helperText={error.label}
-                        />
-                    </Grid>
-                    <Grid item xs={6} md={6} lg={6}>
-                        <TextField
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
+                            InputLabelProps={{ shrink: true }}
                             variant='outlined'
                             size='small'
                             fullWidth
@@ -367,12 +374,8 @@ function MarkerForm({
                             value={location ? location.latlon.lon : ''}
                             disabled
                         />
-                    </Grid>
-                    <Grid item xs={6} md={6} lg={6}>
                         <TextField
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
+                            InputLabelProps={{ shrink: true }}
                             variant='outlined'
                             size='small'
                             fullWidth
@@ -380,39 +383,33 @@ function MarkerForm({
                             value={location ? location.latlon.lat : ''}
                             disabled
                         />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Selectable
-                            label='type'
-                            required
-                            value={formValue.type}
-                            onValueChange={(e) => onValueChangeHandler('type', e.target.value)}
-                            defaultSelectaValue={''}
-                            defaultSelectText={''}
-                            errorMessage={error.type}
-                            list={eventtypes}
-                            valueKey={'value'}
-                            textKey={'label'}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            InputLabelProps={{
-                                shrink: !!formValue.address,
-                            }}
-                            variant='outlined'
-                            fullWidth
-                            required
-                            label='address'
-                            value={formValue.address}
-                            onChange={(e) => onValueChangeHandler('address', e.target.value)}
-                            error={!!error.address}
-                            helperText={error.address}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Grid container spacing={0}>
-                            <Grid item xs={9} md={9} lg={9}>
+                    </Box>
+                    <Selectable
+                        label='type'
+                        required
+                        value={formValue.type}
+                        onValueChange={(e) => onValueChangeHandler('type', e.target.value)}
+                        defaultSelectaValue={''}
+                        defaultSelectText={''}
+                        errorMessage={error.type}
+                        list={eventtypes}
+                        valueKey={'value'}
+                        textKey={'label'}
+                    />
+                    <TextField
+                        InputLabelProps={{ shrink: !!formValue.address }}
+                        variant='outlined'
+                        fullWidth
+                        required
+                        label='address'
+                        value={formValue.address}
+                        onChange={(e) => onValueChangeHandler('address', e.target.value)}
+                        error={!!error.address}
+                        helperText={error.address}
+                    />
+                    <Stack spacing={0}>
+                        <Box sx={{ display: 'flex' }}>
+                            <Box sx={{ flex: 9 }}>
                                 <TextField
                                     variant='outlined'
                                     fullWidth
@@ -422,211 +419,175 @@ function MarkerForm({
                                     error={!!error.link}
                                     helperText={error.link}
                                 />
-                            </Grid>
-                            <Grid item xs={3} md={3} lg={3}>
-                                    <Button 
-                                        variant='outlined'
-                                        id='website-menu-button'
-                                        aria-controls={menuOpen ? 'website-menu' : undefined}
-                                        aria-haspopup='true'
-                                        aria-expanded={menuOpen ? 'true' : undefined}
-                                        onClick={handleMenuClick}
-                                        fullWidth
-                                        style={{
-                                            height: '100%',
-                                        }}
-                                    >
-                                        <MoreVertIcon />
-                                    </Button>
-                                    <Menu
-                                        id='website-menu'
-                                        anchorEl={anchorEl}
-                                        open={menuOpen}
-                                        onClose={handleMenuClose}
-                                        MenuListProps={{
-                                            'aria-labelledby': 'website-menu-button',
-                                        }}
-                                    >
-                                        <MenuItem onClick={() => onScrapperClick('openrice')}>
-                                            <ListItemIcon>
-                                                <RiceBowlIcon fontSize="small" />
-                                            </ListItemIcon>
-                                            <ListItemText>Openrice</ListItemText>
-                                        </MenuItem>
-                                    </Menu>
-                            </Grid>
-                            {scrapperData?.restaurant && (
-                                <div 
-                                    style={{
-                                        color: 'red',
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                                <Button
+                                    variant='outlined'
+                                    id='website-menu-button'
+                                    aria-controls={menuOpen ? 'website-menu' : undefined}
+                                    aria-haspopup='true'
+                                    aria-expanded={menuOpen ? 'true' : undefined}
+                                    onClick={handleMenuClick}
+                                    fullWidth
+                                    sx={{
+                                        minWidth: 0,
+                                        height: '100%',
+                                        borderLeft: 0,
+                                        borderTopLeftRadius: 0,
+                                        borderBottomLeftRadius: 0,
                                     }}
-                                    onClick={removeScrapperData}
                                 >
-                                    <DeleteIcon sx={{ verticalAlign: 'middle', display: 'inline-block', fontSize: '18px' }}/> 
-                                    <span style={{ verticalAlign: 'middle', display: 'inline-block' }}>Remove Restaurant Data</span>
+                                    <MoreVertIcon />
+                                </Button>
+                            </Box>
+                        </Box>
+                        <Button
+                            variant='outlined'
+                            disabled={!websiteLink}
+                            onClick={() => scrapImageWithLink()}
+                            fullWidth
+                            sx={{
+                                mt: 0,
+                                borderTop: 0,
+                                borderTopLeftRadius: 0,
+                                borderTopRightRadius: 0,
+                            }}
+                        >
+                            FETCH DATA
+                        </Button>
+                        {scrapperData?.restaurant && (
+                            <Box
+                                sx={{ color: 'error.main', cursor: 'pointer' }}
+                                onClick={removeScrapperData}
+                            >
+                                <DeleteIcon sx={{ verticalAlign: 'middle', display: 'inline-block', fontSize: '18px' }}/>
+                                <span style={{ verticalAlign: 'middle', display: 'inline-block' }}>Remove Restaurant Data</span>
+                            </Box>
+                        )}
+                        <Menu
+                            id='website-menu'
+                            anchorEl={anchorEl}
+                            open={menuOpen}
+                            onClose={handleMenuClose}
+                            MenuListProps={{
+                                'aria-labelledby': 'website-menu-button',
+                            }}
+                        >
+                            <MenuItem onClick={() => onScrapperClick('openrice')}>
+                                <ListItemIcon>
+                                    <RiceBowlIcon fontSize='small' />
+                                </ListItemIcon>
+                                <ListItemText>Openrice</ListItemText>
+                            </MenuItem>
+                        </Menu>
+                    </Stack>
+                    <FormControl component='image' fullWidth>
+                        <FormLabel component='legend'>Preview</FormLabel>
+                        <FormLabel>{imageSubmitMessage}</FormLabel>
+                        <ButtonGroup fullWidth variant='outlined'>
+                            <Button onClick={() => setImageState('weblink')}>
+                                <AddLinkIcon />
+                            </Button>
+                            <Button onClick={() => uploadInputRef.current?.click()}>
+                                <InsertDriveFileIcon />
+                            </Button>
+                            <Button disabled={!formValue.imageLink} onClick={() => setImageState('preview')}>
+                                <VisibilityIcon />
+                            </Button>
+                        </ButtonGroup>
+                        <input ref={uploadInputRef} type='file' style={{ display: 'none' }} onChange={handleImageChange} />
+                        <FormLabel>
+                            {formValue.imageLink && (
+                                <div
+                                    style={{ color: 'red' }}
+                                    onClick={removeImage}
+                                >
+                                    <DeleteIcon sx={{ verticalAlign: 'middle', display: 'inline-block', fontSize: '18px' }}/>
+                                    <span style={{ verticalAlign: 'middle', display: 'inline-block' }}>Remove Image</span>
                                 </div>
                             )}
-                            <Grid item xs={12} md={12} lg={12}>
-                                <Button 
-                                    variant='outlined'
-                                    fullWidth
-                                    disabled={!websiteLink}
-                                    onClick={() => scrapImageWithLink()}
-                                >FETCH DATA</Button>
-                            </Grid>
-                        </Grid>
-                        
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <FormControl component='image' fullWidth>
-                            <FormLabel 
-                                component='legend'
-                            >
-                                Preview
-                            </FormLabel>
-                            <FormLabel>
-                                {imageSubmitMessage}
-                            </FormLabel>
-                            <Grid container spacing={0} fullWidth>
-                                <Grid item xs={4} md={4} lg={4}>
-                                    <Button 
-                                        variant='outlined'
-                                        fullWidth
-                                        onClick={() => setImageState('weblink')}>
-                                        <AddLinkIcon />
-                                    </Button>
-                                </Grid>
-                                <Grid item xs={4} md={4} lg={4}>
-                                    <input type='file' id='upload-image' style={{ display: 'none' }} onChange={handleImageChange} />
-                                    <label htmlFor='upload-image'>
-                                        <Button 
-                                            variant='outlined'
-                                            component='span'
-                                            fullWidth>
-                                            <InsertDriveFileIcon />
-                                        </Button>
-                                    </label>
-                                </Grid>
-                                <Grid item xs={4} md={4} lg={4}>
-                                    <Button 
-                                        variant='outlined'
-                                        fullWidth
-                                        disabled={!formValue.imageLink}
-                                        onClick={() => setImageState('preview')}
-                                    >
-                                        <VisibilityIcon />
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                            <FormLabel>
-                                {formValue.imageLink && (
-                                    <div 
-                                        style={{
-                                            color: 'red',
-                                        }}
-                                        onClick={removeImage}
-                                    >
-                                        <DeleteIcon sx={{ verticalAlign: 'middle', display: 'inline-block', fontSize: '18px' }}/> 
-                                        <span style={{ verticalAlign: 'middle', display: 'inline-block' }}>Remove Image</span>
-                                    </div>
-                                )}
-                            </FormLabel>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            label='description'
-                            value={formValue.description}
-                            onChange={(e) => onValueChangeHandler('description', e.target.value)}
-                            error={!!error.description}
-                            helperText={error.description}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Selectable
-                            label='estimate time'
-                            value={formValue.estimate_time}
-                            onValueChange={(e) => onValueChangeHandler('estimate_time', e.target.value)}
-                            defaultSelectaValue={''}
-                            defaultSelectText={''}
-                            errorMessage={''}
-                            list={[
-                                { value: 'short', label: 'Short' },
-                                { value: 'medium', label: 'Medium' },
-                                { value: 'long', label: 'Long' },
-                            ]}
-                            valueKey={'value'}
-                            textKey={'label'}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Selectable
-                            label='pricing'
-                            value={formValue.price}
-                            onValueChange={(e) => onValueChangeHandler('price', e.target.value)}
-                            defaultSelectaValue={''}
-                            defaultSelectText={''}
-                            errorMessage={''}
-                            list={[
-                                { value: 'free', label: 'Free' },
-                                { value: 'cheap', label: 'Cheap $' },
-                                { value: 'middle', label: 'Middle $$' },
-                                { value: 'expensive', label: 'Expensive $$$'},
-                            ]}
-                            valueKey={'value'}
-                            textKey={'label'}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <NullableDatePicker
-                            label={'from'}
-                            value={formValue.from_time}
-                            onValueChange={(e) => onValueChangeHandler('from_time', e)}
-                            errorMessage={error.from_time}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <NullableDatePicker
-                            noPast
-                            label={'to'}
-                            value={formValue.to_time}
-                            onValueChange={(e) => onValueChangeHandler('to_time', e)}
-                            errorMessage={error.to_time}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Selectable
-                            label='permanent'
-                            value={formValue.permanent}
-                            onValueChange={(e) => onValueChangeHandler('permanent', e.target.value)}
-                            noDefault
-                            errorMessage={''}
-                            list={[
-                                { value: false, label: 'no' },
-                                { value: true, label: 'yes' },
-                            ]}
-                            valueKey={'value'}
-                            textKey={'label'}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Selectable
-                            label='need booking'
-                            value={formValue.need_booking}
-                            onValueChange={(e) => onValueChangeHandler('need_booking', e.target.value)}
-                            noDefault
-                            errorMessage={''}
-                            list={[
-                                { value: false, label: 'no' },
-                                { value: true, label: 'yes' },
-                            ]}
-                            valueKey={'value'}
-                            textKey={'label'}
-                        />
-                    </Grid>
-                </Grid>
+                        </FormLabel>
+                    </FormControl>
+                    <TextField
+                        variant='outlined'
+                        fullWidth
+                        label='description'
+                        value={formValue.description}
+                        onChange={(e) => onValueChangeHandler('description', e.target.value)}
+                        error={!!error.description}
+                        helperText={error.description}
+                    />
+                    <Selectable
+                        label='estimate time'
+                        value={formValue.estimate_time}
+                        onValueChange={(e) => onValueChangeHandler('estimate_time', e.target.value)}
+                        defaultSelectaValue={''}
+                        defaultSelectText={''}
+                        errorMessage={''}
+                        list={[
+                            { value: 'short', label: 'Short' },
+                            { value: 'medium', label: 'Medium' },
+                            { value: 'long', label: 'Long' },
+                        ]}
+                        valueKey={'value'}
+                        textKey={'label'}
+                    />
+                    <Selectable
+                        label='pricing'
+                        value={formValue.price}
+                        onValueChange={(e) => onValueChangeHandler('price', e.target.value)}
+                        defaultSelectaValue={''}
+                        defaultSelectText={''}
+                        errorMessage={''}
+                        list={[
+                            { value: 'free', label: 'Free' },
+                            { value: 'cheap', label: 'Cheap $' },
+                            { value: 'middle', label: 'Middle $$' },
+                            { value: 'expensive', label: 'Expensive $$$'},
+                        ]}
+                        valueKey={'value'}
+                        textKey={'label'}
+                    />
+                    <NullableDatePicker
+                        label={'from'}
+                        value={formValue.from_time}
+                        onValueChange={(e) => onValueChangeHandler('from_time', e)}
+                        errorMessage={error.from_time}
+                    />
+                    <NullableDatePicker
+                        noPast
+                        label={'to'}
+                        value={formValue.to_time}
+                        onValueChange={(e) => onValueChangeHandler('to_time', e)}
+                        errorMessage={error.to_time}
+                    />
+                    <Selectable
+                        label='permanent'
+                        value={formValue.permanent}
+                        onValueChange={(e) => onValueChangeHandler('permanent', e.target.value)}
+                        noDefault
+                        errorMessage={''}
+                        list={[
+                            { value: false, label: 'no' },
+                            { value: true, label: 'yes' },
+                        ]}
+                        valueKey={'value'}
+                        textKey={'label'}
+                    />
+                    <Selectable
+                        label='need booking'
+                        value={formValue.need_booking}
+                        onValueChange={(e) => onValueChangeHandler('need_booking', e.target.value)}
+                        noDefault
+                        errorMessage={''}
+                        list={[
+                            { value: false, label: 'no' },
+                            { value: true, label: 'yes' },
+                        ]}
+                        valueKey={'value'}
+                        textKey={'label'}
+                    />
+                </Stack>
             </BaseForm>
             <ImageLinkValidate 
                 shouldOpen={imageFormState === 'weblink'}

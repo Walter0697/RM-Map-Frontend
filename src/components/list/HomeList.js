@@ -76,9 +76,6 @@ function HomeList({
             setYesterdaySchedules(unfinished_event)
         }
         
-        if (todayError) {
-            console.log(todayError)
-        }
     }, [todayData, todayError])
 
     const onTodayScheduleClick = () => {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { connect } from 'react-redux'
+import { useLazyQuery } from '@apollo/client'
 import {
     useSpring,
     config,
@@ -30,6 +31,10 @@ import FilterCircleButton from '../wrapper/FilterCircleButton'
 
 import maphelper from '../../scripts/map'
 import constants from '../../constant'
+import graphql from '../../graphql'
+import viewportQuery from '../../scripts/viewportQuery'
+import telemetry from '../../scripts/telemetry'
+import { buildPagedCacheKey, readPagedCache, writePagedCache } from '../../scripts/pagedCache'
 import apis from '../../apis'
 import {
     prefersReducedMotion,
@@ -56,6 +61,7 @@ function MarkerMap({
     mappins,
     stations,
     showInMap,
+    setSelectedMarker,
 }) {
     const mapElement = useRef(null)
     const previousWeatherViewportRef = useRef(null)
@@ -63,6 +69,10 @@ function MarkerMap({
 
     const [ viewPreviewContent, setViewContent ] = useState(false)
     const [ hasPreviewContent, setPreviewContent ] = useState(false)
+    const [ listViewportMarkerGQL ] = useLazyQuery(graphql.markers.viewport_page, { fetchPolicy: 'no-cache' })
+    const [ viewportMarkers, setViewportMarkers ] = useState([])
+    const [ viewportStale, setViewportStale ] = useState(false)
+    const latestViewportRequestRef = useRef(0)
 
     const {
         mapOpacity,
@@ -164,8 +174,9 @@ function MarkerMap({
     }, [markers, filtercountry, previousCountry])
 
     useEffect(() => {
-        const output = []
-        markers.forEach(item => {
+        let output = []
+        const activeMarkers = viewportMarkers
+        activeMarkers.forEach(item => {
             const pinType = maphelper.pins.getPinType(item)
             output.push({
                 id: item.id,
@@ -179,26 +190,167 @@ function MarkerMap({
         })
 
         setLocation(output)
-    }, [markers, showingList])
+    }, [markers, viewportMarkers, showingList])
 
     useEffect(() => {
         if (!clickedMarker || clickedMarker === -1) return
-        if (clickedMarker.type === 'marker') {
-            const marker = markers.find(s => s.id === clickedMarker.item.id)
-            if (marker) {
-                setViewMarker({
-                    type: 'marker',
-                    item: marker,
-                })
+        if (clickedMarker) {
+            if (clickedMarker.type === 'marker') {
+                const activeMarkers = viewportMarkers
+                const marker = activeMarkers.find(s => s.id === clickedMarker.item.id)
+                if (marker) {
+                    setViewMarker({
+                        type: 'marker',
+                        item: marker,
+                    })
+                    setViewContent(true)
+                    setPreviewContent(true)
+                }
+            } else {
+                setViewMarker(clickedMarker)
                 setViewContent(true)
                 setPreviewContent(true)
             }
-        } else {
-            setViewMarker(clickedMarker)
-            setViewContent(true)
-            setPreviewContent(true)
+        } 
+    }, [clickedMarker, markers, viewportMarkers])
+
+    useEffect(() => {
+        if (!map) return
+
+        const fetchViewportMarkers = async () => {
+            if (!map.getBounds) return
+            const bounds = map.getBounds()
+            const query = viewportQuery.buildViewportQuery(bounds, map.getZoom())
+            if (!query) return
+
+            const requestId = Date.now()
+            latestViewportRequestRef.current = requestId
+            telemetry.debugLog('viewport_markers', 'request:start', {
+                requestId,
+                ...query,
+            })
+
+            let cursor = null
+            let merged = []
+            let page = 0
+            const queryIdentity = {
+                west: query.west,
+                south: query.south,
+                east: query.east,
+                north: query.north,
+                zoom: query.zoom,
+            }
+
+            const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false
+            if (isOffline) {
+                while (page < 5) {
+                    const cacheKey = buildPagedCacheKey('viewport_markers', queryIdentity, cursor || '')
+                    const cached = readPagedCache(cacheKey, 5 * 60 * 1000)
+                    telemetry.trackCacheMetric('viewport_markers', !!cached)
+                    telemetry.debugLog('viewport_markers', 'cache:page', {
+                        requestId,
+                        page: page + 1,
+                        cursor: cursor || null,
+                        hit: !!cached,
+                    })
+                    if (!cached || !cached.record) break
+                    const dedupe = {}
+                    merged.concat(cached.record.items || []).forEach((item) => {
+                        if (!item || !item.id) return
+                        dedupe[item.id] = item
+                    })
+                    merged = Object.values(dedupe).sort((a, b) => a.id - b.id)
+                    cursor = cached.record.nextCursor || null
+                    page += 1
+                    if (!cursor) break
+                }
+
+                if (latestViewportRequestRef.current === requestId && merged.length > 0) {
+                    setViewportMarkers(merged)
+                    setViewportStale(true)
+                    telemetry.debugLog('viewport_markers', 'cache:applied', {
+                        requestId,
+                        items: merged.length,
+                        stale: true,
+                    })
+                }
+                return
+            }
+
+            try {
+                while (page < 5) {
+                    const cacheKey = buildPagedCacheKey('viewport_markers', queryIdentity, cursor || '')
+                    const response = await listViewportMarkerGQL({
+                        variables: {
+                            ...query,
+                            cursor: cursor,
+                            limit: 120,
+                        }
+                    })
+
+                    if (latestViewportRequestRef.current !== requestId) {
+                        return
+                    }
+
+                    const payload = response?.data?.viewportmarkers
+                    const items = payload?.items || []
+                    const dedupe = {}
+                    merged.concat(items).forEach((item) => {
+                        if (!item || !item.id) return
+                        dedupe[item.id] = item
+                    })
+                    merged = Object.values(dedupe).sort((a, b) => a.id - b.id)
+                    cursor = payload?.next_cursor || null
+                    page += 1
+
+                    telemetry.trackRequestMetric('viewport_markers', payload, false)
+                    writePagedCache('viewport_markers', cacheKey, {
+                        items,
+                        nextCursor: cursor,
+                    })
+                    telemetry.debugLog('viewport_markers', 'request:page-success', {
+                        requestId,
+                        page,
+                        pageItems: items.length,
+                        mergedItems: merged.length,
+                        nextCursor: cursor,
+                    })
+
+                    if (!cursor) break
+                }
+                if (latestViewportRequestRef.current === requestId) {
+                    setViewportMarkers(merged)
+                    setViewportStale(false)
+                    telemetry.debugLog('viewport_markers', 'request:complete', {
+                        requestId,
+                        items: merged.length,
+                        stale: false,
+                    })
+                }
+            } catch (err) {
+                telemetry.trackRequestMetric('viewport_markers', null, true)
+                telemetry.debugLog('viewport_markers', 'request:error', {
+                    requestId,
+                    message: err?.message || 'unknown error',
+                })
+            }
         }
-    }, [clickedMarker, markers])
+
+        const debouncedFetch = _.debounce(fetchViewportMarkers, 300)
+        map.on('moveend', debouncedFetch)
+        map.on('zoomend', debouncedFetch)
+        debouncedFetch()
+
+        return () => {
+            if (map) {
+                map.off('moveend', debouncedFetch)
+                map.off('zoomend', debouncedFetch)
+            }
+            if (debouncedFetch.cancel) {
+                debouncedFetch.cancel()
+            }
+        }
+    }, [map, listViewportMarkerGQL])
 
     useEffect(() => {
         if (!scheduleCreated) return
@@ -497,6 +649,7 @@ function MarkerMap({
                     onClose={() => setViewContent(false)}
                     shouldViewContent={viewPreviewContent}
                     setSelectedById={setSelectedById}
+                    onSelectMarker={setSelectedMarker}
                 />
             </animated.div>
 
@@ -750,6 +903,12 @@ function MarkerMap({
                 open={gpsFail}
                 type={'warning'}
                 message={'Cannot retrieve GPS information'}
+                timing={3000}
+            />
+            <AutoHideAlert
+                open={viewportStale}
+                type={'warning'}
+                message={'Showing cached map markers'}
                 timing={3000}
             />
         </>

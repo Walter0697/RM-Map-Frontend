@@ -97,7 +97,25 @@ function ScrapperForm({
 
     const getClipboardMessage = async () => {
         setLoading(true)
-        const text = await navigator.clipboard.readText()
+        if (!navigator?.clipboard?.readText) {
+            setLoading(false)
+            setAlertMessage({
+                type: 'warning',
+                message: 'Clipboard access is unavailable in this browser/context.',
+            })
+            return
+        }
+        let text = ''
+        try {
+            text = await navigator.clipboard.readText()
+        } catch (error) {
+            setLoading(false)
+            setAlertMessage({
+                type: 'warning',
+                message: 'Unable to read clipboard content.',
+            })
+            return
+        }
         if (text === copyContent) {
             setLoading(false)
         }

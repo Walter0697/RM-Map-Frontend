@@ -205,9 +205,6 @@ function MovieList({
             setList(movieData.moviefetch)
         }
 
-        if (movieError) {
-            console.log(movieError)
-        }
     }, [movieData, movieError])
 
     return (

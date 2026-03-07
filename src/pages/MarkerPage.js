@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { connect } from 'react-redux'
 import { useLocation } from 'react-router-dom'
+import { useLazyQuery } from '@apollo/client'
 import Base from './Base'
 
 import {
@@ -27,12 +28,20 @@ import CountrySelect from '../components/map/mappart/countryselect/CountrySelect
 import search from '../scripts/search'
 
 import styles from '../styles/list.module.css'
+import graphql from '../graphql'
+import usePagedDataController from '../hooks/usePagedDataController'
+import telemetry from '../scripts/telemetry'
+import deepLinkScript from '../scripts/deepLink'
+import actions from '../store/actions'
 
 function MarkerPage({ 
     markers,
     eventtypes,
     filterlist,
     filtercountry,
+    countryparts,
+    pendingDeepLink,
+    dispatch,
 }) {
     const location = useLocation()
     const suffix = location.pathname.replace('/markers', '')
@@ -47,6 +56,10 @@ function MarkerPage({
     const [ editAlert, confirmEdited ] = useBoop(3000)
 
     const [ editedTrigger, setEditTrigger ] = useState(nanoid())
+    const resolvingDeepLinkIdRef = useRef(null)
+    const [ listPagedMarkerGQL ] = useLazyQuery(graphql.markers.viewport_page, { fetchPolicy: 'no-cache' })
+    const [ listMarkerGQL ] = useLazyQuery(graphql.markers.list, { fetchPolicy: 'no-cache' })
+    const [ deepLinkOpenFailed, setDeepLinkOpenFailed ] = useBoop(3000)
 
     // if it is showing list or map
     const [ showingList, setShowingList ] = useState((suffix && suffix === '/list') ? true : false)
@@ -86,15 +99,152 @@ function MarkerPage({
     //     return list
     // }, [markers, finalFilterValue, filterOption, customFilterValue, showingList, eventtypes, editAlert])
 
+    const pagedMarkerController = usePagedDataController({
+        resource: 'markers_list',
+        queryIdentity: { scope: 'world' },
+        fetchPage: async (cursor) => {
+            const response = await listPagedMarkerGQL({
+                variables: {
+                    west: -180,
+                    south: -90,
+                    east: 180,
+                    north: 90,
+                    limit: 30,
+                    cursor: cursor || null,
+                }
+            })
+            const payload = response?.data?.viewportmarkers || {}
+            return {
+                items: payload.items || [],
+                nextCursor: payload.next_cursor || null,
+            }
+        }
+    })
+
+    useEffect(() => {
+        pagedMarkerController.refresh()
+        telemetry.debugLog('markers_list', 'refresh:initial')
+    }, [])
+
+    const markerSource = useMemo(() => {
+        return pagedMarkerController.items
+    }, [pagedMarkerController.items])
+
     const filteredMarkers = useMemo(() => {
-        return search.filter.parse(markers, filterlist, eventtypes, filtercountry)
+        return search.filter.parse(markerSource, filterlist, eventtypes, filtercountry)
+    }, [markerSource, filterlist, eventtypes, filtercountry, editedTrigger])
+    const fallbackFilteredMarkers = useMemo(() => {
+        return search.filter.parse(markers || [], filterlist, eventtypes, filtercountry)
     }, [markers, filterlist, eventtypes, filtercountry, editedTrigger])
+    const useFallbackList = filteredMarkers.length === 0 && fallbackFilteredMarkers.length > 0
+    const displayMarkers = useMemo(() => {
+        if (useFallbackList) return fallbackFilteredMarkers
+        return filteredMarkers
+    }, [filteredMarkers, fallbackFilteredMarkers, useFallbackList])
 
     useEffect(() => {
         if (editAlert) {
             setEditTrigger(nanoid())
         }
     }, [editAlert])
+
+    useEffect(() => {
+        telemetry.debugLog('markers_list', 'items:update', {
+            count: filteredMarkers.length,
+            nextCursor: pagedMarkerController.nextCursor,
+            loading: pagedMarkerController.loading,
+        })
+    }, [filteredMarkers.length, pagedMarkerController.nextCursor, pagedMarkerController.loading])
+
+    useEffect(() => {
+        if (!useFallbackList) return
+        telemetry.debugLog('markers_list', 'fallback:store-markers', {
+            pagedCount: markerSource.length,
+            fallbackCount: fallbackFilteredMarkers.length,
+        })
+    }, [useFallbackList, markerSource.length, fallbackFilteredMarkers.length])
+
+    useEffect(() => {
+        telemetry.debugLog('marker_page', 'view:switch', {
+            view: showingList ? 'list' : 'map',
+        })
+    }, [showingList])
+
+    useEffect(() => {
+        if (!pendingDeepLink) return
+        if (pendingDeepLink.resourceType !== deepLinkScript.resources.marker) return
+
+        setShowingList(true)
+
+        const markerId = deepLinkScript.parsePositiveIntId(pendingDeepLink.id)
+        if (!markerId) {
+            dispatch(actions.clearDeepLinkIntent())
+            setDeepLinkOpenFailed()
+            return
+        }
+        if (resolvingDeepLinkIdRef.current === markerId) return
+
+        let cancelled = false
+        resolvingDeepLinkIdRef.current = markerId
+
+        const resolveDeepLinkMarker = async () => {
+            try {
+                const response = await listMarkerGQL()
+                if (cancelled) return
+
+                const backendMarkers = response?.data?.markers || []
+                const selected = backendMarkers.find(s => s.id === markerId)
+
+                if (!selected) {
+                    dispatch(actions.clearDeepLinkIntent())
+                    setDeepLinkOpenFailed()
+                    return
+                }
+
+                const selectedCountryCode = selected.country_code || filtercountry?.countryCode || 'HK'
+                const selectedParts = countryparts?.[selectedCountryCode] || []
+                const selectedPart = selected.country_part
+                const countryPart = (selectedPart && selectedParts.includes(selectedPart))
+                    ? {
+                        type: 'part',
+                        name: selectedPart,
+                    }
+                    : {
+                        type: 'all',
+                    }
+
+                dispatch(actions.resetFilterCountry({
+                    countryCode: selectedCountryCode,
+                    countryPart,
+                }))
+                setSelected(selected)
+                dispatch(actions.clearDeepLinkIntent())
+            } catch (error) {
+                telemetry.debugLog('marker_page', 'deep-link:resolve-error', {
+                    id: markerId,
+                    message: error?.message || 'unknown error',
+                })
+                dispatch(actions.clearDeepLinkIntent())
+                setDeepLinkOpenFailed()
+            } finally {
+                if (!cancelled) {
+                    resolvingDeepLinkIdRef.current = null
+                }
+            }
+        }
+
+        resolveDeepLinkMarker()
+        return () => {
+            cancelled = true
+            resolvingDeepLinkIdRef.current = null
+        }
+    }, [
+        pendingDeepLink,
+        listMarkerGQL,
+        filtercountry,
+        countryparts,
+        dispatch,
+    ])
 
     // const [ showFilterInListView, showFilter ] = useState(false)
 
@@ -112,16 +262,9 @@ function MarkerPage({
     // }, [eventtypes])
 
     const setSelectedById = (id) => {
-        let selected = null
-        markers.forEach(m => {
-            if (m.id === id) {
-                selected = m
-                return
-            }
-        })
-        if (selected) {
-            setSelected(selected)
-        }
+        const selected = markerSource.find(s => s.id === id)
+            || (markers || []).find(s => s.id === id)
+        if (selected) setSelected(selected)
     } 
 
     // const confirmFilterValue = (finalValue) => {
@@ -133,6 +276,11 @@ function MarkerPage({
         setSelected(null)
         setEditing(false)
         confirmEdited()
+    }
+
+    const onSelectMarker = (marker) => {
+        if (!marker) return
+        setSelected(marker)
     }
 
     const onScheduleCreated = () => {
@@ -160,8 +308,9 @@ function MarkerPage({
                     <MarkerMap 
                         showingList={showingList}
                         toListView={() => setShowingList(true)}
-                        markers={filteredMarkers || []}
+                        markers={markers || []}
                         setSelectedById={setSelectedById}
+                        setSelectedMarker={onSelectMarker}
                         // filterOption={filterOption} // for filter option
                         // filterValue={filterValue}   // for filter temporary value setter and getter
                         // setFilterValue={setFilterValue}  
@@ -185,8 +334,17 @@ function MarkerPage({
                         top={'15%'}
                         height={'85%'}
                         showingList={showingList}
-                        markers={filteredMarkers || []}
+                        markers={displayMarkers || []}
                         setSelectedById={setSelectedById}
+                        onReachEnd={pagedMarkerController.loadMore}
+                        onRefreshTop={pagedMarkerController.refresh}
+                        hasMore={!!pagedMarkerController.nextCursor && !useFallbackList}
+                        loadingMore={pagedMarkerController.loading}
+                        refreshing={pagedMarkerController.refreshing}
+                        onRetry={pagedMarkerController.retry}
+                        loadingError={pagedMarkerController.error}
+                        staleData={pagedMarkerController.stale}
+                        offlineCached={pagedMarkerController.offlineCached}
                         // filterOption={filterOption} // for filter option
                         // filterValue={filterValue}   // for filter temporary value setter and getter
                         // setFilterValue={setFilterValue}  
@@ -278,6 +436,12 @@ function MarkerPage({
                 message={'Successfully edit marker!'}
                 timing={3000}
             />
+            <AutoHideAlert
+                open={deepLinkOpenFailed}
+                type={'error'}
+                message={'Requested marker cannot be opened. Showing marker list instead.'}
+                timing={3000}
+            />
         </Base>
     )
 }
@@ -286,5 +450,7 @@ export default connect(state => ({
     markers: state.marker.markers,
     eventtypes: state.marker.eventtypes,
     filterlist: state.filter.list,
-    filtercountry: state.marker.filtercountry
+    filtercountry: state.marker.filtercountry,
+    countryparts: state.marker.countryparts,
+    pendingDeepLink: state.deepLink.pending,
 })) (MarkerPage)

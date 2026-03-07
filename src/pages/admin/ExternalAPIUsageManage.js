@@ -158,9 +158,25 @@ function ExternalAPIUsageManage({ jwt }) {
     }, [jwt])
 
     const providerRows = summary && Array.isArray(summary.providers) ? summary.providers : []
+    const providerOptions = useMemo(() => {
+        const map = new Map()
+        providers.forEach((item) => {
+            if (!item?.id) return
+            map.set(item.id, item)
+        })
+        providerRows.forEach((row) => {
+            const id = row?.provider
+            if (!id || map.has(id)) return
+            map.set(id, {
+                id,
+                label: row?.provider_label || id,
+            })
+        })
+        return Array.from(map.values())
+    }, [providers, providerRows])
     const overall = summary && summary.overall ? summary.overall : null
     const maxTrend = trends.reduce((max, item) => Math.max(max, Number(item.total_calls || 0)), 0)
-    const providerValue = provider === 'all' || providers.some((item) => item.id === provider) ? provider : 'all'
+    const providerValue = provider === 'all' || providerOptions.some((item) => item.id === provider) ? provider : 'all'
     const totalCalls = Number(overall?.total_calls || 0)
     const successCount = Number(overall?.success_count || 0)
     const errorCount = Number(overall?.error_count || 0)
@@ -180,7 +196,7 @@ function ExternalAPIUsageManage({ jwt }) {
 
     return (
         <AdminPageShell
-            title='External API Usage [UI-CHECK-2026-03-03]'
+            title='External API Usage'
             description='Audit-based usage analytics for managed external providers'
             actions={(
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
@@ -210,7 +226,7 @@ function ExternalAPIUsageManage({ jwt }) {
                                     inputProps={{ 'data-testid': 'api-usage-provider-input' }}
                                 >
                                     <MenuItem value='all'>All providers</MenuItem>
-                                    {providers.map((item) => (
+                                    {providerOptions.map((item) => (
                                         <MenuItem key={item.id} value={item.id}>{item.label}</MenuItem>
                                     ))}
                                 </Select>

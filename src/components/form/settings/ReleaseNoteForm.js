@@ -43,9 +43,6 @@ function ReleaseNoteItem({
             setNotes(JSON.parse(releaseData.specificreleasenote.notes))
         }
 
-        if (releaseError) {
-            console.log(releaseError)
-        }
     }, [releaseData, releaseError])
 
     return (

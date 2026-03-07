@@ -1,13 +1,9 @@
-import React, { useState, useRef } from 'react'
+import React, { useMemo, useRef, useState, useEffect } from 'react'
 import { connect } from 'react-redux'
+import { Virtuoso } from 'react-virtuoso'
 
-import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
-// import FilterBox from '../filterbox/FilterBox'
-import AutoUpdateTop from './AutoUpdateTop'
 import MarkerItem from './listitem/MarkerItem'
-
-const loadingBoxHeight = 300
 
 function MarkerList({
   top,
@@ -15,112 +11,131 @@ function MarkerList({
   markers,
   setSelectedById,
   eventtypes,
-  filterOption,   // below filter related
-  filterValue,
-  setFilterValue,
-  isFilterExpanded,
-  setExpandFilter,
-  confirmFilterValue,
-  finalFilterValue,
-  customFilterValue,
-  setCustomFilterValue,
-  filterOpen,
+  onReachEnd,
+  hasMore,
+  loadingMore,
+  loadingError,
+  onRetry,
+  staleData,
+  offlineCached,
+  onRefreshTop,
+  refreshing,
 }) {
-    const listRef = useRef(null)
-    const itemListRef = useRef(null)
+    const refreshArmedRef = useRef(false)
+    const [ scrollerEl, setScrollerEl ] = useState(null)
+    const [ refreshUI, setRefreshUI ] = useState('hidden')
 
-    // const {
-    //   filterBoxTransform,
-    //   filterBoxOpacity,
-    // } = useSpring({
-    //   config: config.slow,
-    //   from: {
-    //     filterBoxOpacity: 0,
-    //     filterBoxTransform: 'scale(0, 0) translate(-100%, 3000%)',
-    //   },
-    //   to: {
-    //     filterBoxOpacity: filterOpen ? 1 : 0,
-    //     filterBoxTransform: filterOpen ? 'scale(1, 1) translate(0%, 0%)' : 'scale(0, 0) translate(-100%, 3000%)',
-    //   }
-    // })
+    const footerContent = useMemo(() => {
+      if (loadingMore) return <div style={{ paddingBottom: '16px' }}>Loading more markers...</div>
+      if (loadingError) {
+        return (
+          <div style={{ paddingBottom: '16px' }}>
+            Failed to load more markers.
+            {onRetry && (
+              <button type='button' onClick={onRetry} style={{ marginLeft: '8px' }}>
+                Retry
+              </button>
+            )}
+          </div>
+        )
+      }
+      if (offlineCached) return <div style={{ paddingBottom: '16px' }}>Offline: showing cached list data.</div>
+      if (staleData) return <div style={{ paddingBottom: '16px' }}>Showing cached marker data.</div>
+      return null
+    }, [loadingMore, loadingError, onRetry, staleData, offlineCached])
 
-    const [ bottomPaddingBox, setPaddingHeight ] = useState(0)
+    useEffect(() => {
+      if (!scrollerEl) return
+      const onScroll = () => {
+        const top = scrollerEl.scrollTop || 0
+            if (top > 80 && !refreshArmedRef.current) {
+              refreshArmedRef.current = true
+            }
+        if (top <= 2 && refreshArmedRef.current && onRefreshTop && !loadingMore) {
+          refreshArmedRef.current = false
+          setRefreshUI('refreshing')
+          onRefreshTop()
+        }
+      }
+      scrollerEl.addEventListener('scroll', onScroll, { passive: true })
+      return () => scrollerEl.removeEventListener('scroll', onScroll)
+    }, [scrollerEl, onRefreshTop, loadingMore, refreshing])
+
+    useEffect(() => {
+      if (refreshing) {
+        setRefreshUI('refreshing')
+        return
+      }
+      if (refreshUI === 'refreshing') {
+        const timer = window.setTimeout(() => {
+          setRefreshUI('hidden')
+        }, 350)
+        return () => window.clearTimeout(timer)
+      }
+    }, [refreshing, refreshUI])
 
     return (
-        <>
-          <div 
-              ref={listRef}
-              style={{
-                  position: 'absolute',
-                  top: top ?? null,
-                  height: height,
-                  width: '95%',
-                  paddingLeft: '5%',
-                  paddingTop: '20px',
-                  overflow: 'auto',
-              }}
+      <div
+        style={{
+          position: 'absolute',
+          top: top ?? null,
+          height: height,
+          width: '95%',
+          paddingLeft: '5%',
+          paddingTop: '20px',
+        }}
+      >
+          <div
+            style={{
+              position: 'absolute',
+              top: '4px',
+              left: '50%',
+              transform: refreshUI === 'refreshing' ? 'translate(-50%, 0)' : 'translate(-50%, -120%)',
+              opacity: refreshUI === 'refreshing' ? 1 : 0,
+              transition: 'all 220ms ease',
+              background: '#4ea6d8',
+              color: '#fff',
+              borderRadius: '999px',
+              fontSize: '12px',
+            fontWeight: 600,
+            padding: '6px 12px',
+            zIndex: 3,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+              pointerEvents: 'none',
+            }}
           >
-            <AutoUpdateTop
-              topHeight={loadingBoxHeight}
-              items={markers}
-              listRef={listRef}
-              itemListRef={itemListRef}
-              setBottomPaddingHeight={setPaddingHeight}
-            />
-              <div ref={itemListRef}>
-                <BottomUpTrail>
-                  {markers.map((item, index) => (
-                    <WrapperBox
-                      key={index}
-                      height={'120px'}
-                      marginBottom='10px'
-                    >
-                      {(() => {
-                        const currentType = eventtypes.find(s => s.value === item.type)
-                        const typeIcon = currentType?.icon_path || ''
-                        return (
-                          <MarkerItem
-                            item={item}
-                            typeIcon={typeIcon}
-                            onClickHandler={() => setSelectedById(item.id)}
-                          />
-                        )
-                      })()}
-                    </WrapperBox>
-                  ))}
-                </BottomUpTrail>
-              </div>
-
-              <div
-                style={{
-                  height: bottomPaddingBox,
-                  width: '100%',
-                }}
-              />
-          </div>
-
-          {/* <animated.div style={{
-            transform: filterBoxTransform,
-            position: 'absolute',
-            paddingTop: '20px',
-            paddingLeft: '5%',
-            width: '100%',
-            transformOrigin: 'bottom left',
-            visibility: filterBoxOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
-          }}>
-            <FilterBox 
-                filterOption={filterOption}
-                filterValue={filterValue}
-                setFilterValue={setFilterValue}
-                isExpanded={isFilterExpanded}
-                setExpand={setExpandFilter}
-                confirmFilterValue={confirmFilterValue}
-                finalFilterValue={finalFilterValue}
-                customFilterValue={customFilterValue}
-                setCustomFilterValue={setCustomFilterValue}
-            />
-          </animated.div> */}
-        </>
+          Refreshing list...
+        </div>
+        <Virtuoso
+          style={{ height: '100%', width: '100%' }}
+          data={markers}
+          scrollerRef={setScrollerEl}
+          endReached={() => {
+            if (!hasMore || loadingMore || !onReachEnd) return
+            onReachEnd()
+          }}
+          components={{
+            Footer: () => footerContent,
+          }}
+          itemContent={(_, item) => {
+            const currentType = eventtypes.find(s => s.value === item.type)
+            const typeIcon = currentType?.icon_path || ''
+            return (
+              <WrapperBox
+                key={item.id}
+                height={'120px'}
+                marginBottom='10px'
+              >
+                <MarkerItem
+                  item={item}
+                  typeIcon={typeIcon}
+                  onClickHandler={() => setSelectedById(item.id)}
+                />
+              </WrapperBox>
+            )
+          }}
+        />
+      </div>
     )
 }
 

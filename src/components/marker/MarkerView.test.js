@@ -65,6 +65,7 @@ describe('MarkerView action layout', () => {
         const actionRow = document.querySelector('[data-testid="marker-view-top-actions"]')
         expect(actionRow).not.toBeNull()
         expect(actionRow.querySelectorAll('button').length).toBeGreaterThanOrEqual(2)
+        expect(document.querySelector('[data-testid="marker-view-id-badge"]')?.textContent).toBe('#1')
 
         act(() => {
             root.unmount()

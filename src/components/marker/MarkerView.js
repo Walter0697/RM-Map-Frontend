@@ -54,6 +54,7 @@ function MarkerView({
     dispatch,
 }) {
     const history = useHistory()
+    const markerDisplayId = marker?.id ?? marker?.marker_id ?? marker?.markerId ?? marker?.identifier ?? null
 
     const [ updateMarkerFavouriteGQL, { data: updateData, loading: updateLoading, error: updateError } ] = useMutation(graphql.markers.update_fav, { errorPolicy: 'all' }) 
     const [ removeMarkerGQL, { data: removeData, loading: removeLoading, error: removeError } ] = useMutation(graphql.markers.remove, { errorPolicy: 'all' })
@@ -163,6 +164,11 @@ function MarkerView({
                 onClose={handleClose}
                 scroll={'paper'}
                 TransitionComponent={TransitionUp}
+                PaperProps={{
+                    sx: {
+                        position: 'relative',
+                    },
+                }}
             >
                 { marker && (
                     <>
@@ -394,6 +400,25 @@ function MarkerView({
                                 </Grid>
                             </DialogContentText>
                         </DialogContent>
+                        {(markerDisplayId !== undefined && markerDisplayId !== null) && (
+                            <Box
+                                data-testid='marker-view-id-badge'
+                                sx={{
+                                    position: 'absolute',
+                                    right: 10,
+                                    bottom: 10,
+                                    zIndex: 2,
+                                    fontSize: '0.75rem',
+                                    lineHeight: 1.1,
+                                    color: '#8a8f98',
+                                    letterSpacing: 0.1,
+                                    userSelect: 'text',
+                                    pointerEvents: 'none',
+                                }}
+                            >
+                                #{markerDisplayId}
+                            </Box>
+                        )}
                     </>
                 )}
             </Dialog>

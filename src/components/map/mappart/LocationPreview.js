@@ -22,6 +22,7 @@ function LocationPreview({
     onClose,
     shouldViewContent,
     setSelectedById,
+    onSelectMarker,
     eventtypes,
 }) {
     const [ typeIcon, setIcon ] = useState(null)
@@ -58,6 +59,10 @@ function LocationPreview({
 
     const showMarkerView = () => {
         if (marker && marker.type === 'marker') {
+            if (onSelectMarker) {
+                onSelectMarker(marker.item)
+                return
+            }
             setSelectedById(marker?.item.id)
         }
     }

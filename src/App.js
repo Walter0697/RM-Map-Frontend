@@ -32,6 +32,7 @@ import ApiKeyManage from './pages/admin/ApiKeyManage'
 import TrainStationManage from './pages/admin/TrainStationManage'
 import PermanentCleanupManage from './pages/admin/PermanentCleanupManage'
 import ExternalAPIUsageManage from './pages/admin/ExternalAPIUsageManage'
+import SystemSettingsManage from './pages/admin/SystemSettingsManage'
 
 import InitData from './InitData'
 
@@ -44,8 +45,10 @@ function App() {
             <Route exact path='/login/oidc' component={OIDCLoginPage} />
             <Route path='/login' component={Login} />
             <Route path='/search' component={SearchPage} />
+            <Route exact path='/markers/:marker_id' component={MarkerPage} />
             <Route path='/markers' component={MarkerPage} />
             <Route path='/home' component={HomePage} />
+            <Route exact path='/schedules/:schedule_id' component={SchedulePage} />
             <Route path='/schedule' component={SchedulePage} />
             <Route path='/setting' component={SettingPage} />
 
@@ -66,6 +69,7 @@ function App() {
             <Route path='/admin/station/:mapName?' component={TrainStationManage} />
             <Route path='/admin/cleanup' component={PermanentCleanupManage} />
             <Route path='/admin/api-usage' component={ExternalAPIUsageManage} />
+            <Route path='/admin/system-settings' component={SystemSettingsManage} />
           </Switch>
         )} />
         <InitData />
