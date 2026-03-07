@@ -33,6 +33,7 @@ import TrainStationManage from './pages/admin/TrainStationManage'
 import PermanentCleanupManage from './pages/admin/PermanentCleanupManage'
 import ExternalAPIUsageManage from './pages/admin/ExternalAPIUsageManage'
 import SystemSettingsManage from './pages/admin/SystemSettingsManage'
+import ReleaseNotesManage from './pages/admin/ReleaseNotesManage'
 
 import InitData from './InitData'
 
@@ -70,6 +71,7 @@ function App() {
             <Route path='/admin/cleanup' component={PermanentCleanupManage} />
             <Route path='/admin/api-usage' component={ExternalAPIUsageManage} />
             <Route path='/admin/system-settings' component={SystemSettingsManage} />
+            <Route path='/admin/release-notes' component={ReleaseNotesManage} />
           </Switch>
         )} />
         <InitData />

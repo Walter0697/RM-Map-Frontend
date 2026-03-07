@@ -39,6 +39,11 @@ const adminNavItems = [
         description: 'Runtime integration configuration',
         path: '/admin/system-settings',
     },
+    {
+        label: 'Release Notes',
+        description: 'Draft and publish release announcements',
+        path: '/admin/release-notes',
+    },
 ]
 
 export default adminNavItems
