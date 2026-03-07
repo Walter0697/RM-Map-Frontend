@@ -32,7 +32,7 @@ const legacyIconComponentMap = {
     festival: FestivalIcon,
 }
 
-const emojiIconOptions = [
+const legacyEmojiIconOptions = [
     ['sun', 'Sun', '☀️'],
     ['cloud', 'Cloud', '☁️'],
     ['rain', 'Rain', '🌧️'],
@@ -160,6 +160,47 @@ const emojiIconOptions = [
     ['ladybug', 'Ladybug', '🐞'],
 ]
 
+const monochromeEmojiIconOptions = [
+    ['dot-solid', 'Dot Solid', '●'],
+    ['dot-outline', 'Dot Outline', '○'],
+    ['circle-solid', 'Circle Solid', '⬤'],
+    ['circle-outline', 'Circle Outline', '◯'],
+    ['square-solid', 'Square Solid', '■'],
+    ['square-outline', 'Square Outline', '□'],
+    ['rect-solid', 'Rectangle Solid', '▬'],
+    ['rect-outline', 'Rectangle Outline', '▭'],
+    ['triangle-up-solid', 'Triangle Up Solid', '▲'],
+    ['triangle-up-outline', 'Triangle Up Outline', '△'],
+    ['triangle-down-solid', 'Triangle Down Solid', '▼'],
+    ['triangle-down-outline', 'Triangle Down Outline', '▽'],
+    ['diamond-solid', 'Diamond Solid', '◆'],
+    ['diamond-outline', 'Diamond Outline', '◇'],
+    ['star-solid', 'Star Solid', '★'],
+    ['star-outline', 'Star Outline', '☆'],
+    ['heart-solid', 'Heart Solid', '♥'],
+    ['heart-outline', 'Heart Outline', '♡'],
+    ['spade-solid', 'Spade Solid', '♠'],
+    ['club-solid', 'Club Solid', '♣'],
+    ['cross-solid', 'Cross Solid', '✚'],
+    ['plus-heavy', 'Plus Heavy', '✜'],
+    ['minus-heavy', 'Minus Heavy', '➖'],
+    ['check-solid', 'Check Solid', '✔'],
+    ['x-solid', 'X Solid', '✖'],
+    ['spark-solid', 'Spark Solid', '✦'],
+    ['spark-outline', 'Spark Outline', '✧'],
+    ['bullet', 'Bullet', '•'],
+    ['block-light', 'Block Light', '░'],
+    ['block-medium', 'Block Medium', '▒'],
+    ['block-dark', 'Block Dark', '▓'],
+    ['box-small-solid', 'Box Small Solid', '▪'],
+    ['box-small-outline', 'Box Small Outline', '▫'],
+]
+
+const allEmojiIconOptions = [
+    ...legacyEmojiIconOptions,
+    ...monochromeEmojiIconOptions,
+]
+
 export const RELEASE_NOTE_ICON_OPTIONS = [
     { key: '', label: 'No icon', kind: 'none' },
     ...Object.keys(legacyIconComponentMap).map((key) => ({
@@ -167,7 +208,7 @@ export const RELEASE_NOTE_ICON_OPTIONS = [
         label: key,
         kind: 'mui',
     })),
-    ...emojiIconOptions.map(([key, label, emoji]) => ({
+    ...monochromeEmojiIconOptions.map(([key, label, emoji]) => ({
         key,
         label,
         emoji,
@@ -187,11 +228,20 @@ function VersionIcon({
         return (<MUIIcon sx={sx} />)
     }
 
-    const emojiOption = RELEASE_NOTE_ICON_OPTIONS.find((item) => item.key === key && item.kind === 'emoji')
-    if (emojiOption?.emoji) {
+    const emojiOption = allEmojiIconOptions.find((item) => item[0] === key)
+    if (emojiOption?.[2]) {
         return (
             <span style={{ fontSize: (sx && sx.fontSize) || 18, lineHeight: 1 }}>
-                {emojiOption.emoji}
+                {emojiOption[2]}
+            </span>
+        )
+    }
+
+    const listedEmojiOption = RELEASE_NOTE_ICON_OPTIONS.find((item) => item.key === key && item.kind === 'emoji')
+    if (listedEmojiOption?.emoji) {
+        return (
+            <span style={{ fontSize: (sx && sx.fontSize) || 18, lineHeight: 1 }}>
+                {listedEmojiOption.emoji}
             </span>
         )
     }

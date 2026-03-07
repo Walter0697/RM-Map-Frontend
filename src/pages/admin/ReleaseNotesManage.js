@@ -376,7 +376,23 @@ function ReleaseNotesManage({ jwt }) {
                                             isOptionEqualToValue={(option, value) => option.key === value.key}
                                             onChange={(_, option) => setIconRef(option?.key || '')}
                                             renderInput={(params) => (
-                                                <TextField {...params} label='Icon' />
+                                                <TextField
+                                                    {...params}
+                                                    label='Icon'
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        startAdornment: (
+                                                            <>
+                                                                {iconRef ? (
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+                                                                        <VersionIcon icon={iconRef} sx={{ fontSize: 20 }} />
+                                                                    </Box>
+                                                                ) : null}
+                                                                {params.InputProps.startAdornment}
+                                                            </>
+                                                        ),
+                                                    }}
+                                                />
                                             )}
                                             renderOption={(props, option) => (
                                                 <li {...props} key={option.key || 'none'}>
