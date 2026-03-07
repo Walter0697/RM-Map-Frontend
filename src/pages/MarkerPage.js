@@ -48,6 +48,7 @@ function MarkerPage({
 
     // selected marker
     const [ selectedMarker, setSelected ] = useState(null)
+    const [ selectedMarkerId, setSelectedMarkerId ] = useState(null)
     // if the selected marker is set to be schedule
     const [ scheduleFormOpen, setScheduleFormOpen ] = useState(false)
     const [ createAlert, confirmCreated ] = useBoop(3000)
@@ -130,17 +131,24 @@ function MarkerPage({
         return pagedMarkerController.items
     }, [pagedMarkerController.items])
 
+    const combinedListSource = useMemo(() => {
+        const dedupe = {}
+        ;(markerSource || []).forEach((marker) => {
+            if (!marker?.id) return
+            dedupe[marker.id] = marker
+        })
+        ;(markers || []).forEach((marker) => {
+            if (!marker?.id) return
+            if (!dedupe[marker.id]) {
+                dedupe[marker.id] = marker
+            }
+        })
+        return Object.values(dedupe)
+    }, [markerSource, markers])
+
     const filteredMarkers = useMemo(() => {
-        return search.filter.parse(markerSource, filterlist, eventtypes, filtercountry)
-    }, [markerSource, filterlist, eventtypes, filtercountry, editedTrigger])
-    const fallbackFilteredMarkers = useMemo(() => {
-        return search.filter.parse(markers || [], filterlist, eventtypes, filtercountry)
-    }, [markers, filterlist, eventtypes, filtercountry, editedTrigger])
-    const useFallbackList = filteredMarkers.length === 0 && fallbackFilteredMarkers.length > 0
-    const displayMarkers = useMemo(() => {
-        if (useFallbackList) return fallbackFilteredMarkers
-        return filteredMarkers
-    }, [filteredMarkers, fallbackFilteredMarkers, useFallbackList])
+        return search.filter.parse(combinedListSource, filterlist, eventtypes, filtercountry)
+    }, [combinedListSource, filterlist, eventtypes, filtercountry, editedTrigger])
 
     useEffect(() => {
         if (editAlert) {
@@ -155,14 +163,6 @@ function MarkerPage({
             loading: pagedMarkerController.loading,
         })
     }, [filteredMarkers.length, pagedMarkerController.nextCursor, pagedMarkerController.loading])
-
-    useEffect(() => {
-        if (!useFallbackList) return
-        telemetry.debugLog('markers_list', 'fallback:store-markers', {
-            pagedCount: markerSource.length,
-            fallbackCount: fallbackFilteredMarkers.length,
-        })
-    }, [useFallbackList, markerSource.length, fallbackFilteredMarkers.length])
 
     useEffect(() => {
         telemetry.debugLog('marker_page', 'view:switch', {
@@ -264,7 +264,10 @@ function MarkerPage({
     const setSelectedById = (id) => {
         const selected = markerSource.find(s => s.id === id)
             || (markers || []).find(s => s.id === id)
-        if (selected) setSelected(selected)
+        if (selected) {
+            setSelected(selected)
+            setSelectedMarkerId(selected.id)
+        }
     } 
 
     // const confirmFilterValue = (finalValue) => {
@@ -274,6 +277,7 @@ function MarkerPage({
 
     const onMarkerUpdated = () => {
         setSelected(null)
+        setSelectedMarkerId(null)
         setEditing(false)
         confirmEdited()
     }
@@ -281,10 +285,20 @@ function MarkerPage({
     const onSelectMarker = (marker) => {
         if (!marker) return
         setSelected(marker)
+        setSelectedMarkerId(marker.id)
+    }
+
+    const onViewportSelectionUpdate = (marker) => {
+        if (marker) {
+            if (selectedMarkerId && marker.id === selectedMarkerId) {
+                setSelected(marker)
+            }
+        }
     }
 
     const onScheduleCreated = () => {
         setSelected(null)
+        setSelectedMarkerId(null)
         setScheduleFormOpen(false)
         confirmCreated()
     }
@@ -311,6 +325,7 @@ function MarkerPage({
                         markers={markers || []}
                         setSelectedById={setSelectedById}
                         setSelectedMarker={onSelectMarker}
+                        onViewportSelectionUpdate={onViewportSelectionUpdate}
                         // filterOption={filterOption} // for filter option
                         // filterValue={filterValue}   // for filter temporary value setter and getter
                         // setFilterValue={setFilterValue}  
@@ -334,11 +349,11 @@ function MarkerPage({
                         top={'15%'}
                         height={'85%'}
                         showingList={showingList}
-                        markers={displayMarkers || []}
+                        markers={filteredMarkers || []}
                         setSelectedById={setSelectedById}
                         onReachEnd={pagedMarkerController.loadMore}
                         onRefreshTop={pagedMarkerController.refresh}
-                        hasMore={!!pagedMarkerController.nextCursor && !useFallbackList}
+                        hasMore={!!pagedMarkerController.nextCursor}
                         loadingMore={pagedMarkerController.loading}
                         refreshing={pagedMarkerController.refreshing}
                         onRetry={pagedMarkerController.retry}
@@ -407,7 +422,10 @@ function MarkerPage({
 
             <MarkerView
                 open={!!selectedMarker}
-                handleClose={() => setSelected(null)}
+                handleClose={() => {
+                    setSelected(null)
+                    setSelectedMarkerId(null)
+                }}
                 openSchedule={() => setScheduleFormOpen(true)}
                 editMarker={() => setEditing(true)}
                 marker={selectedMarker}

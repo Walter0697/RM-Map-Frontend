@@ -145,15 +145,28 @@ function LocationPreview({
                                 justifyContent: 'center',
                             }}
                         >
-                            <img
+                            <div
                                 style={{
                                     marginLeft: '10px',
-                                    maxHeight: '92%',
-                                    maxWidth: '92%',
-                                    objectFit: 'contain',
+                                    width: '82%',
+                                    maxWidth: '96px',
+                                    aspectRatio: '1 / 1',
+                                    backgroundColor: 'transparent',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    overflow: 'hidden',
                                 }}
-                                src={displayImage}
-                            />
+                            >
+                                <img
+                                    style={{
+                                        maxHeight: '100%',
+                                        maxWidth: '100%',
+                                        objectFit: 'contain',
+                                    }}
+                                    src={displayImage}
+                                />
+                            </div>
                         </Grid>
                     )}
                     <ContentPreview

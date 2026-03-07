@@ -41,6 +41,8 @@ import {
     shouldAnimateWeatherTransition,
     WEATHER_TRANSITION_DURATION_MS,
 } from './weatherUtils'
+import viewportState from '../../scripts/map/viewportState'
+import actions from '../../store/actions'
 
 function MarkerMap({
     showingList,
@@ -62,6 +64,8 @@ function MarkerMap({
     stations,
     showInMap,
     setSelectedMarker,
+    onViewportSelectionUpdate,
+    dispatch,
 }) {
     const mapElement = useRef(null)
     const previousWeatherViewportRef = useRef(null)
@@ -72,7 +76,9 @@ function MarkerMap({
     const [ listViewportMarkerGQL ] = useLazyQuery(graphql.markers.viewport_page, { fetchPolicy: 'no-cache' })
     const [ viewportMarkers, setViewportMarkers ] = useState([])
     const [ viewportStale, setViewportStale ] = useState(false)
-    const latestViewportRequestRef = useRef(0)
+    const latestViewportRequestSeqRef = useRef(0)
+    const autoSyncCountryChangeRef = useRef(false)
+    const [ selectedViewportMarkerId, setSelectedViewportMarkerId ] = useState(null)
 
     const {
         mapOpacity,
@@ -153,16 +159,29 @@ function MarkerMap({
     )
 
     useEffect(() => {
+        if (showingList) return
+        if (autoSyncCountryChangeRef.current) {
+            autoSyncCountryChangeRef.current = false
+            const selectedCountry = _.cloneDeep(filtercountry)
+            setPreviousCountry(selectedCountry)
+            return
+        }
+
         if (previousCountry) {
             if (!_.isEqual(previousCountry, filtercountry)) {
                 if (filtercountry?.countryCode) {
                     let output = markers.filter(s => s.country_code === filtercountry.countryCode)
-                    if (filtercountry?.countryPart && filtercountry?.countryPart?.type === 'part') {
+                    if (
+                        filtercountry?.countryPart
+                        && filtercountry?.countryPart?.type === 'part'
+                    ) {
                         output = output.filter(s => s.country_part === filtercountry.countryPart.name)
                     }
 
-                    const position = maphelper.generic.getCenterFromMarkerList(output)
-                    setLocationCenter(position.latitude, position.longitude)
+                    if (output.length > 0) {
+                        const position = maphelper.generic.getCenterFromMarkerList(output)
+                        setLocationCenter(position.latitude, position.longitude)
+                    }
                 }
                 const selectedCountry = _.cloneDeep(filtercountry)
                 setPreviousCountry(selectedCountry)
@@ -171,26 +190,16 @@ function MarkerMap({
             const selectedCountry = _.cloneDeep(filtercountry)
             setPreviousCountry(selectedCountry)
         }
-    }, [markers, filtercountry, previousCountry])
+    }, [markers, filtercountry, previousCountry, showingList])
 
     useEffect(() => {
-        let output = []
-        const activeMarkers = viewportMarkers
-        activeMarkers.forEach(item => {
-            const pinType = maphelper.pins.getPinType(item)
-            output.push({
-                id: item.id,
-                type: item.type,
-                pin: pinType,
-                location: {
-                    lon: item.longitude,
-                    lat: item.latitude,
-                },
-            })
-        })
-
+        const output = viewportState.buildMapLocations(
+            viewportMarkers,
+            selectedViewportMarkerId,
+            maphelper,
+        )
         setLocation(output)
-    }, [markers, viewportMarkers, showingList])
+    }, [markers, viewportMarkers, showingList, selectedViewportMarkerId])
 
     useEffect(() => {
         if (!clickedMarker || clickedMarker === -1) return
@@ -203,6 +212,7 @@ function MarkerMap({
                         type: 'marker',
                         item: marker,
                     })
+                    setSelectedViewportMarkerId(marker.id)
                     setViewContent(true)
                     setPreviewContent(true)
                 }
@@ -223,8 +233,8 @@ function MarkerMap({
             const query = viewportQuery.buildViewportQuery(bounds, map.getZoom())
             if (!query) return
 
-            const requestId = Date.now()
-            latestViewportRequestRef.current = requestId
+            const requestId = latestViewportRequestSeqRef.current + 1
+            latestViewportRequestSeqRef.current = requestId
             telemetry.debugLog('viewport_markers', 'request:start', {
                 requestId,
                 ...query,
@@ -265,7 +275,7 @@ function MarkerMap({
                     if (!cursor) break
                 }
 
-                if (latestViewportRequestRef.current === requestId && merged.length > 0) {
+                if (latestViewportRequestSeqRef.current === requestId && merged.length > 0) {
                     setViewportMarkers(merged)
                     setViewportStale(true)
                     telemetry.debugLog('viewport_markers', 'cache:applied', {
@@ -288,7 +298,7 @@ function MarkerMap({
                         }
                     })
 
-                    if (latestViewportRequestRef.current !== requestId) {
+                    if (latestViewportRequestSeqRef.current !== requestId) {
                         return
                     }
 
@@ -318,7 +328,7 @@ function MarkerMap({
 
                     if (!cursor) break
                 }
-                if (latestViewportRequestRef.current === requestId) {
+                if (latestViewportRequestSeqRef.current === requestId) {
                     setViewportMarkers(merged)
                     setViewportStale(false)
                     telemetry.debugLog('viewport_markers', 'request:complete', {
@@ -353,9 +363,41 @@ function MarkerMap({
     }, [map, listViewportMarkerGQL])
 
     useEffect(() => {
+        const resolved = viewportState.reconcileSelectedMarker(selectedViewportMarkerId, viewportMarkers)
+        if (resolved.marker) {
+            onViewportSelectionUpdate && onViewportSelectionUpdate(resolved.marker)
+            return
+        }
+        if (resolved.shouldClear) {
+            telemetry.debugLog('marker_selection', 'selection:retain-out-of-viewport', {
+                reason: resolved.reason,
+                markerId: selectedViewportMarkerId,
+            })
+        }
+    }, [selectedViewportMarkerId, viewportMarkers, onViewportSelectionUpdate])
+
+    useEffect(() => {
+        if (showingList) return
+        if (!viewportMarkers || viewportMarkers.length === 0) return
+        const nextCountry = viewportState.deriveViewportCountrySelection(
+            viewportMarkers,
+            filtercountry?.countryCode || 'HK',
+        )
+        if (!nextCountry) return
+        if (viewportState.isSameFilterCountry(filtercountry, nextCountry)) return
+        autoSyncCountryChangeRef.current = true
+        telemetry.debugLog('country_sync', 'viewport:sync', {
+            from: filtercountry,
+            to: nextCountry,
+        })
+        dispatch(actions.resetFilterCountry(nextCountry))
+    }, [viewportMarkers, filtercountry, dispatch, showingList])
+
+    useEffect(() => {
         if (!scheduleCreated) return
         setClickedMarker(null)
         setViewMarker(null)
+        setSelectedViewportMarkerId(null)
         setViewContent(false)
         setPreviewContent(false)
     }, [scheduleCreated])

@@ -160,10 +160,11 @@ const outputMarkerByFilter = (markers, filterlist, eventtypes, locationfilter) =
     let outputList = markers
 
     if (locationfilter) {
+        const inViewportMode = locationfilter?.countryPart?.type === 'viewport'
         if (locationfilter.countryCode) {
             outputList = outputList.filter(s => s.country_code === locationfilter.countryCode)
         }
-        if (locationfilter.countryPart) {
+        if (locationfilter.countryPart && !inViewportMode) {
             if (locationfilter.countryPart.type === 'part') {
                 outputList = outputList.filter(s => s.country_part === locationfilter.countryPart.name)
             }
