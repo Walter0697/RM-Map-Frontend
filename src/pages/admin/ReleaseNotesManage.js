@@ -372,7 +372,14 @@ function ReleaseNotesManage({ jwt }) {
     }
 
     const setPublishedState = async (state) => {
-        if (!jwt || selectedID === 'new') return
+        if (!jwt) return
+        if (selectedID === 'new') {
+            setPublishState(state)
+            setSuccessMessage(state === 'published'
+                ? 'New release note will be saved as published.'
+                : 'New release note will be saved as draft.')
+            return
+        }
         setSaving(true)
         setErrorMessage('')
         setSuccessMessage('')
@@ -722,8 +729,8 @@ function ReleaseNotesManage({ jwt }) {
                                 )}
 
                                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }}>
-                                    <Button className='admin-action-button' variant='outlined' onClick={() => setPublishedState('draft')} disabled={selectedID === 'new' || saving}>Move To Draft</Button>
-                                    <Button className='admin-action-button' variant='contained' onClick={() => setPublishedState('published')} disabled={selectedID === 'new' || saving}>Publish</Button>
+                                    <Button className='admin-action-button' variant='outlined' onClick={() => setPublishedState('draft')} disabled={saving}>Move To Draft</Button>
+                                    <Button className='admin-action-button' variant='contained' onClick={() => setPublishedState('published')} disabled={saving}>Publish</Button>
                                 </Stack>
                                 {iconRef ? (
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
