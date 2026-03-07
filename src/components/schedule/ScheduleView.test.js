@@ -55,6 +55,11 @@ describe('ScheduleView layout contracts', () => {
                         handleClose={() => {}}
                         schedules={schedules}
                         selected_date={today}
+                        activeScheduleId={1}
+                        fetchStatus='success'
+                        fetchError=''
+                        onRetry={() => {}}
+                        onRefresh={() => {}}
                         openArriveForm={() => {}}
                         openEditForm={() => {}}
                     />

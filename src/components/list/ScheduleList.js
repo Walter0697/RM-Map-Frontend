@@ -24,6 +24,29 @@ import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
 dayjs.extend(dayjsPluginUTC)
 
+const toScheduleImageSrc = (rawPath) => {
+    if (!rawPath) return ''
+    if (/^(https?:)?\/\//i.test(rawPath)) return rawPath
+
+    const base = (backend.IMAGE_LINK || '').replace(/\/+$/, '')
+    const normalized = `${rawPath}`
+    const imageBaseWithSlash = `${base}/`
+    if (normalized.startsWith(imageBaseWithSlash)) {
+        return normalized
+    }
+
+    if (normalized.startsWith('/image/')) {
+        const baseRoot = base.endsWith('/image') ? base.slice(0, -6) : ''
+        return `${baseRoot}${normalized}`
+    }
+
+    if (normalized.startsWith('/')) {
+        return `${base}${normalized}`
+    }
+
+    return `${base}/${normalized}`
+}
+
 function ScheduleItem({
     item,
     selected_date,
@@ -104,7 +127,7 @@ function ScheduleItem({
                             >
                                 <img
                                     height='80px'
-                                    src={backend.IMAGE_LINK + sche.image_path}
+                                    src={toScheduleImageSrc(sche.image_path)}
                                 />
                             </div>
                         </div>
@@ -117,6 +140,7 @@ function ScheduleItem({
 
 function TodayList({
     list,
+    imageList,
     onClickHandler,
 }) {
     const [ isBlinking, setBlink ] = useBoop(500)
@@ -131,7 +155,7 @@ function TodayList({
 
     useEffect(() => {
         let timer = null
-        const filteredList = list.filter(s => s.image_path)
+        const filteredList = (imageList || []).filter(s => s.image_path)
         setRandomBigImageMarker(filteredList)
 
         if (filteredList.length > 2) {
@@ -145,7 +169,7 @@ function TodayList({
                 window.clearInterval(timer)
             }
         }
-    }, [list])
+    }, [imageList])
 
     const setRandomBigImageMarker = (filteredList) => {
         if (filteredList.length <= 2) {
@@ -222,18 +246,33 @@ function TodayList({
                                         width: '100%', 
                                         height: '100%',
                                         display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
+                                        justifyContent: 'flex-start',
+                                        alignItems: 'flex-start',
                                     }}>
-                                        <img 
-                                            src={backend.IMAGE_LINK + bigImageMarkers[0].image_path}
+                                        <div style={{
+                                            width: '100%',
+                                            maxWidth: '130px',
+                                            height: '96px',
+                                            borderRadius: '8px',
+                                            backgroundColor: 'transparent',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            overflow: 'hidden',
+                                        }}>
+                                            <img
+                                            src={toScheduleImageSrc(bigImageMarkers[0].image_path)}
                                             style={{
-                                                maxHeight: '150px',
-                                                width: '90%',
+                                                maxHeight: '92px',
+                                                maxWidth: '120px',
+                                                objectFit: 'contain',
                                             }}
                                         />
+                                        </div>
                                     </div>
-                                    {bigImageMarkers[0].label}
+                                    <div style={{ marginTop: '8px', fontSize: '13px', textAlign: 'left', paddingRight: '8px' }}>
+                                        {bigImageMarkers[0].label}
+                                    </div>
                                 </>
                             ) : (
                                 <></>
@@ -251,18 +290,33 @@ function TodayList({
                                         width: '100%', 
                                         height: '100%',
                                         display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
+                                        justifyContent: 'flex-start',
+                                        alignItems: 'flex-start',
                                     }}>
+                                        <div style={{
+                                            width: '100%',
+                                            maxWidth: '130px',
+                                            height: '96px',
+                                            borderRadius: '8px',
+                                            backgroundColor: 'transparent',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            overflow: 'hidden',
+                                        }}>
                                         <img 
-                                            src={backend.IMAGE_LINK + bigImageMarkers[1].image_path}
+                                            src={toScheduleImageSrc(bigImageMarkers[1].image_path)}
                                             style={{
-                                                maxHeight: '150px',
-                                                width: '90%',
+                                                maxHeight: '92px',
+                                                maxWidth: '120px',
+                                                objectFit: 'contain',
                                             }}
                                         />
+                                        </div>
                                     </div>
-                                    {bigImageMarkers[1].label}
+                                    <div style={{ marginTop: '8px', fontSize: '13px', textAlign: 'left', paddingRight: '8px' }}>
+                                        {bigImageMarkers[1].label}
+                                    </div>
                                 </>
                             ) : (
                                 <></>
@@ -299,8 +353,10 @@ function TodayList({
                                 }}
                             >
                                 <img 
+                                    width='50px'
                                     height='50px'
-                                    src={backend.IMAGE_LINK + sche.image_path}
+                                    src={toScheduleImageSrc(sche.image_path)}
+                                    style={{ objectFit: 'contain' }}
                                 />
                             </div>
                         </div>
@@ -326,6 +382,7 @@ function TodayList({
                 width: '100%',
                 boxShadow: '2px 2px 6px',
                 textTransform: 'none',
+                justifyContent: 'flex-start',
             }}
             onClick={todayListOnClick}
         >
@@ -338,9 +395,10 @@ function TodayList({
                     style={{
                         height: '50px',
                         display: 'flex',
-                        justifyContent: 'center',
+                        justifyContent: 'flex-start',
                         alignItems: 'center',
                         paddingTop: '10px',
+                        paddingLeft: '8px',
                         fontSize: '20px',
                         color: '#455295',
                     }}
@@ -374,9 +432,16 @@ function ScheduleList({
     const [ scrollerEl, setScrollerEl ] = useState(null)
     const [ refreshUI, setRefreshUI ] = useState('hidden')
 
-    const scheduleSource = schedulesOverride && schedulesOverride.length >= 0 ? schedulesOverride : schedules
+    const scheduleSource = Array.isArray(schedulesOverride) && schedulesOverride.length > 0
+        ? schedulesOverride
+        : (schedules || [])
 
     const today_schedules = useMemo(() => {
+        if (!scheduleSource) return []
+        return filters.schedules.get_today(scheduleSource)
+    }, [scheduleSource])
+
+    const today_schedules_with_image = useMemo(() => {
         if (!scheduleSource) return []
         return filters.schedules.get_today_image(scheduleSource, eventtypes)
     }, [scheduleSource, eventtypes])
@@ -539,6 +604,7 @@ function ScheduleList({
                                 >
                                     <TodayList
                                         list={today_schedules}
+                                        imageList={today_schedules_with_image}
                                         onClickHandler={openScheduleView}
                                     />
                                 </WrapperBox>
