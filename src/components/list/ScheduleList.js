@@ -24,6 +24,27 @@ import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
 dayjs.extend(dayjsPluginUTC)
 
+const getScheduleImagePath = (schedule) => {
+    if (!schedule) return ''
+    return (
+        schedule.image_path
+        || schedule.image_link
+        || schedule.imageLink
+        || schedule.movie?.image_path
+        || schedule.movie?.image_link
+        || schedule.movie?.imageLink
+        || schedule.marker?.image_link
+        || schedule.marker?.imageLink
+        || schedule.marker?.image_path
+        || schedule.marker?.imagePath
+        || schedule.selected_marker?.image_link
+        || schedule.selected_marker?.imageLink
+        || schedule.selected_marker?.image_path
+        || schedule.selected_marker?.imagePath
+        || ''
+    )
+}
+
 const toScheduleImageSrc = (rawPath) => {
     if (!rawPath) return ''
     if (/^(https?:)?\/\//i.test(rawPath)) return rawPath
@@ -147,6 +168,38 @@ function TodayList({
     const [ bigImageMarkers, setBigMarkers ] = useState([]) // select two markers to display it big
     const [ smallDisplayMarkers, setSmallMarkers ] = useState([])
 
+    useEffect(() => {
+        if (!Array.isArray(list)) return
+        const sample = list.slice(0, 6).map((item) => ({
+            id: item?.id,
+            label: item?.label,
+            image_path: item?.image_path,
+            image_link: item?.image_link,
+            movie_image_path: item?.movie?.image_path,
+            movie_image_link: item?.movie?.image_link,
+            marker_image_link: item?.marker?.image_link,
+            resolved_image_path: getScheduleImagePath(item),
+        }))
+        console.log('[schedule today tile] raw today list', {
+            total: list.length,
+            sample,
+        })
+    }, [list])
+
+    useEffect(() => {
+        if (!Array.isArray(imageList)) return
+        const sample = imageList.slice(0, 6).map((item) => ({
+            id: item?.id,
+            label: item?.label,
+            image_path: item?.image_path,
+            resolved_image_path: getScheduleImagePath(item),
+        }))
+        console.log('[schedule today tile] image list', {
+            total: imageList.length,
+            sample,
+        })
+    }, [imageList])
+
     const { x } = useSpring({
         config: config.gentle,
         from: { x: 0 },
@@ -155,7 +208,21 @@ function TodayList({
 
     useEffect(() => {
         let timer = null
-        const filteredList = (imageList || []).filter(s => s.image_path)
+        const baseList = (imageList && imageList.length > 0 ? imageList : list) || []
+        const filteredList = baseList
+            .map((item) => {
+                const imagePath = getScheduleImagePath(item)
+                if (!imagePath) return null
+                return {
+                    ...item,
+                    image_path: imagePath,
+                }
+            })
+            .filter(Boolean)
+        console.log('[schedule today tile] filtered images after resolve', {
+            total: filteredList.length,
+            ids: filteredList.map((item) => item?.id),
+        })
         setRandomBigImageMarker(filteredList)
 
         if (filteredList.length > 2) {
@@ -172,9 +239,19 @@ function TodayList({
     }, [imageList])
 
     const setRandomBigImageMarker = (filteredList) => {
+        if (!filteredList || filteredList.length === 0) {
+            setBigMarkers([])
+            setSmallMarkers([])
+            return
+        }
+
         if (filteredList.length <= 2) {
             setBigMarkers(filteredList)
             setSmallMarkers(filteredList)
+            console.log('[schedule today tile] set big/small (<=2)', {
+                bigIds: filteredList.map((item) => item?.id),
+            })
+            return
         }
 
         let displayList = []
@@ -195,6 +272,10 @@ function TodayList({
             setTimeout(() => {
                 setBigMarkers(displayList)
                 setSmallMarkers(smallList)
+                console.log('[schedule today tile] set big/small (>2)', {
+                    bigIds: displayList.map((item) => item?.id),
+                    smallIds: smallList.map((item) => item?.id),
+                })
             }, 500)
         }  
     }
@@ -217,6 +298,8 @@ function TodayList({
                 </Grid>
             )
         }
+        const primaryDisplayList = bigImageMarkers.length > 0 ? bigImageMarkers : (list || []).slice(0, 2)
+        const secondaryDisplayList = smallDisplayMarkers.length > 0 ? smallDisplayMarkers : (list || []).slice(2, 8)
         return (
             <animated.div
                 style={{
@@ -228,7 +311,7 @@ function TodayList({
                     item xs={12}
                     fullWidth
                     style={{
-                        height: '280px',
+                        height: '320px',
                         width: '100%',
                         color: '#445295',
                     }}
@@ -237,10 +320,13 @@ function TodayList({
                         <Grid 
                             item xs={6}
                             style={{
-                                width: '100%',
+                                width: '50%',
+                                maxWidth: '50%',
+                                flexBasis: '50%',
+                                paddingRight: '8px',
                             }}    
                         >
-                            {bigImageMarkers.length >= 1 ? (
+                            {primaryDisplayList.length >= 1 ? (
                                 <>
                                     <div style={{ 
                                         width: '100%', 
@@ -249,29 +335,31 @@ function TodayList({
                                         justifyContent: 'flex-start',
                                         alignItems: 'flex-start',
                                     }}>
-                                        <div style={{
-                                            width: '100%',
-                                            maxWidth: '130px',
-                                            height: '96px',
-                                            borderRadius: '8px',
-                                            backgroundColor: 'transparent',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            overflow: 'hidden',
-                                        }}>
-                                            <img
-                                            src={toScheduleImageSrc(bigImageMarkers[0].image_path)}
-                                            style={{
-                                                maxHeight: '92px',
-                                                maxWidth: '120px',
-                                                objectFit: 'contain',
-                                            }}
-                                        />
-                                        </div>
+                                        {getScheduleImagePath(primaryDisplayList[0]) && (
+                                            <div style={{
+                                                width: '100%',
+                                                maxWidth: '100%',
+                                                height: '150px',
+                                                borderRadius: '8px',
+                                                backgroundColor: 'transparent',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                overflow: 'hidden',
+                                            }}>
+                                                <img
+                                                    src={toScheduleImageSrc(getScheduleImagePath(primaryDisplayList[0]))}
+                                                    style={{
+                                                        maxHeight: '100%',
+                                                        maxWidth: '100%',
+                                                        objectFit: 'contain',
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                     <div style={{ marginTop: '8px', fontSize: '13px', textAlign: 'left', paddingRight: '8px' }}>
-                                        {bigImageMarkers[0].label}
+                                        {primaryDisplayList[0].label}
                                     </div>
                                 </>
                             ) : (
@@ -281,41 +369,46 @@ function TodayList({
                         <Grid 
                             item xs={6}
                             style={{
-                                width: '100%',
+                                width: '50%',
+                                maxWidth: '50%',
+                                flexBasis: '50%',
+                                paddingLeft: '8px',
                             }}    
                         >
-                            {bigImageMarkers.length >= 2 ? (
+                            {primaryDisplayList.length >= 2 ? (
                                 <>
                                     <div style={{ 
                                         width: '100%', 
                                         height: '100%',
                                         display: 'flex',
-                                        justifyContent: 'flex-start',
+                                        justifyContent: 'flex-end',
                                         alignItems: 'flex-start',
                                     }}>
-                                        <div style={{
-                                            width: '100%',
-                                            maxWidth: '130px',
-                                            height: '96px',
-                                            borderRadius: '8px',
-                                            backgroundColor: 'transparent',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            overflow: 'hidden',
-                                        }}>
-                                        <img 
-                                            src={toScheduleImageSrc(bigImageMarkers[1].image_path)}
-                                            style={{
-                                                maxHeight: '92px',
-                                                maxWidth: '120px',
-                                                objectFit: 'contain',
-                                            }}
-                                        />
-                                        </div>
+                                        {getScheduleImagePath(primaryDisplayList[1]) && (
+                                            <div style={{
+                                                width: '100%',
+                                                maxWidth: '100%',
+                                                height: '150px',
+                                                borderRadius: '8px',
+                                                backgroundColor: 'transparent',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                overflow: 'hidden',
+                                            }}>
+                                                <img 
+                                                    src={toScheduleImageSrc(getScheduleImagePath(primaryDisplayList[1]))}
+                                                    style={{
+                                                        maxHeight: '100%',
+                                                        maxWidth: '100%',
+                                                        objectFit: 'contain',
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                     <div style={{ marginTop: '8px', fontSize: '13px', textAlign: 'left', paddingRight: '8px' }}>
-                                        {bigImageMarkers[1].label}
+                                        {primaryDisplayList[1].label}
                                     </div>
                                 </>
                             ) : (
@@ -335,7 +428,7 @@ function TodayList({
                         overflowY: 'hidden',
                     }}
                 >
-                    {smallDisplayMarkers.map((sche, index) => (
+                    {secondaryDisplayList.map((sche, index) => (
                         <div 
                             key={index}
                             style={{
@@ -355,7 +448,7 @@ function TodayList({
                                 <img 
                                     width='50px'
                                     height='50px'
-                                    src={toScheduleImageSrc(sche.image_path)}
+                                    src={toScheduleImageSrc(getScheduleImagePath(sche))}
                                     style={{ objectFit: 'contain' }}
                                 />
                             </div>
@@ -438,8 +531,27 @@ function ScheduleList({
 
     const today_schedules = useMemo(() => {
         if (!scheduleSource) return []
-        return filters.schedules.get_today(scheduleSource)
-    }, [scheduleSource])
+        const baseToday = filters.schedules.get_today(scheduleSource)
+        if (!Array.isArray(baseToday) || baseToday.length === 0) return []
+
+        return baseToday.map((item) => {
+            const hasImageData = !!getScheduleImagePath(item)
+            if (hasImageData) return item
+
+            const fallback = (schedules || []).find((raw) => raw?.id === item?.id)
+            if (!fallback) return item
+
+            return {
+                ...fallback,
+                ...item,
+                image_path: item?.image_path || fallback?.image_path,
+                image_link: item?.image_link || fallback?.image_link,
+                marker: item?.marker || fallback?.marker,
+                movie: item?.movie || fallback?.movie,
+                selected_marker: item?.selected_marker || fallback?.selected_marker,
+            }
+        })
+    }, [scheduleSource, schedules])
 
     const today_schedules_with_image = useMemo(() => {
         if (!scheduleSource) return []
