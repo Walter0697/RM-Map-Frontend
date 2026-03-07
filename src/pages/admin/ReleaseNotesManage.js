@@ -103,7 +103,7 @@ function escapeHTML(input) {
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;')
+        .replaceAll('\'', '&#39;')
 }
 
 function sanitizePreviewURL(input) {
@@ -126,12 +126,12 @@ function inlineMarkdownToHTML(input) {
             const imageMatch = token.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)
             const alt = escapeHTML(imageMatch?.[1] || '')
             const src = sanitizePreviewURL(imageMatch?.[2] || '')
-            output += src ? `<img src="${escapeHTML(src)}" alt="${alt}" style="max-width:100%;height:auto;border-radius:8px;" />` : escapeHTML(token)
+            output += src ? `<img src='${escapeHTML(src)}' alt='${alt}' style='max-width:100%;height:auto;border-radius:8px;' />` : escapeHTML(token)
         } else if (token.startsWith('[')) {
             const linkMatch = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
             const label = escapeHTML(linkMatch?.[1] || '')
             const href = sanitizePreviewURL(linkMatch?.[2] || '')
-            output += href ? `<a href="${escapeHTML(href)}" target="_blank" rel="noreferrer noopener">${label}</a>` : escapeHTML(token)
+            output += href ? `<a href='${escapeHTML(href)}' target='_blank' rel='noreferrer noopener'>${label}</a>` : escapeHTML(token)
         } else if (token.startsWith('**') && token.endsWith('**')) {
             output += `<strong>${escapeHTML(token.slice(2, -2))}</strong>`
         } else if (token.startsWith('*') && token.endsWith('*')) {
@@ -708,7 +708,7 @@ function ReleaseNotesManage({ jwt }) {
                                                     '& img': { display: 'block', my: 1 },
                                                 }}
                                                 dangerouslySetInnerHTML={{
-                                                    __html: markdownPreviewToHTML(content) || '<p style="opacity:0.6">Nothing to preview yet.</p>',
+                                                    __html: markdownPreviewToHTML(content) || '<p style=\'opacity:0.6\'>Nothing to preview yet.</p>',
                                                 }}
                                             />
                                         </Box>
