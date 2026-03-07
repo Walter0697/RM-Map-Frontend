@@ -188,6 +188,42 @@ function markdownPreviewToHTML(markdown) {
     return output
 }
 
+function collectImageRefsFromContent(contentValue, format) {
+    const source = format === 'json'
+        ? parseJsonContentLines(contentValue).join('\n')
+        : `${contentValue || ''}`
+    const refs = []
+    const regex = /!\[[^\]]*\]\(([^)]+)\)/g
+    let match = regex.exec(source)
+    while (match) {
+        const raw = `${match[1] || ''}`.trim()
+        if (!raw) {
+            match = regex.exec(source)
+            continue
+        }
+        if (raw.startsWith('http://') || raw.startsWith('https://')) {
+            refs.push(raw)
+            match = regex.exec(source)
+            continue
+        }
+        if (raw.startsWith('/image/')) {
+            refs.push(`/${raw.replace(/^\/image\/+/, '')}`)
+            match = regex.exec(source)
+            continue
+        }
+        if (raw.startsWith('/release_notes/')) {
+            refs.push(raw)
+            match = regex.exec(source)
+            continue
+        }
+        if (raw.startsWith('release_notes/')) {
+            refs.push(`/${raw}`)
+        }
+        match = regex.exec(source)
+    }
+    return refs
+}
+
 function ReleaseNotesManage({ jwt }) {
     const baselineVersion = useMemo(() => normalizeSemver(appPackage.version || ''), [])
     const [items, setItems] = useState([])
@@ -324,6 +360,10 @@ function ReleaseNotesManage({ jwt }) {
         const contentPayload = notesFormat === 'json'
             ? JSON.stringify(normalizedJsonLines)
             : mdContent
+        const mergedImageRefs = [...new Set([
+            ...imageRefs,
+            ...collectImageRefsFromContent(contentPayload, notesFormat),
+        ])]
 
         if (!version.trim() || !contentPayload.trim()) {
             setErrorMessage('Version and content are required.')
@@ -356,7 +396,7 @@ function ReleaseNotesManage({ jwt }) {
                     notes_format: notesFormat,
                     icon_ref: iconRef,
                     publish_state: publishState,
-                    image_refs: imageRefs,
+                    image_refs: mergedImageRefs,
                 }),
             })
             if (!response.ok) throw new Error(await parseResponseError(response))

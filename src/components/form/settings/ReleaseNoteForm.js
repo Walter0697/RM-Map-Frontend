@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 
 import VersionIcon from '../../wrapper/VersionIcon'
+import backend from '../../../constant/backend'
 
 import actions from '../../../store/actions'
 import graphql from '../../../graphql'
@@ -38,6 +39,114 @@ const parseReleaseNotes = (rawValue) => {
         .split(/\r?\n/)
         .map((line) => line.trim().replace(/^-+\s*/, ''))
         .filter((line) => line !== '')
+}
+
+const escapeHTML = (input) => {
+    return `${input || ''}`
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll('\'', '&#39;')
+}
+
+const sanitizePreviewURL = (input) => {
+    const value = `${input || ''}`.trim()
+    if (!value) return ''
+    const imageBase = `${backend.IMAGE_LINK || '/image'}`.replace(/\/+$/, '')
+    if (value.startsWith('http://') || value.startsWith('https://')) return value
+    if (value.startsWith('/image/')) return `${imageBase}/${value.replace(/^\/image\/+/, '')}`
+    if (value.startsWith('image/')) return `${imageBase}/${value.replace(/^image\/+/, '')}`
+    if (value.startsWith('/release_notes/')) return `${imageBase}${value}`
+    if (value.startsWith('release_notes/')) return `${imageBase}/${value}`
+    if (value.startsWith('/')) return value
+    return ''
+}
+
+const inlineMarkdownToHTML = (input) => {
+    const source = `${input || ''}`
+    const tokenPattern = /(!\[[^\]]*\]\([^)]+\)|\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*)/g
+    let cursor = 0
+    let output = ''
+    let match = tokenPattern.exec(source)
+    while (match) {
+        const token = match[0]
+        output += escapeHTML(source.slice(cursor, match.index))
+        if (token.startsWith('![')) {
+            const imageMatch = token.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)
+            const alt = escapeHTML(imageMatch?.[1] || '')
+            const src = sanitizePreviewURL(imageMatch?.[2] || '')
+            output += src ? `<img src='${escapeHTML(src)}' alt='${alt}' style='max-width:100%;height:auto;border-radius:8px;' />` : escapeHTML(token)
+        } else if (token.startsWith('[')) {
+            const linkMatch = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
+            const label = escapeHTML(linkMatch?.[1] || '')
+            const href = sanitizePreviewURL(linkMatch?.[2] || '')
+            output += href ? `<a href='${escapeHTML(href)}' target='_blank' rel='noreferrer noopener'>${label}</a>` : escapeHTML(token)
+        } else if (token.startsWith('**') && token.endsWith('**')) {
+            output += `<strong>${escapeHTML(token.slice(2, -2))}</strong>`
+        } else if (token.startsWith('*') && token.endsWith('*')) {
+            output += `<em>${escapeHTML(token.slice(1, -1))}</em>`
+        } else {
+            output += escapeHTML(token)
+        }
+        cursor = match.index + token.length
+        match = tokenPattern.exec(source)
+    }
+    output += escapeHTML(source.slice(cursor))
+    return output
+}
+
+const markdownToHTML = (markdown) => {
+    const lines = `${markdown || ''}`.split(/\r?\n/)
+    if (lines.length === 0) return ''
+    let output = ''
+    let inList = false
+    for (const rawLine of lines) {
+        const line = `${rawLine || ''}`.trim()
+        if (!line) {
+            if (inList) {
+                output += '</ul>'
+                inList = false
+            }
+            continue
+        }
+        if (line.startsWith('- ')) {
+            if (!inList) {
+                output += '<ul>'
+                inList = true
+            }
+            output += `<li>${inlineMarkdownToHTML(line.slice(2))}</li>`
+            continue
+        }
+        if (inList) {
+            output += '</ul>'
+            inList = false
+        }
+        if (line.startsWith('## ')) {
+            output += `<h3>${inlineMarkdownToHTML(line.slice(3))}</h3>`
+            continue
+        }
+        output += `<p>${inlineMarkdownToHTML(line)}</p>`
+    }
+    if (inList) output += '</ul>'
+    return output
+}
+
+const parseReleaseContent = (rawValue) => {
+    const raw = `${rawValue ?? ''}`.trim()
+    if (!raw) return { mode: 'list', items: [] }
+    try {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) {
+            return {
+                mode: 'list',
+                items: parsed.map((item) => `${item ?? ''}`.trim()).filter((item) => item !== ''),
+            }
+        }
+    } catch (error) {
+        // markdown fallback below
+    }
+    return { mode: 'markdown', html: markdownToHTML(raw) }
 }
 
 const normalizeSemver = (input) => {
@@ -82,7 +191,7 @@ function ReleaseNoteItem({
     handleClose,
     version,
 }) {
-    const [ releaseNotes, setNotes ] = useState([])
+    const [ releaseNotes, setNotes ] = useState({ mode: 'list', items: [] })
     const [ releaseDate, setDate ] = useState('')
     const [ specificReleaseNoteGQL, { data: releaseData, loading: releaseLoading, error: releaseError } ] = useLazyQuery(graphql.releasenotes.find, { fetchPolicy: 'no-cache' })
 
@@ -95,7 +204,7 @@ function ReleaseNoteItem({
     useEffect(() => {
         if (releaseData) {
             setDate(releaseData.specificreleasenote.date)
-            setNotes(parseReleaseNotes(releaseData.specificreleasenote.notes))
+            setNotes(parseReleaseContent(releaseData.specificreleasenote.notes))
         }
 
     }, [releaseData, releaseError])
@@ -129,33 +238,40 @@ function ReleaseNoteItem({
                         >
                             {dayjs(releaseDate).format('YYYY-MM-DD')}
                         </Grid>
-                        {releaseNotes.map((note, index) => {
-                            if (note.startsWith('[b]')) {
+                        {releaseNotes.mode === 'markdown' ? (
+                            <Grid item xs={12} md={12} lg={12}
+                                style={{ width: '100%', fontSize: '15px' }}
+                                dangerouslySetInnerHTML={{ __html: releaseNotes.html || '<p style=\'opacity:0.6\'>No content</p>' }}
+                            />
+                        ) : (
+                            releaseNotes.items.map((note, index) => {
+                                if (note.startsWith('[b]')) {
+                                    return (
+                                        <Grid item key={'n' + index} xs={12} md={12} lg={12}
+                                            style={{
+                                                width: '100%',
+                                                fontWeight: '700',
+                                                fontSize: '18px',
+                                                marginBottom: '5px',
+                                                marginTop: '10px',
+                                            }}
+                                        >
+                                            {note.replace('[b]', '')}
+                                        </Grid>   
+                                    ) 
+                                }
                                 return (
                                     <Grid item key={'n' + index} xs={12} md={12} lg={12}
                                         style={{
                                             width: '100%',
-                                            fontWeight: '700',
-                                            fontSize: '18px',
-                                            marginBottom: '5px',
-                                            marginTop: '10px',
+                                            fontSize: '15px',
                                         }}
                                     >
-                                        {note.replace('[b]', '')}
+                                        - {note}
                                     </Grid>   
-                                ) 
-                            }
-                            return (
-                                <Grid item key={'n' + index} xs={12} md={12} lg={12}
-                                    style={{
-                                        width: '100%',
-                                        fontSize: '15px',
-                                    }}
-                                >
-                                    - {note}
-                                </Grid>   
-                            )
-                        })}
+                                )
+                            })
+                        )}
                     </Grid>
                 )   
                 }
@@ -180,7 +296,7 @@ function ReleaseNoteForm({
     dispatch,
 }) {
     const [ isSeen, setSeen ] = useState(false)
-    const [ latestReleaseNotes, setLatest ] = useState([])
+    const [ latestReleaseNotes, setLatest ] = useState({ mode: 'list', items: [] })
 
     const [ selectedVersion, setVersion ] = useState(null)
 
@@ -192,7 +308,7 @@ function ReleaseNoteForm({
 
     useEffect(() => {
         if (latest?.notes) {
-            setLatest(parseReleaseNotes(latest.notes))
+            setLatest(parseReleaseContent(latest.notes))
         }
         if (open) {
             if (latest.version !== seen) {
@@ -250,33 +366,40 @@ function ReleaseNoteForm({
                                     {dayjs(latest.date).format('YYYY-MM-DD')}
                                 </Grid>
                                 <Grid item xs={12} md={12} lg={12} style={{ marginTop: '10px' }}></Grid>
-                                {latestReleaseNotes.map((note, index) => {
-                                    if (note.startsWith('[b]')) {
+                                {latestReleaseNotes.mode === 'markdown' ? (
+                                    <Grid item xs={12} md={12} lg={12}
+                                        style={{ width: '100%', fontSize: '15px' }}
+                                        dangerouslySetInnerHTML={{ __html: latestReleaseNotes.html || '<p style=\'opacity:0.6\'>No content</p>' }}
+                                    />
+                                ) : (
+                                    latestReleaseNotes.items.map((note, index) => {
+                                        if (note.startsWith('[b]')) {
+                                            return (
+                                                <Grid item key={'n' + index} xs={12} md={12} lg={12}
+                                                    style={{
+                                                        width: '100%',
+                                                        fontWeight: '700',
+                                                        fontSize: '18px',
+                                                        marginBottom: '5px',
+                                                        marginTop: '10px',
+                                                    }}
+                                                >
+                                                    {note.replace('[b]', '')}
+                                                </Grid>   
+                                            ) 
+                                        }
                                         return (
                                             <Grid item key={'n' + index} xs={12} md={12} lg={12}
                                                 style={{
                                                     width: '100%',
-                                                    fontWeight: '700',
-                                                    fontSize: '18px',
-                                                    marginBottom: '5px',
-                                                    marginTop: '10px',
+                                                    fontSize: '15px',
                                                 }}
                                             >
-                                                {note.replace('[b]', '')}
+                                                - {note}
                                             </Grid>   
-                                        ) 
-                                    }
-                                    return (
-                                        <Grid item key={'n' + index} xs={12} md={12} lg={12}
-                                            style={{
-                                                width: '100%',
-                                                fontSize: '15px',
-                                            }}
-                                        >
-                                            - {note}
-                                        </Grid>   
-                                    )
-                                })}
+                                        )
+                                    })
+                                )}
                             </>
                         )}
                     </Grid>
