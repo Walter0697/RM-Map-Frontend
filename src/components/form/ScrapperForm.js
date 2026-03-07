@@ -7,6 +7,8 @@ import {
 
 import BaseForm from './BaseForm'
 import OpenriceScrap from './scrapper/OpenriceScrap'
+import YelpScrap from './scrapper/YelpScrap'
+import TabelogScrap from './scrapper/TabelogScrap'
 import RestaurantCard from '../card/RestaurantCard'
 
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom'
@@ -40,6 +42,10 @@ function ScrapperForm({
         switch (source) {
             case 'openrice':
                 return 'Scrap Openrice'
+            case 'yelp':
+                return 'Scrap Yelp'
+            case 'tabelog':
+                return 'Scrap Tabelog'
             default:
                 return 'Scrapping...'
         }
@@ -150,6 +156,26 @@ function ScrapperForm({
             return (
                 <OpenriceScrap
                     showInstruction={!success}
+                    content={copyContent}
+                    setFetchInfo={setFetchInfo}
+                    findInfoFailed={findInfoFailed}
+                    onDataSame={onDataSame}
+                    sourceId={source_id}
+                />
+            )
+        } else if (source === 'yelp') {
+            return (
+                <YelpScrap
+                    content={copyContent}
+                    setFetchInfo={setFetchInfo}
+                    findInfoFailed={findInfoFailed}
+                    onDataSame={onDataSame}
+                    sourceId={source_id}
+                />
+            )
+        } else if (source === 'tabelog') {
+            return (
+                <TabelogScrap
                     content={copyContent}
                     setFetchInfo={setFetchInfo}
                     findInfoFailed={findInfoFailed}

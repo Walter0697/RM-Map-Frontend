@@ -6,19 +6,28 @@ import {
 
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
-import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon'
-import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied'
-import MoodBadIcon from '@mui/icons-material/MoodBad'
+import StarIcon from '@mui/icons-material/Star'
 
 function RestaurantCard({
     restaurant,
 }) {
     if (!restaurant) return false
-    const rating = useMemo(() => {
-        if (restaurant) {
-            return JSON.parse(restaurant.rating)
+    const ratingSummary = useMemo(() => {
+        if (!restaurant?.rating) return null
+        try {
+            const parsed = JSON.parse(restaurant.rating)
+            if (parsed && typeof parsed === 'object') {
+                const rows = []
+                if (parsed.like) rows.push(`Like ${parsed.like}`)
+                if (parsed.average) rows.push(`Average ${parsed.average}`)
+                if (parsed.dislike) rows.push(`Dislike ${parsed.dislike}`)
+                return rows.length ? rows.join(' | ') : null
+            }
+        } catch (error) {
+            // Yelp and future providers may return rating as plain text.
         }
-        return {}
+        const raw = `${restaurant.rating}`.trim()
+        return raw || null
     }, [restaurant])
     const metricRowStyle = {
         display: 'flex',
@@ -103,27 +112,13 @@ function RestaurantCard({
                         <span>{restaurant.price_range}</span>
                     </Grid>
                 )}
-                {rating && (
-                    <>
-                        <Grid item xs={12} md={12} lg={12}
-                            style={metricRowStyle}
-                        >
-                            <InsertEmoticonIcon />
-                            <span>Like: {rating.like}</span>
-                        </Grid>
-                        <Grid item xs={12} md={12} lg={12}
-                            style={metricRowStyle}
-                        >
-                            <SentimentDissatisfiedIcon />
-                            <span>Average: {rating.average}</span>
-                        </Grid>
-                        <Grid item xs={12} md={12} lg={12}
-                            style={metricRowStyle}
-                        >
-                            <MoodBadIcon />
-                            <span>Dislike: {rating.dislike}</span>
-                        </Grid>
-                    </>
+                {ratingSummary && (
+                    <Grid item xs={12} md={12} lg={12}
+                        style={metricRowStyle}
+                    >
+                        <StarIcon />
+                        <span>{ratingSummary}</span>
+                    </Grid>
                 )}
                 {restaurant.other_info && (
                     <Grid item xs={12} md={12} lg={12} fullWidth>
