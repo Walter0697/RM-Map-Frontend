@@ -33,4 +33,24 @@ describe('schedule filter', () => {
         expect(output[0].image_path).toBe('/image/sample.png')
         expect(source.image_path).toBeUndefined()
     })
+
+    test('uses marker type icon when marker image is missing', () => {
+        const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD')
+        const source = {
+            id: 3,
+            selected_date: `${tomorrow}T12:00:00`,
+            marker: {
+                type: 'museum',
+            },
+        }
+
+        const eventtypes = [
+            { value: 'museum', icon_path: '/image/icons/museum.png' },
+        ]
+
+        const output = scheduleFilter.get_schedule_image([source], eventtypes)
+        expect(output).toHaveLength(1)
+        expect(output[0].image_path).toBe('/image/icons/museum.png')
+        expect(source.image_path).toBeUndefined()
+    })
 })
