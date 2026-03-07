@@ -79,10 +79,11 @@ function ReleaseNotesManage({ jwt }) {
     const baselineVersion = useMemo(() => normalizeSemver(appPackage.version || ''), [])
     const [items, setItems] = useState([])
     const [selectedID, setSelectedID] = useState('new')
-    const [title, setTitle] = useState('')
+    const [selectedVersion, setSelectedVersion] = useState('')
     const [version, setVersion] = useState('')
     const [content, setContent] = useState('')
     const [contentFormat, setContentFormat] = useState('markdown')
+    const [notesFormat, setNotesFormat] = useState('md')
     const [publishState, setPublishState] = useState('draft')
     const [imageRefs, setImageRefs] = useState([])
     const [saving, setSaving] = useState(false)
@@ -90,26 +91,36 @@ function ReleaseNotesManage({ jwt }) {
     const [errorMessage, setErrorMessage] = useState('')
     const [successMessage, setSuccessMessage] = useState('')
 
-    const isVersionValid = normalizeSemver(version) !== ''
+    const isExistingNote = selectedID !== 'new'
+    const normalizedVersion = normalizeSemver(version)
+    const normalizedSelectedVersion = normalizeSemver(selectedVersion)
+    const isVersionValid = normalizedVersion !== ''
+    const versionChanged = isExistingNote && normalizedSelectedVersion !== '' && normalizedVersion !== normalizedSelectedVersion
+    const requiresVersionProgression = !isExistingNote || versionChanged
     const isVersionProgressed = isVersionValid && compareSemver(version, baselineVersion) > 0
-    const canPublish = publishState === 'published' ? isVersionProgressed : true
+    const isVersionAllowed = isVersionValid && (!requiresVersionProgression || isVersionProgressed)
+    const canPublish = publishState === 'published'
+        ? (requiresVersionProgression ? isVersionProgressed : true)
+        : true
 
     const resetForm = () => {
         setSelectedID('new')
-        setTitle('')
+        setSelectedVersion('')
         setVersion('')
         setContent('')
         setContentFormat('markdown')
+        setNotesFormat('md')
         setPublishState('draft')
         setImageRefs([])
     }
 
     const applyItem = (item) => {
         setSelectedID(`${item.id}`)
-        setTitle(item.title || '')
+        setSelectedVersion(item.version || '')
         setVersion(item.version || '')
         setContent(item.content || '')
         setContentFormat(item.content_format || 'markdown')
+        setNotesFormat(item.notes_format || 'md')
         setPublishState(item.publish_state || 'draft')
         setImageRefs(Array.isArray(item.image_refs) ? item.image_refs : [])
     }
@@ -151,15 +162,15 @@ function ReleaseNotesManage({ jwt }) {
 
     const submit = async () => {
         if (!jwt) return
-        if (!title.trim() || !version.trim() || !content.trim()) {
-            setErrorMessage('Title, version, and content are required.')
+        if (!version.trim() || !content.trim()) {
+            setErrorMessage('Version and content are required.')
             return
         }
         if (!isVersionValid) {
             setErrorMessage('Version must be valid semantic version (for example 2.9.5).')
             return
         }
-        if (!isVersionProgressed) {
+        if (!isVersionAllowed) {
             setErrorMessage(`Version must be greater than app version ${baselineVersion}.`)
             return
         }
@@ -181,10 +192,10 @@ function ReleaseNotesManage({ jwt }) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    title: title.trim(),
                     version: version.trim(),
                     content,
                     content_format: contentFormat,
+                    notes_format: notesFormat,
                     publish_state: publishState,
                     image_refs: imageRefs,
                 }),
@@ -246,6 +257,9 @@ function ReleaseNotesManage({ jwt }) {
             if (!imageRefs.includes(path)) {
                 setImageRefs((previous) => [...previous, path])
             }
+            if (notesFormat === 'json') {
+                setNotesFormat('md')
+            }
             if (contentFormat === 'markdown') {
                 setContent((previous) => `${previous}${previous ? '\n' : ''}![release-note-image](${payload.url || `/image${path}`})`)
             } else {
@@ -286,8 +300,20 @@ function ReleaseNotesManage({ jwt }) {
                                         onClick={() => applyItem(item)}
                                         sx={{ justifyContent: 'space-between' }}
                                     >
-                                        <span>{item.version} - {item.title}</span>
-                                        <Chip size='small' label={item.publish_state || 'draft'} color={item.publish_state === 'published' ? 'success' : 'default'} />
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            {item.image_urls?.[0] ? (
+                                                <img
+                                                    src={item.image_urls[0]}
+                                                    alt='release-note-icon'
+                                                    style={{ width: 20, height: 20, borderRadius: 4, objectFit: 'cover' }}
+                                                />
+                                            ) : null}
+                                            <span>{item.version}</span>
+                                        </span>
+                                        <span style={{ display: 'flex', gap: 6 }}>
+                                            <Chip size='small' label={item.notes_format || 'md'} />
+                                            <Chip size='small' label={item.publish_state || 'draft'} color={item.publish_state === 'published' ? 'success' : 'default'} />
+                                        </span>
                                     </Button>
                                 ))}
                                 {items.length === 0 ? <Typography variant='body2' color='text.secondary'>No release notes yet.</Typography> : null}
@@ -306,21 +332,16 @@ function ReleaseNotesManage({ jwt }) {
                                 </Box>
 
                                 <TextField
-                                    label='Title'
-                                    value={title}
-                                    onChange={(event) => setTitle(event.target.value)}
-                                    placeholder='Release title'
-                                    fullWidth
-                                />
-                                <TextField
                                     label='Version'
                                     value={version}
                                     onChange={(event) => setVersion(event.target.value)}
                                     placeholder='2.9.5'
-                                    error={version.trim() !== '' && !isVersionProgressed}
-                                    helperText={version.trim() !== '' && !isVersionProgressed
+                                    error={version.trim() !== '' && !isVersionAllowed}
+                                    helperText={version.trim() !== '' && !isVersionAllowed
                                         ? `Must be greater than ${baselineVersion}`
-                                        : 'Use semantic versioning (major.minor.patch).'}
+                                        : requiresVersionProgression
+                                            ? 'Use semantic versioning (major.minor.patch).'
+                                            : 'Editing existing version is allowed.'}
                                     fullWidth
                                 />
 
@@ -354,12 +375,26 @@ function ReleaseNotesManage({ jwt }) {
                                             </Select>
                                         </FormControl>
                                     </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <FormControl fullWidth>
+                                            <InputLabel id='release-note-notes-format'>Notes Storage</InputLabel>
+                                            <Select
+                                                labelId='release-note-notes-format'
+                                                value={notesFormat}
+                                                label='Notes Storage'
+                                                onChange={(event) => setNotesFormat(event.target.value)}
+                                            >
+                                                <MenuItem value='md'>md</MenuItem>
+                                                <MenuItem value='json'>json</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
                                 </Grid>
 
                                 <TextField
                                     label='Content'
                                     multiline
-                                    minRows={8}
+                                    minRows={16}
                                     value={content}
                                     onChange={(event) => setContent(event.target.value)}
                                     helperText={contentFormat === 'markdown'

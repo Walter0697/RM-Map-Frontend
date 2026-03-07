@@ -22,6 +22,24 @@ const TransitionUp = (props) => {
     return <Slide {...props} direction='up' />
 }
 
+const parseReleaseNotes = (rawValue) => {
+    const raw = `${rawValue ?? ''}`.trim()
+    if (!raw) return []
+    try {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) {
+            return parsed.map((item) => `${item ?? ''}`.trim()).filter((item) => item !== '')
+        }
+    } catch (error) {
+        // fallback below
+    }
+
+    return raw
+        .split(/\r?\n/)
+        .map((line) => line.trim().replace(/^-+\s*/, ''))
+        .filter((line) => line !== '')
+}
+
 function ReleaseNoteItem({
     open,
     handleClose,
@@ -40,7 +58,7 @@ function ReleaseNoteItem({
     useEffect(() => {
         if (releaseData) {
             setDate(releaseData.specificreleasenote.date)
-            setNotes(JSON.parse(releaseData.specificreleasenote.notes))
+            setNotes(parseReleaseNotes(releaseData.specificreleasenote.notes))
         }
 
     }, [releaseData, releaseError])
@@ -139,7 +157,7 @@ function ReleaseNoteForm({
 
     useEffect(() => {
         if (latest?.notes) {
-            setLatest(JSON.parse(latest.notes))
+            setLatest(parseReleaseNotes(latest.notes))
         }
         if (open) {
             if (latest.version !== seen) {

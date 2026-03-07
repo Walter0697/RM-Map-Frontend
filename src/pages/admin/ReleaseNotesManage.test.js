@@ -82,12 +82,10 @@ describe('ReleaseNotesManage', () => {
             await flushPromises()
         })
 
-        const titleInput = container.querySelector('input[placeholder="Release title"]')
         const versionInput = container.querySelector('input[placeholder="2.9.5"]')
         const contentArea = container.querySelector('textarea')
 
         act(() => {
-            setInputValue(titleInput, 'Release 2.9.4')
             setInputValue(versionInput, '2.9.4')
             setInputValue(contentArea, 'content')
         })
