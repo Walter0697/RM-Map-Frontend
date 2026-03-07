@@ -202,15 +202,15 @@ const allEmojiIconOptions = [
 ]
 
 export const RELEASE_NOTE_ICON_OPTIONS = [
-    { key: '', label: 'No icon', kind: 'none' },
+    { key: '', label: 'none', kind: 'none' },
     ...Object.keys(legacyIconComponentMap).map((key) => ({
         key,
         label: key,
         kind: 'mui',
     })),
-    ...monochromeEmojiIconOptions.map(([key, label, emoji]) => ({
+    ...monochromeEmojiIconOptions.map(([key, _label, emoji]) => ({
         key,
-        label,
+        label: key,
         emoji,
         kind: 'emoji',
     })),

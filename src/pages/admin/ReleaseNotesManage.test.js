@@ -15,16 +15,6 @@ function rootReducer(state = { auth: { jwt: 'test-jwt', username: 'admin' } }) {
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0))
 
-function setInputValue(input, value) {
-    const prototype = input instanceof window.HTMLTextAreaElement
-        ? window.HTMLTextAreaElement.prototype
-        : window.HTMLInputElement.prototype
-    const setter = Object.getOwnPropertyDescriptor(prototype, 'value').set
-    setter.call(input, value)
-    input.dispatchEvent(new Event('input', { bubbles: true }))
-    input.dispatchEvent(new Event('change', { bubbles: true }))
-}
-
 function createRenderedPage() {
     const store = configureStore({ reducer: rootReducer })
     const container = document.createElement('div')
@@ -70,7 +60,7 @@ describe('ReleaseNotesManage', () => {
         expect(document.body.textContent).toContain('No release notes yet.')
     })
 
-    test('blocks save when version is not greater than app baseline', async () => {
+    test('uses current app version for new draft by default', async () => {
         global.fetch.mockResolvedValueOnce({
             ok: true,
             status: 200,
@@ -83,22 +73,9 @@ describe('ReleaseNotesManage', () => {
         })
 
         const versionInput = container.querySelector('input[placeholder="2.9.5"]')
-        const contentArea = container.querySelector('textarea')
-
-        act(() => {
-            setInputValue(versionInput, '2.9.4')
-            setInputValue(contentArea, 'content')
-        })
-
-        const saveButton = Array.from(container.querySelectorAll('button')).find((item) => (item.textContent || '').trim() === 'Save')
-        act(() => {
-            saveButton.dispatchEvent(new MouseEvent('click', { bubbles: true }))
-        })
-        await act(async () => {
-            await flushPromises()
-        })
-
-        expect(document.body.textContent).toContain('Version must be greater than app version')
+        expect(versionInput.value).toBe('2.9.5')
+        expect(versionInput.disabled).toBe(true)
+        expect(document.body.textContent).toContain('New draft uses the current app version.')
     })
 
     test('uploads image and inserts markdown syntax into content', async () => {

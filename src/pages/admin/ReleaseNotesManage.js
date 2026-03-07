@@ -97,12 +97,19 @@ function parseJsonContentLines(input) {
     return fallback.length > 0 ? fallback : ['']
 }
 
+function buildVersionLabel(version, icon) {
+    const base = `${version || ''}`.trim()
+    const suffix = `${icon || ''}`.trim()
+    if (!base) return ''
+    return suffix ? `${base}.${suffix}` : base
+}
+
 function ReleaseNotesManage({ jwt }) {
     const baselineVersion = useMemo(() => normalizeSemver(appPackage.version || ''), [])
     const [items, setItems] = useState([])
     const [selectedID, setSelectedID] = useState('new')
     const [selectedVersion, setSelectedVersion] = useState('')
-    const [version, setVersion] = useState('')
+    const [version, setVersion] = useState(baselineVersion || '')
     const [content, setContent] = useState('')
     const [notesFormat, setNotesFormat] = useState('md')
     const [jsonLines, setJsonLines] = useState([''])
@@ -120,14 +127,17 @@ function ReleaseNotesManage({ jwt }) {
     const normalizedSelectedVersion = normalizeSemver(selectedVersion)
     const isVersionValid = normalizedVersion !== ''
     const versionChanged = isExistingNote && normalizedSelectedVersion !== '' && normalizedVersion !== normalizedSelectedVersion
-    const requiresVersionProgression = !isExistingNote || versionChanged
     const isVersionProgressed = isVersionValid && compareSemver(version, baselineVersion) > 0
-    const isVersionAllowed = isVersionValid && (!requiresVersionProgression || isVersionProgressed)
+    const isVersionAllowed = isVersionValid && (
+        isExistingNote
+            ? (!versionChanged || compareSemver(version, baselineVersion) >= 0)
+            : compareSemver(version, baselineVersion) === 0
+    )
 
     const resetForm = () => {
         setSelectedID('new')
         setSelectedVersion('')
-        setVersion('')
+        setVersion(baselineVersion || '')
         setContent('')
         setNotesFormat('md')
         setJsonLines([''])
@@ -424,8 +434,8 @@ function ReleaseNotesManage({ jwt }) {
                                         sx={{ justifyContent: 'space-between' }}
                                     >
                                         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <span>{buildVersionLabel(item.version, item.icon_ref)}</span>
                                             {item.icon_ref ? <VersionIcon icon={item.icon_ref} sx={{ fontSize: 18 }} /> : null}
-                                            <span>{item.version}</span>
                                         </span>
                                         <span style={{ display: 'flex', gap: 6 }}>
                                             <Chip size='small' label={item.notes_format || 'md'} />
@@ -460,12 +470,15 @@ function ReleaseNotesManage({ jwt }) {
                                     value={version}
                                     onChange={(event) => setVersion(event.target.value)}
                                     placeholder='2.9.5'
+                                    disabled={!isExistingNote}
                                     error={version.trim() !== '' && !isVersionAllowed}
                                     helperText={version.trim() !== '' && !isVersionAllowed
-                                        ? `Must be greater than ${baselineVersion}`
-                                        : requiresVersionProgression
-                                            ? 'Use semantic versioning (major.minor.patch).'
-                                            : 'Editing existing version is allowed.'}
+                                        ? isExistingNote
+                                            ? `Must be equal to or greater than ${baselineVersion}`
+                                            : `Must match current app version ${baselineVersion}`
+                                        : isExistingNote
+                                            ? 'Editing existing version is allowed.'
+                                            : 'New draft uses the current app version.'}
                                     fullWidth
                                 />
 
