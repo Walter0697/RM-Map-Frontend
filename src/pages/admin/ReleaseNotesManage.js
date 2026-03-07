@@ -352,7 +352,25 @@ function ReleaseNotesManage({ jwt }) {
             if (notesFormat === 'json') {
                 setJsonLines((previous) => [...previous.filter((item) => `${item || ''}`.trim() !== ''), markdownImage])
             } else {
-                setContent((previous) => `${previous}${previous ? '\n' : ''}${markdownImage}`)
+                const editor = mdEditorRef.current
+                if (!editor) {
+                    setContent((previous) => `${previous}${previous ? '\n' : ''}${markdownImage}`)
+                } else {
+                    const start = editor.selectionStart || 0
+                    const end = editor.selectionEnd || 0
+                    const prefix = content.slice(0, start)
+                    const suffix = content.slice(end)
+                    const needsLeadingBreak = prefix.length > 0 && !prefix.endsWith('\n')
+                    const needsTrailingBreak = suffix.length > 0 && !suffix.startsWith('\n')
+                    const inserted = `${needsLeadingBreak ? '\n' : ''}${markdownImage}${needsTrailingBreak ? '\n' : ''}`
+                    const nextValue = `${prefix}${inserted}${suffix}`
+                    setContent(nextValue)
+                    window.requestAnimationFrame(() => {
+                        editor.focus()
+                        const cursor = prefix.length + inserted.length
+                        editor.setSelectionRange(cursor, cursor)
+                    })
+                }
             }
             setSuccessMessage('Image uploaded and inserted into content.')
         } catch (error) {
