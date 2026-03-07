@@ -109,9 +109,12 @@ function escapeHTML(input) {
 function sanitizePreviewURL(input) {
     const value = `${input || ''}`.trim()
     if (!value) return ''
+    const imageBase = `${backend.IMAGE_LINK || '/image'}`.replace(/\/+$/, '')
     if (value.startsWith('http://') || value.startsWith('https://')) return value
-    if (value.startsWith('/image/')) return value
-    if (value.startsWith('/release_notes/')) return `/image${value}`
+    if (value.startsWith('/image/')) return `${imageBase}/${value.replace(/^\/image\/+/, '')}`
+    if (value.startsWith('image/')) return `${imageBase}/${value.replace(/^image\/+/, '')}`
+    if (value.startsWith('/release_notes/')) return `${imageBase}${value}`
+    if (value.startsWith('release_notes/')) return `${imageBase}/${value}`
     if (value.startsWith('/')) return value
     return ''
 }
