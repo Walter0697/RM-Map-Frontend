@@ -20,6 +20,25 @@ import {
 import backend from '../../constant/backend'
 import AdminPageShell from '../../components/admin/AdminPageShell'
 import appPackage from '../../../package.json'
+import VersionIcon from '../../components/wrapper/VersionIcon'
+
+const RELEASE_NOTE_ICON_OPTIONS = [
+    'valentine',
+    'christmas',
+    'anniversary',
+    'birthday',
+    'apple',
+    'moon',
+    'pokemon',
+    'nature',
+    'champion',
+    'icecream',
+    'dining',
+    'museum',
+    'game',
+    'festival',
+]
+const isKnownIcon = (value) => RELEASE_NOTE_ICON_OPTIONS.includes(`${value || ''}`.trim())
 
 function normalizeSemver(input) {
     const value = `${input || ''}`.trim().toLowerCase().replace(/^v/, '')
@@ -120,7 +139,7 @@ function ReleaseNotesManage({ jwt }) {
         setNotesFormat(item.notes_format || 'md')
         setPublishState(item.publish_state || 'draft')
         setImageRefs(Array.isArray(item.image_refs) ? item.image_refs : [])
-        setIconRef(item.icon_ref || '')
+        setIconRef(isKnownIcon(item.icon_ref) ? item.icon_ref : '')
     }
 
     const parseResponseError = async (resp) => {
@@ -256,9 +275,6 @@ function ReleaseNotesManage({ jwt }) {
             if (!imageRefs.includes(path)) {
                 setImageRefs((previous) => [...previous, path])
             }
-            if (!iconRef) {
-                setIconRef(path)
-            }
             if (notesFormat === 'json') {
                 setNotesFormat('md')
             }
@@ -307,13 +323,7 @@ function ReleaseNotesManage({ jwt }) {
                                         sx={{ justifyContent: 'space-between' }}
                                     >
                                         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            {item.icon_url ? (
-                                                <img
-                                                    src={item.icon_url}
-                                                    alt='release-note-icon'
-                                                    style={{ width: 20, height: 20, borderRadius: 4, objectFit: 'cover' }}
-                                                />
-                                            ) : null}
+                                            {item.icon_ref ? <VersionIcon icon={item.icon_ref} sx={{ fontSize: 18 }} /> : null}
                                             <span>{item.version}</span>
                                         </span>
                                         <span style={{ display: 'flex', gap: 6 }}>
@@ -377,7 +387,7 @@ function ReleaseNotesManage({ jwt }) {
                                                 onChange={(event) => setIconRef(event.target.value)}
                                             >
                                                 <MenuItem value=''>No icon</MenuItem>
-                                                {imageRefs.map((item) => (
+                                                {RELEASE_NOTE_ICON_OPTIONS.map((item) => (
                                                     <MenuItem key={item} value={item}>{item}</MenuItem>
                                                 ))}
                                             </Select>
@@ -407,11 +417,7 @@ function ReleaseNotesManage({ jwt }) {
                                 {iconRef ? (
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Typography variant='subtitle2'>Selected Icon:</Typography>
-                                        <img
-                                            src={iconRef.startsWith('http') ? iconRef : `/image${iconRef}`}
-                                            alt='selected-release-note-icon'
-                                            style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', border: '1px solid #ddd' }}
-                                        />
+                                        <VersionIcon icon={iconRef} sx={{ fontSize: 24 }} />
                                     </Box>
                                 ) : null}
 
