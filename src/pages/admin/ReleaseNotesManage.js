@@ -568,10 +568,12 @@ function ReleaseNotesManage({ jwt }) {
                                 )}
 
                                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }}>
-                                    <Button className='admin-action-button' variant='outlined' component='label'>
-                                        Upload Image
-                                        <input type='file' hidden accept='image/*' onChange={(event) => uploadImage(event.target.files?.[0])} />
-                                    </Button>
+                                    {notesFormat === 'md' ? (
+                                        <Button className='admin-action-button' variant='outlined' component='label'>
+                                            Upload Image
+                                            <input type='file' hidden accept='image/*' onChange={(event) => uploadImage(event.target.files?.[0])} />
+                                        </Button>
+                                    ) : null}
                                     <Button className='admin-action-button' variant='outlined' onClick={() => setPublishedState('draft')} disabled={selectedID === 'new' || saving}>Move To Draft</Button>
                                     <Button className='admin-action-button' variant='contained' onClick={() => setPublishedState('published')} disabled={selectedID === 'new' || saving}>Publish</Button>
                                 </Stack>
