@@ -311,7 +311,7 @@ function TodayList({
                     item xs={12}
                     fullWidth
                     style={{
-                        height: '320px',
+                        height: '304px',
                         width: '100%',
                         color: '#445295',
                     }}
@@ -323,7 +323,7 @@ function TodayList({
                                 width: '50%',
                                 maxWidth: '50%',
                                 flexBasis: '50%',
-                                paddingRight: '8px',
+                                paddingRight: '12px',
                             }}    
                         >
                             {primaryDisplayList.length >= 1 ? (
@@ -338,8 +338,8 @@ function TodayList({
                                         {getScheduleImagePath(primaryDisplayList[0]) && (
                                             <div style={{
                                                 width: '100%',
-                                                maxWidth: '100%',
-                                                height: '150px',
+                                                maxWidth: '96%',
+                                                height: '136px',
                                                 borderRadius: '8px',
                                                 backgroundColor: 'transparent',
                                                 display: 'flex',
@@ -358,7 +358,7 @@ function TodayList({
                                             </div>
                                         )}
                                     </div>
-                                    <div style={{ marginTop: '8px', fontSize: '13px', textAlign: 'left', paddingRight: '8px' }}>
+                                    <div style={{ marginTop: '10px', fontSize: '13px', textAlign: 'left', paddingRight: '10px' }}>
                                         {primaryDisplayList[0].label}
                                     </div>
                                 </>
@@ -372,7 +372,7 @@ function TodayList({
                                 width: '50%',
                                 maxWidth: '50%',
                                 flexBasis: '50%',
-                                paddingLeft: '8px',
+                                paddingLeft: '12px',
                             }}    
                         >
                             {primaryDisplayList.length >= 2 ? (
@@ -387,8 +387,8 @@ function TodayList({
                                         {getScheduleImagePath(primaryDisplayList[1]) && (
                                             <div style={{
                                                 width: '100%',
-                                                maxWidth: '100%',
-                                                height: '150px',
+                                                maxWidth: '96%',
+                                                height: '136px',
                                                 borderRadius: '8px',
                                                 backgroundColor: 'transparent',
                                                 display: 'flex',
@@ -407,7 +407,7 @@ function TodayList({
                                             </div>
                                         )}
                                     </div>
-                                    <div style={{ marginTop: '8px', fontSize: '13px', textAlign: 'left', paddingRight: '8px' }}>
+                                    <div style={{ marginTop: '10px', fontSize: '13px', textAlign: 'left', paddingRight: '10px' }}>
                                         {primaryDisplayList[1].label}
                                     </div>
                                 </>
