@@ -20,15 +20,6 @@ const deriveViewportCountrySelection = (markers = [], fallbackCountryCode = 'HK'
         }
     })
 
-    if (countryCodes.length === 1) {
-        return {
-            countryCode: dominantCountryCode,
-            countryPart: {
-                type: 'all',
-            },
-        }
-    }
-
     return {
         countryCode: dominantCountryCode || fallbackCountryCode,
         countryPart: {

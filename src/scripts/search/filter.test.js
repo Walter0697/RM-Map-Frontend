@@ -24,11 +24,22 @@ describe('search filter country handling', () => {
         expect(output.map((item) => item.id)).toEqual([1])
     })
 
-    test('does not filter by country when in viewport mode', () => {
+    test('filters by country code in viewport mode', () => {
         const output = filter.parse(markers, filterList, eventtypes, {
             countryCode: 'HK',
             countryPart: { type: 'viewport', name: 'In View' },
         })
-        expect(output.map((item) => item.id)).toEqual([1, 2])
+        expect(output.map((item) => item.id)).toEqual([1])
+    })
+
+    test('ignores country part when in viewport mode', () => {
+        const output = filter.parse([
+            ...markers,
+            { id: 3, label: 'c', type: 'food', country_code: 'HK', country_part: 'NT', description: '' },
+        ], filterList, eventtypes, {
+            countryCode: 'HK',
+            countryPart: { type: 'viewport', name: 'In View' },
+        })
+        expect(output.map((item) => item.id)).toEqual([1, 3])
     })
 })

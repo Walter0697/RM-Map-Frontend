@@ -159,6 +159,7 @@ function MarkerMap({
     )
 
     useEffect(() => {
+        if (showingList) return
         if (autoSyncCountryChangeRef.current) {
             autoSyncCountryChangeRef.current = false
             const selectedCountry = _.cloneDeep(filtercountry)
@@ -189,7 +190,7 @@ function MarkerMap({
             const selectedCountry = _.cloneDeep(filtercountry)
             setPreviousCountry(selectedCountry)
         }
-    }, [markers, filtercountry, previousCountry])
+    }, [markers, filtercountry, previousCountry, showingList])
 
     useEffect(() => {
         const output = viewportState.buildMapLocations(

@@ -131,17 +131,24 @@ function MarkerPage({
         return pagedMarkerController.items
     }, [pagedMarkerController.items])
 
+    const combinedListSource = useMemo(() => {
+        const dedupe = {}
+        ;(markerSource || []).forEach((marker) => {
+            if (!marker?.id) return
+            dedupe[marker.id] = marker
+        })
+        ;(markers || []).forEach((marker) => {
+            if (!marker?.id) return
+            if (!dedupe[marker.id]) {
+                dedupe[marker.id] = marker
+            }
+        })
+        return Object.values(dedupe)
+    }, [markerSource, markers])
+
     const filteredMarkers = useMemo(() => {
-        return search.filter.parse(markerSource, filterlist, eventtypes, filtercountry)
-    }, [markerSource, filterlist, eventtypes, filtercountry, editedTrigger])
-    const fallbackFilteredMarkers = useMemo(() => {
-        return search.filter.parse(markers || [], filterlist, eventtypes, filtercountry)
-    }, [markers, filterlist, eventtypes, filtercountry, editedTrigger])
-    const useFallbackList = filteredMarkers.length === 0 && fallbackFilteredMarkers.length > 0
-    const displayMarkers = useMemo(() => {
-        if (useFallbackList) return fallbackFilteredMarkers
-        return filteredMarkers
-    }, [filteredMarkers, fallbackFilteredMarkers, useFallbackList])
+        return search.filter.parse(combinedListSource, filterlist, eventtypes, filtercountry)
+    }, [combinedListSource, filterlist, eventtypes, filtercountry, editedTrigger])
 
     useEffect(() => {
         if (editAlert) {
@@ -156,14 +163,6 @@ function MarkerPage({
             loading: pagedMarkerController.loading,
         })
     }, [filteredMarkers.length, pagedMarkerController.nextCursor, pagedMarkerController.loading])
-
-    useEffect(() => {
-        if (!useFallbackList) return
-        telemetry.debugLog('markers_list', 'fallback:store-markers', {
-            pagedCount: markerSource.length,
-            fallbackCount: fallbackFilteredMarkers.length,
-        })
-    }, [useFallbackList, markerSource.length, fallbackFilteredMarkers.length])
 
     useEffect(() => {
         telemetry.debugLog('marker_page', 'view:switch', {
@@ -350,11 +349,11 @@ function MarkerPage({
                         top={'15%'}
                         height={'85%'}
                         showingList={showingList}
-                        markers={displayMarkers || []}
+                        markers={filteredMarkers || []}
                         setSelectedById={setSelectedById}
                         onReachEnd={pagedMarkerController.loadMore}
                         onRefreshTop={pagedMarkerController.refresh}
-                        hasMore={!!pagedMarkerController.nextCursor && !useFallbackList}
+                        hasMore={!!pagedMarkerController.nextCursor}
                         loadingMore={pagedMarkerController.loading}
                         refreshing={pagedMarkerController.refreshing}
                         onRetry={pagedMarkerController.retry}

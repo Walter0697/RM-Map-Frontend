@@ -1,7 +1,7 @@
 import viewportState from './viewportState'
 
 describe('viewportState', () => {
-    test('deriveViewportCountrySelection returns all for single country viewport', () => {
+    test('deriveViewportCountrySelection returns viewport mode for single country viewport', () => {
         const result = viewportState.deriveViewportCountrySelection([
             { id: 1, country_code: 'HK' },
             { id: 2, country_code: 'HK' },
@@ -9,7 +9,7 @@ describe('viewportState', () => {
 
         expect(result).toEqual({
             countryCode: 'HK',
-            countryPart: { type: 'all' },
+            countryPart: { type: 'viewport', name: 'In View' },
         })
     })
 
@@ -50,7 +50,7 @@ describe('viewportState', () => {
         })
     })
 
-    test('pan scenario: viewport country selection switches when dominant country changes', () => {
+    test('pan scenario: viewport country selection switches dominant country while staying in viewport mode', () => {
         const initial = viewportState.deriveViewportCountrySelection([
             { id: 1, country_code: 'HK' },
             { id: 2, country_code: 'HK' },
@@ -62,11 +62,11 @@ describe('viewportState', () => {
 
         expect(initial).toEqual({
             countryCode: 'HK',
-            countryPart: { type: 'all' },
+            countryPart: { type: 'viewport', name: 'In View' },
         })
         expect(afterPan).toEqual({
             countryCode: 'CA',
-            countryPart: { type: 'all' },
+            countryPart: { type: 'viewport', name: 'In View' },
         })
     })
 
