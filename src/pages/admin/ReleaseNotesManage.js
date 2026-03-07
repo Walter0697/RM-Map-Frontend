@@ -284,8 +284,8 @@ function ReleaseNotesManage({ jwt }) {
             {errorMessage ? <Alert severity='error'>{errorMessage}</Alert> : null}
             {successMessage ? <Alert severity='success'>{successMessage}</Alert> : null}
 
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={3}>
+            <Grid container spacing={2} sx={{ width: '100%' }}>
+                <Grid item xs={12} md={12}>
                     <Card className='admin-panel'>
                         <CardContent>
                             <Stack spacing={1.25}>
@@ -320,7 +320,7 @@ function ReleaseNotesManage({ jwt }) {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} md={9}>
+                <Grid item xs={12} md={12}>
                     <Card className='admin-panel'>
                         <CardContent>
                             <Stack spacing={2}>
