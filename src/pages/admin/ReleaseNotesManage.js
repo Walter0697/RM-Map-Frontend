@@ -109,7 +109,10 @@ function escapeHTML(input) {
 function sanitizePreviewURL(input) {
     const value = `${input || ''}`.trim()
     if (!value) return ''
-    if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/')) return value
+    if (value.startsWith('http://') || value.startsWith('https://')) return value
+    if (value.startsWith('/image/')) return value
+    if (value.startsWith('/release_notes/')) return `/image${value}`
+    if (value.startsWith('/')) return value
     return ''
 }
 
