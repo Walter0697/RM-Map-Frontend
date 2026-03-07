@@ -111,8 +111,7 @@ function MarkerMap({
     const [ weatherCenter, setWeatherCenter ] = useState(null)
     const [ forecastDayOffset, setForecastDayOffset ] = useState(1)
     const [ weatherStatusTooltipOpen, setWeatherStatusTooltipOpen ] = useState(false)
-
-    const weatherFeatureEnabled = process.env.REACT_APP_FEATURE_PLANNING_WEATHER_OVERLAY === 'true'
+    const [ weatherFeatureEnabled, setWeatherFeatureEnabled ] = useState(false)
 
     const {
         weatherOpacity,
@@ -368,6 +367,46 @@ function MarkerMap({
             setExtraLocationInformation(constants.overlay.typeStation, [])
         }
     }, [stations, showInMap])
+
+    useEffect(() => {
+        if (!map) return undefined
+        let cancelled = false
+
+        const detectWeatherCapability = async () => {
+            try {
+                const bounds = map.getBounds()
+                const center = map.getCenter()
+                const query = {
+                    min_lat: bounds.getSouth(),
+                    max_lat: bounds.getNorth(),
+                    min_lon: bounds.getWest(),
+                    max_lon: bounds.getEast(),
+                    center_lat: center.lat,
+                    center_lon: center.lng,
+                    zoom: map.getZoom(),
+                    forecast_window_h: 48,
+                    forecast_day_offset: 1,
+                }
+                const result = await apis.weather.planning(query)
+                const payload = result?.data || {}
+                if (cancelled) return
+                const backendFeatureDisabled = payload?.error_code === 'feature_disabled'
+                setWeatherFeatureEnabled(!backendFeatureDisabled)
+                if (backendFeatureDisabled) {
+                    setPlanningModeEnabled(false)
+                    setWeatherUnavailable(payload?.error_message || 'Weather data unavailable')
+                }
+            } catch (err) {
+                if (cancelled) return
+                setWeatherFeatureEnabled(false)
+            }
+        }
+
+        detectWeatherCapability()
+        return () => {
+            cancelled = true
+        }
+    }, [map])
 
     useEffect(() => {
         if (!map || !weatherFeatureEnabled || !planningModeEnabled) return undefined

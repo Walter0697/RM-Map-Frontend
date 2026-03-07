@@ -29,27 +29,48 @@ function NullableDatePicker({
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DateTimePicker
                 slotProps={{ textField: { fullWidth: true } }}
-                renderInput={(props) => (
-                    <TextField 
-                        {...props} 
-                        fullWidth
-                        required={required}
-                        error={!!errorMessage}
-                        helperText={errorMessage}
-                        InputProps={{
-                            endAdornment: (value && (
-                                <InputAdornment position='end'>
-                                    <IconButton
-                                        onClick={clearDate}
-                                        edge='end'
-                                    >
-                                        <ClearIcon />
-                                    </IconButton>
-                                </InputAdornment>
-                            )),
-                        }}
-                    />
-                )}
+                renderInput={(params) => {
+                    const pickerEndAdornment = params?.InputProps?.endAdornment
+                    return (
+                        <TextField 
+                            {...params} 
+                            fullWidth
+                            required={required}
+                            error={!!errorMessage}
+                            helperText={errorMessage}
+                            sx={{
+                                '& .MuiInputBase-input': {
+                                    textAlign: 'left',
+                                },
+                            }}
+                            inputProps={{
+                                ...params?.inputProps,
+                                style: {
+                                    ...(params?.inputProps?.style || {}),
+                                    textAlign: 'left',
+                                },
+                            }}
+                            InputProps={{
+                                ...params?.InputProps,
+                                endAdornment: (
+                                    <>
+                                        {value && (
+                                            <InputAdornment position='end'>
+                                                <IconButton
+                                                    onClick={clearDate}
+                                                    edge='end'
+                                                >
+                                                    <ClearIcon />
+                                                </IconButton>
+                                            </InputAdornment>
+                                        )}
+                                        {pickerEndAdornment}
+                                    </>
+                                ),
+                            }}
+                        />
+                    )
+                }}
                 minDate={noPast ? new Date() : null}
                 label={label}
                 value={value}
