@@ -137,8 +137,24 @@ function ScheduleArriveForm({
             <Grid container spacing={2}>
                 {arrivalSchedules.map((item, index) => (
                     <Grid key={index} item xs={12} md={12} lg={12}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={3} md={3} lg={3}>
+                        <Grid
+                            container
+                            spacing={0}
+                            style={{
+                                alignItems: 'center',
+                                flexWrap: 'nowrap',
+                            }}
+                        >
+                            <Grid
+                                item
+                                xs={3}
+                                md={3}
+                                lg={3}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                }}
+                            >
                                 <div
                                     style={{
                                         display: 'flex',
@@ -184,6 +200,7 @@ function ScheduleArriveForm({
                                     alignItems: 'center',
                                     paddingLeft: '8px',
                                     minWidth: 0,
+                                    height: '100%',
                                 }}
                             >
                                 <div
