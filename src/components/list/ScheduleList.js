@@ -128,15 +128,18 @@ function ScheduleItem({
             <Grid 
                 container
                 fullWidth
+                style={{
+                    alignContent: 'flex-start',
+                }}
             >
                 <Grid
                     item xs={12} 
                     style={{
-                        minHeight: '46px',
+                        height: '44px',
                         display: 'flex',
                         justifyContent: 'flex-start',
                         alignItems: 'center',
-                        paddingTop: '6px',
+                        paddingTop: '2px',
                         fontSize: '19px',
                         fontWeight: 500,
                         color: '#455295',
@@ -147,13 +150,12 @@ function ScheduleItem({
                 <Grid
                     item xs={12}
                     style={{
-                        minHeight: '104px',
+                        height: '72px',
+                        width: '100%',
                         display: 'flex',
                         justifyContent: 'flex-start',
-                        alignItems: 'flex-start',
-                        paddingTop: '8px',
-                        paddingBottom: '6px',
-                        fontSize: '20px',
+                        alignItems: 'center',
+                        paddingTop: '4px',
                         color: '#455295',
                         overflowX: 'auto',
                         overflowY: 'hidden',
@@ -162,14 +164,14 @@ function ScheduleItem({
                     {imageMarkers.map((sche, index) => (
                         <div key={index}
                             style={{
-                                width: '90px',
-                                marginRight: '10px',
+                                width: '50px',
+                                marginRight: '15px',
                             }}
                         >
                             <div
                                 style={{
-                                    height: '72px',
-                                    width: '72px',
+                                    height: '50px',
+                                    width: '50px',
                                     overflow: 'hidden',
                                     borderRadius: '5px',
                                     backgroundColor: 'transparent',
@@ -179,7 +181,8 @@ function ScheduleItem({
                                 }}
                             >
                                 <img
-                                    height='72px'
+                                    width='50px'
+                                    height='50px'
                                     src={toScheduleImageSrc(sche.image_path)}
                                     style={{
                                         maxHeight: '100%',
@@ -187,22 +190,6 @@ function ScheduleItem({
                                         objectFit: 'contain',
                                     }}
                                 />
-                            </div>
-                            <div
-                                style={{
-                                    marginTop: '6px',
-                                    fontSize: '11px',
-                                    lineHeight: 1.2,
-                                    color: '#445295',
-                                    textAlign: 'left',
-                                    maxWidth: '90px',
-                                    overflow: 'hidden',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 2,
-                                    WebkitBoxOrient: 'vertical',
-                                }}
-                            >
-                                {sche?.label || ''}
                             </div>
                         </div>
                     ))}
