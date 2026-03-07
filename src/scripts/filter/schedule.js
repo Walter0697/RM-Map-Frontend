@@ -19,12 +19,25 @@ const getUpcomingSchedules = (schedules) => {
 
 const getDisplayImagePath = (schedule, eventtypes) => {
     if (!schedule) return ''
+    const marker = schedule.marker || schedule.selected_marker || {}
 
+    if (schedule.image_path) return schedule.image_path
+    if (schedule.image_link) return schedule.image_link
     if (schedule.movie?.image_path) return schedule.movie.image_path
-    if (schedule.marker?.image_link) return schedule.marker.image_link
+    if (schedule.movie?.image_link) return schedule.movie.image_link
+    if (marker.image_link) return marker.image_link
+    if (marker.image_path) return marker.image_path
+    if (marker.icon_path) return marker.icon_path
 
-    if (schedule.marker?.type) {
-        const typeObj = eventtypes.find(et => et.value === schedule.marker.type)
+    const markerType = marker.type || marker.marker_type || marker.type_id
+    if (markerType && Array.isArray(eventtypes) && eventtypes.length > 0) {
+        const typeObj = eventtypes.find(et => (
+            et?.value === markerType
+            || et?.id === markerType
+            || `${et?.value}` === `${markerType}`
+            || `${et?.id}` === `${markerType}`
+            || `${et?.label}`.toLowerCase() === `${markerType}`.toLowerCase()
+        ))
         if (typeObj?.icon_path) return typeObj.icon_path
     }
 

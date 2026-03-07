@@ -24,7 +24,22 @@ import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
 dayjs.extend(dayjsPluginUTC)
 
-const getScheduleImagePath = (schedule) => {
+const getMarkerTypeIconPath = (schedule, eventtypes = []) => {
+    const marker = schedule?.marker || schedule?.selected_marker || {}
+    const markerType = marker?.type || marker?.marker_type || marker?.type_id
+    if (!markerType || !Array.isArray(eventtypes) || eventtypes.length === 0) return ''
+
+    const typeObj = eventtypes.find((et) => (
+        et?.value === markerType
+        || et?.id === markerType
+        || `${et?.value}` === `${markerType}`
+        || `${et?.id}` === `${markerType}`
+        || `${et?.label}`.toLowerCase() === `${markerType}`.toLowerCase()
+    ))
+    return typeObj?.icon_path || ''
+}
+
+const getScheduleImagePath = (schedule, eventtypes = []) => {
     if (!schedule) return ''
     return (
         schedule.image_path
@@ -37,10 +52,13 @@ const getScheduleImagePath = (schedule) => {
         || schedule.marker?.imageLink
         || schedule.marker?.image_path
         || schedule.marker?.imagePath
+        || schedule.marker?.icon_path
         || schedule.selected_marker?.image_link
         || schedule.selected_marker?.imageLink
         || schedule.selected_marker?.image_path
         || schedule.selected_marker?.imagePath
+        || schedule.selected_marker?.icon_path
+        || getMarkerTypeIconPath(schedule, eventtypes)
         || ''
     )
 }
@@ -76,7 +94,16 @@ function ScheduleItem({
 }) {
     const imageMarkers = useMemo(() => {
         if (!item) return []
-        return filters.schedules.get_schedule_image(item, eventtypes)
+        return item
+            .map((scheduleItem) => {
+                const resolvedPath = getScheduleImagePath(scheduleItem, eventtypes)
+                if (!resolvedPath) return null
+                return {
+                    ...scheduleItem,
+                    image_path: resolvedPath,
+                }
+            })
+            .filter(Boolean)
     }, [item, eventtypes])
 
     const scheduleItemOnClick = () => {
@@ -105,12 +132,13 @@ function ScheduleItem({
                 <Grid
                     item xs={12} 
                     style={{
-                        height: '50px',
+                        minHeight: '46px',
                         display: 'flex',
                         justifyContent: 'flex-start',
                         alignItems: 'center',
-                        paddingTop: '10px',
-                        fontSize: '20px',
+                        paddingTop: '6px',
+                        fontSize: '19px',
+                        fontWeight: 500,
                         color: '#455295',
                     }}
                 >
@@ -119,11 +147,12 @@ function ScheduleItem({
                 <Grid
                     item xs={12}
                     style={{
-                        height: '100px',
+                        minHeight: '104px',
                         display: 'flex',
                         justifyContent: 'flex-start',
-                        alignItems: 'center',
-                        paddingTop: '10px',
+                        alignItems: 'flex-start',
+                        paddingTop: '8px',
+                        paddingBottom: '6px',
                         fontSize: '20px',
                         color: '#455295',
                         overflowX: 'auto',
@@ -133,23 +162,47 @@ function ScheduleItem({
                     {imageMarkers.map((sche, index) => (
                         <div key={index}
                             style={{
-                                width: '80px',
-                                //overflow: 'hidden',
-                                marginRight: '15px',
+                                width: '90px',
+                                marginRight: '10px',
                             }}
                         >
                             <div
                                 style={{
-                                    height: '80px',
-                                    width: '80px',
+                                    height: '72px',
+                                    width: '72px',
                                     overflow: 'hidden',
                                     borderRadius: '5px',
+                                    backgroundColor: 'transparent',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
                                 }}
                             >
                                 <img
-                                    height='80px'
+                                    height='72px'
                                     src={toScheduleImageSrc(sche.image_path)}
+                                    style={{
+                                        maxHeight: '100%',
+                                        maxWidth: '100%',
+                                        objectFit: 'contain',
+                                    }}
                                 />
+                            </div>
+                            <div
+                                style={{
+                                    marginTop: '6px',
+                                    fontSize: '11px',
+                                    lineHeight: 1.2,
+                                    color: '#445295',
+                                    textAlign: 'left',
+                                    maxWidth: '90px',
+                                    overflow: 'hidden',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                }}
+                            >
+                                {sche?.label || ''}
                             </div>
                         </div>
                     ))}
@@ -162,43 +215,12 @@ function ScheduleItem({
 function TodayList({
     list,
     imageList,
+    eventtypes,
     onClickHandler,
 }) {
     const [ isBlinking, setBlink ] = useBoop(500)
     const [ bigImageMarkers, setBigMarkers ] = useState([]) // select two markers to display it big
     const [ smallDisplayMarkers, setSmallMarkers ] = useState([])
-
-    useEffect(() => {
-        if (!Array.isArray(list)) return
-        const sample = list.slice(0, 6).map((item) => ({
-            id: item?.id,
-            label: item?.label,
-            image_path: item?.image_path,
-            image_link: item?.image_link,
-            movie_image_path: item?.movie?.image_path,
-            movie_image_link: item?.movie?.image_link,
-            marker_image_link: item?.marker?.image_link,
-            resolved_image_path: getScheduleImagePath(item),
-        }))
-        console.log('[schedule today tile] raw today list', {
-            total: list.length,
-            sample,
-        })
-    }, [list])
-
-    useEffect(() => {
-        if (!Array.isArray(imageList)) return
-        const sample = imageList.slice(0, 6).map((item) => ({
-            id: item?.id,
-            label: item?.label,
-            image_path: item?.image_path,
-            resolved_image_path: getScheduleImagePath(item),
-        }))
-        console.log('[schedule today tile] image list', {
-            total: imageList.length,
-            sample,
-        })
-    }, [imageList])
 
     const { x } = useSpring({
         config: config.gentle,
@@ -211,7 +233,7 @@ function TodayList({
         const baseList = (imageList && imageList.length > 0 ? imageList : list) || []
         const filteredList = baseList
             .map((item) => {
-                const imagePath = getScheduleImagePath(item)
+                const imagePath = getScheduleImagePath(item, eventtypes)
                 if (!imagePath) return null
                 return {
                     ...item,
@@ -219,10 +241,6 @@ function TodayList({
                 }
             })
             .filter(Boolean)
-        console.log('[schedule today tile] filtered images after resolve', {
-            total: filteredList.length,
-            ids: filteredList.map((item) => item?.id),
-        })
         setRandomBigImageMarker(filteredList)
 
         if (filteredList.length > 2) {
@@ -236,7 +254,7 @@ function TodayList({
                 window.clearInterval(timer)
             }
         }
-    }, [imageList])
+    }, [imageList, list, eventtypes])
 
     const setRandomBigImageMarker = (filteredList) => {
         if (!filteredList || filteredList.length === 0) {
@@ -248,9 +266,6 @@ function TodayList({
         if (filteredList.length <= 2) {
             setBigMarkers(filteredList)
             setSmallMarkers(filteredList)
-            console.log('[schedule today tile] set big/small (<=2)', {
-                bigIds: filteredList.map((item) => item?.id),
-            })
             return
         }
 
@@ -272,10 +287,6 @@ function TodayList({
             setTimeout(() => {
                 setBigMarkers(displayList)
                 setSmallMarkers(smallList)
-                console.log('[schedule today tile] set big/small (>2)', {
-                    bigIds: displayList.map((item) => item?.id),
-                    smallIds: smallList.map((item) => item?.id),
-                })
             }, 500)
         }  
     }
@@ -335,7 +346,7 @@ function TodayList({
                                         justifyContent: 'center',
                                         alignItems: 'flex-start',
                                     }}>
-                                        {getScheduleImagePath(primaryDisplayList[0]) && (
+                                        {getScheduleImagePath(primaryDisplayList[0], eventtypes) && (
                                             <div style={{
                                                 width: '100%',
                                                 maxWidth: '100%',
@@ -348,7 +359,7 @@ function TodayList({
                                                 overflow: 'hidden',
                                             }}>
                                                 <img
-                                                    src={toScheduleImageSrc(getScheduleImagePath(primaryDisplayList[0]))}
+                                                    src={toScheduleImageSrc(getScheduleImagePath(primaryDisplayList[0], eventtypes))}
                                                     style={{
                                                         maxHeight: '100%',
                                                         maxWidth: '100%',
@@ -384,7 +395,7 @@ function TodayList({
                                         justifyContent: 'center',
                                         alignItems: 'flex-start',
                                     }}>
-                                        {getScheduleImagePath(primaryDisplayList[1]) && (
+                                        {getScheduleImagePath(primaryDisplayList[1], eventtypes) && (
                                             <div style={{
                                                 width: '100%',
                                                 maxWidth: '100%',
@@ -397,7 +408,7 @@ function TodayList({
                                                 overflow: 'hidden',
                                             }}>
                                                 <img 
-                                                    src={toScheduleImageSrc(getScheduleImagePath(primaryDisplayList[1]))}
+                                                    src={toScheduleImageSrc(getScheduleImagePath(primaryDisplayList[1], eventtypes))}
                                                     style={{
                                                         maxHeight: '100%',
                                                         maxWidth: '100%',
@@ -448,7 +459,7 @@ function TodayList({
                                 <img 
                                     width='50px'
                                     height='50px'
-                                    src={toScheduleImageSrc(getScheduleImagePath(sche))}
+                                    src={toScheduleImageSrc(getScheduleImagePath(sche, eventtypes))}
                                     style={{ objectFit: 'contain' }}
                                 />
                             </div>
@@ -535,7 +546,7 @@ function ScheduleList({
         if (!Array.isArray(baseToday) || baseToday.length === 0) return []
 
         return baseToday.map((item) => {
-            const hasImageData = !!getScheduleImagePath(item)
+            const hasImageData = !!getScheduleImagePath(item, eventtypes)
             if (hasImageData) return item
 
             const fallback = (schedules || []).find((raw) => raw?.id === item?.id)
@@ -551,7 +562,7 @@ function ScheduleList({
                 selected_marker: item?.selected_marker || fallback?.selected_marker,
             }
         })
-    }, [scheduleSource, schedules])
+    }, [scheduleSource, schedules, eventtypes])
 
     const today_schedules_with_image = useMemo(() => {
         if (!scheduleSource) return []
@@ -717,6 +728,7 @@ function ScheduleList({
                                     <TodayList
                                         list={today_schedules}
                                         imageList={today_schedules_with_image}
+                                        eventtypes={eventtypes}
                                         onClickHandler={openScheduleView}
                                     />
                                 </WrapperBox>
@@ -738,7 +750,7 @@ function ScheduleList({
                         }
                         return (
                             <WrapperBox
-                                height={150}
+                                height={170}
                                 marginBottom={'10px'}
                             >
                                 <ScheduleItem
