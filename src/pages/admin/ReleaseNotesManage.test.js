@@ -16,7 +16,10 @@ function rootReducer(state = { auth: { jwt: 'test-jwt', username: 'admin' } }) {
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 function setInputValue(input, value) {
-    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
+    const prototype = input instanceof window.HTMLTextAreaElement
+        ? window.HTMLTextAreaElement.prototype
+        : window.HTMLInputElement.prototype
+    const setter = Object.getOwnPropertyDescriptor(prototype, 'value').set
     setter.call(input, value)
     input.dispatchEvent(new Event('input', { bubbles: true }))
     input.dispatchEvent(new Event('change', { bubbles: true }))
