@@ -176,7 +176,6 @@ function MarkerMap({
 
     useEffect(() => {
         let output = []
-        let output = []
         const activeMarkers = viewportMarkers
         activeMarkers.forEach(item => {
             const pinType = maphelper.pins.getPinType(item)
