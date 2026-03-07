@@ -8,10 +8,18 @@ import {
     Card,
     CardContent,
     Chip,
+    IconButton,
     Stack,
     TextField,
+    Tooltip,
     Typography,
 } from '@mui/material'
+import FormatBoldIcon from '@mui/icons-material/FormatBold'
+import FormatItalicIcon from '@mui/icons-material/FormatItalic'
+import TitleIcon from '@mui/icons-material/Title'
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
+import LinkIcon from '@mui/icons-material/Link'
+import ImageIcon from '@mui/icons-material/Image'
 
 import backend from '../../constant/backend'
 import AdminPageShell from '../../components/admin/AdminPageShell'
@@ -548,15 +556,40 @@ function ReleaseNotesManage({ jwt }) {
                                     <Stack spacing={1}>
                                         <Typography variant='subtitle2'>Content (Rich Markdown Editor)</Typography>
                                         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                                            <Button className='admin-action-button' variant='outlined' onClick={() => applyMarkdown('**', '**')}>Bold</Button>
-                                            <Button className='admin-action-button' variant='outlined' onClick={() => applyMarkdown('*', '*')}>Italic</Button>
-                                            <Button className='admin-action-button' variant='outlined' onClick={() => applyMarkdown('## ')}>Heading</Button>
-                                            <Button className='admin-action-button' variant='outlined' onClick={applyMarkdownList}>List</Button>
-                                            <Button className='admin-action-button' variant='outlined' onClick={() => applyMarkdown('[', '](https://example.com)')}>Link</Button>
-                                            <Button className='admin-action-button' variant='outlined' component='label'>
-                                                Upload Image
-                                                <input type='file' hidden accept='image/*' onChange={(event) => uploadImage(event.target.files?.[0])} />
-                                            </Button>
+                                            <Tooltip title='Bold'>
+                                                <IconButton size='small' onClick={() => applyMarkdown('**', '**')}>
+                                                    <FormatBoldIcon fontSize='small' />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title='Italic'>
+                                                <IconButton size='small' onClick={() => applyMarkdown('*', '*')}>
+                                                    <FormatItalicIcon fontSize='small' />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title='Heading'>
+                                                <IconButton size='small' onClick={() => applyMarkdown('## ')}>
+                                                    <TitleIcon fontSize='small' />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title='List'>
+                                                <IconButton size='small' onClick={applyMarkdownList}>
+                                                    <FormatListBulletedIcon fontSize='small' />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title='Link'>
+                                                <IconButton size='small' onClick={() => applyMarkdown('[', '](https://example.com)')}>
+                                                    <LinkIcon fontSize='small' />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title='Upload Image'>
+                                                <IconButton size='small' component='label'>
+                                                    <ImageIcon fontSize='small' />
+                                                    <input type='file' hidden accept='image/*' onChange={(event) => uploadImage(event.target.files?.[0])} />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Typography variant='caption' color='text.secondary' sx={{ alignSelf: 'center' }}>
+                                                Markdown Toolbar
+                                            </Typography>
                                         </Stack>
                                         <TextField
                                             label='Content'
