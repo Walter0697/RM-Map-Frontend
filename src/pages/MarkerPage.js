@@ -48,6 +48,7 @@ function MarkerPage({
 
     // selected marker
     const [ selectedMarker, setSelected ] = useState(null)
+    const [ selectedMarkerId, setSelectedMarkerId ] = useState(null)
     // if the selected marker is set to be schedule
     const [ scheduleFormOpen, setScheduleFormOpen ] = useState(false)
     const [ createAlert, confirmCreated ] = useBoop(3000)
@@ -264,7 +265,10 @@ function MarkerPage({
     const setSelectedById = (id) => {
         const selected = markerSource.find(s => s.id === id)
             || (markers || []).find(s => s.id === id)
-        if (selected) setSelected(selected)
+        if (selected) {
+            setSelected(selected)
+            setSelectedMarkerId(selected.id)
+        }
     } 
 
     // const confirmFilterValue = (finalValue) => {
@@ -274,6 +278,7 @@ function MarkerPage({
 
     const onMarkerUpdated = () => {
         setSelected(null)
+        setSelectedMarkerId(null)
         setEditing(false)
         confirmEdited()
     }
@@ -281,10 +286,20 @@ function MarkerPage({
     const onSelectMarker = (marker) => {
         if (!marker) return
         setSelected(marker)
+        setSelectedMarkerId(marker.id)
+    }
+
+    const onViewportSelectionUpdate = (marker) => {
+        if (marker) {
+            if (selectedMarkerId && marker.id === selectedMarkerId) {
+                setSelected(marker)
+            }
+        }
     }
 
     const onScheduleCreated = () => {
         setSelected(null)
+        setSelectedMarkerId(null)
         setScheduleFormOpen(false)
         confirmCreated()
     }
@@ -311,6 +326,7 @@ function MarkerPage({
                         markers={markers || []}
                         setSelectedById={setSelectedById}
                         setSelectedMarker={onSelectMarker}
+                        onViewportSelectionUpdate={onViewportSelectionUpdate}
                         // filterOption={filterOption} // for filter option
                         // filterValue={filterValue}   // for filter temporary value setter and getter
                         // setFilterValue={setFilterValue}  
@@ -407,7 +423,10 @@ function MarkerPage({
 
             <MarkerView
                 open={!!selectedMarker}
-                handleClose={() => setSelected(null)}
+                handleClose={() => {
+                    setSelected(null)
+                    setSelectedMarkerId(null)
+                }}
                 openSchedule={() => setScheduleFormOpen(true)}
                 editMarker={() => setEditing(true)}
                 marker={selectedMarker}

@@ -29,6 +29,9 @@ function CountrySelect({
 
     const displayPartName = useMemo(() => {
         if (filtercountry) {
+            if (filtercountry.countryPart.type === 'viewport') {
+                return 'In View'
+            }
             if (filtercountry.countryPart.type === 'all') {
                 return 'All Areas'
             }
