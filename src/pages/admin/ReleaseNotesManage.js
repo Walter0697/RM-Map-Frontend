@@ -115,9 +115,6 @@ function ReleaseNotesManage({ jwt }) {
     const requiresVersionProgression = !isExistingNote || versionChanged
     const isVersionProgressed = isVersionValid && compareSemver(version, baselineVersion) > 0
     const isVersionAllowed = isVersionValid && (!requiresVersionProgression || isVersionProgressed)
-    const canPublish = publishState === 'published'
-        ? (requiresVersionProgression ? isVersionProgressed : true)
-        : true
 
     const resetForm = () => {
         setSelectedID('new')
@@ -238,11 +235,6 @@ function ReleaseNotesManage({ jwt }) {
             setErrorMessage(`Version must be greater than app version ${baselineVersion}.`)
             return
         }
-        if (!canPublish) {
-            setErrorMessage(`Publish is blocked until version is greater than ${baselineVersion}.`)
-            return
-        }
-
         setSaving(true)
         setErrorMessage('')
         setSuccessMessage('')
@@ -301,6 +293,40 @@ function ReleaseNotesManage({ jwt }) {
         }
     }
 
+    const togglePublishedStateForItem = async (item, event) => {
+        if (event) {
+            event.preventDefault()
+            event.stopPropagation()
+        }
+        if (!jwt || saving) return
+        const id = `${item?.id || ''}`.trim()
+        if (!id) return
+        const currentState = `${item.publish_state || 'draft'}`.toLowerCase()
+        const nextState = currentState === 'published' ? 'draft' : 'published'
+        setSaving(true)
+        setErrorMessage('')
+        setSuccessMessage('')
+        try {
+            const response = await fetch(backend.withBasePath(`admin/release-notes/${id}/${nextState === 'published' ? 'publish' : 'unpublish'}`), {
+                method: 'POST',
+                headers: {
+                    Authorization: jwt,
+                },
+            })
+            if (!response.ok) throw new Error(await parseResponseError(response))
+            const payload = await response.json()
+            setSuccessMessage(nextState === 'published' ? 'Release note published.' : 'Release note moved to draft.')
+            await load()
+            if (`${selectedID}` === id) {
+                applyItem(payload)
+            }
+        } catch (error) {
+            setErrorMessage(error.message)
+        } finally {
+            setSaving(false)
+        }
+    }
+
     const uploadImage = async (file) => {
         if (!file || !jwt) return
         setErrorMessage('')
@@ -342,7 +368,7 @@ function ReleaseNotesManage({ jwt }) {
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                     <Button className='admin-action-button' variant='outlined' onClick={load} disabled={loading || saving}>Refresh</Button>
                     <Button className='admin-action-button' variant='outlined' onClick={resetForm} disabled={saving}>New Draft</Button>
-                    <Button className='admin-action-button' variant='contained' onClick={submit} disabled={loading || saving || !canPublish}>Save</Button>
+                    <Button className='admin-action-button' variant='contained' onClick={submit} disabled={loading || saving}>Save</Button>
                 </Stack>
             )}
         >
@@ -377,7 +403,13 @@ function ReleaseNotesManage({ jwt }) {
                                         </span>
                                         <span style={{ display: 'flex', gap: 6 }}>
                                             <Chip size='small' label={item.notes_format || 'md'} />
-                                            <Chip size='small' label={item.publish_state || 'draft'} color={item.publish_state === 'published' ? 'success' : 'default'} />
+                                            <Chip
+                                                size='small'
+                                                label={item.publish_state || 'draft'}
+                                                color={item.publish_state === 'published' ? 'success' : 'default'}
+                                                onClick={(event) => togglePublishedStateForItem(item, event)}
+                                                disabled={saving}
+                                            />
                                         </span>
                                     </Button>
                                 ))}
@@ -523,7 +555,7 @@ function ReleaseNotesManage({ jwt }) {
                                         <input type='file' hidden accept='image/*' onChange={(event) => uploadImage(event.target.files?.[0])} />
                                     </Button>
                                     <Button className='admin-action-button' variant='outlined' onClick={() => setPublishedState('draft')} disabled={selectedID === 'new' || saving}>Move To Draft</Button>
-                                    <Button className='admin-action-button' variant='contained' onClick={() => setPublishedState('published')} disabled={selectedID === 'new' || saving || !isVersionProgressed}>Publish</Button>
+                                    <Button className='admin-action-button' variant='contained' onClick={() => setPublishedState('published')} disabled={selectedID === 'new' || saving}>Publish</Button>
                                 </Stack>
                                 {iconRef ? (
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
