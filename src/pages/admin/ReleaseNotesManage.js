@@ -9,7 +9,6 @@ import {
     CardContent,
     Chip,
     FormControl,
-    Grid,
     InputLabel,
     MenuItem,
     Select,
@@ -346,8 +345,15 @@ function ReleaseNotesManage({ jwt }) {
                                     fullWidth
                                 />
 
-                                <Grid container spacing={2}>
-                                    <Grid item xs={12} md={6}>
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        flexDirection: { xs: 'column', sm: 'row' },
+                                        gap: 2,
+                                        width: '100%',
+                                    }}
+                                >
+                                    <Box sx={{ width: { xs: '100%', sm: '50%' } }}>
                                         <FormControl fullWidth>
                                             <InputLabel id='release-note-notes-format'>Notes Storage</InputLabel>
                                             <Select
@@ -360,9 +366,10 @@ function ReleaseNotesManage({ jwt }) {
                                                 <MenuItem value='json'>json</MenuItem>
                                             </Select>
                                         </FormControl>
-                                    </Grid>
-                                    <Grid item xs={12} md={6}>
+                                    </Box>
+                                    <Box sx={{ width: { xs: '100%', sm: '50%' } }}>
                                         <Autocomplete
+                                            fullWidth
                                             options={RELEASE_NOTE_ICON_OPTIONS}
                                             value={RELEASE_NOTE_ICON_OPTIONS.find((item) => item.key === iconRef) || RELEASE_NOTE_ICON_OPTIONS[0]}
                                             getOptionLabel={(option) => option.label}
@@ -380,8 +387,8 @@ function ReleaseNotesManage({ jwt }) {
                                                 </li>
                                             )}
                                         />
-                                    </Grid>
-                                </Grid>
+                                    </Box>
+                                </Box>
 
                                 <TextField
                                     label='Content'
