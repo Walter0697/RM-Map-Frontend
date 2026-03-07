@@ -540,9 +540,31 @@ function ScheduleList({
         ? schedulesOverride
         : (schedules || [])
 
+    const enrichedScheduleSource = useMemo(() => {
+        if (!Array.isArray(scheduleSource) || scheduleSource.length === 0) return []
+
+        return scheduleSource.map((item) => {
+            const hasImageData = !!getScheduleImagePath(item, eventtypes)
+            if (hasImageData) return item
+
+            const fallback = (schedules || []).find((raw) => raw?.id === item?.id)
+            if (!fallback) return item
+
+            return {
+                ...fallback,
+                ...item,
+                image_path: item?.image_path || fallback?.image_path,
+                image_link: item?.image_link || fallback?.image_link,
+                marker: item?.marker || fallback?.marker,
+                movie: item?.movie || fallback?.movie,
+                selected_marker: item?.selected_marker || fallback?.selected_marker,
+            }
+        })
+    }, [scheduleSource, schedules, eventtypes])
+
     const today_schedules = useMemo(() => {
-        if (!scheduleSource) return []
-        const baseToday = filters.schedules.get_today(scheduleSource)
+        if (!enrichedScheduleSource) return []
+        const baseToday = filters.schedules.get_today(enrichedScheduleSource)
         if (!Array.isArray(baseToday) || baseToday.length === 0) return []
 
         return baseToday.map((item) => {
@@ -562,17 +584,17 @@ function ScheduleList({
                 selected_marker: item?.selected_marker || fallback?.selected_marker,
             }
         })
-    }, [scheduleSource, schedules, eventtypes])
+    }, [enrichedScheduleSource, schedules, eventtypes])
 
     const today_schedules_with_image = useMemo(() => {
-        if (!scheduleSource) return []
-        return filters.schedules.get_today_image(scheduleSource, eventtypes)
-    }, [scheduleSource, eventtypes])
+        if (!enrichedScheduleSource) return []
+        return filters.schedules.get_today_image(enrichedScheduleSource, eventtypes)
+    }, [enrichedScheduleSource, eventtypes])
 
     const upcoming_schedules = useMemo(() => {
-        if (!scheduleSource) return []
+        if (!enrichedScheduleSource) return []
         
-        const upcoming_list = filters.schedules.get_upcoming(scheduleSource)
+        const upcoming_list = filters.schedules.get_upcoming(enrichedScheduleSource)
         
         // use dictionary for grouping the schedules into each day
         let result = {}
@@ -597,7 +619,7 @@ function ScheduleList({
         })
 
         return sorted
-    }, [scheduleSource])
+    }, [enrichedScheduleSource])
 
     useEffect(() => {
         let timeout = null
