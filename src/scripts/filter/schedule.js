@@ -6,7 +6,7 @@ const getTodaySchedule = (schedules) => {
     if (!schedules) return []
     
     const now = dayjs().format('YYYY-MM-DD')
-    return schedules.filter(s => dayjs.utc(s.selected_date).format('YYYY-MM-DD') === now)
+    return schedules.filter(s => dayjs(s.selected_date).format('YYYY-MM-DD') === now)
 }
 
 const getUpcomingSchedules = (schedules) => {
@@ -14,34 +14,37 @@ const getUpcomingSchedules = (schedules) => {
 
     const now = dayjs()
     const nowStr = now.format('YYYY-MM-DD')
-    return schedules.filter(s => dayjs.utc(s.selected_date).format('YYYY-MM-DD') !== nowStr && dayjs(s.selected_date).isAfter(now))
+    return schedules.filter(s => dayjs(s.selected_date).format('YYYY-MM-DD') !== nowStr && dayjs(s.selected_date).isAfter(now))
+}
+
+const getDisplayImagePath = (schedule, eventtypes) => {
+    if (!schedule) return ''
+
+    if (schedule.movie?.image_path) return schedule.movie.image_path
+    if (schedule.marker?.image_link) return schedule.marker.image_link
+
+    if (schedule.marker?.type) {
+        const typeObj = eventtypes.find(et => et.value === schedule.marker.type)
+        if (typeObj?.icon_path) return typeObj.icon_path
+    }
+
+    return ''
 }
 
 const getTodayScheduleWithImage = (schedules, eventtypes) => {
     if (!schedules) return []
 
     const today_list = getTodaySchedule(schedules)
-    let result = []
-    today_list.forEach(s => {
-        if (s.movie) {
-            if (s.movie.image_path) {
-                s.image_path = s.movie.image_path
-                result.push(s)
+    return today_list
+        .map((s) => {
+            const imagePath = getDisplayImagePath(s, eventtypes)
+            if (!imagePath) return null
+            return {
+                ...s,
+                image_path: imagePath,
             }
-        } else if (s.marker) {
-            if (s.marker.image_link) {
-                s.image_path = s.marker.image_link
-                result.push(s)
-            } else if (s.marker.type) {
-                const typeObj = eventtypes.find(et => et.value === s.marker.type)
-                if (typeObj) {
-                    s.image_path = typeObj.icon_path
-                    result.push(s)
-                } 
-            }
-        }
-    })
-    return result
+        })
+        .filter(Boolean)
     // const included_image_list = today_list.filter(s => s.marker?.image_link)
 
     // if (included_image_list.length === 0) {
@@ -70,27 +73,16 @@ const getTodayScheduleWithImage = (schedules, eventtypes) => {
 const getScheuldeWithImage = (schedules, eventtypes) => {
     if (!schedules) return []
 
-    let result = []
-    schedules.forEach(s => {
-        if (s.movie) {
-            if (s.movie.image_path) {
-                s.image_path = s.movie.image_path
-                result.push(s)
+    return schedules
+        .map((s) => {
+            const imagePath = getDisplayImagePath(s, eventtypes)
+            if (!imagePath) return null
+            return {
+                ...s,
+                image_path: imagePath,
             }
-        } else if (s.marker) {
-            if (s.marker.image_link) {
-                s.image_path = s.marker.image_link
-                result.push(s)
-            } else if (s.marker.type) {
-                const typeObj = eventtypes.find(et => et.value === s.marker.type)
-                if (typeObj) {
-                    s.image_path = typeObj.icon_path
-                    result.push(s)
-                } 
-            }
-        }
-    })
-    return result
+        })
+        .filter(Boolean)
     // const included_image_list = schedules.filter(s => s.marker?.image_link)
 
     // if (included_image_list.length === 0) {

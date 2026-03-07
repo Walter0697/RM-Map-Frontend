@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
 import {
@@ -91,6 +91,40 @@ const formatSignedSeconds = (seconds) => {
     return `${seconds >= 0 ? '+' : '-'}${formatted}`
 }
 
+const toNumberOrFallback = (...values) => {
+    for (let i = 0; i < values.length; i++) {
+        const value = values[i]
+        if (value === undefined || value === null || value === '') continue
+        const parsed = Number(value)
+        if (!Number.isNaN(parsed)) return parsed
+    }
+    return 0
+}
+
+const toScheduleImageSrc = (item) => {
+    const rawPath = item?.image_path || item?.movie?.image_path || item?.marker?.image_link || ''
+    if (!rawPath) return ''
+    if (/^(https?:)?\/\//i.test(rawPath)) return rawPath
+
+    const base = (backend.IMAGE_LINK || '').replace(/\/+$/, '')
+    const normalized = `${rawPath}`
+    const imageBaseWithSlash = `${base}/`
+    if (normalized.startsWith(imageBaseWithSlash)) {
+        return normalized
+    }
+
+    if (normalized.startsWith('/image/')) {
+        const baseRoot = base.endsWith('/image') ? base.slice(0, -6) : ''
+        return `${baseRoot}${normalized}`
+    }
+
+    if (normalized.startsWith('/')) {
+        return `${base}${normalized}`
+    }
+
+    return `${base}/${normalized}`
+}
+
 function ScheduleItem({
     item,
     transition,
@@ -109,13 +143,15 @@ function ScheduleItem({
     const [ imageExist, setImageExist ] = useState(false)
     const [ explanationAnchor, setExplanationAnchor ] = useState(null)
 
+    const imageSrc = toScheduleImageSrc(item)
+
     useEffect(() => {
-        if (item.image_path) {
+        if (imageSrc) {
             setImageExist(true)
         } else {
             setImageExist(false)
         }
-    }, [item])
+    }, [imageSrc])
 
     const onImageFailedToLoad = () => {
         setImageExist(false)
@@ -149,8 +185,18 @@ function ScheduleItem({
 
     const transitionVisual = getDifficultyVisual(transition)
     const FaceIcon = transitionVisual.icon
-    const transitionTravelSeconds = transition?.duration_seconds || 0
-    const transitionGapSeconds = transition?.scheduled_gap_seconds || 0
+    const transitionTravelSeconds = toNumberOrFallback(
+        transition?.duration_seconds,
+        transition?.travel_duration_seconds,
+        transition?.travel_time_seconds,
+        transition?.duration,
+    )
+    const transitionGapSeconds = toNumberOrFallback(
+        transition?.scheduled_gap_seconds,
+        transition?.between_time_seconds,
+        transition?.gap_seconds,
+        transition?.scheduled_gap,
+    )
     const lineHeight = 70
     const descriptionText = item?.description || item?.marker?.description || ''
 
@@ -160,9 +206,16 @@ function ScheduleItem({
         }
         const travelText = formatMinutesCompact(Math.round(transitionTravelSeconds / 60))
         const gapText = formatMinutesCompact(Math.round(transitionGapSeconds / 60))
-        const deltaText = transition.delta_seconds === undefined || transition.delta_seconds === null
+        const deltaSeconds = toNumberOrFallback(
+            transition?.delta_seconds,
+            transition?.buffer_seconds,
+            transition?.difference_seconds,
+        )
+        const deltaText = transition.delta_seconds === undefined
+            && transition.buffer_seconds === undefined
+            && transition.difference_seconds === undefined
             ? 'N/A'
-            : formatSignedSeconds(transition.delta_seconds)
+            : formatSignedSeconds(deltaSeconds)
         return `Gap: ${gapText}, Travel: ${travelText}, Buffer: ${deltaText}.`
     })()
 
@@ -235,7 +288,7 @@ function ScheduleItem({
                                 borderRadius: '6px',
                                 display: 'block',
                             }}
-                            src={backend.IMAGE_LINK + item.image_path}
+                            src={imageSrc}
                             onError={onImageFailedToLoad}
                         />
                     ) : (
@@ -396,6 +449,11 @@ function ScheduleView({
     handleClose,
     schedules,
     selected_date,
+    activeScheduleId,
+    fetchStatus,
+    fetchError,
+    onRetry,
+    onRefresh,
     openArriveForm,
     openEditForm,
     jwt,
@@ -446,6 +504,9 @@ function ScheduleView({
 
     const [ copyMessage, triggerCopyMessage ] = useBoop(3000)
     const [ transitionAnalysis, setTransitionAnalysis ] = useState([])
+    const [ transitionFetchStatus, setTransitionFetchStatus ] = useState('idle')
+    const [ transitionFetchMessage, setTransitionFetchMessage ] = useState('')
+    const transitionRequestVersionRef = useRef(0)
 
     const onEditClickHandler = (schedule) => {
         openEditForm(schedule)
@@ -461,8 +522,15 @@ function ScheduleView({
         const fetchTransitionAnalysis = async () => {
             if (!open || !jwt || !sortedList || sortedList.length <= 1) {
                 setTransitionAnalysis([])
+                setTransitionFetchStatus('idle')
+                setTransitionFetchMessage('')
                 return
             }
+
+            const requestVersion = transitionRequestVersionRef.current + 1
+            transitionRequestVersionRef.current = requestVersion
+            setTransitionFetchStatus('loading')
+            setTransitionFetchMessage('')
 
             const requestSchedules = sortedList.map((schedule) => ({
                 schedule_id: schedule.id,
@@ -485,18 +553,33 @@ function ScheduleView({
                     }),
                 })
                 if (!response.ok) {
+                    if (transitionRequestVersionRef.current !== requestVersion) return
                     setTransitionAnalysis([])
+                    setTransitionFetchStatus('error')
+                    setTransitionFetchMessage(`Travel analysis endpoint returned ${response.status}`)
                     return
                 }
                 const payload = await response.json()
+                if (transitionRequestVersionRef.current !== requestVersion) return
                 setTransitionAnalysis(payload?.transition_analysis || [])
+                setTransitionFetchStatus('success')
+                setTransitionFetchMessage('')
             } catch (error) {
+                if (transitionRequestVersionRef.current !== requestVersion) return
                 setTransitionAnalysis([])
+                setTransitionFetchStatus('error')
+                setTransitionFetchMessage('Travel analysis request failed before reaching provider')
             }
         }
 
         fetchTransitionAnalysis()
-    }, [open, jwt, sortedList])
+    }, [open, jwt, sortedList, activeScheduleId, fetchStatus])
+
+    const normalizedViewStatus = useMemo(() => {
+        if (fetchStatus === 'loading' || fetchStatus === 'error') return fetchStatus
+        if (!sortedList || sortedList.length === 0) return 'empty'
+        return 'success'
+    }, [fetchStatus, sortedList])
 
     return (
         <>
@@ -511,28 +594,58 @@ function ScheduleView({
                 { sortedList && (
                     <>
                         <DialogTitle>
-                            {isToday ? 'Today\'s schedule' : selected_date}
+                            {normalizedViewStatus === 'loading'
+                                ? 'Loading schedule...'
+                                : (isToday ? 'Today\'s schedule' : (selected_date || 'Schedule details'))}
                         </DialogTitle>
                         <DialogContent dividers>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
-                                {sortedList.map((schedule, index) => (
-                                    <ScheduleItem 
-                                        key={index}
-                                        item={schedule}
-                                        transition={transitionAnalysis[index] || null}
-                                        triggerCopyMessage={triggerCopyMessage}
-                                        isToday={isToday}
-                                        onEditClick={onEditClickHandler}
-                                        onDeleteClick={onDeleteClickHandler}
-                                    />
-                                ))}
-                            </div>
+                            {normalizedViewStatus === 'loading' && (
+                                <div style={{ minHeight: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    Loading schedule details...
+                                </div>
+                            )}
+                            {normalizedViewStatus === 'error' && (
+                                <div style={{ minHeight: '120px', display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div>{fetchError || 'Failed to load schedule details.'}</div>
+                                    <Button variant='outlined' onClick={onRetry}>Retry</Button>
+                                </div>
+                            )}
+                            {normalizedViewStatus === 'empty' && (
+                                <div style={{ minHeight: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    No schedule details available.
+                                </div>
+                            )}
+                            {normalizedViewStatus === 'success' && (
+                                <>
+                                    {transitionFetchStatus === 'error' && (
+                                        <div style={{ marginBottom: '10px', color: '#b33434', fontSize: '13px' }}>
+                                            {transitionFetchMessage || 'Travel estimates are temporarily unavailable. Tap Refresh to retry.'}
+                                        </div>
+                                    )}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+                                        {sortedList.map((schedule, index) => (
+                                            <ScheduleItem
+                                                key={index}
+                                                item={schedule}
+                                                transition={transitionAnalysis[index] || null}
+                                                triggerCopyMessage={triggerCopyMessage}
+                                                isToday={isToday}
+                                                onEditClick={onEditClickHandler}
+                                                onDeleteClick={onDeleteClickHandler}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
+                            )}
                         </DialogContent>
                     </>
                 )}
-                {isToday && (
+                {(normalizedViewStatus === 'success' || normalizedViewStatus === 'error') && (
                     <DialogActions>
-                        <Button onClick={openArriveForm}>Arrived</Button>
+                        <Button onClick={onRefresh}>Refresh</Button>
+                        {isToday && normalizedViewStatus === 'success' && (
+                            <Button onClick={openArriveForm}>Arrived</Button>
+                        )}
                     </DialogActions>
                 )}
                 

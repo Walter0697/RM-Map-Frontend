@@ -41,18 +41,24 @@ function TodaySchedule({
                 textTransform: 'none',
                 position: 'relative',
                 overflow: 'hidden',
+                justifyContent: 'flex-start',
+                alignItems: 'flex-start',
             }}
             onClick={onClickHandler}
         >
             <Grid container fullWidth style={{
                 paddingTop: '10px',
+                textAlign: 'left',
             }}>
-                Today Schedules
+                <Grid item xs={12} style={{ paddingLeft: '8px', fontWeight: 500 }}>
+                    Today Schedules
+                </Grid>
                 <Grid item xs={12} md={12} lg={12}
                     style={{
                         height: '70px',
                         width: '100%',
                         marginTop: '10px',
+                        paddingLeft: '8px',
                     }}
                 >
                     <animated.div
@@ -69,16 +75,20 @@ function TodaySchedule({
                             <div 
                                 key={index}
                                 style={{
-                                    width: '50px',
-                                    height: '50px',
-                                    marginRight: '15px',
+                                    width: '44px',
+                                    height: '44px',
+                                    marginRight: '12px',
                                     zIndex: 2,
+                                    borderRadius: '6px',
+                                    overflow: 'hidden',
+                                    backgroundColor: '#d9e6f3',
                                 }}
                             >
                                 <RoundImage 
-                                    width={'50px'}
-                                    height={'50px'}
+                                    width={'44px'}
+                                    height={'44px'}
                                     src={schedule.image_path}
+                                    style={{ objectFit: 'contain' }}
                                 />
                             </div>
                         ))}
