@@ -332,13 +332,13 @@ function TodayList({
                                         width: '100%', 
                                         height: '100%',
                                         display: 'flex',
-                                        justifyContent: 'flex-start',
+                                        justifyContent: 'center',
                                         alignItems: 'flex-start',
                                     }}>
                                         {getScheduleImagePath(primaryDisplayList[0]) && (
                                             <div style={{
                                                 width: '100%',
-                                                maxWidth: '96%',
+                                                maxWidth: '100%',
                                                 height: '136px',
                                                 borderRadius: '8px',
                                                 backgroundColor: 'transparent',
@@ -381,13 +381,13 @@ function TodayList({
                                         width: '100%', 
                                         height: '100%',
                                         display: 'flex',
-                                        justifyContent: 'flex-end',
+                                        justifyContent: 'center',
                                         alignItems: 'flex-start',
                                     }}>
                                         {getScheduleImagePath(primaryDisplayList[1]) && (
                                             <div style={{
                                                 width: '100%',
-                                                maxWidth: '96%',
+                                                maxWidth: '100%',
                                                 height: '136px',
                                                 borderRadius: '8px',
                                                 backgroundColor: 'transparent',
