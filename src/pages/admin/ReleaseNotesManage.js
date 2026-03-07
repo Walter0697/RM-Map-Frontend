@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { connect } from 'react-redux'
 import {
     Autocomplete,
@@ -8,10 +8,6 @@ import {
     Card,
     CardContent,
     Chip,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
     Stack,
     TextField,
     Typography,
@@ -74,6 +70,25 @@ function compareSemver(a, b) {
     return 0
 }
 
+function parseJsonContentLines(input) {
+    const raw = `${input || ''}`.trim()
+    if (!raw) return ['']
+    try {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) {
+            const lines = parsed.map((item) => `${item ?? ''}`.trim()).filter((item) => item !== '')
+            return lines.length > 0 ? lines : ['']
+        }
+    } catch (error) {
+        // fallback below
+    }
+    const fallback = raw
+        .split(/\r?\n/)
+        .map((line) => line.trim().replace(/^-+\s*/, ''))
+        .filter((line) => line !== '')
+    return fallback.length > 0 ? fallback : ['']
+}
+
 function ReleaseNotesManage({ jwt }) {
     const baselineVersion = useMemo(() => normalizeSemver(appPackage.version || ''), [])
     const [items, setItems] = useState([])
@@ -82,6 +97,7 @@ function ReleaseNotesManage({ jwt }) {
     const [version, setVersion] = useState('')
     const [content, setContent] = useState('')
     const [notesFormat, setNotesFormat] = useState('md')
+    const [jsonLines, setJsonLines] = useState([''])
     const [publishState, setPublishState] = useState('draft')
     const [imageRefs, setImageRefs] = useState([])
     const [iconRef, setIconRef] = useState('')
@@ -89,6 +105,7 @@ function ReleaseNotesManage({ jwt }) {
     const [loading, setLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
     const [successMessage, setSuccessMessage] = useState('')
+    const mdEditorRef = useRef(null)
 
     const isExistingNote = selectedID !== 'new'
     const normalizedVersion = normalizeSemver(version)
@@ -108,6 +125,7 @@ function ReleaseNotesManage({ jwt }) {
         setVersion('')
         setContent('')
         setNotesFormat('md')
+        setJsonLines([''])
         setPublishState('draft')
         setImageRefs([])
         setIconRef('')
@@ -119,6 +137,7 @@ function ReleaseNotesManage({ jwt }) {
         setVersion(item.version || '')
         setContent(item.content || '')
         setNotesFormat(item.notes_format || 'md')
+        setJsonLines(parseJsonContentLines(item.content || ''))
         setPublishState(item.publish_state || 'draft')
         setImageRefs(Array.isArray(item.image_refs) ? item.image_refs : [])
         const iconKey = `${item.icon_ref || ''}`.trim()
@@ -160,9 +179,54 @@ function ReleaseNotesManage({ jwt }) {
         load()
     }, [jwt])
 
+    const applyMarkdown = (prefix, suffix = '') => {
+        const editor = mdEditorRef.current
+        if (!editor) return
+        const start = editor.selectionStart || 0
+        const end = editor.selectionEnd || 0
+        const selected = content.slice(start, end)
+        const replacement = `${prefix}${selected || 'text'}${suffix}`
+        const nextValue = `${content.slice(0, start)}${replacement}${content.slice(end)}`
+        setContent(nextValue)
+        window.requestAnimationFrame(() => {
+            editor.focus()
+            const cursor = start + replacement.length
+            editor.setSelectionRange(cursor, cursor)
+        })
+    }
+
+    const applyMarkdownList = () => {
+        const editor = mdEditorRef.current
+        if (!editor) return
+        const start = editor.selectionStart || 0
+        const end = editor.selectionEnd || 0
+        const selected = content.slice(start, end) || 'item'
+        const withBullets = selected
+            .split('\n')
+            .map((line) => {
+                const value = line.trim()
+                if (!value) return '- '
+                return value.startsWith('- ') ? value : `- ${value}`
+            })
+            .join('\n')
+        const nextValue = `${content.slice(0, start)}${withBullets}${content.slice(end)}`
+        setContent(nextValue)
+        window.requestAnimationFrame(() => {
+            editor.focus()
+            const cursor = start + withBullets.length
+            editor.setSelectionRange(cursor, cursor)
+        })
+    }
+
     const submit = async () => {
         if (!jwt) return
-        if (!version.trim() || !content.trim()) {
+        const mdContent = content.trim()
+        const normalizedJsonLines = jsonLines.map((item) => `${item || ''}`.trim()).filter((item) => item !== '')
+        const contentPayload = notesFormat === 'json'
+            ? JSON.stringify(normalizedJsonLines)
+            : mdContent
+
+        if (!version.trim() || !contentPayload.trim()) {
             setErrorMessage('Version and content are required.')
             return
         }
@@ -193,7 +257,7 @@ function ReleaseNotesManage({ jwt }) {
                 },
                 body: JSON.stringify({
                     version: version.trim(),
-                    content,
+                    content: contentPayload,
                     content_format: 'markdown',
                     notes_format: notesFormat,
                     icon_ref: iconRef,
@@ -258,10 +322,12 @@ function ReleaseNotesManage({ jwt }) {
             if (!imageRefs.includes(path)) {
                 setImageRefs((previous) => [...previous, path])
             }
+            const markdownImage = `![release-note-image](${payload.url || `/image${path}`})`
             if (notesFormat === 'json') {
-                setNotesFormat('md')
+                setJsonLines((previous) => [...previous.filter((item) => `${item || ''}`.trim() !== ''), markdownImage])
+            } else {
+                setContent((previous) => `${previous}${previous ? '\n' : ''}${markdownImage}`)
             }
-            setContent((previous) => `${previous}${previous ? '\n' : ''}![release-note-image](${payload.url || `/image${path}`})`)
             setSuccessMessage('Image uploaded and inserted into content.')
         } catch (error) {
             setErrorMessage(error.message)
@@ -354,18 +420,7 @@ function ReleaseNotesManage({ jwt }) {
                                     }}
                                 >
                                     <Box sx={{ width: { xs: '100%', sm: '50%' } }}>
-                                        <FormControl fullWidth>
-                                            <InputLabel id='release-note-notes-format'>Notes Storage</InputLabel>
-                                            <Select
-                                                labelId='release-note-notes-format'
-                                                value={notesFormat}
-                                                label='Notes Storage'
-                                                onChange={(event) => setNotesFormat(event.target.value)}
-                                            >
-                                                <MenuItem value='md'>md</MenuItem>
-                                                <MenuItem value='json'>json</MenuItem>
-                                            </Select>
-                                        </FormControl>
+                                        <TextField label='Notes Storage' value={notesFormat} fullWidth disabled />
                                     </Box>
                                     <Box sx={{ width: { xs: '100%', sm: '50%' } }}>
                                         <Autocomplete
@@ -406,15 +461,61 @@ function ReleaseNotesManage({ jwt }) {
                                     </Box>
                                 </Box>
 
-                                <TextField
-                                    label='Content'
-                                    multiline
-                                    minRows={10}
-                                    value={content}
-                                    onChange={(event) => setContent(event.target.value)}
-                                    helperText='Markdown/source text. Uploaded images insert markdown syntax.'
-                                    fullWidth
-                                />
+                                {notesFormat === 'json' ? (
+                                    <Stack spacing={1}>
+                                        <Typography variant='subtitle2'>JSON Lines</Typography>
+                                        {jsonLines.map((line, index) => (
+                                            <Box key={`json-line-${index}`} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                                <TextField
+                                                    label={`Line ${index + 1}`}
+                                                    value={line}
+                                                    onChange={(event) => setJsonLines((previous) => previous.map((item, itemIndex) => (itemIndex === index ? event.target.value : item)))}
+                                                    fullWidth
+                                                />
+                                                <Button
+                                                    className='admin-action-button'
+                                                    variant='outlined'
+                                                    onClick={() => setJsonLines((previous) => {
+                                                        if (previous.length <= 1) return ['']
+                                                        return previous.filter((_, itemIndex) => itemIndex !== index)
+                                                    })}
+                                                >
+                                                    Remove
+                                                </Button>
+                                            </Box>
+                                        ))}
+                                        <Box>
+                                            <Button
+                                                className='admin-action-button'
+                                                variant='outlined'
+                                                onClick={() => setJsonLines((previous) => [...previous, ''])}
+                                            >
+                                                Add Line
+                                            </Button>
+                                        </Box>
+                                    </Stack>
+                                ) : (
+                                    <Stack spacing={1}>
+                                        <Typography variant='subtitle2'>Content (Rich Markdown Editor)</Typography>
+                                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                            <Button className='admin-action-button' variant='outlined' onClick={() => applyMarkdown('**', '**')}>Bold</Button>
+                                            <Button className='admin-action-button' variant='outlined' onClick={() => applyMarkdown('*', '*')}>Italic</Button>
+                                            <Button className='admin-action-button' variant='outlined' onClick={() => applyMarkdown('## ')}>Heading</Button>
+                                            <Button className='admin-action-button' variant='outlined' onClick={applyMarkdownList}>List</Button>
+                                            <Button className='admin-action-button' variant='outlined' onClick={() => applyMarkdown('[', '](https://example.com)')}>Link</Button>
+                                        </Stack>
+                                        <TextField
+                                            label='Content'
+                                            multiline
+                                            minRows={10}
+                                            value={content}
+                                            inputRef={mdEditorRef}
+                                            onChange={(event) => setContent(event.target.value)}
+                                            helperText='Markdown content. Use toolbar buttons to format quickly.'
+                                            fullWidth
+                                        />
+                                    </Stack>
+                                )}
 
                                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }}>
                                     <Button className='admin-action-button' variant='outlined' component='label'>
