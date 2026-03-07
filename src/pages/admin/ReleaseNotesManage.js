@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { connect } from 'react-redux'
 import {
+    Autocomplete,
     Alert,
     Box,
     Button,
@@ -20,25 +21,7 @@ import {
 import backend from '../../constant/backend'
 import AdminPageShell from '../../components/admin/AdminPageShell'
 import appPackage from '../../../package.json'
-import VersionIcon from '../../components/wrapper/VersionIcon'
-
-const RELEASE_NOTE_ICON_OPTIONS = [
-    'valentine',
-    'christmas',
-    'anniversary',
-    'birthday',
-    'apple',
-    'moon',
-    'pokemon',
-    'nature',
-    'champion',
-    'icecream',
-    'dining',
-    'museum',
-    'game',
-    'festival',
-]
-const isKnownIcon = (value) => RELEASE_NOTE_ICON_OPTIONS.includes(`${value || ''}`.trim())
+import VersionIcon, { RELEASE_NOTE_ICON_OPTIONS } from '../../components/wrapper/VersionIcon'
 
 function normalizeSemver(input) {
     const value = `${input || ''}`.trim().toLowerCase().replace(/^v/, '')
@@ -139,7 +122,8 @@ function ReleaseNotesManage({ jwt }) {
         setNotesFormat(item.notes_format || 'md')
         setPublishState(item.publish_state || 'draft')
         setImageRefs(Array.isArray(item.image_refs) ? item.image_refs : [])
-        setIconRef(isKnownIcon(item.icon_ref) ? item.icon_ref : '')
+        const iconKey = `${item.icon_ref || ''}`.trim()
+        setIconRef(RELEASE_NOTE_ICON_OPTIONS.some((option) => option.key === iconKey) ? iconKey : '')
     }
 
     const parseResponseError = async (resp) => {
@@ -378,20 +362,24 @@ function ReleaseNotesManage({ jwt }) {
                                         </FormControl>
                                     </Grid>
                                     <Grid item xs={12} md={6}>
-                                        <FormControl fullWidth>
-                                            <InputLabel id='release-note-icon-ref'>Icon</InputLabel>
-                                            <Select
-                                                labelId='release-note-icon-ref'
-                                                value={iconRef}
-                                                label='Icon'
-                                                onChange={(event) => setIconRef(event.target.value)}
-                                            >
-                                                <MenuItem value=''>No icon</MenuItem>
-                                                {RELEASE_NOTE_ICON_OPTIONS.map((item) => (
-                                                    <MenuItem key={item} value={item}>{item}</MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
+                                        <Autocomplete
+                                            options={RELEASE_NOTE_ICON_OPTIONS}
+                                            value={RELEASE_NOTE_ICON_OPTIONS.find((item) => item.key === iconRef) || RELEASE_NOTE_ICON_OPTIONS[0]}
+                                            getOptionLabel={(option) => option.label}
+                                            isOptionEqualToValue={(option, value) => option.key === value.key}
+                                            onChange={(_, option) => setIconRef(option?.key || '')}
+                                            renderInput={(params) => (
+                                                <TextField {...params} label='Icon' />
+                                            )}
+                                            renderOption={(props, option) => (
+                                                <li {...props} key={option.key || 'none'}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        {option.key ? <VersionIcon icon={option.key} sx={{ fontSize: 20 }} /> : null}
+                                                        <span>{option.label}</span>
+                                                    </Box>
+                                                </li>
+                                            )}
+                                        />
                                     </Grid>
                                 </Grid>
 
