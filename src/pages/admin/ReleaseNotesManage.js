@@ -409,11 +409,10 @@ function ReleaseNotesManage({ jwt }) {
                                 <TextField
                                     label='Content'
                                     multiline
-                                    minRows={24}
+                                    minRows={10}
                                     value={content}
                                     onChange={(event) => setContent(event.target.value)}
                                     helperText='Markdown/source text. Uploaded images insert markdown syntax.'
-                                    sx={{ '& .MuiInputBase-inputMultiline': { minHeight: '55vh !important' } }}
                                     fullWidth
                                 />
 
