@@ -97,6 +97,91 @@ function parseJsonContentLines(input) {
     return fallback.length > 0 ? fallback : ['']
 }
 
+function escapeHTML(input) {
+    return `${input || ''}`
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;')
+}
+
+function sanitizePreviewURL(input) {
+    const value = `${input || ''}`.trim()
+    if (!value) return ''
+    if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/')) return value
+    return ''
+}
+
+function inlineMarkdownToHTML(input) {
+    const source = `${input || ''}`
+    const tokenPattern = /(!\[[^\]]*\]\([^)]+\)|\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*)/g
+    let cursor = 0
+    let output = ''
+    let match = tokenPattern.exec(source)
+    while (match) {
+        const token = match[0]
+        output += escapeHTML(source.slice(cursor, match.index))
+        if (token.startsWith('![')) {
+            const imageMatch = token.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)
+            const alt = escapeHTML(imageMatch?.[1] || '')
+            const src = sanitizePreviewURL(imageMatch?.[2] || '')
+            output += src ? `<img src="${escapeHTML(src)}" alt="${alt}" style="max-width:100%;height:auto;border-radius:8px;" />` : escapeHTML(token)
+        } else if (token.startsWith('[')) {
+            const linkMatch = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
+            const label = escapeHTML(linkMatch?.[1] || '')
+            const href = sanitizePreviewURL(linkMatch?.[2] || '')
+            output += href ? `<a href="${escapeHTML(href)}" target="_blank" rel="noreferrer noopener">${label}</a>` : escapeHTML(token)
+        } else if (token.startsWith('**') && token.endsWith('**')) {
+            output += `<strong>${escapeHTML(token.slice(2, -2))}</strong>`
+        } else if (token.startsWith('*') && token.endsWith('*')) {
+            output += `<em>${escapeHTML(token.slice(1, -1))}</em>`
+        } else {
+            output += escapeHTML(token)
+        }
+        cursor = match.index + token.length
+        match = tokenPattern.exec(source)
+    }
+    output += escapeHTML(source.slice(cursor))
+    return output
+}
+
+function markdownPreviewToHTML(markdown) {
+    const lines = `${markdown || ''}`.split(/\r?\n/)
+    if (lines.length === 0) return ''
+    let output = ''
+    let inList = false
+    for (const rawLine of lines) {
+        const line = `${rawLine || ''}`.trim()
+        if (!line) {
+            if (inList) {
+                output += '</ul>'
+                inList = false
+            }
+            continue
+        }
+        if (line.startsWith('- ')) {
+            if (!inList) {
+                output += '<ul>'
+                inList = true
+            }
+            output += `<li>${inlineMarkdownToHTML(line.slice(2))}</li>`
+            continue
+        }
+        if (inList) {
+            output += '</ul>'
+            inList = false
+        }
+        if (line.startsWith('## ')) {
+            output += `<h3>${inlineMarkdownToHTML(line.slice(3))}</h3>`
+            continue
+        }
+        output += `<p>${inlineMarkdownToHTML(line)}</p>`
+    }
+    if (inList) output += '</ul>'
+    return output
+}
+
 function ReleaseNotesManage({ jwt }) {
     const baselineVersion = useMemo(() => normalizeSemver(appPackage.version || ''), [])
     const [items, setItems] = useState([])
@@ -607,6 +692,26 @@ function ReleaseNotesManage({ jwt }) {
                                             helperText='Markdown content. Use toolbar buttons to format quickly.'
                                             fullWidth
                                         />
+                                        <Box>
+                                            <Typography variant='subtitle2'>Preview</Typography>
+                                            <Box
+                                                sx={{
+                                                    mt: 1,
+                                                    p: 2,
+                                                    border: '1px solid',
+                                                    borderColor: 'divider',
+                                                    borderRadius: 1,
+                                                    backgroundColor: 'background.paper',
+                                                    '& p': { my: 1 },
+                                                    '& h3': { mt: 1, mb: 1 },
+                                                    '& ul': { mt: 1, mb: 1, pl: 3 },
+                                                    '& img': { display: 'block', my: 1 },
+                                                }}
+                                                dangerouslySetInnerHTML={{
+                                                    __html: markdownPreviewToHTML(content) || '<p style="opacity:0.6">Nothing to preview yet.</p>',
+                                                }}
+                                            />
+                                        </Box>
                                     </Stack>
                                 )}
 
