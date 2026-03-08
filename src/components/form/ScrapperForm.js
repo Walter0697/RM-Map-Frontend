@@ -7,6 +7,8 @@ import {
 
 import BaseForm from './BaseForm'
 import OpenriceScrap from './scrapper/OpenriceScrap'
+import YelpScrap from './scrapper/YelpScrap'
+import TabelogScrap from './scrapper/TabelogScrap'
 import RestaurantCard from '../card/RestaurantCard'
 
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom'
@@ -40,6 +42,10 @@ function ScrapperForm({
         switch (source) {
             case 'openrice':
                 return 'Scrap Openrice'
+            case 'yelp':
+                return 'Scrap Yelp'
+            case 'tabelog':
+                return 'Scrap Tabelog'
             default:
                 return 'Scrapping...'
         }
@@ -157,6 +163,26 @@ function ScrapperForm({
                     sourceId={source_id}
                 />
             )
+        } else if (source === 'yelp') {
+            return (
+                <YelpScrap
+                    content={copyContent}
+                    setFetchInfo={setFetchInfo}
+                    findInfoFailed={findInfoFailed}
+                    onDataSame={onDataSame}
+                    sourceId={source_id}
+                />
+            )
+        } else if (source === 'tabelog') {
+            return (
+                <TabelogScrap
+                    content={copyContent}
+                    setFetchInfo={setFetchInfo}
+                    findInfoFailed={findInfoFailed}
+                    onDataSame={onDataSame}
+                    sourceId={source_id}
+                />
+            )
         } else {
             return false
         }
@@ -176,6 +202,13 @@ function ScrapperForm({
 
     const onSubmitHandler = (e) => {
         e.preventDefault()
+        if (!fetchData || !fetchData.restaurant) {
+            setAlertMessage({
+                type: 'warning',
+                message: 'Website integration is not ready yet. Please fetch and confirm restaurant data first.',
+            })
+            return
+        }
         setValue(link, fetchData)
     }
 
@@ -205,10 +238,15 @@ function ScrapperForm({
                         <Grid item xs={12} md={12} lg={12} fullWidth style={{
                             display: 'flex',
                             justifyContent: 'center',
+                            width: '100%',
                         }}>
                             <Button
                                 variant='contained'
                                 onClick={getClipboardMessage}
+                                style={{
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto',
+                                }}
                             >Paste from clipboard</Button>
                         </Grid>
                     )}

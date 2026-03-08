@@ -363,6 +363,11 @@ function ScheduleItem({
                     />
                 </div>
             )}
+            {item.marker && !item.marker.restaurant && item.marker.link && (
+                <div style={{ marginTop: '10px', fontSize: '13px', color: '#6c7787' }}>
+                    Website integration unavailable for this marker.
+                </div>
+            )}
             {item.movie && (
                 <div style={{ marginTop: '8px', fontSize: '13px', color: '#455295' }}>
                     Movie: {item.movie.label}

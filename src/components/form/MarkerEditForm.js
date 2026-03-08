@@ -21,6 +21,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility'
 import DeleteIcon from '@mui/icons-material/Delete'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import RiceBowlIcon from '@mui/icons-material/RiceBowl'
+import StorefrontIcon from '@mui/icons-material/Storefront'
+import RamenDiningIcon from '@mui/icons-material/RamenDining'
 
 import useObject from '../../hooks/useObject'
 
@@ -495,6 +497,18 @@ function MarkerEditForm({
                                     <RiceBowlIcon fontSize='small' />
                                 </ListItemIcon>
                                 <ListItemText>Openrice</ListItemText>
+                            </MenuItem>
+                            <MenuItem onClick={() => onScrapperClick('yelp')}>
+                                <ListItemIcon>
+                                    <StorefrontIcon fontSize='small' />
+                                </ListItemIcon>
+                                <ListItemText>Yelp</ListItemText>
+                            </MenuItem>
+                            <MenuItem onClick={() => onScrapperClick('tabelog')}>
+                                <ListItemIcon>
+                                    <RamenDiningIcon fontSize='small' />
+                                </ListItemIcon>
+                                <ListItemText>Tabelog</ListItemText>
                             </MenuItem>
                         </Menu>
                     </Stack>
