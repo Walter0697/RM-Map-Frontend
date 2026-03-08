@@ -429,7 +429,7 @@ function ScheduleItem({
                             onClick={() => onSyncNow(item)}
                             disabled={syncActionLoading || syncInfo?.sync_status === 'pending'}
                         >
-                            Sync to Calendar
+                            Sync Whole Schedule
                         </Button>
                         <Button
                             size='small'
@@ -749,6 +749,33 @@ function ScheduleView({
         }
     }
 
+    const withBulkSyncAction = async (actionFn) => {
+        const ids = sortedList.map((item) => item.id)
+        if (ids.length === 0) return
+        setSyncActionLoading((prev) => {
+            const next = { ...prev }
+            ids.forEach((id) => {
+                next[id] = true
+            })
+            return next
+        })
+        try {
+            await actionFn()
+            triggerSyncQueuedAlert()
+        } catch (error) {
+            setFailMessage(error?.message || 'Calendar sync request failed')
+            fail()
+        } finally {
+            setSyncActionLoading((prev) => {
+                const next = { ...prev }
+                ids.forEach((id) => {
+                    next[id] = false
+                })
+                return next
+            })
+        }
+    }
+
     const refreshSyncStatus = async () => {
         const ids = sortedList.map((item) => item.id).join(',')
         if (!ids || !jwt) return {}
@@ -789,24 +816,36 @@ function ScheduleView({
         window.location.href = target
     }
 
-    const onSyncNow = async (schedule) => {
-        await withSyncAction(schedule.id, async () => {
-            const response = await fetch(backend.withBasePath(`calendar/schedules/${schedule.id}/sync-now`), {
-                method: 'POST',
-                headers: {
-                    Authorization: jwt,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ provider: 'google_calendar' }),
-            })
-            if (!response.ok) {
-                throw new Error('Failed to queue sync')
+    const onSyncNow = async () => {
+        await withBulkSyncAction(async () => {
+            const failures = []
+            for (const schedule of sortedList) {
+                const response = await fetch(backend.withBasePath(`calendar/schedules/${schedule.id}/sync-now`), {
+                    method: 'POST',
+                    headers: {
+                        Authorization: jwt,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ provider: 'google_calendar' }),
+                })
+                if (!response.ok) {
+                    failures.push(`${schedule.label}: request failed (${response.status})`)
+                    continue
+                }
+                let payload = {}
+                try {
+                    payload = await response.json()
+                } catch (error) {
+                    payload = {}
+                }
+                if (payload?.status === 'failed') {
+                    failures.push(`${schedule.label}: ${payload?.result?.last_error_message || 'Calendar sync failed'}`)
+                }
             }
-            const payload = await response.json()
-            if (payload?.status === 'failed') {
-                throw new Error(payload?.result?.last_error_message || 'Calendar sync failed')
+            await refreshSyncStatus()
+            if (failures.length > 0) {
+                throw new Error(`Failed to sync ${failures.length} item(s). ${failures[0]}`)
             }
-            await pollScheduleSyncStatus(schedule.id, ['synced', 'failed'])
         })
     }
 
@@ -939,7 +978,7 @@ function ScheduleView({
             <AutoHideAlert
                 open={syncQueuedAlert}
                 type={'success'}
-                message={'Calendar sync request queued'}
+                message={'Calendar sync completed'}
                 timing={2500}
             />
         </>
