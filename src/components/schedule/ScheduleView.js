@@ -24,7 +24,7 @@ import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk'
 import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt'
 import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral'
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -240,15 +240,9 @@ function ScheduleItem({
 
     const syncError = syncInfo?.last_error_message || ''
     const googleCalendarOpenUrl = (() => {
-        const eventId = syncInfo?.external_event_id || ''
-        if (eventId) {
-            return `https://calendar.google.com/calendar/u/0/r/search?q=${encodeURIComponent(eventId)}`
-        }
-        const label = item?.label || ''
-        if (label) {
-            return `https://calendar.google.com/calendar/u/0/r/search?q=${encodeURIComponent(label)}`
-        }
-        return 'https://calendar.google.com/calendar/u/0/r'
+        const eventDate = dayjs.utc(item?.selected_date)
+        if (!eventDate.isValid()) return 'https://calendar.google.com/calendar/u/0/r'
+        return `https://calendar.google.com/calendar/u/0/r/day/${eventDate.format('YYYY/M/D')}`
     })()
 
     return (
@@ -411,9 +405,9 @@ function ScheduleItem({
                 <IconButton
                     size='small'
                     onClick={() => window.open(googleCalendarOpenUrl, '_blank', 'noopener,noreferrer')}
-                    aria-label='Open Calendar'
+                    aria-label='Open Google Calendar Day'
                 >
-                    <OpenInNewIcon fontSize='small' />
+                    <CalendarTodayIcon fontSize='small' />
                 </IconButton>
             </div>
             {syncError && (
@@ -730,13 +724,17 @@ function ScheduleView({
         })
         if (!response.ok) return {}
         const payload = await response.json()
-        const nextStatus = {}
+        const incomingStatus = {}
         const items = Array.isArray(payload.items) ? payload.items : []
         items.forEach((item) => {
-            nextStatus[item.schedule_id] = item
+            incomingStatus[item.schedule_id] = item
         })
-        setSyncStatusBySchedule(nextStatus)
-        return nextStatus
+        let mergedStatus = {}
+        setSyncStatusBySchedule((prev) => {
+            mergedStatus = { ...prev, ...incomingStatus }
+            return mergedStatus
+        })
+        return mergedStatus
     }
 
     const onConnectProvider = () => {
@@ -747,6 +745,7 @@ function ScheduleView({
     const onSyncNow = async () => {
         await withBulkSyncAction(async () => {
             const failures = []
+            const optimisticStatuses = {}
             for (const schedule of sortedList) {
                 const response = await fetch(backend.withBasePath(`calendar/schedules/${schedule.id}/sync-now`), {
                     method: 'POST',
@@ -766,9 +765,23 @@ function ScheduleView({
                 } catch (error) {
                     payload = {}
                 }
+                if (payload?.status) {
+                    optimisticStatuses[schedule.id] = {
+                        ...(syncStatusBySchedule[schedule.id] || {}),
+                        schedule_id: schedule.id,
+                        provider_key: 'google_calendar',
+                        sync_status: payload.status,
+                        external_event_id: payload?.result?.external_event_id || syncStatusBySchedule[schedule.id]?.external_event_id || '',
+                        last_error_message: payload?.result?.last_error_message || '',
+                        last_error_code: payload?.result?.last_error_code || '',
+                    }
+                }
                 if (payload?.status === 'failed') {
                     failures.push(`${schedule.label}: ${payload?.result?.last_error_message || 'Calendar sync failed'}`)
                 }
+            }
+            if (Object.keys(optimisticStatuses).length > 0) {
+                setSyncStatusBySchedule((prev) => ({ ...prev, ...optimisticStatuses }))
             }
             await refreshSyncStatus()
             if (failures.length > 0) {

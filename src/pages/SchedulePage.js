@@ -215,16 +215,29 @@ function SchedulePage({
     const refreshActiveSchedule = useCallback(() => {
         if (!activeScheduleId) return
 
-        const selected = scheduleItems.find(s => s.id === activeScheduleId)
-            || schedules.find(s => s.id === activeScheduleId)
-
-        if (selected) {
-            setScheduleView([selected], dayjs(selected.selected_date).format('YYYY-MM-DD'), { activeScheduleId })
+        const currentDateKey = selectedDate || (selectedSchedules[0] ? dayjs(selectedSchedules[0].selected_date).format('YYYY-MM-DD') : null)
+        const sameDaySchedules = currentDateKey
+            ? scheduleItems.filter((item) => dayjs(item.selected_date).format('YYYY-MM-DD') === currentDateKey)
+            : []
+        if (sameDaySchedules.length > 0) {
+            const hasActiveSchedule = sameDaySchedules.some((item) => item.id === activeScheduleId)
+            const nextActiveScheduleId = hasActiveSchedule ? activeScheduleId : sameDaySchedules[0].id
+            setScheduleView(sameDaySchedules, currentDateKey, { activeScheduleId: nextActiveScheduleId })
             return
         }
 
+        const selected = scheduleItems.find(s => s.id === activeScheduleId)
+            || schedules.find(s => s.id === activeScheduleId)
+            || selectedSchedules.find(s => s.id === activeScheduleId)
+        if (selected) {
+            const selectedDay = dayjs(selected.selected_date).format('YYYY-MM-DD')
+            const currentViewDay = selectedSchedules.filter((item) => dayjs(item.selected_date).format('YYYY-MM-DD') === selectedDay)
+            const nextView = currentViewDay.length > 0 ? currentViewDay : [selected]
+            setScheduleView(nextView, selectedDay, { activeScheduleId })
+            return
+        }
         resolveScheduleById(activeScheduleId, { forceListContext: false })
-    }, [activeScheduleId, scheduleItems, schedules, resolveScheduleById, setScheduleView])
+    }, [activeScheduleId, scheduleItems, schedules, selectedSchedules, selectedDate, resolveScheduleById, setScheduleView])
 
     React.useEffect(() => {
         const pendingDeepLinkId = pendingDeepLink?.resourceType === deepLinkScript.resources.schedule
