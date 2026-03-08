@@ -732,13 +732,13 @@ function ScheduleView({
 
     const refreshSyncStatus = async () => {
         const ids = sortedList.map((item) => item.id).join(',')
-        if (!ids || !jwt) return
+        if (!ids || !jwt) return {}
         const response = await fetch(backend.withBasePath(`calendar/schedules/status?ids=${encodeURIComponent(ids)}`), {
             headers: {
                 Authorization: jwt,
             },
         })
-        if (!response.ok) return
+        if (!response.ok) return {}
         const payload = await response.json()
         const nextStatus = {}
         const items = Array.isArray(payload.items) ? payload.items : []
@@ -746,6 +746,23 @@ function ScheduleView({
             nextStatus[item.schedule_id] = item
         })
         setSyncStatusBySchedule(nextStatus)
+        return nextStatus
+    }
+
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+    const pollScheduleSyncStatus = async (scheduleId, terminalStatuses = ['synced', 'failed', 'disconnected']) => {
+        const startAt = Date.now()
+        const timeoutMs = 12000
+        const intervalMs = 1200
+        while (Date.now() - startAt < timeoutMs) {
+            const statuses = await refreshSyncStatus()
+            const currentStatus = statuses[scheduleId]?.sync_status
+            if (terminalStatuses.includes(currentStatus)) {
+                return
+            }
+            await wait(intervalMs)
+        }
     }
 
     const onConnectProvider = () => {
@@ -766,7 +783,7 @@ function ScheduleView({
             if (!response.ok) {
                 throw new Error('Failed to queue sync')
             }
-            await refreshSyncStatus()
+            await pollScheduleSyncStatus(schedule.id, ['synced', 'failed'])
         })
     }
 
@@ -781,7 +798,7 @@ function ScheduleView({
             if (!response.ok) {
                 throw new Error('Failed to queue retry')
             }
-            await refreshSyncStatus()
+            await pollScheduleSyncStatus(schedule.id, ['synced', 'failed'])
         })
     }
 
@@ -796,7 +813,7 @@ function ScheduleView({
             if (!response.ok) {
                 throw new Error('Failed to disconnect sync')
             }
-            await refreshSyncStatus()
+            await pollScheduleSyncStatus(schedule.id, ['disconnected', 'failed'])
         })
     }
 
