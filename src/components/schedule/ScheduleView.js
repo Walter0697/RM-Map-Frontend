@@ -244,6 +244,17 @@ function ScheduleItem({
     })()
 
     const syncError = syncInfo?.last_error_message || ''
+    const googleCalendarOpenUrl = (() => {
+        const eventId = syncInfo?.external_event_id || ''
+        if (eventId) {
+            return `https://calendar.google.com/calendar/u/0/r/search?q=${encodeURIComponent(eventId)}`
+        }
+        const label = item?.label || ''
+        if (label) {
+            return `https://calendar.google.com/calendar/u/0/r/search?q=${encodeURIComponent(label)}`
+        }
+        return 'https://calendar.google.com/calendar/u/0/r'
+    })()
 
     return (
         <div style={{ width: '100%' }}>
@@ -436,6 +447,14 @@ function ScheduleItem({
                             disabled={syncActionLoading || !syncInfo}
                         >
                             Disconnect
+                        </Button>
+                        <Button
+                            size='small'
+                            variant='outlined'
+                            onClick={() => window.open(googleCalendarOpenUrl, '_blank', 'noopener,noreferrer')}
+                            disabled={syncActionLoading || !providerConnected}
+                        >
+                            Open Calendar
                         </Button>
                     </>
                 )}
