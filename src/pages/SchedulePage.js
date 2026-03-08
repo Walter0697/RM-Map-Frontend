@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import { useLazyQuery } from '@apollo/client'
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom'
 import dayjs from 'dayjs'
+import dayjsPluginUTC from 'dayjs-plugin-utc'
+dayjs.extend(dayjsPluginUTC)
 
 import Base from './Base'
 
@@ -89,7 +91,7 @@ function SchedulePage({
         const safeSchedules = nextSchedules || []
         const primarySchedule = safeSchedules[0] || null
         const nextActiveId = options.activeScheduleId || primarySchedule?.id || null
-        const nextDate = date || (primarySchedule ? dayjs(primarySchedule.selected_date).format('YYYY-MM-DD') : null)
+        const nextDate = date || (primarySchedule ? dayjs.utc(primarySchedule.selected_date).format('YYYY-MM-DD') : null)
 
         setSchedules(safeSchedules)
         setSelectedDate(nextDate)
@@ -145,7 +147,7 @@ function SchedulePage({
 
         if (existing) {
             if (deepLinkRequestVersionRef.current !== requestVersion) return
-            setScheduleView([existing], dayjs(existing.selected_date).format('YYYY-MM-DD'), { activeScheduleId: scheduleId })
+            setScheduleView([existing], dayjs.utc(existing.selected_date).format('YYYY-MM-DD'), { activeScheduleId: scheduleId })
             dispatch(actions.clearDeepLinkIntent())
             if (options.forceListContext) {
                 toScheduleListContext()
@@ -172,7 +174,7 @@ function SchedulePage({
                 const found = items.find(item => item.id === scheduleId)
 
                 if (found) {
-                    setScheduleView([found], dayjs(found.selected_date).format('YYYY-MM-DD'), { activeScheduleId: scheduleId })
+                    setScheduleView([found], dayjs.utc(found.selected_date).format('YYYY-MM-DD'), { activeScheduleId: scheduleId })
                     dispatch(actions.clearDeepLinkIntent())
                     if (options.forceListContext) {
                         toScheduleListContext()
@@ -215,9 +217,9 @@ function SchedulePage({
     const refreshActiveSchedule = useCallback(() => {
         if (!activeScheduleId) return
 
-        const currentDateKey = selectedDate || (selectedSchedules[0] ? dayjs(selectedSchedules[0].selected_date).format('YYYY-MM-DD') : null)
+        const currentDateKey = selectedDate || (selectedSchedules[0] ? dayjs.utc(selectedSchedules[0].selected_date).format('YYYY-MM-DD') : null)
         const sameDaySchedules = currentDateKey
-            ? scheduleItems.filter((item) => dayjs(item.selected_date).format('YYYY-MM-DD') === currentDateKey)
+            ? scheduleItems.filter((item) => dayjs.utc(item.selected_date).format('YYYY-MM-DD') === currentDateKey)
             : []
         if (sameDaySchedules.length > 0) {
             const hasActiveSchedule = sameDaySchedules.some((item) => item.id === activeScheduleId)
@@ -230,8 +232,8 @@ function SchedulePage({
             || schedules.find(s => s.id === activeScheduleId)
             || selectedSchedules.find(s => s.id === activeScheduleId)
         if (selected) {
-            const selectedDay = dayjs(selected.selected_date).format('YYYY-MM-DD')
-            const currentViewDay = selectedSchedules.filter((item) => dayjs(item.selected_date).format('YYYY-MM-DD') === selectedDay)
+            const selectedDay = dayjs.utc(selected.selected_date).format('YYYY-MM-DD')
+            const currentViewDay = selectedSchedules.filter((item) => dayjs.utc(item.selected_date).format('YYYY-MM-DD') === selectedDay)
             const nextView = currentViewDay.length > 0 ? currentViewDay : [selected]
             setScheduleView(nextView, selectedDay, { activeScheduleId })
             return

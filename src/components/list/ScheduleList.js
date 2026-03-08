@@ -464,7 +464,8 @@ function TodayList({
     const todayListOnClick = () => {
         if (!list || (list && list.length === 0)) return
 
-        onClickHandler(list, dayjs().format('YYYY-MM-DD'))
+        const dayKey = dayjs.utc(list[0].selected_date).format('YYYY-MM-DD')
+        onClickHandler(list, dayKey)
     }
 
     return (
@@ -590,23 +591,27 @@ function ScheduleList({
         // use dictionary for grouping the schedules into each day
         let result = {}
         upcoming_list.forEach((sd) => {
-            const date = dayjs.utc(sd.selected_date).format('MM/DD/YYYY')
-            if (date in result) {
-                result[date].push(sd)
+            const dayKey = dayjs.utc(sd.selected_date).format('YYYY-MM-DD')
+            const displayDate = dayjs.utc(sd.selected_date).format('MM/DD/YYYY')
+            if (dayKey in result) {
+                result[dayKey].items.push(sd)
             } else {
-                result[date] = [sd]
+                result[dayKey] = {
+                    dayKey,
+                    displayDate,
+                    items: [sd],
+                }
             }
         })
 
         // create an array with dictionary
-        const result_arr = Object.entries(result)
+        const result_arr = Object.values(result)
 
         // sorted the array according to date
         const sorted = result_arr.sort((a, b) => {
-            if (dayjs(a[0]).isAfter(dayjs(b[0]))) {
-                return -1
-            }
-            return 1
+            if (a.dayKey < b.dayKey) return 1
+            if (a.dayKey > b.dayKey) return -1
+            return 0
         })
 
         return sorted
@@ -616,7 +621,10 @@ function ScheduleList({
         let timeout = null
         if (location.pathname === '/schedule/open') {
             timeout = window.setTimeout(() => {
-                openScheduleView(today_schedules, dayjs().format('YYYY-MM-DD'))
+                const dayKey = today_schedules && today_schedules.length > 0
+                    ? dayjs.utc(today_schedules[0].selected_date).format('YYYY-MM-DD')
+                    : dayjs.utc().format('YYYY-MM-DD')
+                openScheduleView(today_schedules, dayKey)
             }, 800)
             
         }
@@ -632,8 +640,9 @@ function ScheduleList({
         upcoming_schedules.forEach((item) => {
             rows.push({
                 kind: 'schedule',
-                date: item[0],
-                items: item[1],
+                dayKey: item.dayKey,
+                date: item.displayDate,
+                items: item.items,
             })
         })
         return rows
@@ -770,7 +779,7 @@ function ScheduleList({
                                     item={row.items}
                                     selected_date={row.date}
                                     eventtypes={eventtypes}
-                                    onClickHandler={openScheduleView}
+                                    onClickHandler={(items) => openScheduleView(items, row.dayKey)}
                                 />
                             </WrapperBox>
                         )

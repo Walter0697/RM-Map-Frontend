@@ -669,7 +669,6 @@ function ScheduleView({
                     },
                 })
                 if (!syncResponse.ok) {
-                    setSyncStatusBySchedule({})
                     return
                 }
                 const syncPayload = await syncResponse.json()
@@ -678,9 +677,9 @@ function ScheduleView({
                 items.forEach((item) => {
                     nextStatus[item.schedule_id] = item
                 })
-                setSyncStatusBySchedule(nextStatus)
+                setSyncStatusBySchedule((prev) => ({ ...prev, ...nextStatus }))
             } catch (error) {
-                setSyncStatusBySchedule({})
+                // keep previous status snapshot to avoid flipping labels on transient request failures
             }
         }
 
