@@ -46,6 +46,10 @@ function SystemSettingsManage({ jwt }) {
     const [ shortcutURL, setShortcutURL ] = useState('')
     const [ easyThresholdMinutes, setEasyThresholdMinutes ] = useState('')
     const [ difficultThresholdMinutes, setDifficultThresholdMinutes ] = useState('')
+    const [ calendarShortMinutes, setCalendarShortMinutes ] = useState('')
+    const [ calendarMediumMinutes, setCalendarMediumMinutes ] = useState('')
+    const [ calendarLongMinutes, setCalendarLongMinutes ] = useState('')
+    const [ calendarAutoMinutes, setCalendarAutoMinutes ] = useState('')
     const trimmedShortcutURL = shortcutURL.trim()
     const hasShortcutURL = trimmedShortcutURL !== ''
     const isShortcutURLValid = validateShortcutURL(trimmedShortcutURL)
@@ -55,13 +59,25 @@ function SystemSettingsManage({ jwt }) {
     const areThresholdsOrdered = areThresholdsPresent && parsedEasyThresholdMinutes < parsedDifficultThresholdMinutes
     const areThresholdsValid = areThresholdsPresent && areThresholdsOrdered
     const hasThresholdValues = `${easyThresholdMinutes}`.trim() !== '' || `${difficultThresholdMinutes}`.trim() !== ''
+    const parsedCalendarShortMinutes = parsePositiveInteger(calendarShortMinutes)
+    const parsedCalendarMediumMinutes = parsePositiveInteger(calendarMediumMinutes)
+    const parsedCalendarLongMinutes = parsePositiveInteger(calendarLongMinutes)
+    const parsedCalendarAutoMinutes = parsePositiveInteger(calendarAutoMinutes)
+    const areCalendarDurationsValid = parsedCalendarShortMinutes !== null
+        && parsedCalendarMediumMinutes !== null
+        && parsedCalendarLongMinutes !== null
+        && parsedCalendarAutoMinutes !== null
+    const hasCalendarDurationValues = `${calendarShortMinutes}`.trim() !== ''
+        || `${calendarMediumMinutes}`.trim() !== ''
+        || `${calendarLongMinutes}`.trim() !== ''
+        || `${calendarAutoMinutes}`.trim() !== ''
 
     const fetchSetting = async () => {
         if (!jwt) return
         setLoading(true)
         setErrorMessage('')
         try {
-            const [ shortcutResponse, thresholdResponse ] = await Promise.all([
+            const [ shortcutResponse, thresholdResponse, calendarDurationResponse ] = await Promise.all([
                 fetch(backend.withBasePath('admin/settings/ios-shortcut-install-url'), {
                     method: 'GET',
                     headers: {
@@ -69,6 +85,12 @@ function SystemSettingsManage({ jwt }) {
                     },
                 }),
                 fetch(backend.withBasePath('admin/settings/schedule-travel-thresholds'), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
+                }),
+                fetch(backend.withBasePath('admin/settings/calendar-sync-durations'), {
                     method: 'GET',
                     headers: {
                         Authorization: jwt,
@@ -85,6 +107,11 @@ function SystemSettingsManage({ jwt }) {
                 setErrorMessage(text || `Failed to load travel thresholds (${thresholdResponse.status})`)
                 return
             }
+            if (!calendarDurationResponse.ok) {
+                const text = await calendarDurationResponse.text()
+                setErrorMessage(text || `Failed to load calendar sync durations (${calendarDurationResponse.status})`)
+                return
+            }
 
             const shortcutData = await shortcutResponse.json()
             setShortcutURL(shortcutData?.ios_shortcut_install_url || '')
@@ -92,6 +119,12 @@ function SystemSettingsManage({ jwt }) {
             const thresholdData = await thresholdResponse.json()
             setEasyThresholdMinutes(`${thresholdData?.easy_threshold_minutes ?? ''}`)
             setDifficultThresholdMinutes(`${thresholdData?.difficult_threshold_minutes ?? ''}`)
+
+            const calendarDurationData = await calendarDurationResponse.json()
+            setCalendarShortMinutes(`${calendarDurationData?.short_minutes ?? ''}`)
+            setCalendarMediumMinutes(`${calendarDurationData?.medium_minutes ?? ''}`)
+            setCalendarLongMinutes(`${calendarDurationData?.long_minutes ?? ''}`)
+            setCalendarAutoMinutes(`${calendarDurationData?.auto_minutes ?? ''}`)
         } catch (error) {
             setErrorMessage(httpScript.toAuthAwareErrorMessage(error, 'Failed to load setting'))
         } finally {
@@ -142,12 +175,36 @@ function SystemSettingsManage({ jwt }) {
                 return
             }
 
+            const calendarDurationResponse = await fetch(backend.withBasePath('admin/settings/calendar-sync-durations'), {
+                method: 'PUT',
+                headers: {
+                    Authorization: jwt,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    short_minutes: parsedCalendarShortMinutes,
+                    medium_minutes: parsedCalendarMediumMinutes,
+                    long_minutes: parsedCalendarLongMinutes,
+                    auto_minutes: parsedCalendarAutoMinutes,
+                }),
+            })
+            if (!calendarDurationResponse.ok) {
+                const text = await calendarDurationResponse.text()
+                setErrorMessage(text || `Failed to save calendar sync durations (${calendarDurationResponse.status})`)
+                return
+            }
+
             const shortcutData = await shortcutResponse.json()
             setShortcutURL(shortcutData?.ios_shortcut_install_url || '')
 
             const thresholdData = await thresholdResponse.json()
             setEasyThresholdMinutes(`${thresholdData?.easy_threshold_minutes ?? ''}`)
             setDifficultThresholdMinutes(`${thresholdData?.difficult_threshold_minutes ?? ''}`)
+            const calendarDurationData = await calendarDurationResponse.json()
+            setCalendarShortMinutes(`${calendarDurationData?.short_minutes ?? ''}`)
+            setCalendarMediumMinutes(`${calendarDurationData?.medium_minutes ?? ''}`)
+            setCalendarLongMinutes(`${calendarDurationData?.long_minutes ?? ''}`)
+            setCalendarAutoMinutes(`${calendarDurationData?.auto_minutes ?? ''}`)
             setSuccessMessage('Saved system settings.')
         } catch (error) {
             setErrorMessage(httpScript.toAuthAwareErrorMessage(error, 'Failed to save setting'))
@@ -169,7 +226,7 @@ function SystemSettingsManage({ jwt }) {
                         className='admin-action-button'
                         variant='contained'
                         onClick={onSave}
-                        disabled={loading || saving || (hasShortcutURL && !isShortcutURLValid) || !areThresholdsValid}
+                        disabled={loading || saving || (hasShortcutURL && !isShortcutURLValid) || !areThresholdsValid || !areCalendarDurationsValid}
                     >
                         Save
                     </Button>
@@ -286,6 +343,81 @@ function SystemSettingsManage({ jwt }) {
                                 disabled={loading || saving}
                                 error={hasThresholdValues && !areThresholdsValid}
                                 helperText={hasThresholdValues && !areThresholdsValid ? 'Enter a positive integer greater than Easy threshold.' : 'Durations above this are labeled difficult.'}
+                            />
+                        </Stack>
+
+                        <Divider />
+
+                        <Box
+                            sx={{
+                                p: 1.5,
+                                borderRadius: 1.5,
+                                background: 'linear-gradient(90deg, #fff5e8 0%, #fffaf3 100%)',
+                                border: '1px solid #f7dfbe',
+                            }}
+                        >
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent='space-between' alignItems={{ xs: 'flex-start', sm: 'center' }}>
+                                <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
+                                    Calendar Sync Duration Presets
+                                </Typography>
+                                <Chip
+                                    size='small'
+                                    color={hasCalendarDurationValues ? (areCalendarDurationsValid ? 'success' : 'warning') : 'default'}
+                                    label={hasCalendarDurationValues ? (areCalendarDurationsValid ? 'Configured' : 'Invalid durations') : 'Not configured'}
+                                />
+                            </Stack>
+                            <Typography variant='body2' color='text.secondary' sx={{ mt: 0.75 }}>
+                                Marker estimate-time buckets map to event length (short/medium/long). If marker estimate-time is missing, Auto fallback is used.
+                            </Typography>
+                        </Box>
+
+                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                                fullWidth
+                                type='number'
+                                label='Short Duration (minutes)'
+                                placeholder='30'
+                                value={calendarShortMinutes}
+                                onChange={(event) => setCalendarShortMinutes(event.target.value)}
+                                disabled={loading || saving}
+                                error={hasCalendarDurationValues && !areCalendarDurationsValid}
+                                helperText={hasCalendarDurationValues && !areCalendarDurationsValid ? 'All values must be positive integers.' : 'Used when marker estimate_time=short.'}
+                            />
+                            <TextField
+                                fullWidth
+                                type='number'
+                                label='Medium Duration (minutes)'
+                                placeholder='60'
+                                value={calendarMediumMinutes}
+                                onChange={(event) => setCalendarMediumMinutes(event.target.value)}
+                                disabled={loading || saving}
+                                error={hasCalendarDurationValues && !areCalendarDurationsValid}
+                                helperText={hasCalendarDurationValues && !areCalendarDurationsValid ? 'All values must be positive integers.' : 'Used when marker estimate_time=medium.'}
+                            />
+                        </Stack>
+
+                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                                fullWidth
+                                type='number'
+                                label='Long Duration (minutes)'
+                                placeholder='120'
+                                value={calendarLongMinutes}
+                                onChange={(event) => setCalendarLongMinutes(event.target.value)}
+                                disabled={loading || saving}
+                                error={hasCalendarDurationValues && !areCalendarDurationsValid}
+                                helperText={hasCalendarDurationValues && !areCalendarDurationsValid ? 'All values must be positive integers.' : 'Used when marker estimate_time=long.'}
+                            />
+                            <TextField
+                                fullWidth
+                                type='number'
+                                label='Auto Fallback (minutes)'
+                                placeholder='30'
+                                value={calendarAutoMinutes}
+                                onChange={(event) => setCalendarAutoMinutes(event.target.value)}
+                                disabled={loading || saving}
+                                error={hasCalendarDurationValues && !areCalendarDurationsValid}
+                                helperText={hasCalendarDurationValues && !areCalendarDurationsValid ? 'All values must be positive integers.' : 'Used when marker estimate_time is missing or unknown.'}
                             />
                         </Stack>
                     </Stack>
