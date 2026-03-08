@@ -9,7 +9,7 @@ const toRFC3339Format = (date) => {
 }
 
 const toServerFormat = (date) => {
-    const dateOnly = dayjs(date).format('YYYY-MM-DD HH:mm:ss+00')
+    const dateOnly = dayjs(date).utc().format('YYYY-MM-DD HH:mm:ss[+00]')
     return dateOnly
 }
 

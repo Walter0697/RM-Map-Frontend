@@ -783,6 +783,10 @@ function ScheduleView({
             if (!response.ok) {
                 throw new Error('Failed to queue sync')
             }
+            const payload = await response.json()
+            if (payload?.status === 'failed') {
+                throw new Error(payload?.result?.last_error_message || 'Calendar sync failed')
+            }
             await pollScheduleSyncStatus(schedule.id, ['synced', 'failed'])
         })
     }
@@ -798,6 +802,10 @@ function ScheduleView({
             if (!response.ok) {
                 throw new Error('Failed to queue retry')
             }
+            const payload = await response.json()
+            if (payload?.status === 'failed') {
+                throw new Error(payload?.result?.last_error_message || 'Calendar retry failed')
+            }
             await pollScheduleSyncStatus(schedule.id, ['synced', 'failed'])
         })
     }
@@ -812,6 +820,10 @@ function ScheduleView({
             })
             if (!response.ok) {
                 throw new Error('Failed to disconnect sync')
+            }
+            const payload = await response.json()
+            if (payload?.status === 'failed') {
+                throw new Error(payload?.result?.last_error_message || 'Calendar disconnect failed')
             }
             await pollScheduleSyncStatus(schedule.id, ['disconnected', 'failed'])
         })
