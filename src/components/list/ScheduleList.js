@@ -609,8 +609,8 @@ function ScheduleList({
 
         // sorted the array according to date
         const sorted = result_arr.sort((a, b) => {
-            if (a.dayKey < b.dayKey) return 1
-            if (a.dayKey > b.dayKey) return -1
+            if (a.dayKey < b.dayKey) return -1
+            if (a.dayKey > b.dayKey) return 1
             return 0
         })
 
