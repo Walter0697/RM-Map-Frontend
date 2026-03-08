@@ -4,6 +4,7 @@ import { useMutation } from '@apollo/client'
 import {
     Button,
     IconButton,
+    Chip,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -128,6 +129,13 @@ const toScheduleImageSrc = (item) => {
 function ScheduleItem({
     item,
     transition,
+    syncInfo,
+    providerConnected,
+    syncActionLoading,
+    onConnectProvider,
+    onSyncNow,
+    onRetrySync,
+    onDisconnectSync,
     triggerCopyMessage,
     isToday,
     onEditClick,
@@ -218,6 +226,24 @@ function ScheduleItem({
             : formatSignedSeconds(deltaSeconds)
         return `Gap: ${gapText}, Travel: ${travelText}, Buffer: ${deltaText}.`
     })()
+
+    const syncStatusLabel = (() => {
+        const status = syncInfo?.sync_status || 'disconnected'
+        if (status === 'synced') return 'Synced'
+        if (status === 'pending') return 'Sync pending'
+        if (status === 'failed') return 'Sync failed'
+        return 'Not synced'
+    })()
+
+    const syncStatusColor = (() => {
+        const status = syncInfo?.sync_status || 'disconnected'
+        if (status === 'synced') return 'success'
+        if (status === 'pending') return 'warning'
+        if (status === 'failed') return 'error'
+        return 'default'
+    })()
+
+    const syncError = syncInfo?.last_error_message || ''
 
     return (
         <div style={{ width: '100%' }}>
@@ -373,6 +399,52 @@ function ScheduleItem({
                     Movie: {item.movie.label}
                 </div>
             )}
+            <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                <Chip size='small' color={syncStatusColor} label={syncStatusLabel} />
+                {!providerConnected ? (
+                    <Button
+                        size='small'
+                        variant='outlined'
+                        onClick={onConnectProvider}
+                        disabled={syncActionLoading}
+                    >
+                        Connect Google
+                    </Button>
+                ) : (
+                    <>
+                        <Button
+                            size='small'
+                            variant='outlined'
+                            onClick={() => onSyncNow(item)}
+                            disabled={syncActionLoading || syncInfo?.sync_status === 'pending'}
+                        >
+                            Sync to Calendar
+                        </Button>
+                        <Button
+                            size='small'
+                            variant='outlined'
+                            onClick={() => onRetrySync(item)}
+                            disabled={syncActionLoading || syncInfo?.sync_status !== 'failed'}
+                        >
+                            Retry
+                        </Button>
+                        <Button
+                            size='small'
+                            color='error'
+                            variant='outlined'
+                            onClick={() => onDisconnectSync(item)}
+                            disabled={syncActionLoading || !syncInfo}
+                        >
+                            Disconnect
+                        </Button>
+                    </>
+                )}
+            </div>
+            {syncError && (
+                <div style={{ marginTop: '6px', fontSize: '12px', color: '#b34b3d' }}>
+                    {syncError}
+                </div>
+            )}
             </div>
             {transition && (
                 <div style={{ marginTop: '14px' }}>
@@ -508,10 +580,14 @@ function ScheduleView({
     })
 
     const [ copyMessage, triggerCopyMessage ] = useBoop(3000)
+    const [ syncQueuedAlert, triggerSyncQueuedAlert ] = useBoop(3000)
     const [ transitionAnalysis, setTransitionAnalysis ] = useState([])
     const [ transitionFetchStatus, setTransitionFetchStatus ] = useState('idle')
     const [ transitionFetchMessage, setTransitionFetchMessage ] = useState('')
     const transitionRequestVersionRef = useRef(0)
+    const [ providerConnected, setProviderConnected ] = useState(false)
+    const [ syncStatusBySchedule, setSyncStatusBySchedule ] = useState({})
+    const [ syncActionLoading, setSyncActionLoading ] = useState({})
 
     const onEditClickHandler = (schedule) => {
         openEditForm(schedule)
@@ -586,6 +662,144 @@ function ScheduleView({
         return 'success'
     }, [fetchStatus, sortedList])
 
+    useEffect(() => {
+        const loadCalendarStatus = async () => {
+            if (!open || !jwt) {
+                setProviderConnected(false)
+                setSyncStatusBySchedule({})
+                return
+            }
+            try {
+                const providerResponse = await fetch(backend.withBasePath('calendar/providers/status'), {
+                    headers: {
+                        Authorization: jwt,
+                    },
+                })
+                if (providerResponse.ok) {
+                    const providerPayload = await providerResponse.json()
+                    const items = Array.isArray(providerPayload.items) ? providerPayload.items : []
+                    const active = items.some((item) => item.provider_key === 'google_calendar' && item.status === 'active')
+                    setProviderConnected(active)
+                } else {
+                    setProviderConnected(false)
+                }
+            } catch (error) {
+                setProviderConnected(false)
+            }
+
+            const ids = sortedList.map((item) => item.id).join(',')
+            if (!ids) {
+                setSyncStatusBySchedule({})
+                return
+            }
+            try {
+                const syncResponse = await fetch(backend.withBasePath(`calendar/schedules/status?ids=${encodeURIComponent(ids)}`), {
+                    headers: {
+                        Authorization: jwt,
+                    },
+                })
+                if (!syncResponse.ok) {
+                    setSyncStatusBySchedule({})
+                    return
+                }
+                const syncPayload = await syncResponse.json()
+                const nextStatus = {}
+                const items = Array.isArray(syncPayload.items) ? syncPayload.items : []
+                items.forEach((item) => {
+                    nextStatus[item.schedule_id] = item
+                })
+                setSyncStatusBySchedule(nextStatus)
+            } catch (error) {
+                setSyncStatusBySchedule({})
+            }
+        }
+
+        loadCalendarStatus()
+    }, [open, jwt, sortedList])
+
+    const withSyncAction = async (scheduleId, actionFn) => {
+        setSyncActionLoading((prev) => ({ ...prev, [scheduleId]: true }))
+        try {
+            await actionFn()
+            triggerSyncQueuedAlert()
+        } catch (error) {
+            setFailMessage(error?.message || 'Calendar sync request failed')
+            fail()
+        } finally {
+            setSyncActionLoading((prev) => ({ ...prev, [scheduleId]: false }))
+        }
+    }
+
+    const refreshSyncStatus = async () => {
+        const ids = sortedList.map((item) => item.id).join(',')
+        if (!ids || !jwt) return
+        const response = await fetch(backend.withBasePath(`calendar/schedules/status?ids=${encodeURIComponent(ids)}`), {
+            headers: {
+                Authorization: jwt,
+            },
+        })
+        if (!response.ok) return
+        const payload = await response.json()
+        const nextStatus = {}
+        const items = Array.isArray(payload.items) ? payload.items : []
+        items.forEach((item) => {
+            nextStatus[item.schedule_id] = item
+        })
+        setSyncStatusBySchedule(nextStatus)
+    }
+
+    const onConnectProvider = () => {
+        const target = backend.withBasePath(`calendar/google/connect?token=${encodeURIComponent(jwt || '')}`)
+        window.location.href = target
+    }
+
+    const onSyncNow = async (schedule) => {
+        await withSyncAction(schedule.id, async () => {
+            const response = await fetch(backend.withBasePath(`calendar/schedules/${schedule.id}/sync-now`), {
+                method: 'POST',
+                headers: {
+                    Authorization: jwt,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ provider: 'google_calendar' }),
+            })
+            if (!response.ok) {
+                throw new Error('Failed to queue sync')
+            }
+            await refreshSyncStatus()
+        })
+    }
+
+    const onRetrySync = async (schedule) => {
+        await withSyncAction(schedule.id, async () => {
+            const response = await fetch(backend.withBasePath(`calendar/schedules/${schedule.id}/retry-sync`), {
+                method: 'POST',
+                headers: {
+                    Authorization: jwt,
+                },
+            })
+            if (!response.ok) {
+                throw new Error('Failed to queue retry')
+            }
+            await refreshSyncStatus()
+        })
+    }
+
+    const onDisconnectSync = async (schedule) => {
+        await withSyncAction(schedule.id, async () => {
+            const response = await fetch(backend.withBasePath(`calendar/schedules/${schedule.id}/disconnect-sync`), {
+                method: 'POST',
+                headers: {
+                    Authorization: jwt,
+                },
+            })
+            if (!response.ok) {
+                throw new Error('Failed to disconnect sync')
+            }
+            await refreshSyncStatus()
+        })
+    }
+
     return (
         <>
             <Dialog
@@ -633,6 +847,13 @@ function ScheduleView({
                                                 key={index}
                                                 item={schedule}
                                                 transition={transitionAnalysis[index] || null}
+                                                syncInfo={syncStatusBySchedule[schedule.id] || null}
+                                                providerConnected={providerConnected}
+                                                syncActionLoading={!!syncActionLoading[schedule.id]}
+                                                onConnectProvider={onConnectProvider}
+                                                onSyncNow={onSyncNow}
+                                                onRetrySync={onRetrySync}
+                                                onDisconnectSync={onDisconnectSync}
                                                 triggerCopyMessage={triggerCopyMessage}
                                                 isToday={isToday}
                                                 onEditClick={onEditClickHandler}
@@ -666,6 +887,12 @@ function ScheduleView({
                 type={'success'}
                 message={'address copied!'}
                 timing={2000}
+            />
+            <AutoHideAlert
+                open={syncQueuedAlert}
+                type={'success'}
+                message={'Calendar sync request queued'}
+                timing={2500}
             />
         </>
     )
