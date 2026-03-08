@@ -60,6 +60,9 @@ function SettingPage({
         pin_image_path: '',
     })
     const [ iosShortcutInstallURL, setIOSShortcutInstallURL ] = useState('')
+    const [ calendarProviderStatus, setCalendarProviderStatus ] = useState('')
+    const [ calendarProviderLoading, setCalendarProviderLoading ] = useState(false)
+    const [ calendarProviderActionLoading, setCalendarProviderActionLoading ] = useState(false)
 
     // graphql request
     const { data: preferenceData, loading: preferenceLoading, error: preferenceError } = useQuery(graphql.users.preference, { errorPolicy: 'all', fetchPolicy: 'no-cache' })
@@ -159,6 +162,35 @@ function SettingPage({
         fetchSettingsConfig()
     }, [jwt])
 
+    useEffect(() => {
+        const fetchCalendarProviderStatus = async () => {
+            if (!jwt) return
+            setCalendarProviderLoading(true)
+            try {
+                const response = await fetch(backend.withBasePath('calendar/providers/status'), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
+                })
+                if (!response.ok) {
+                    setCalendarProviderStatus('')
+                    return
+                }
+                const payload = await response.json()
+                const items = Array.isArray(payload?.items) ? payload.items : []
+                const google = items.find((item) => `${item?.provider_key || ''}`.trim().toLowerCase() === 'google_calendar')
+                setCalendarProviderStatus(`${google?.status || ''}`.trim().toLowerCase())
+            } catch {
+                setCalendarProviderStatus('')
+            } finally {
+                setCalendarProviderLoading(false)
+            }
+        }
+
+        fetchCalendarProviderStatus()
+    }, [jwt])
+
     const openIOSShortcutInstall = () => {
         const validatedURL = validateIOSShortcutInstallURL(iosShortcutInstallURL)
         if (!validatedURL) return
@@ -166,6 +198,29 @@ function SettingPage({
         const opened = window.open(validatedURL, '_blank', 'noopener,noreferrer')
         if (opened) {
             opened.opener = null
+        }
+    }
+
+    const openGoogleCalendarConnect = () => {
+        const target = backend.withBasePath(`calendar/google/connect?token=${encodeURIComponent(jwt || '')}`)
+        window.location.href = target
+    }
+
+    const disconnectGoogleCalendar = async () => {
+        if (!jwt) return
+        setCalendarProviderActionLoading(true)
+        try {
+            const response = await fetch(backend.withBasePath('calendar/providers/google_calendar/disconnect'), {
+                method: 'POST',
+                headers: {
+                    Authorization: jwt,
+                },
+            })
+            if (response.ok) {
+                setCalendarProviderStatus('disconnected')
+            }
+        } finally {
+            setCalendarProviderActionLoading(false)
         }
     }
 
@@ -278,6 +333,11 @@ function SettingPage({
                 openPreviewDisplayPinForm={openPreviewDisplayPinForm}
                 showIOSShortcutInstallCTA={!!validateIOSShortcutInstallURL(iosShortcutInstallURL)}
                 openIOSShortcutInstall={openIOSShortcutInstall}
+                showCalendarConnectionCTA={true}
+                isGoogleCalendarConnected={calendarProviderStatus === 'active'}
+                isGoogleCalendarLoading={calendarProviderLoading || calendarProviderActionLoading}
+                openGoogleCalendarConnect={openGoogleCalendarConnect}
+                disconnectGoogleCalendar={disconnectGoogleCalendar}
             />
             <RelationSearchForm
                 open={isRelationFormOpen}

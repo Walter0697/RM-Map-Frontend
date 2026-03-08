@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
+import { useHistory } from 'react-router-dom'
 import {
     Button,
     IconButton,
@@ -103,8 +104,22 @@ const toNumberOrFallback = (...values) => {
     return 0
 }
 
-const toScheduleImageSrc = (item) => {
-    const rawPath = item?.image_path || item?.movie?.image_path || item?.marker?.image_link || ''
+const getMarkerTypeIconPath = (item, eventtypes = []) => {
+    const markerType = item?.marker?.type || item?.marker?.marker_type || item?.marker?.type_id
+    if (!markerType || !Array.isArray(eventtypes) || eventtypes.length === 0) return ''
+
+    const typeObj = eventtypes.find((et) => (
+        et?.value === markerType
+        || et?.id === markerType
+        || `${et?.value}` === `${markerType}`
+        || `${et?.id}` === `${markerType}`
+        || `${et?.label}`.toLowerCase() === `${markerType}`.toLowerCase()
+    ))
+    return typeObj?.icon_path || ''
+}
+
+const toScheduleImageSrc = (item, eventtypes = []) => {
+    const rawPath = item?.image_path || item?.movie?.image_path || item?.marker?.image_link || getMarkerTypeIconPath(item, eventtypes) || ''
     if (!rawPath) return ''
     if (/^(https?:)?\/\//i.test(rawPath)) return rawPath
 
@@ -129,6 +144,7 @@ const toScheduleImageSrc = (item) => {
 
 function ScheduleItem({
     item,
+    eventtypes,
     transition,
     syncInfo,
     triggerCopyMessage,
@@ -146,7 +162,7 @@ function ScheduleItem({
     const [ imageExist, setImageExist ] = useState(false)
     const [ explanationAnchor, setExplanationAnchor ] = useState(null)
 
-    const imageSrc = toScheduleImageSrc(item)
+    const imageSrc = toScheduleImageSrc(item, eventtypes)
 
     useEffect(() => {
         if (imageSrc) {
@@ -527,8 +543,10 @@ function ScheduleView({
     openArriveForm,
     openEditForm,
     jwt,
+    eventtypes,
     dispatch,
 }) {
+    const history = useHistory()
     const [ removeScheduleGQL, { data: removeData, loading: removeLoading, error: removeError } ] = useMutation(graphql.schedules.remove, { errorPolicy: 'all' })
 
     const [ deletingId, setDeleting ] = useState(-1)
@@ -812,6 +830,11 @@ function ScheduleView({
         })
     }
 
+    const onOpenCalendarSettings = () => {
+        handleClose()
+        history.push('/setting')
+    }
+
     return (
         <>
             <Dialog
@@ -858,6 +881,7 @@ function ScheduleView({
                                             <ScheduleItem
                                                 key={index}
                                                 item={schedule}
+                                                eventtypes={eventtypes}
                                                 transition={transitionAnalysis[index] || null}
                                                 syncInfo={syncStatusBySchedule[schedule.id] || null}
                                                 triggerCopyMessage={triggerCopyMessage}
@@ -875,6 +899,13 @@ function ScheduleView({
                 {(normalizedViewStatus === 'success' || normalizedViewStatus === 'error') && (
                     <DialogActions>
                         <Button onClick={onRefresh}>Refresh</Button>
+                        <Button
+                            variant='text'
+                            startIcon={<CalendarTodayIcon />}
+                            onClick={onOpenCalendarSettings}
+                        >
+                            Calendar Settings
+                        </Button>
                         {!providerConnected ? (
                             <Button variant='outlined' onClick={onConnectProvider} disabled={Object.values(syncActionLoading).some((value) => !!value)}>
                                 Connect Google
@@ -916,4 +947,5 @@ function ScheduleView({
 
 export default connect(state => ({
     jwt: state.auth.jwt,
+    eventtypes: state?.marker?.eventtypes || [],
 }))(ScheduleView)
