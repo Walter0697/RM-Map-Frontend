@@ -238,6 +238,7 @@ function ScheduleItem({
         if (status === 'synced') return 'Synced'
         if (status === 'pending') return 'Sync pending'
         if (status === 'failed') return 'Sync failed'
+        if (status === 'disconnected') return (syncInfo?.external_event_id || '').trim() !== '' ? 'Disconnected' : 'Not synced'
         return 'Not synced'
     })()
 
@@ -246,6 +247,7 @@ function ScheduleItem({
         if (status === 'synced') return 'success'
         if (status === 'pending') return 'warning'
         if (status === 'failed') return 'error'
+        if (status === 'disconnected') return (syncInfo?.external_event_id || '').trim() !== '' ? 'warning' : 'default'
         return 'default'
     })()
 
