@@ -222,8 +222,19 @@ function ScheduleItem({
         return `Gap: ${gapText}, Travel: ${travelText}, Buffer: ${deltaText}.`
     })()
 
+    const normalizedSyncStatus = (() => {
+        const rawStatus = `${syncInfo?.sync_status || syncInfo?.status || ''}`.trim().toLowerCase()
+        if (rawStatus === 'synced' || rawStatus === 'pending' || rawStatus === 'failed' || rawStatus === 'disconnected') {
+            return rawStatus
+        }
+        if ((syncInfo?.external_event_id || '').trim() !== '') {
+            return 'synced'
+        }
+        return 'disconnected'
+    })()
+
     const syncStatusLabel = (() => {
-        const status = syncInfo?.sync_status || 'disconnected'
+        const status = normalizedSyncStatus
         if (status === 'synced') return 'Synced'
         if (status === 'pending') return 'Sync pending'
         if (status === 'failed') return 'Sync failed'
@@ -231,7 +242,7 @@ function ScheduleItem({
     })()
 
     const syncStatusColor = (() => {
-        const status = syncInfo?.sync_status || 'disconnected'
+        const status = normalizedSyncStatus
         if (status === 'synced') return 'success'
         if (status === 'pending') return 'warning'
         if (status === 'failed') return 'error'
