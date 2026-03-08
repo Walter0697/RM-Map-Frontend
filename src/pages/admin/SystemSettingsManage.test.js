@@ -86,6 +86,16 @@ describe('SystemSettingsManage', () => {
                 ok: true,
                 status: 200,
                 json: async () => ({
+                    short_minutes: 30,
+                    medium_minutes: 60,
+                    long_minutes: 120,
+                    auto_minutes: 30,
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
                     ios_shortcut_install_url: 'https://www.icloud.com/shortcuts/new',
                 }),
             })
@@ -95,6 +105,16 @@ describe('SystemSettingsManage', () => {
                 json: async () => ({
                     easy_threshold_minutes: 18,
                     difficult_threshold_minutes: 42,
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    short_minutes: 35,
+                    medium_minutes: 70,
+                    long_minutes: 150,
+                    auto_minutes: 30,
                 }),
             })
 
@@ -109,13 +129,25 @@ describe('SystemSettingsManage', () => {
         expect(input.value).toBe('https://www.icloud.com/shortcuts/old')
         const easyInput = container.querySelector('input[placeholder=\"20\"]')
         const difficultInput = container.querySelector('input[placeholder=\"45\"]')
+        const shortInput = container.querySelector('input[placeholder=\"30\"]')
+        const mediumInput = container.querySelector('input[placeholder=\"60\"]')
+        const longInput = container.querySelector('input[placeholder=\"120\"]')
+        const autoInput = container.querySelectorAll('input[placeholder=\"30\"]')[1]
         expect(easyInput.value).toBe('20')
         expect(difficultInput.value).toBe('45')
+        expect(shortInput.value).toBe('30')
+        expect(mediumInput.value).toBe('60')
+        expect(longInput.value).toBe('120')
+        expect(autoInput.value).toBe('30')
 
         act(() => {
             setInputValue(input, 'https://www.icloud.com/shortcuts/new')
             setInputValue(easyInput, '18')
             setInputValue(difficultInput, '42')
+            setInputValue(shortInput, '35')
+            setInputValue(mediumInput, '70')
+            setInputValue(longInput, '150')
+            setInputValue(autoInput, '30')
         })
         clickByText(container, 'button', 'Save', true)
 
@@ -123,16 +155,24 @@ describe('SystemSettingsManage', () => {
             await flushPromises()
         })
 
-        const shortcutSaveCall = global.fetch.mock.calls[2]
+        const shortcutSaveCall = global.fetch.mock.calls[3]
         expect(shortcutSaveCall[0]).toContain('/admin/settings/ios-shortcut-install-url')
         expect(shortcutSaveCall[1].method).toBe('PUT')
         expect(shortcutSaveCall[1].body).toContain('https://www.icloud.com/shortcuts/new')
 
-        const thresholdSaveCall = global.fetch.mock.calls[3]
+        const thresholdSaveCall = global.fetch.mock.calls[4]
         expect(thresholdSaveCall[0]).toContain('/admin/settings/schedule-travel-thresholds')
         expect(thresholdSaveCall[1].method).toBe('PUT')
         expect(thresholdSaveCall[1].body).toContain('"easy_threshold_minutes":18')
         expect(thresholdSaveCall[1].body).toContain('"difficult_threshold_minutes":42')
+
+        const durationSaveCall = global.fetch.mock.calls[5]
+        expect(durationSaveCall[0]).toContain('/admin/settings/calendar-sync-durations')
+        expect(durationSaveCall[1].method).toBe('PUT')
+        expect(durationSaveCall[1].body).toContain('"short_minutes":35')
+        expect(durationSaveCall[1].body).toContain('"medium_minutes":70')
+        expect(durationSaveCall[1].body).toContain('"long_minutes":150')
+        expect(durationSaveCall[1].body).toContain('"auto_minutes":30')
 
         expect(document.body.textContent).toContain('Saved system settings.')
     })
@@ -152,6 +192,16 @@ describe('SystemSettingsManage', () => {
                 json: async () => ({
                     easy_threshold_minutes: 20,
                     difficult_threshold_minutes: 45,
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    short_minutes: 30,
+                    medium_minutes: 60,
+                    long_minutes: 120,
+                    auto_minutes: 30,
                 }),
             })
             .mockResolvedValueOnce({
@@ -193,6 +243,16 @@ describe('SystemSettingsManage', () => {
                 json: async () => ({
                     easy_threshold_minutes: 20,
                     difficult_threshold_minutes: 45,
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    short_minutes: 30,
+                    medium_minutes: 60,
+                    long_minutes: 120,
+                    auto_minutes: 30,
                 }),
             })
 

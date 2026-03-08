@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
+import { useHistory } from 'react-router-dom'
 import {
     Button,
     IconButton,
+    Chip,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -23,6 +25,7 @@ import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk'
 import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt'
 import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral'
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied'
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -101,8 +104,22 @@ const toNumberOrFallback = (...values) => {
     return 0
 }
 
-const toScheduleImageSrc = (item) => {
-    const rawPath = item?.image_path || item?.movie?.image_path || item?.marker?.image_link || ''
+const getMarkerTypeIconPath = (item, eventtypes = []) => {
+    const markerType = item?.marker?.type || item?.marker?.marker_type || item?.marker?.type_id
+    if (!markerType || !Array.isArray(eventtypes) || eventtypes.length === 0) return ''
+
+    const typeObj = eventtypes.find((et) => (
+        et?.value === markerType
+        || et?.id === markerType
+        || `${et?.value}` === `${markerType}`
+        || `${et?.id}` === `${markerType}`
+        || `${et?.label}`.toLowerCase() === `${markerType}`.toLowerCase()
+    ))
+    return typeObj?.icon_path || ''
+}
+
+const toScheduleImageSrc = (item, eventtypes = []) => {
+    const rawPath = item?.image_path || item?.movie?.image_path || item?.marker?.image_link || getMarkerTypeIconPath(item, eventtypes) || ''
     if (!rawPath) return ''
     if (/^(https?:)?\/\//i.test(rawPath)) return rawPath
 
@@ -127,7 +144,9 @@ const toScheduleImageSrc = (item) => {
 
 function ScheduleItem({
     item,
+    eventtypes,
     transition,
+    syncInfo,
     triggerCopyMessage,
     isToday,
     onEditClick,
@@ -143,7 +162,7 @@ function ScheduleItem({
     const [ imageExist, setImageExist ] = useState(false)
     const [ explanationAnchor, setExplanationAnchor ] = useState(null)
 
-    const imageSrc = toScheduleImageSrc(item)
+    const imageSrc = toScheduleImageSrc(item, eventtypes)
 
     useEffect(() => {
         if (imageSrc) {
@@ -197,6 +216,16 @@ function ScheduleItem({
         transition?.gap_seconds,
         transition?.scheduled_gap,
     )
+    const hasTravelDuration = transition?.duration_seconds !== undefined
+        || transition?.travel_duration_seconds !== undefined
+        || transition?.travel_time_seconds !== undefined
+        || transition?.duration !== undefined
+    const hasGapDuration = transition?.scheduled_gap_seconds !== undefined
+        || transition?.between_time_seconds !== undefined
+        || transition?.gap_seconds !== undefined
+        || transition?.scheduled_gap !== undefined
+    const travelTimeDisplay = hasTravelDuration ? formatMinutesCompact(Math.round(transitionTravelSeconds / 60)) : 'N/A'
+    const gapTimeDisplay = hasGapDuration ? formatMinutesCompact(Math.round(transitionGapSeconds / 60)) : 'N/A'
     const lineHeight = 70
     const descriptionText = item?.description || item?.marker?.description || ''
 
@@ -204,8 +233,8 @@ function ScheduleItem({
         if (!transition || transition.status === 'unavailable') {
             return 'Travel estimate is unavailable for this pair.'
         }
-        const travelText = formatMinutesCompact(Math.round(transitionTravelSeconds / 60))
-        const gapText = formatMinutesCompact(Math.round(transitionGapSeconds / 60))
+        const travelText = travelTimeDisplay
+        const gapText = gapTimeDisplay
         const deltaSeconds = toNumberOrFallback(
             transition?.delta_seconds,
             transition?.buffer_seconds,
@@ -217,6 +246,42 @@ function ScheduleItem({
             ? 'N/A'
             : formatSignedSeconds(deltaSeconds)
         return `Gap: ${gapText}, Travel: ${travelText}, Buffer: ${deltaText}.`
+    })()
+
+    const normalizedSyncStatus = (() => {
+        const rawStatus = `${syncInfo?.sync_status || syncInfo?.status || ''}`.trim().toLowerCase()
+        if (rawStatus === 'synced' || rawStatus === 'pending' || rawStatus === 'failed' || rawStatus === 'disconnected') {
+            return rawStatus
+        }
+        if ((syncInfo?.external_event_id || '').trim() !== '') {
+            return 'synced'
+        }
+        return 'disconnected'
+    })()
+
+    const syncStatusLabel = (() => {
+        const status = normalizedSyncStatus
+        if (status === 'synced') return 'Synced'
+        if (status === 'pending') return 'Sync pending'
+        if (status === 'failed') return 'Sync failed'
+        if (status === 'disconnected') return (syncInfo?.external_event_id || '').trim() !== '' ? 'Disconnected' : 'Not synced'
+        return 'Not synced'
+    })()
+
+    const syncStatusColor = (() => {
+        const status = normalizedSyncStatus
+        if (status === 'synced') return 'success'
+        if (status === 'pending') return 'warning'
+        if (status === 'failed') return 'error'
+        if (status === 'disconnected') return (syncInfo?.external_event_id || '').trim() !== '' ? 'warning' : 'default'
+        return 'default'
+    })()
+
+    const syncError = syncInfo?.last_error_message || ''
+    const googleCalendarOpenUrl = (() => {
+        const eventDate = dayjs.utc(item?.selected_date)
+        if (!eventDate.isValid()) return 'https://calendar.google.com/calendar/u/0/r'
+        return `https://calendar.google.com/calendar/u/0/r/day/${eventDate.format('YYYY/M/D')}`
     })()
 
     return (
@@ -373,6 +438,22 @@ function ScheduleItem({
                     Movie: {item.movie.label}
                 </div>
             )}
+            <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                <Chip size='small' color={syncStatusColor} label={syncStatusLabel} />
+                <div style={{ flex: 1 }} />
+                <IconButton
+                    size='small'
+                    onClick={() => window.open(googleCalendarOpenUrl, '_blank', 'noopener,noreferrer')}
+                    aria-label='Open Google Calendar Day'
+                >
+                    <CalendarTodayIcon fontSize='small' />
+                </IconButton>
+            </div>
+            {syncError && (
+                <div style={{ marginTop: '6px', fontSize: '12px', color: '#b34b3d' }}>
+                    {syncError}
+                </div>
+            )}
             </div>
             {transition && (
                 <div style={{ marginTop: '14px' }}>
@@ -394,7 +475,7 @@ function ScheduleItem({
                                         <div>time</div>
                                     </div>
                                     <div style={{ fontSize: '14px', fontWeight: 800, color: '#2f4056' }}>
-                                        {formatMinutesCompact(Math.round(transitionGapSeconds / 60))}
+                                        {gapTimeDisplay}
                                     </div>
                                     <div style={{ width: '3px', height: `${lineHeight}px`, backgroundColor: transitionVisual.color, borderRadius: '2px' }} />
                                     <ArrowDownwardIcon sx={{ color: transitionVisual.color, fontSize: '18px' }} />
@@ -425,7 +506,7 @@ function ScheduleItem({
                                         <div>time</div>
                                     </div>
                                     <div style={{ fontSize: '14px', fontWeight: 800, color: '#2f4056' }}>
-                                        {formatMinutesCompact(Math.round(transitionTravelSeconds / 60))}
+                                        {travelTimeDisplay}
                                     </div>
                                     <div style={{ width: '3px', height: `${lineHeight}px`, backgroundColor: transitionVisual.color, borderRadius: '2px' }} />
                                     <ArrowDownwardIcon sx={{ color: transitionVisual.color, fontSize: '18px' }} />
@@ -462,8 +543,10 @@ function ScheduleView({
     openArriveForm,
     openEditForm,
     jwt,
+    eventtypes,
     dispatch,
 }) {
+    const history = useHistory()
     const [ removeScheduleGQL, { data: removeData, loading: removeLoading, error: removeError } ] = useMutation(graphql.schedules.remove, { errorPolicy: 'all' })
 
     const [ deletingId, setDeleting ] = useState(-1)
@@ -508,10 +591,14 @@ function ScheduleView({
     })
 
     const [ copyMessage, triggerCopyMessage ] = useBoop(3000)
+    const [ syncQueuedAlert, triggerSyncQueuedAlert ] = useBoop(3000)
     const [ transitionAnalysis, setTransitionAnalysis ] = useState([])
     const [ transitionFetchStatus, setTransitionFetchStatus ] = useState('idle')
     const [ transitionFetchMessage, setTransitionFetchMessage ] = useState('')
     const transitionRequestVersionRef = useRef(0)
+    const [ providerConnected, setProviderConnected ] = useState(false)
+    const [ syncStatusBySchedule, setSyncStatusBySchedule ] = useState({})
+    const [ syncActionLoading, setSyncActionLoading ] = useState({})
 
     const onEditClickHandler = (schedule) => {
         openEditForm(schedule)
@@ -586,6 +673,168 @@ function ScheduleView({
         return 'success'
     }, [fetchStatus, sortedList])
 
+    useEffect(() => {
+        const loadCalendarStatus = async () => {
+            if (!open || !jwt) {
+                setProviderConnected(false)
+                setSyncStatusBySchedule({})
+                return
+            }
+            try {
+                const providerResponse = await fetch(backend.withBasePath('calendar/providers/status'), {
+                    headers: {
+                        Authorization: jwt,
+                    },
+                })
+                if (providerResponse.ok) {
+                    const providerPayload = await providerResponse.json()
+                    const items = Array.isArray(providerPayload.items) ? providerPayload.items : []
+                    const active = items.some((item) => item.provider_key === 'google_calendar' && item.status === 'active')
+                    setProviderConnected(active)
+                } else {
+                    setProviderConnected(false)
+                }
+            } catch (error) {
+                setProviderConnected(false)
+            }
+
+            const ids = sortedList.map((item) => item.id).join(',')
+            if (!ids) {
+                setSyncStatusBySchedule({})
+                return
+            }
+            try {
+                const syncResponse = await fetch(backend.withBasePath(`calendar/schedules/status?ids=${encodeURIComponent(ids)}`), {
+                    headers: {
+                        Authorization: jwt,
+                    },
+                })
+                if (!syncResponse.ok) {
+                    return
+                }
+                const syncPayload = await syncResponse.json()
+                const nextStatus = {}
+                const items = Array.isArray(syncPayload.items) ? syncPayload.items : []
+                items.forEach((item) => {
+                    nextStatus[item.schedule_id] = item
+                })
+                setSyncStatusBySchedule((prev) => ({ ...prev, ...nextStatus }))
+            } catch (error) {
+                // keep previous status snapshot to avoid flipping labels on transient request failures
+            }
+        }
+
+        loadCalendarStatus()
+    }, [open, jwt, sortedList])
+
+    const withBulkSyncAction = async (actionFn) => {
+        const ids = sortedList.map((item) => item.id)
+        if (ids.length === 0) return
+        setSyncActionLoading((prev) => {
+            const next = { ...prev }
+            ids.forEach((id) => {
+                next[id] = true
+            })
+            return next
+        })
+        try {
+            await actionFn()
+            triggerSyncQueuedAlert()
+        } catch (error) {
+            setFailMessage(error?.message || 'Calendar sync request failed')
+            fail()
+        } finally {
+            setSyncActionLoading((prev) => {
+                const next = { ...prev }
+                ids.forEach((id) => {
+                    next[id] = false
+                })
+                return next
+            })
+        }
+    }
+
+    const refreshSyncStatus = async () => {
+        const ids = sortedList.map((item) => item.id).join(',')
+        if (!ids || !jwt) return {}
+        const response = await fetch(backend.withBasePath(`calendar/schedules/status?ids=${encodeURIComponent(ids)}`), {
+            headers: {
+                Authorization: jwt,
+            },
+        })
+        if (!response.ok) return {}
+        const payload = await response.json()
+        const incomingStatus = {}
+        const items = Array.isArray(payload.items) ? payload.items : []
+        items.forEach((item) => {
+            incomingStatus[item.schedule_id] = item
+        })
+        let mergedStatus = {}
+        setSyncStatusBySchedule((prev) => {
+            mergedStatus = { ...prev, ...incomingStatus }
+            return mergedStatus
+        })
+        return mergedStatus
+    }
+
+    const onConnectProvider = () => {
+        const target = backend.withBasePath(`calendar/google/connect?token=${encodeURIComponent(jwt || '')}`)
+        window.location.href = target
+    }
+
+    const onSyncNow = async () => {
+        await withBulkSyncAction(async () => {
+            const failures = []
+            const optimisticStatuses = {}
+            for (const schedule of sortedList) {
+                const response = await fetch(backend.withBasePath(`calendar/schedules/${schedule.id}/sync-now`), {
+                    method: 'POST',
+                    headers: {
+                        Authorization: jwt,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ provider: 'google_calendar' }),
+                })
+                if (!response.ok) {
+                    failures.push(`${schedule.label}: request failed (${response.status})`)
+                    continue
+                }
+                let payload = {}
+                try {
+                    payload = await response.json()
+                } catch (error) {
+                    payload = {}
+                }
+                if (payload?.status) {
+                    optimisticStatuses[schedule.id] = {
+                        ...(syncStatusBySchedule[schedule.id] || {}),
+                        schedule_id: schedule.id,
+                        provider_key: 'google_calendar',
+                        sync_status: payload.status,
+                        external_event_id: payload?.result?.external_event_id || syncStatusBySchedule[schedule.id]?.external_event_id || '',
+                        last_error_message: payload?.result?.last_error_message || '',
+                        last_error_code: payload?.result?.last_error_code || '',
+                    }
+                }
+                if (payload?.status === 'failed') {
+                    failures.push(`${schedule.label}: ${payload?.result?.last_error_message || 'Calendar sync failed'}`)
+                }
+            }
+            if (Object.keys(optimisticStatuses).length > 0) {
+                setSyncStatusBySchedule((prev) => ({ ...prev, ...optimisticStatuses }))
+            }
+            await refreshSyncStatus()
+            if (failures.length > 0) {
+                throw new Error(`Failed to sync ${failures.length} item(s). ${failures[0]}`)
+            }
+        })
+    }
+
+    const onOpenCalendarSettings = () => {
+        handleClose()
+        history.push('/setting')
+    }
+
     return (
         <>
             <Dialog
@@ -632,7 +881,9 @@ function ScheduleView({
                                             <ScheduleItem
                                                 key={index}
                                                 item={schedule}
+                                                eventtypes={eventtypes}
                                                 transition={transitionAnalysis[index] || null}
+                                                syncInfo={syncStatusBySchedule[schedule.id] || null}
                                                 triggerCopyMessage={triggerCopyMessage}
                                                 isToday={isToday}
                                                 onEditClick={onEditClickHandler}
@@ -648,6 +899,22 @@ function ScheduleView({
                 {(normalizedViewStatus === 'success' || normalizedViewStatus === 'error') && (
                     <DialogActions>
                         <Button onClick={onRefresh}>Refresh</Button>
+                        <Button
+                            variant='text'
+                            startIcon={<CalendarTodayIcon />}
+                            onClick={onOpenCalendarSettings}
+                        >
+                            Calendar Settings
+                        </Button>
+                        {!providerConnected ? (
+                            <Button variant='outlined' onClick={onConnectProvider} disabled={Object.values(syncActionLoading).some((value) => !!value)}>
+                                Connect Google
+                            </Button>
+                        ) : (
+                            <Button variant='outlined' onClick={onSyncNow} disabled={Object.values(syncActionLoading).some((value) => !!value)}>
+                                Sync Whole Schedule
+                            </Button>
+                        )}
                         {isToday && normalizedViewStatus === 'success' && (
                             <Button onClick={openArriveForm}>Arrived</Button>
                         )}
@@ -667,6 +934,12 @@ function ScheduleView({
                 message={'address copied!'}
                 timing={2000}
             />
+            <AutoHideAlert
+                open={syncQueuedAlert}
+                type={'success'}
+                message={'Calendar sync completed'}
+                timing={2500}
+            />
         </>
     )
 }
@@ -674,4 +947,5 @@ function ScheduleView({
 
 export default connect(state => ({
     jwt: state.auth.jwt,
+    eventtypes: state?.marker?.eventtypes || [],
 }))(ScheduleView)

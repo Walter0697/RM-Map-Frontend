@@ -13,6 +13,7 @@ import ExpiredMarkerButton from './settings/ExpiredMarkerButton'
 import WatchedMovieListButton from './settings/WatchedMovieListButton'
 import PreviewDisplayPinButton from './settings/PreviewDisplayPinButton'
 import IOSShortcutInstallButton from './settings/IOSShortcutInstallButton'
+import GoogleCalendarConnectionButton from './settings/GoogleCalendarConnectionButton'
 
 import WrapperBox from '../wrapper/WrapperBox'
 import SectionHeader from './settings/SectionHeader'
@@ -38,6 +39,11 @@ function SettingList({
   openPreviewDisplayPinForm,
   showIOSShortcutInstallCTA,
   openIOSShortcutInstall,
+  showCalendarConnectionCTA,
+  isGoogleCalendarConnected,
+  isGoogleCalendarLoading,
+  openGoogleCalendarConnect,
+  disconnectGoogleCalendar,
 }) {
   const history = useHistory()
 
@@ -159,7 +165,7 @@ function SettingList({
                 onClickHandler={openPreviewDisplayPinForm}
             />
         </WrapperBox>
-        {showIOSShortcutInstallCTA ? (
+        {showIOSShortcutInstallCTA || showCalendarConnectionCTA ? (
           <>
             <WrapperBox
               height={50}
@@ -170,14 +176,29 @@ function SettingList({
                 icon={<PhoneIphoneIcon />}
               />
             </WrapperBox>
-            <WrapperBox
-              height={30}
-              marginBottom={'30px'}
-            >
-              <IOSShortcutInstallButton
-                onClickHandler={openIOSShortcutInstall}
-              />
-            </WrapperBox>
+            {showCalendarConnectionCTA ? (
+              <WrapperBox
+                height={30}
+                marginBottom={'15px'}
+              >
+                <GoogleCalendarConnectionButton
+                  connected={isGoogleCalendarConnected}
+                  loading={isGoogleCalendarLoading}
+                  onConnect={openGoogleCalendarConnect}
+                  onDisconnect={disconnectGoogleCalendar}
+                />
+              </WrapperBox>
+            ) : null}
+            {showIOSShortcutInstallCTA ? (
+              <WrapperBox
+                height={30}
+                marginBottom={'30px'}
+              >
+                <IOSShortcutInstallButton
+                  onClickHandler={openIOSShortcutInstall}
+                />
+              </WrapperBox>
+            ) : null}
           </>
         ) : null}
         <WrapperBox
