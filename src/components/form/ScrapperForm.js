@@ -202,6 +202,13 @@ function ScrapperForm({
 
     const onSubmitHandler = (e) => {
         e.preventDefault()
+        if (!fetchData || !fetchData.restaurant) {
+            setAlertMessage({
+                type: 'warning',
+                message: 'Website integration is not ready yet. Please fetch and confirm restaurant data first.',
+            })
+            return
+        }
         setValue(link, fetchData)
     }
 
@@ -231,10 +238,15 @@ function ScrapperForm({
                         <Grid item xs={12} md={12} lg={12} fullWidth style={{
                             display: 'flex',
                             justifyContent: 'center',
+                            width: '100%',
                         }}>
                             <Button
                                 variant='contained'
                                 onClick={getClipboardMessage}
+                                style={{
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto',
+                                }}
                             >Paste from clipboard</Button>
                         </Grid>
                     )}

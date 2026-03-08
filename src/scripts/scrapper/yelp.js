@@ -1,28 +1,24 @@
 const baseURL = 'https://www.yelp.com/biz/'
+const yelpURLPattern = /https?:\/\/(?:www\.)?yelp\.com\/biz\/[^\s]+/i
 
 const validate = (content) => {
     if (!content) return false
-    return content.indexOf(baseURL) !== -1
+    return yelpURLPattern.test(content)
 }
 
 const scrap = (content) => {
-    const arrInfo = content.split('\n')
-    let linkStr = ''
-
-    for (let i = 0; i < arrInfo.length; i++) {
-        const info = arrInfo[i]
-        const index = info.indexOf(baseURL)
-        if (index !== -1) {
-            linkStr = info.substring(index).replace('\n', '').replace('\r', '')
-        }
-    }
+    const match = content.match(yelpURLPattern)
+    let linkStr = match ? match[0] : ''
+    linkStr = linkStr.replace(/[)\],.;]+$/, '')
 
     if (linkStr) {
         try {
             const parsedURL = new URL(linkStr)
-            const sourceID = parsedURL.pathname.replace('/biz/', '').replace(/\//g, '').trim()
+            const pathParts = parsedURL.pathname.split('/').filter(Boolean)
+            const bizIndex = pathParts.findIndex((item) => item.toLowerCase() === 'biz')
+            const sourceID = bizIndex !== -1 && pathParts[bizIndex + 1] ? pathParts[bizIndex + 1].trim() : ''
             if (!sourceID) return false
-            return { source_id: sourceID, link: linkStr }
+            return { source_id: sourceID, link: `${parsedURL.origin}/biz/${sourceID}` }
         } catch (error) {
             return false
         }

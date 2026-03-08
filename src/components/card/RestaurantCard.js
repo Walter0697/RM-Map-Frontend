@@ -1,17 +1,27 @@
 import React, { useMemo } from 'react'
 import {
     Grid,
-    Button,
+    IconButton,
 } from '@mui/material'
 
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
 import StarIcon from '@mui/icons-material/Star'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 
 function RestaurantCard({
     restaurant,
 }) {
     if (!restaurant) return false
+    const providerLabel = useMemo(() => {
+        const raw = `${restaurant?.source || ''}`.trim().toLowerCase()
+        if (!raw) return null
+        if (raw === 'openrice') return 'OpenRice'
+        if (raw === 'yelp') return 'Yelp'
+        if (raw === 'tabelog') return 'Tabelog'
+        return raw.charAt(0).toUpperCase() + raw.slice(1)
+    }, [restaurant?.source])
+    const sourceID = useMemo(() => `${restaurant?.source_id || ''}`.trim(), [restaurant?.source_id])
     const ratingSummary = useMemo(() => {
         if (!restaurant?.rating) return null
         try {
@@ -41,39 +51,89 @@ function RestaurantCard({
     }
 
     return (
-        <Button
-            variant='contained'
-            size='large'
+        <div
             style={{
-                pointerEvents: 'none',
                 backgroundColor: '#83c0ff',
                 color: '#0808c1',
                 width: '100%',
                 height: 'auto',
                 borderRadius: '5px',
                 boxShadow: '2px 2px 6px',
-                alignItems: 'flex-start',
-                textTransform: 'none',
                 padding: '0',
                 paddingTop: '10px',
                 paddingBottom: '10px',
                 boxSizing: 'border-box',
                 overflow: 'hidden',
+                position: 'relative',
             }}
         >
+            {restaurant.website && (
+                <IconButton
+                    aria-label='Open restaurant website'
+                    size='small'
+                    onClick={() => window.open(restaurant.website, '_blank', 'noopener,noreferrer')}
+                    style={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                        padding: '4px',
+                        color: '#1f3f85',
+                        backgroundColor: 'rgba(255,255,255,0.7)',
+                        zIndex: 2,
+                    }}
+                >
+                    <OpenInNewIcon fontSize='small' />
+                </IconButton>
+            )}
             <Grid container spacing={0} style={{ width: '100%', margin: 0 }}>
                 <Grid item xs={12} md={12} lg={12}
                     style={{
                         fontWeight: 'bold',
-                        fontSize: '18px',
+                        fontSize: '20px',
                         justifyContent: 'flex-start',
                         display: 'flex',
                         paddingLeft: '12px',
-                        paddingRight: '12px',
+                        paddingRight: '48px',
+                        lineHeight: 1.2,
                     }}
                 >
                     {restaurant.name}
                 </Grid>
+                {providerLabel && (
+                    <Grid
+                        item
+                        xs={12}
+                        md={12}
+                        lg={12}
+                        style={{
+                            textAlign: 'left',
+                            paddingLeft: '12px',
+                            paddingRight: '12px',
+                            paddingTop: '4px',
+                            paddingBottom: '4px',
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '6px',
+                            alignItems: 'center',
+                        }}
+                    >
+                        {providerLabel && (
+                            <span
+                                title={sourceID ? `ID: ${sourceID}` : ''}
+                                style={{
+                                    backgroundColor: '#2f5fd0',
+                                    color: '#fff',
+                                    borderRadius: '999px',
+                                    padding: '2px 10px',
+                                    fontWeight: 'bold',
+                                    fontSize: '12px',
+                                }}
+                            >
+                                {providerLabel}
+                            </span>
+                        )}
+                    </Grid>
+                )}
                 <Grid item xs={12} md={12} lg={12}
                     style={{
                         wordWrap: 'break-word',
@@ -149,7 +209,7 @@ function RestaurantCard({
                     </Grid>
                 )}
             </Grid>
-        </Button>
+        </div>
     )
 }
 
