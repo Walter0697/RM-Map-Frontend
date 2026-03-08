@@ -200,6 +200,16 @@ function ScheduleItem({
         transition?.gap_seconds,
         transition?.scheduled_gap,
     )
+    const hasTravelDuration = transition?.duration_seconds !== undefined
+        || transition?.travel_duration_seconds !== undefined
+        || transition?.travel_time_seconds !== undefined
+        || transition?.duration !== undefined
+    const hasGapDuration = transition?.scheduled_gap_seconds !== undefined
+        || transition?.between_time_seconds !== undefined
+        || transition?.gap_seconds !== undefined
+        || transition?.scheduled_gap !== undefined
+    const travelTimeDisplay = hasTravelDuration ? formatMinutesCompact(Math.round(transitionTravelSeconds / 60)) : 'N/A'
+    const gapTimeDisplay = hasGapDuration ? formatMinutesCompact(Math.round(transitionGapSeconds / 60)) : 'N/A'
     const lineHeight = 70
     const descriptionText = item?.description || item?.marker?.description || ''
 
@@ -207,8 +217,8 @@ function ScheduleItem({
         if (!transition || transition.status === 'unavailable') {
             return 'Travel estimate is unavailable for this pair.'
         }
-        const travelText = formatMinutesCompact(Math.round(transitionTravelSeconds / 60))
-        const gapText = formatMinutesCompact(Math.round(transitionGapSeconds / 60))
+        const travelText = travelTimeDisplay
+        const gapText = gapTimeDisplay
         const deltaSeconds = toNumberOrFallback(
             transition?.delta_seconds,
             transition?.buffer_seconds,
@@ -449,7 +459,7 @@ function ScheduleItem({
                                         <div>time</div>
                                     </div>
                                     <div style={{ fontSize: '14px', fontWeight: 800, color: '#2f4056' }}>
-                                        {formatMinutesCompact(Math.round(transitionGapSeconds / 60))}
+                                        {gapTimeDisplay}
                                     </div>
                                     <div style={{ width: '3px', height: `${lineHeight}px`, backgroundColor: transitionVisual.color, borderRadius: '2px' }} />
                                     <ArrowDownwardIcon sx={{ color: transitionVisual.color, fontSize: '18px' }} />
@@ -480,7 +490,7 @@ function ScheduleItem({
                                         <div>time</div>
                                     </div>
                                     <div style={{ fontSize: '14px', fontWeight: 800, color: '#2f4056' }}>
-                                        {formatMinutesCompact(Math.round(transitionTravelSeconds / 60))}
+                                        {travelTimeDisplay}
                                     </div>
                                     <div style={{ width: '3px', height: `${lineHeight}px`, backgroundColor: transitionVisual.color, borderRadius: '2px' }} />
                                     <ArrowDownwardIcon sx={{ color: transitionVisual.color, fontSize: '18px' }} />
