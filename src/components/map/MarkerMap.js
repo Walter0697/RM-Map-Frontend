@@ -17,9 +17,12 @@ import OpacityIcon from '@mui/icons-material/Opacity'
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined'
 import CloudOffOutlinedIcon from '@mui/icons-material/CloudOffOutlined'
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
+import Button from '@mui/material/Button'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
@@ -118,6 +121,7 @@ function MarkerMap({
     const [ forecastDayOffset, setForecastDayOffset ] = useState(1)
     const [ weatherStatusTooltipOpen, setWeatherStatusTooltipOpen ] = useState(false)
     const [ weatherFeatureEnabled, setWeatherFeatureEnabled ] = useState(false)
+    const [ forecastMenuAnchorEl, setForecastMenuAnchorEl ] = useState(null)
 
     const {
         weatherOpacity,
@@ -751,7 +755,7 @@ function MarkerMap({
                         position: 'absolute',
                         visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
                         opacity: mapOpacity,
-                        top: '102px',
+                        top: '126px',
                         left: '20px',
                     }}
                 >
@@ -783,7 +787,7 @@ function MarkerMap({
                         position: 'absolute',
                         visibility: mapOpacity.to(o => o === 0 ? 'hidden' : 'visible'),
                         opacity: mapOpacity,
-                        top: '82px',
+                        top: '118px',
                         right: '20px',
                         zIndex: 20,
                     }}
@@ -802,6 +806,16 @@ function MarkerMap({
                                 backgroundColor: 'rgba(255,255,255,0.96)',
                                 border: '2px solid #0f172a',
                                 boxShadow: '0 0 0 2px rgba(255,255,255,0.95), 0 0 8px rgba(15,23,42,0.45)',
+                                color: '#334155',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255,255,255,0.96)',
+                                },
+                                '&:active': {
+                                    backgroundColor: 'rgba(255,255,255,0.96)',
+                                },
+                                '&.Mui-focusVisible': {
+                                    backgroundColor: 'rgba(255,255,255,0.96)',
+                                },
                             }}
                         >
                             <WeatherStatusIcon
@@ -906,37 +920,58 @@ function MarkerMap({
                         }}
                     >
                         <span style={{ fontWeight: 600 }}>Forecast Day</span>
-                        <select
-                            value={forecastDayOffset}
-                            onChange={(event) => setForecastDayOffset(Number(event.target.value))}
+                        <Button
+                            onClick={(event) => setForecastMenuAnchorEl(event.currentTarget)}
                             style={{
                                 background: 'rgba(255,255,255,0.95)',
                                 color: '#0f172a',
                                 border: '1px solid #94a3b8',
                                 borderRadius: '10px',
-                                padding: '4px 8px',
+                                padding: '4px 10px',
                                 pointerEvents: 'auto',
                                 fontSize: '12px',
                                 fontWeight: 600,
+                                textTransform: 'none',
+                                minWidth: '120px',
+                                justifyContent: 'space-between',
+                            }}
+                        >
+                            <span>{forecastDayOptions.find((item) => item.offset === forecastDayOffset)?.label || `${forecastDayOffset} day(s)`}</span>
+                            <KeyboardArrowUpIcon sx={{ ml: 1, fontSize: 16 }} />
+                        </Button>
+                        <Menu
+                            anchorEl={forecastMenuAnchorEl}
+                            open={!!forecastMenuAnchorEl}
+                            onClose={() => setForecastMenuAnchorEl(null)}
+                            anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'center',
+                            }}
+                            transformOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'center',
+                            }}
+                            PaperProps={{
+                                sx: {
+                                    pointerEvents: 'auto',
+                                    borderRadius: 1.25,
+                                    minWidth: 160,
+                                },
                             }}
                         >
                             {forecastDayOptions.map((item) => (
-                                <option key={item.offset} value={item.offset}>
+                                <MenuItem
+                                    key={item.offset}
+                                    selected={item.offset === forecastDayOffset}
+                                    onClick={() => {
+                                        setForecastDayOffset(item.offset)
+                                        setForecastMenuAnchorEl(null)
+                                    }}
+                                >
                                     {item.label}
-                                </option>
+                                </MenuItem>
                             ))}
-                        </select>
-                        <IconButton
-                            size='small'
-                            onClick={() => setWeatherStatusTooltipOpen(prev => !prev)}
-                            sx={{
-                                pointerEvents: 'auto',
-                                color: '#fff',
-                                border: '1px solid rgba(255,255,255,0.65)',
-                            }}
-                        >
-                            <InfoOutlinedIcon fontSize='small' />
-                        </IconButton>
+                        </Menu>
                     </div>
                 </animated.div>
             )}

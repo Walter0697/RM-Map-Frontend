@@ -1,8 +1,6 @@
 import React from 'react'
-import {
-    Grid,
-    Button,
-} from '@mui/material'
+import { Button } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 import backend from '../../../constant/backend'
 
 import constants from '../../../constant'
