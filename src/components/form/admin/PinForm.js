@@ -5,7 +5,13 @@ import {
     TextField,
     Button,
     FormControl,
+    InputLabel,
     FormHelperText,
+    Select,
+    MenuItem,
+    Checkbox,
+    ListItemText,
+    OutlinedInput,
     Paper,
     Stack,
     Typography,
@@ -33,6 +39,7 @@ function PinForm({
     onUpdated,
     typeList,
     pin,
+    pinGroups = [],
 }) {
     // graphql request
     const [ createPinGQL, { data: createData, loading: createLoading, error: createError } ] = useMutation(graphql.pins.create, { errorPolicy: 'all' })
@@ -59,6 +66,7 @@ function PinForm({
     const [ submitting, setSubmitting ] = useState(false)
     
     const [ alertMessage, setAlertMessage ] = useState(null)
+    const [ selectedGroupIDs, setSelectedGroupIDs ] = useState([])
     const fieldSx = { width: { xs: '100%', md: 300 } }
 
     const selectedType = useMemo(() => {
@@ -85,6 +93,9 @@ function PinForm({
             setFormValue('top_left_y', pin.top_left_y)
             setFormValue('bottom_right_x', pin.bottom_right_x)
             setFormValue('bottom_right_y', pin.bottom_right_y)
+            setSelectedGroupIDs(Array.isArray(pin.group_ids) ? pin.group_ids : [])
+        } else {
+            setSelectedGroupIDs([])
         }
     }, [pin, open])
 
@@ -230,6 +241,7 @@ function PinForm({
             top_left_y: formValue.top_left_y,
             bottom_right_x: formValue.bottom_right_x,
             bottom_right_y: formValue.bottom_right_y,
+            group_ids: selectedGroupIDs,
             image_upload: formValue.imageUpload.upload,
         }})
     }
@@ -242,6 +254,7 @@ function PinForm({
             top_left_y: formValue.top_left_y,
             bottom_right_x: formValue.bottom_right_x,
             bottom_right_y: formValue.bottom_right_y,
+            group_ids: selectedGroupIDs,
             image_upload: formValue.imageUpload? formValue.imageUpload.upload : null,
         }})
     }
@@ -299,6 +312,32 @@ function PinForm({
                                         </FormHelperText>
                                     </FormControl>
                                 </label>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <FormControl fullWidth>
+                                    <InputLabel id='pin-group-select-label'>Pin Groups</InputLabel>
+                                    <Select
+                                        labelId='pin-group-select-label'
+                                        multiple
+                                        value={selectedGroupIDs}
+                                        onChange={(event) => setSelectedGroupIDs(event.target.value)}
+                                        input={<OutlinedInput label='Pin Groups' />}
+                                        renderValue={(selected) => {
+                                            const labels = pinGroups
+                                                .filter((group) => selected.includes(group.id))
+                                                .map((group) => group.name)
+                                            return labels.join(', ')
+                                        }}
+                                    >
+                                        {pinGroups.map((group) => (
+                                            <MenuItem key={group.id} value={group.id}>
+                                                <Checkbox checked={selectedGroupIDs.indexOf(group.id) > -1} />
+                                                <ListItemText primary={group.name} />
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    <FormHelperText>Assign zero or more groups. Leave empty for ungrouped.</FormHelperText>
+                                </FormControl>
                             </Grid>
                         </Grid>
                     </Paper>

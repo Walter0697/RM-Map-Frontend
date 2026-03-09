@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import {
     Box,
     Button,
@@ -9,6 +10,7 @@ import {
     Stack,
     Typography,
 } from '@mui/material'
+import { useHistory } from 'react-router-dom'
 import backend from '../../constant/backend'
 
 import { useQuery, useLazyQuery, useMutation } from '@apollo/client'
@@ -45,7 +47,8 @@ const getSampleTypesForPin = (typeList, pinId) => {
     return Array.from({ length: count }, (_, index) => sorted[(start + index) % total])
 }
 
-function PinManage() {
+function PinManage({ jwt }) {
+    const history = useHistory()
     // graphql request
     const { data: typeData, loading: typeLoading, error: typeError } = useQuery(graphql.markertypes.list, { fetchPolicy: 'no-cache' })
     const [ listPinGQL, { data: pinData, loading: pinLoading, error: pinError } ] = useLazyQuery(graphql.pins.list, { fetchPolicy: 'no-cache' })
@@ -56,6 +59,7 @@ function PinManage() {
 
     const [ pinList, setList ] = useState([])
     const [ pinPreviewMap, setPinPreviewMap ] = useState({})
+    const [ pinGroupList, setPinGroupList ] = useState([])
 
     const [ createFormOpen, setFormOpen ] = useState(false)
     const [ selectedPin, setSelected ] = useState(null)
@@ -65,6 +69,27 @@ function PinManage() {
     useEffect(() => {
         listPinGQL()
     }, [])
+
+    useEffect(() => {
+        const loadPinGroups = async () => {
+            try {
+                if (!jwt) return
+
+                const response = await fetch(backend.withBasePath('admin/pin-groups'), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
+                })
+                if (!response.ok) return
+                const data = await response.json()
+                setPinGroupList(Array.isArray(data) ? data : [])
+            } catch (error) {
+                setPinGroupList([])
+            }
+        }
+        loadPinGroups()
+    }, [createAlert, jwt])
 
     useEffect(() => {
         if (pinData) {
@@ -206,14 +231,23 @@ function PinManage() {
             alertOpen={createAlert}
             alertMessage={createMessage}
             actions={(
-                <Button
-                    className='admin-action-button'
-                    variant='contained'
-                    startIcon={<AddCircleIcon />}
-                    onClick={onCreateFormOpen}
-                >
-                    Add New
-                </Button>
+                <Stack direction='row' spacing={1}>
+                    <Button
+                        className='admin-action-button'
+                        variant='outlined'
+                        onClick={() => history.push('/admin/pin-groups')}
+                    >
+                        Manage Groups
+                    </Button>
+                    <Button
+                        className='admin-action-button'
+                        variant='contained'
+                        startIcon={<AddCircleIcon />}
+                        onClick={onCreateFormOpen}
+                    >
+                        Add New
+                    </Button>
+                </Stack>
             )}
         >
             <Stack spacing={1.5}>
@@ -337,9 +371,12 @@ function PinManage() {
                 onUpdated={onTypeUpdated}
                 typeList={typeList}
                 pin={selectedPin}
+                pinGroups={pinGroupList}
             />
         </AdminPageShell>
     )
 }
 
-export default PinManage
+export default connect((state) => ({
+    jwt: state.auth.jwt,
+}))(PinManage)

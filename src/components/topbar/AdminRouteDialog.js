@@ -91,6 +91,13 @@ function AdminRouteDialog({
                         directTo={directTo}
                     />
                     <RouteBox
+                        label='Pin Group'
+                        description='Manage reusable pin groups'
+                        route='/admin/pin-groups'
+                        active={location.pathname === '/admin/pin-groups'}
+                        directTo={directTo}
+                    />
+                    <RouteBox
                         label='Default Pin'
                         description='Fallback pin assignments'
                         route='/admin/defaultpin'
