@@ -20,6 +20,7 @@ import actions from '../store/actions'
 import graphql from '../graphql'
 import httpScript from '../scripts/http'
 import deepLinkScript from '../scripts/deepLink'
+import { getDesktopLayoutPage } from '../constant/layoutContract'
 
 import styles from '../styles/bottom.module.css'
 
@@ -28,6 +29,7 @@ function Base({
     jwt,
     pendingDeepLink,
     dispatch,
+    desktopPageKey,
 }) {
     // for environment 
     const history = useHistory()
@@ -86,6 +88,17 @@ function Base({
         from: { x: 0 },
         x: blink ? 0 : 1,
     })
+    const desktopLayout = getDesktopLayoutPage(desktopPageKey)
+    const innerClassName = [
+        styles.baseInner,
+        desktopLayout ? styles.desktopScoped : '',
+    ].filter(Boolean).join(' ')
+    const desktopScopedStyle = desktopLayout ? {
+        '--desktop-max-width': `${desktopLayout.maxWidth}px`,
+        '--desktop-horizontal-padding': `${desktopLayout.horizontalPadding}px`,
+        '--desktop-vertical-padding': `${desktopLayout.verticalPadding}px`,
+    } : null
+
     return (
         <>
             <animated.div
@@ -97,12 +110,18 @@ function Base({
                 }}
                 className={styles.base}
             >
-                {authStatusMessage ? (
-                    <Alert severity='warning' sx={{ mb: 1.5 }}>
-                        {authStatusMessage}
-                    </Alert>
-                ) : null}
-                {children}
+                <div
+                    className={innerClassName}
+                    style={desktopScopedStyle || undefined}
+                    data-desktop-layout-page={desktopPageKey || 'none'}
+                >
+                    {authStatusMessage ? (
+                        <Alert severity='warning' sx={{ mb: 1.5 }}>
+                            {authStatusMessage}
+                        </Alert>
+                    ) : null}
+                    {children}
+                </div>
             </animated.div>
             <BottomBar onChangeClick={refresh}/>
         </>

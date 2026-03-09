@@ -257,7 +257,7 @@ function SchedulePage({
         || selectedSchedules.length > 0
 
     return (
-        <Base>
+        <Base desktopPageKey='schedule'>
             <ScheduleList
                 openScheduleView={setScheduleView}
                 schedulesOverride={scheduleItems}

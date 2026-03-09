@@ -316,7 +316,7 @@ function SettingPage({
     }
 
     return (
-        <Base>
+        <Base desktopPageKey='setting'>
             <TopBar 
                 label='Settings'
             />

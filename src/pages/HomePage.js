@@ -43,7 +43,7 @@ function HomePage() {
     }
 
     return (
-        <Base>
+        <Base desktopPageKey='home'>
             <div
                 style={{
                     width: '100%',

@@ -34,6 +34,37 @@ button {
   cursor: pointer;
 }
 
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  button,
+  a,
+  [role='button'],
+  .MuiButtonBase-root {
+    transition: box-shadow 120ms ease, filter 120ms ease, transform 120ms ease;
+  }
+
+  button:hover,
+  a:hover,
+  [role='button']:hover,
+  .MuiButtonBase-root:hover {
+    filter: brightness(1.03);
+  }
+
+  button:active,
+  [role='button']:active,
+  .MuiButtonBase-root:active {
+    transform: translateY(1px);
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  [role='button']:focus-visible,
+  .MuiButtonBase-root:focus-visible {
+    outline: 2px solid #194834;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba(25, 72, 52, 0.2);
+  }
+}
+
 .weather-atmo {
   position: absolute;
   inset: 0;

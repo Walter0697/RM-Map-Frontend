@@ -24,3 +24,20 @@
     overflow-x: hidden;
     overflow-y: auto;
 }
+
+.baseInner {
+    width: 100%;
+    min-height: 100%;
+}
+
+.desktopScoped {
+    width: 100%;
+}
+
+@media (min-width: 1024px) {
+    .desktopScoped {
+        max-width: var(--desktop-max-width, 1120px);
+        margin: 0 auto;
+        padding: var(--desktop-vertical-padding, 16px) var(--desktop-horizontal-padding, 24px) calc(var(--desktop-vertical-padding, 16px) + 84px);
+    }
+}
