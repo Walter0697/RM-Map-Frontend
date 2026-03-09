@@ -21,6 +21,7 @@ import NullableDatePicker from '../field/NullableDatePicker'
 import generic from '../../scripts/generic'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
+import backend from '../../constant/backend'
 
 function MovieForm({
     open,
@@ -223,6 +224,8 @@ function MovieForm({
                         list={eventtypes}
                         valueKey={'value'}
                         textKey={'label'}
+                        iconKey={'icon_path'}
+                        iconBaseUrl={backend.IMAGE_LINK}
                     />
                     <Selectable
                         label='related marker'
