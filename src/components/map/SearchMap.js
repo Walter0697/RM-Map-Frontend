@@ -15,8 +15,7 @@ import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import RoomIcon from '@mui/icons-material/Room'
 import AddLocationIcon from '@mui/icons-material/AddLocation'
 import TheatersIcon from '@mui/icons-material/Theaters'
-import ManageSearchIcon from '@mui/icons-material/ManageSearch'
-import LocationSearchingIcon from '@mui/icons-material/LocationSearching'
+import SearchIcon from '@mui/icons-material/Search'
 
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
@@ -28,8 +27,7 @@ import AutoHideAlert from '../AutoHideAlert'
 import CircleIconButton from '../field/CircleIconButton'
 import BookmarkButton from '../field/BookmarkButton'
 
-import SearchStreetForm from '../form/SearchStreetForm'
-import LatLonLocationForm from '../form/LatLonLocationForm'
+import SearchLocationForm from '../form/SearchLocationForm'
 
 import maphelper from '../../scripts/map'
 import constants from '../../constant'
@@ -101,13 +99,11 @@ function SearchMap({
     // if center marker is set, show the button
     const [ showCenterPinButton, setCenterPinButton ] = useState(false)
 
-    // open form for user to search by street name and number
-    const [ showStreetNameSearch, setShowStreetNameSearch ] = useState(false)
+    // open form for user to search by street name or lat/lon
+    const [ showLocationSearch, setShowLocationSearch ] = useState(false)
+    const [ locationSearchMethod, setLocationSearchMethod ] = useState('street')
     const [ streetSearchAlert, setSearchAlert ] = useBoop(3000)
     const [ streetSearchResult, setSearchResult ] = useState(null)
-
-    // open form for user to search by location code
-    const [ showLatLonSearch, setShowLatLonSearch ] = useState(false)
 
     const [ 
         map, 
@@ -272,22 +268,19 @@ function SearchMap({
     }
 
     const openSearchByStreetName = () => {
-        setShowStreetNameSearch(true)
-    }
-
-    const openSearchByLocationCode = () => {
-        setShowLatLonSearch(true)
+        setLocationSearchMethod('street')
+        setShowLocationSearch(true)
     }
 
     const setLocationOnMap = (lonlat, address) => {
-        setShowStreetNameSearch(false)
+        setShowLocationSearch(false)
         setSearchAlert()
         setSearchResult(address)
         setCenterToLocation(lonlat, address)
     }
 
     const setLatLonOnMap = (lonlat) => {
-        setShowLatLonSearch(false)
+        setShowLocationSearch(false)
         setSearchAlert()
         setSearchResult('Success')
         setCenterToLocation(lonlat, '', true)
@@ -355,7 +348,7 @@ function SearchMap({
                     submitHandler={onSearchTextSubmitHandler}
                     isLoading={loading}
                     isBottomOpen={viewSearchContent}
-                    isSearchFormOpen={showStreetNameSearch}
+                    isSearchFormOpen={showLocationSearch}
                 />
             </div>
 
@@ -369,21 +362,7 @@ function SearchMap({
                 <BookmarkButton
                     onClickHandler={openSearchByStreetName}
                 >
-                    <ManageSearchIcon />
-                </BookmarkButton>
-            </div>
-
-            <div 
-                style={{
-                    position: 'absolute',
-                    top: '160px',
-                    right: '-5px',
-                }}
-            >
-                <BookmarkButton
-                    onClickHandler={openSearchByLocationCode}
-                >
-                    <LocationSearchingIcon />
+                    <SearchIcon />
                 </BookmarkButton>
             </div>
             
@@ -499,15 +478,17 @@ function SearchMap({
             />
 
             {/* form */}
-            <SearchStreetForm
-                open={showStreetNameSearch}
-                handleClose={() => setShowStreetNameSearch(false)}
-                onFinished={setLocationOnMap}
-            />
-            <LatLonLocationForm
-                open={showLatLonSearch}
-                handleClose={() => setShowLatLonSearch(false)}
-                onFinished={setLatLonOnMap}
+            <SearchLocationForm
+                open={showLocationSearch}
+                handleClose={() => setShowLocationSearch(false)}
+                initialMethod={locationSearchMethod}
+                onFinished={(lonlat, address, method) => {
+                    if (method === 'latlon') {
+                        setLatLonOnMap(lonlat)
+                        return
+                    }
+                    setLocationOnMap(lonlat, address)
+                }}
             />
         </>
     )
