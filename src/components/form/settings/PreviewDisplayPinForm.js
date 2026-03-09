@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@apollo/client'
-import { Alert, Grid } from '@mui/material'
+import { Alert } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 
 import backend from '../../../constant/backend'
 import BaseForm from '../BaseForm'
@@ -96,30 +97,46 @@ function PreviewDisplayPinForm({
             <Grid container spacing={2}>
                 {pinList.map((item, index) => (
                     <Grid
-                        item xs={6} md={6} lg={6}
+                        item xs={4} md={4} lg={4}
                         key={index}
                         style={{
-                            marginBottom: '15px',
+                            marginBottom: '8px',
                             borderRadius: '5px',
-                            paddingLeft: '5px',
-                            paddingRight: '5px',
+                            paddingLeft: '4px',
+                            paddingRight: '4px',
                         }}
                     >
                         <div
                             style={{
                                 width: '100%',
                                 backgroundColor: '#dbfdff',
-                                padding: '5px',
-                                border: (selectedPinId === item.id) ? '3px solid red' : '3px solid black',
+                                padding: '6px',
+                                border: (selectedPinId === item.id) ? '2px solid red' : '2px solid black',
+                                borderRadius: '6px',
                                 cursor: 'pointer',
                             }}
                             onClick={() => setSelectedPinId(item.id)}
                         >
-                            {item.label}
+                            <div
+                                style={{
+                                    fontSize: '13px',
+                                    fontWeight: 600,
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    marginBottom: '4px',
+                                }}
+                            >
+                                {item.label}
+                            </div>
                             <img
                                 width='100%'
                                 src={backend.IMAGE_LINK + item.display_path}
                                 alt={item.label}
+                                style={{
+                                    height: '72px',
+                                    objectFit: 'contain',
+                                }}
                             />
                         </div>
                     </Grid>

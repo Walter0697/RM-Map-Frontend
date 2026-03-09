@@ -17,6 +17,7 @@ function StationInfo({
     onStationUpdate,
     onStationError,
     onLineClick,
+    isMobile,
     dispatch,
 }) {
     const [ updateStationGQL, { data: updateData, loading: updateLoading, error: updateError } ] = useMutation(graphql.stations.update_active, { errorPolicy: 'all' }) 
@@ -60,18 +61,19 @@ function StationInfo({
             style={{
                 backgroundColor: constants.colors.CardBackground,
                 height: '100%',
-                width: '90%',
+                width: '100%',
                 boxShadow: '2px 2px 6px',
                 textTransform: 'none',
                 padding: '12px',
                 color: 'white',
                 borderRadius: '10px',
-                overflow: 'hidden',
+                overflow: isMobile ? 'auto' : 'hidden',
             }}
         >
             <Grid container fullWidth
                 style={{
                     height: '100%',
+                    minHeight: isMobile ? '196px' : 'auto',
                     alignContent: 'flex-start',
                 }}
             >
@@ -80,7 +82,7 @@ function StationInfo({
                         <Grid item xs={12} md={5} lg={5}>
                             <Grid container>
                                 <Grid item xs={12} style={{
-                                    fontSize: '20px',
+                                    fontSize: isMobile ? '18px' : '20px',
                                     fontWeight: '500',
                                     overflowWrap: 'anywhere',
                                 }}>
@@ -95,11 +97,12 @@ function StationInfo({
                                 </Grid>
                             </Grid>
                         </Grid>
-                        <Grid item xs={7} md={4} lg={4}
+                        <Grid item xs={isMobile ? 12 : 7} md={4} lg={4}
                             style={{
-                                maxHeight: '100%',
+                                maxHeight: isMobile ? '130px' : '100%',
                                 overflowY: 'auto',
                                 paddingRight: '8px',
+                                marginTop: isMobile ? '8px' : 0,
                             }}
                         >
                             {station.line.map((l, index) => (
@@ -141,7 +144,7 @@ function StationInfo({
                                 </div>
                             ))}
                         </Grid>
-                        <Grid item xs={5} md={3} lg={3}>
+                        <Grid item xs={isMobile ? 12 : 5} md={3} lg={3}>
                             <div 
                                 style={{
                                     height: '100%',
@@ -149,6 +152,7 @@ function StationInfo({
                                     display: 'flex',
                                     justifyContent: 'center',
                                     alignItems: 'center',
+                                    marginTop: isMobile ? '8px' : 0,
                                 }}
                             >
                                 {station.active ? (

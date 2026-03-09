@@ -33,6 +33,7 @@ function BaseForm({
     alertMessage,
     clearAlertMessage,
     displayMode,
+    footerStart,
 }) {
     const history = useHistory()
 
@@ -120,6 +121,7 @@ function BaseForm({
                             bgcolor: 'background.paper',
                         }}
                     >
+                        {footerStart ? <Box sx={{ mr: 'auto' }}>{footerStart}</Box> : null}
                         {actionButtons}
                     </DialogActions>
                 </Drawer>
@@ -137,6 +139,7 @@ function BaseForm({
                         {children}
                     </DialogContent>
                     <DialogActions>
+                        {footerStart ? <Box sx={{ mr: 'auto' }}>{footerStart}</Box> : null}
                         {actionButtons}
                     </DialogActions>
                 </Dialog>

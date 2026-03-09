@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { connect } from 'react-redux'
 import {
-    Grid,
     TextField,
 } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 
 import BaseForm from '../BaseForm'
 
