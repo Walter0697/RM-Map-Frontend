@@ -1,16 +1,10 @@
-import React, { useState } from 'react'
+import React from 'react'
 import Grid from '@mui/material/GridLegacy'
-import {
-    useSpring,
-    config,
-    animated,
-} from '@react-spring/web'
 
 import FilterContainer from './FilterContainer'
 import FilterTitle from './FilterTitle'
 import FilterBorder from './FilterBorder'
 import FilterButton from './FilterButton'
-import FilterLinkButton from './FilterLinkButton'
 
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
@@ -28,26 +22,30 @@ function NeedBookingFilter({
                 title={'Required Booking'}
             />
             <FilterBorder />
-            <Grid container>
-                <Grid item xs={12}>
-                    <FilterLinkButton 
-                        buttonList={[{
-                            icon: (<LocalPhoneIcon />),
-                            text: 'Booking',
-                            value: 'booking',
-                        }, {
-                            icon: (<DirectionsWalkIcon />),
-                            text: 'Walkin',
-                            value: 'walkin',
-                        }]}
-                        currentStatus={bookingStatus}
-                        onClickHandler={setBookingStatus}
+            <Grid container spacing={1} sx={{ px: 1, pt: 0.5 }}>
+                <Grid item xs={4}>
+                    <FilterButton 
+                        icon={(<LocalPhoneIcon />)}
+                        showText={false}
+                        tooltipText={'Booking'}
+                        isActive={bookingStatus === 'booking'}
+                        onClickHandler={() => setBookingStatus('booking')}
                     />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={4}>
+                    <FilterButton 
+                        icon={(<DirectionsWalkIcon />)}
+                        showText={false}
+                        tooltipText={'Walkin'}
+                        isActive={bookingStatus === 'walkin'}
+                        onClickHandler={() => setBookingStatus('walkin')}
+                    />
+                </Grid>
+                <Grid item xs={4}>
                     <FilterButton 
                         icon={(<HighlightOffIcon />)}
-                        text={'No Filter'}
+                        showText={false}
+                        tooltipText={'No Filter'}
                         isActive={!bookingStatus}
                         onClickHandler={() => setBookingStatus(null)}
                     />
