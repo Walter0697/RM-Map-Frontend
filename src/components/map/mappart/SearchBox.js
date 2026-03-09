@@ -4,6 +4,7 @@ import {
     InputAdornment,
     IconButton,
     Button,
+    Paper,
 } from '@mui/material'
 import {
     useSpring,
@@ -28,16 +29,16 @@ function SearchResultItem({
             size="middle"
             style={{
                 position: 'relative',
-                height: '60px',
-                width: '99%',
-                marginLeft: '1%',
+                height: '52px',
+                width: '100%',
                 borderRadius: '0',
-                zIndex: '2',
                 background: 'white',
                 color: 'black',
                 fontWeight: 'normal',
                 textTransform: 'none',
                 justifyContent: 'start',
+                boxShadow: 'none',
+                borderBottom: '1px solid #e9edf5',
             }}
             onClick={() => { onClickEvent(text) }}
         >{text}</Button>
@@ -54,6 +55,19 @@ function SearchBox({
     isBottomOpen,
     isSearchFormOpen,
 }) {
+    const getSuggestionText = (item) => {
+        const poiName = `${item?.poi?.name || ''}`.trim()
+        if (poiName) return poiName
+
+        const freeform = `${item?.address?.freeformAddress || ''}`.trim()
+        if (freeform) return freeform
+
+        const street = `${item?.address?.streetNumber || ''} ${item?.address?.streetName || ''}`.trim()
+        if (street) return street
+
+        return `${item?.address?.municipality || ''}`.trim()
+    }
+
     const inputRef = useRef(null)
     const manualInput = useRef(false)
     const [ shouldOpenList, setTyping ] = useState(false)
@@ -117,23 +131,28 @@ function SearchBox({
     const fetchSearchResult = async () => {
         if (!manualInput.current) return
         if (searchText) {
-            let result = await apis.maps.search(searchText, location.lon, location.lat, 5)
-            if (result.status === 200) {
-                const list = result.data.results
-                if (list.length === 0) {
+            try {
+                const result = await apis.maps.search(searchText, location.lon, location.lat, 5)
+                if (result.status === 200) {
+                    const list = result?.data?.results || []
+                    if (list.length === 0) {
+                        setList([])
+                        setTyping(false)
+                    } else {
+                        const deduped = new Set()
+                        list.forEach((item) => {
+                            const text = getSuggestionText(item)
+                            if (text) deduped.add(text)
+                        })
+                        const output = Array.from(deduped)
+                        setList(output)
+                        setTyping(output.length > 0)
+                    }
+                } else {
                     setList([])
                     setTyping(false)
-                } else {
-                    let output = []
-                    list.forEach(item => {
-                        if (!output.includes(item.poi.name)) {
-                            output.push(item.poi.name)
-                        }
-                    })
-                    setList(output)
-                    setTyping(true)
                 }
-            } else {
+            } catch (error) {
                 // if the request failed, then just simply don't show the list
                 setList([])
                 setTyping(false)
@@ -183,15 +202,26 @@ function SearchBox({
                     transform: listTransform,
                     transformOrigin: 'top',
                     pointerEvents: 'auto',
+                    position: 'relative',
+                    zIndex: 6,
                 }}
             >
-                {resultList.map((result) => (
-                    <SearchResultItem
-                        key={result}
-                        text={result}
-                        onClickEvent={onTextClickHandler}
-                    />
-                ))}
+                <Paper
+                    elevation={4}
+                    style={{
+                        overflow: 'hidden',
+                        borderRadius: '0 0 8px 8px',
+                        background: '#ffffff',
+                    }}
+                >
+                    {resultList.map((result) => (
+                        <SearchResultItem
+                            key={result}
+                            text={result}
+                            onClickEvent={onTextClickHandler}
+                        />
+                    ))}
+                </Paper>
             </animated.div>            
         </>
     )

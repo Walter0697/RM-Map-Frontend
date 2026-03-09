@@ -39,6 +39,41 @@ function SearchMap({
     stations,   // for stations display in map
     showInMap,
 }) {
+    const getLocationTitle = (item) => {
+        const poiName = `${item?.poi?.name || ''}`.trim()
+        if (poiName) return poiName
+        const freeform = `${item?.address?.freeformAddress || ''}`.trim()
+        if (freeform) return freeform
+        const street = `${item?.address?.streetNumber || ''} ${item?.address?.streetName || ''}`.trim()
+        if (street) return street
+        return 'Unknown Place'
+    }
+
+    const getLocationAddress = (item) => {
+        const freeform = `${item?.address?.freeformAddress || ''}`.trim()
+        if (freeform) return freeform
+        const street = `${item?.address?.streetNumber || ''} ${item?.address?.streetName || ''}`.trim()
+        if (street) return street
+        const municipality = `${item?.address?.municipality || ''}`.trim()
+        if (municipality) return municipality
+        return 'Address unavailable'
+    }
+
+    const normalizeSearchResults = (list) => {
+        return (list || []).map((item, index) => ({
+            id: index,
+            title: getLocationTitle(item),
+            location: item?.position || null,
+            address: getLocationAddress(item),
+            category: item?.poi?.categories?.[0] || 'Unknown category',
+            details: {
+                poi: item?.poi || { categories: [] },
+                address: item?.address || {},
+            },
+            pin: 'regular',
+        })).filter((item) => item.location && typeof item.location.lon === 'number' && typeof item.location.lat === 'number')
+    }
+
     const history = useHistory()
     // reference of the div to render the map
     const mapElement = useRef(null) 
@@ -210,36 +245,14 @@ function SearchMap({
         setLoading(true)
         let result = await apis.maps.search(text, searchingLocation.lon, searchingLocation.lat, 30)
         if (result.status === 200) {
-            const list = result.data.results
-            if (list.length !== 0) {
-                let output = []
-                let id = 0
-                list.forEach(item => {
-                    const address = (item.address.streetNumber) ? `${item.address.streetNumber} ${item.address.streetName}` : item.address.streetName
-                    output.push({
-                        id: id,
-                        title: item.poi.name,
-                        location: item.position,
-                        address: address,
-                        category: item.poi.categories[0],
-                        details: {
-                            poi: item.poi,
-                            address: item.address,
-                        },
-                        pin: 'regular',
-                    })
-                    id++
-                })
-
-                // resetMarkers(output)
+            const list = result?.data?.results || []
+            const output = normalizeSearchResults(list)
+            if (output.length !== 0) {
                 setLocation(output)
-                // set for bottom result list
                 setSearchResults(output)
                 setSelectedSearch(-1)
                 setExtraContent(null)
                 setViewContent(true)
-
-                // change color whenever markers are active
                 setHasContent(true)
             } else {
                 setRetrieveFail()
