@@ -349,6 +349,7 @@ function SettingPage({
                 handleClose={closePreferredPinForm}
                 pinInfo={updatingPreferredPin}
                 onCreated={onChangePreferredPin}
+                jwt={jwt}
             />
             <ReleaseNoteForm
                 open={isReleaseNoteOpen}

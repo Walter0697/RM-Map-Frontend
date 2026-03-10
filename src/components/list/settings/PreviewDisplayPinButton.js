@@ -1,6 +1,5 @@
 import React from 'react'
 import { Button } from '@mui/material'
-import VisibilityIcon from '@mui/icons-material/Visibility'
 import backend from '../../../constant/backend'
 
 function PreviewDisplayPinButton({
@@ -15,37 +14,47 @@ function PreviewDisplayPinButton({
             variant='contained'
             size='large'
             style={{
-                backgroundColor: '#48acdb',
+                backgroundColor: '#dbfdff',
                 height: '100%',
                 width: '100%',
                 boxShadow: '2px 2px 6px',
                 textTransform: 'none',
-                color: '#1c76d2',
+                color: '#12244d',
                 display: 'flex',
                 justifyContent: 'center',
-                gap: '10px',
-                paddingLeft: '12px',
-                paddingRight: '12px',
+                alignItems: 'center',
+                flexDirection: 'column',
+                gap: '6px',
+                padding: '8px',
             }}
             onClick={onClickHandler}
         >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <VisibilityIcon />
-                Preview Display Pin
-            </span>
+            <span style={{ fontSize: '12px', color: '#315786' }}>Preview Display Pin</span>
             {hasPreviewPin ? (
                 <img
                     src={backend.IMAGE_LINK + pinImagePath}
                     alt={pinLabel || 'Selected preview pin'}
                     style={{
-                        width: '26px',
-                        height: '26px',
+                        width: '64px',
+                        height: '44px',
                         objectFit: 'contain',
                     }}
                 />
             ) : (
-                <span>Not Set</span>
+                <span style={{ fontWeight: 600 }}>Not Set</span>
             )}
+            <span
+                style={{
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '100%',
+                }}
+            >
+                {pinLabel || 'Select Pin'}
+            </span>
         </Button>
     )
 }

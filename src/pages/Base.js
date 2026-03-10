@@ -99,6 +99,8 @@ function Base({
         '--desktop-vertical-padding': `${desktopLayout.verticalPadding}px`,
     } : null
 
+    if (!jwt) return null
+
     return (
         <>
             <animated.div

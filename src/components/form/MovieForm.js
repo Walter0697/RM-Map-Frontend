@@ -2,21 +2,18 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useMutation } from '@apollo/client'
 import {
-    Grid,
+    Stack,
     TextField,
     Button,
     FormControl,
     FormLabel,
 } from '@mui/material'
 
-import AddLinkIcon from '@mui/icons-material/AddLink'
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 
 import useObject from '../../hooks/useObject'
 
 import BaseForm from './BaseForm'
-import ImageLinkValidate from './image/ImageLinkValidate'
 import ImagePreview from './image/ImagePreview'
 import Selectable from '../field/Selectable'
 import NullableDatePicker from '../field/NullableDatePicker'
@@ -24,6 +21,7 @@ import NullableDatePicker from '../field/NullableDatePicker'
 import generic from '../../scripts/generic'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
+import backend from '../../constant/backend'
 
 function MovieForm({
     open,
@@ -154,113 +152,93 @@ function MovieForm({
                 alertMessage={alertMessage}
                 clearAlertMessage={() => setAlertMessage(null)}
             >
-                <Grid container spacing={2}>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField
+                <Stack spacing={2}>
+                    <TextField
+                        variant='outlined'
+                        fullWidth
+                        required
+                        label='label'
+                        value={formValue.label}
+                        onChange={(e) => onValueChangeHandler('label', e.target.value)}
+                        error={!!error.label}
+                        helperText={error.label}
+                    />
+                    <TextField
+                        variant='outlined'
+                        fullWidth
+                        label='description'
+                        value={formValue.description}
+                        onChange={(e) => onValueChangeHandler('description', e.target.value)}
+                        error={!!error.description}
+                        helperText={error.description}
+                    />
+                    <NullableDatePicker
+                        label={'selected time'}
+                        required
+                        noPast
+                        value={formValue.selected_time}
+                        onValueChange={(e) => onValueChangeHandler('selected_time', e)}
+                        errorMessage={error.selected_time}
+                    />
+                    <TextField
+                        variant='outlined'
+                        fullWidth
+                        disabled
+                        label='movie title'
+                        value={movie?.title}
+                        error={!!error.movie_name}
+                        helperText={error.movie_name}
+                    />
+                    <FormControl component='image' fullWidth>
+                        <FormLabel component='legend'>
+                            Preview
+                        </FormLabel>
+                        <Button
                             variant='outlined'
                             fullWidth
-                            required
-                            label='label'
-                            value={formValue.label}
-                            onChange={(e) => onValueChangeHandler('label', e.target.value)}
-                            error={!!error.label}
-                            helperText={error.label}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            label='description'
-                            value={formValue.description}
-                            onChange={(e) => onValueChangeHandler('description', e.target.value)}
-                            error={!!error.description}
-                            helperText={error.description}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <NullableDatePicker
-                            label={'selected time'}
-                            required
-                            noPast
-                            value={formValue.selected_time}
-                            onValueChange={(e) => onValueChangeHandler('selected_time', e)}
-                            errorMessage={error.selected_time}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            disabled
-                            label='movie title'
-                            value={movie?.title}
-                            error={!!error.movie_name}
-                            helperText={error.movie_name}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <FormControl component='image' fullWidth>
-                            <FormLabel 
-                                component='legend'
-                            >
-                                Preview
-                            </FormLabel>
-                            <Grid container spacing={0} fullWidth>
-                                <Grid item xs={12} md={12} lg={12}>
-                                    <Button 
-                                        variant='outlined'
-                                        fullWidth
-                                        disabled={!movie?.image_link}
-                                        onClick={() => setImageState('preview')}
-                                    >
-                                        <VisibilityIcon />
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                            <FormLabel>
-                                {imageSubmitMessage}
-                            </FormLabel>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            disabled
-                            label='release date'
-                            value={movie?.release_date}
-                            error={!!error.movie_release}
-                            helperText={error.movie_release}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Selectable
-                            label='marker type'
-                            value={selectedType}
-                            onValueChange={(e) => setSelectedType(e.target.value)}
-                            defaultSelectValue={null}
-                            defaultSelectText={''}
-                            errorMessage={''}
-                            list={eventtypes}
-                            valueKey={'value'}
-                            textKey={'label'}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Selectable
-                            label='related marker'
-                            value={formValue.marker_id}
-                            onValueChange={(e) => onValueChangeHandler('marker_id', e.target.value)}
-                            defaultSelectValue={null}
-                            defaultSelectText={''}
-                            errorMessage={''}
-                            list={filteredMarkers}
-                            valueKey={'id'}
-                            textKey={'label'}
-                        />
-                    </Grid>
-                </Grid>
+                            disabled={!movie?.image_link}
+                            onClick={() => setImageState('preview')}
+                        >
+                            <VisibilityIcon />
+                        </Button>
+                        <FormLabel>
+                            {imageSubmitMessage}
+                        </FormLabel>
+                    </FormControl>
+                    <TextField
+                        variant='outlined'
+                        fullWidth
+                        disabled
+                        label='release date'
+                        value={movie?.release_date}
+                        error={!!error.movie_release}
+                        helperText={error.movie_release}
+                    />
+                    <Selectable
+                        label='marker type'
+                        value={selectedType}
+                        onValueChange={(e) => setSelectedType(e.target.value)}
+                        defaultSelectValue={null}
+                        defaultSelectText={''}
+                        errorMessage={''}
+                        list={eventtypes}
+                        valueKey={'value'}
+                        textKey={'label'}
+                        iconKey={'icon_path'}
+                        iconBaseUrl={backend.IMAGE_LINK}
+                    />
+                    <Selectable
+                        label='related marker'
+                        value={formValue.marker_id}
+                        onValueChange={(e) => onValueChangeHandler('marker_id', e.target.value)}
+                        defaultSelectValue={null}
+                        defaultSelectText={''}
+                        errorMessage={''}
+                        list={filteredMarkers}
+                        valueKey={'id'}
+                        textKey={'label'}
+                    />
+                </Stack>
             </BaseForm>
             <ImagePreview
                 shouldOpen={imageFormState === 'preview'}

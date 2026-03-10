@@ -192,7 +192,7 @@ function FilterList({
                         />
                     </WrapperBox>
                     <WrapperBox
-                        height={'230px'}
+                        height={'118px'}
                         marginBottom='10px'
                         isCenter
                     >

@@ -8,6 +8,7 @@ import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
 import backend from './constant/backend'
 import store from './store'
+import { handleTerminalUnauthorized } from './scripts/authSession'
 
 const httpLink = createUploadLink({
     uri: backend.GRAPHQL_BACKEND,
@@ -40,7 +41,25 @@ const authLink = setContext((_, { headers }) => {
     }
 })
 
-const errorLink = onError(() => {})
+const errorLink = onError(({ graphQLErrors, networkError }) => {
+    const hasUnauthorizedGraphQLError = (graphQLErrors || []).some((error) => {
+        const code = error?.extensions?.code
+        const message = `${error?.message || ''}`.toLowerCase()
+
+        return code === 'UNAUTHENTICATED'
+            || code === 'FORBIDDEN'
+            || message.includes('permission denied')
+            || message.includes('unauthorized')
+            || message.includes('unauthenticated')
+    })
+
+    const statusCode = networkError?.statusCode || networkError?.status || networkError?.response?.status
+    const hasUnauthorizedNetworkError = statusCode === 401
+
+    if (hasUnauthorizedGraphQLError || hasUnauthorizedNetworkError) {
+        handleTerminalUnauthorized()
+    }
+})
 
 const client = new ApolloClient({
     link: from([errorLink, authLink.concat(httpLink)]),

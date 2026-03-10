@@ -1,6 +1,29 @@
 import axios from 'axios'
 import backend from '../constant/backend'
 import store from '../store'
+import { handleTerminalUnauthorized } from '../scripts/authSession'
+
+let unauthorizedInterceptorConfigured = false
+
+const ensureUnauthorizedInterceptor = () => {
+    if (unauthorizedInterceptorConfigured) return
+
+    axios.interceptors.response.use(
+        (response) => response,
+        (error) => {
+            const status = error?.response?.status
+            const authHeader = error?.config?.headers?.Authorization || error?.config?.headers?.authorization
+            if (status === 401 && authHeader) {
+                handleTerminalUnauthorized()
+            }
+            return Promise.reject(error)
+        },
+    )
+
+    unauthorizedInterceptorConfigured = true
+}
+
+ensureUnauthorizedInterceptor()
 
 const get_request = (url) => {
     return axios.get(url)
