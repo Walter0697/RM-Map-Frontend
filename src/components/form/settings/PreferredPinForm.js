@@ -3,8 +3,11 @@ import { useMutation } from '@apollo/client'
 import {
     Alert,
     Box,
+    Button,
     Typography,
 } from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import Grid from '@mui/material/GridLegacy'
 import backend from '../../../constant/backend'
 
@@ -29,7 +32,7 @@ function PreferredPinForm({
     const [ pinList, setPinList ] = useState([])
     const [ groupedPins, setGroupedPins ] = useState([])
     const [ selectedPinId, setPinId ] = useState(-1)
-    const [ selectedGroupKey, setSelectedGroupKey ] = useState('all')
+    const [ selectedGroupKey, setSelectedGroupKey ] = useState('')
     const [ pinLoading, setPinLoading ] = useState(false)
     const [ pinError, setPinError ] = useState('')
 
@@ -42,7 +45,7 @@ function PreferredPinForm({
 
     useEffect(() => {
         setPinId(normalizePinID(pinInfo?.pin_id))
-        setSelectedGroupKey('all')
+        setSelectedGroupKey('')
     }, [pinInfo, open])
 
     useEffect(() => {
@@ -123,10 +126,11 @@ function PreferredPinForm({
         return options
     }, [allPins, groupedOnly, ungroupedSection])
 
-    const displayedPins = useMemo(() => {
-        const selectedGroup = groupOptions.find((group) => group.key === selectedGroupKey)
-        return selectedGroup?.pins || []
-    }, [groupOptions, selectedGroupKey])
+    const selectedGroup = useMemo(
+        () => groupOptions.find((group) => group.key === selectedGroupKey) || null,
+        [groupOptions, selectedGroupKey],
+    )
+    const displayedPins = selectedGroup?.pins || []
 
     return (
         <>
@@ -146,112 +150,121 @@ function PreferredPinForm({
                     </Alert>
                 ) : null}
                 <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
-                            Groups
-                        </Typography>
-                        <Grid container spacing={2}>
-                            {groupOptions.map((group) => {
-                                const previewPin = pickPreviewPin(group.key, group.pins)
-                                return (
-                                    <Grid item xs={4} md={3} lg={2} key={group.key}>
+                    {!selectedGroup ? (
+                        <Grid item xs={12} sx={{ animation: 'fadeInPanel 220ms ease-in-out', '@keyframes fadeInPanel': { from: { opacity: 0 }, to: { opacity: 1 } } }}>
+                            <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
+                                Groups
+                            </Typography>
+                            <Grid container spacing={1.5}>
+                                {groupOptions.map((group) => {
+                                    const previewPin = pickPreviewPin(group.key, group.pins)
+                                    return (
+                                        <Grid item xs={12} md={6} key={group.key}>
+                                            <Box
+                                                sx={{
+                                                    width: '100%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 1.5,
+                                                    padding: '10px',
+                                                    border: '1px solid #8a8a8a',
+                                                    borderRadius: '6px',
+                                                    cursor: 'pointer',
+                                                }}
+                                                onClick={() => setSelectedGroupKey(group.key)}
+                                            >
+                                                {previewPin ? (
+                                                    <img
+                                                        width='52'
+                                                        src={backend.IMAGE_LINK + previewPin.display_path}
+                                                        alt={group.label}
+                                                        style={{
+                                                            height: '52px',
+                                                            objectFit: 'contain',
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <Box sx={{ width: '52px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: 'text.secondary' }}>
+                                                        -
+                                                    </Box>
+                                                )}
+                                                <Box>
+                                                    <Typography variant='body2' sx={{ fontWeight: 700 }}>
+                                                        {group.label}
+                                                    </Typography>
+                                                    <Typography variant='caption' color='text.secondary'>
+                                                        {group.pins.length} pins
+                                                    </Typography>
+                                                </Box>
+                                                <Box sx={{ marginLeft: 'auto', color: '#6e6e6e' }}>
+                                                    <ChevronRightIcon fontSize='small' />
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+                                    )
+                                })}
+                            </Grid>
+                        </Grid>
+                    ) : (
+                        <Grid item xs={12} sx={{ animation: 'fadeInPanel 220ms ease-in-out', '@keyframes fadeInPanel': { from: { opacity: 0 }, to: { opacity: 1 } } }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                <Button size='small' variant='outlined' startIcon={<ArrowBackIcon fontSize='small' />} onClick={() => setSelectedGroupKey('')}>
+                                    Back
+                                </Button>
+                                <Typography variant='subtitle2' sx={{ fontWeight: 700 }}>
+                                    {selectedGroup.label}
+                                </Typography>
+                            </Box>
+                            <Grid container spacing={2}>
+                                {displayedPins.map((item, index) => (
+                                    <Grid
+                                        item xs={4} md={4} lg={4}
+                                        key={`${selectedGroupKey}-${index}-${item.id}`}
+                                        style={{
+                                            marginBottom: '8px',
+                                            borderRadius: '5px',
+                                            paddingLeft: '4px',
+                                            paddingRight: '4px',
+                                        }}
+                                    >
                                         <Box
                                             sx={{
                                                 width: '100%',
-                                                backgroundColor: selectedGroupKey === group.key ? '#f7f9fc' : '#fff',
+                                                backgroundColor: '#fff',
                                                 padding: '6px',
-                                                border: selectedGroupKey === group.key ? '2px dashed #1976d2' : '1px solid #8a8a8a',
+                                                border: (selectedPinId === Number(item.id)) ? '2px solid red' : '2px solid black',
                                                 borderRadius: '6px',
                                                 cursor: 'pointer',
                                             }}
-                                            onClick={() => setSelectedGroupKey(group.key)}
+                                            onClick={() => setPinId(Number(item.id))}
                                         >
                                             <Box
                                                 sx={{
                                                     fontSize: '13px',
-                                                    fontWeight: 700,
+                                                    fontWeight: 600,
                                                     whiteSpace: 'nowrap',
                                                     overflow: 'hidden',
                                                     textOverflow: 'ellipsis',
                                                     mb: '4px',
                                                 }}
                                             >
-                                                {group.label}
+                                                {item.label}
                                             </Box>
-                                            {previewPin ? (
-                                                <img
-                                                    width='100%'
-                                                    src={backend.IMAGE_LINK + previewPin.display_path}
-                                                    alt={group.label}
-                                                    style={{
-                                                        height: '72px',
-                                                        objectFit: 'contain',
-                                                    }}
-                                                />
-                                            ) : (
-                                                <Box sx={{ height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: 'text.secondary' }}>
-                                                    No Pin
-                                                </Box>
-                                            )}
+                                            <img
+                                                width='100%'
+                                                src={backend.IMAGE_LINK + item.display_path}
+                                                alt={item.label}
+                                                style={{
+                                                    height: '72px',
+                                                    objectFit: 'contain',
+                                                }}
+                                            />
                                         </Box>
                                     </Grid>
-                                )
-                            })}
+                                ))}
+                            </Grid>
                         </Grid>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
-                            Pins
-                        </Typography>
-                        <Grid container spacing={2}>
-                            {displayedPins.map((item, index) => (
-                                <Grid
-                                    item xs={4} md={4} lg={4}
-                                    key={`${selectedGroupKey}-${index}-${item.id}`}
-                                    style={{
-                                        marginBottom: '8px',
-                                        borderRadius: '5px',
-                                        paddingLeft: '4px',
-                                        paddingRight: '4px',
-                                    }}
-                                >
-                                    <Box
-                                        sx={{
-                                            width: '100%',
-                                            backgroundColor: '#fff',
-                                            padding: '6px',
-                                            border: (selectedPinId === Number(item.id)) ? '2px solid red' : '2px solid black',
-                                            borderRadius: '6px',
-                                            cursor: 'pointer',
-                                        }}
-                                        onClick={() => setPinId(Number(item.id))}
-                                    >
-                                        <Box
-                                            sx={{
-                                                fontSize: '13px',
-                                                fontWeight: 600,
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                mb: '4px',
-                                            }}
-                                        >
-                                            {item.label}
-                                        </Box>
-                                        <img
-                                            width='100%'
-                                            src={backend.IMAGE_LINK + item.display_path}
-                                            alt={item.label}
-                                            style={{
-                                                height: '72px',
-                                                objectFit: 'contain',
-                                            }}
-                                        />
-                                    </Box>
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Grid>
+                    )}
                 </Grid>
             </BaseForm>
         </>
