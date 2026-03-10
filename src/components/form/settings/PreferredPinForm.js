@@ -157,6 +157,7 @@ function PreferredPinForm({
     const isPinSelected = selectedPinId > 0
     const getSelectedPinForGroup = (group) => {
         if (!isPinSelected) return null
+        if (group?.key === 'all') return null
         return (group.pins || []).find((pin) => Number(pin.id) === selectedPinId) || null
     }
 
