@@ -151,7 +151,7 @@ function PreferredPinForm({
                 ) : null}
                 <Grid container spacing={2}>
                     {!selectedGroup ? (
-                        <Grid item xs={12} sx={{ animation: 'fadeInPanel 220ms ease-in-out', '@keyframes fadeInPanel': { from: { opacity: 0 }, to: { opacity: 1 } } }}>
+                        <Grid item xs={12} sx={{ animation: 'opacityEase 420ms ease-in-out', '@keyframes opacityEase': { from: { opacity: 0 }, to: { opacity: 1 } } }}>
                             <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
                                 Groups
                             </Typography>
@@ -206,7 +206,7 @@ function PreferredPinForm({
                             </Grid>
                         </Grid>
                     ) : (
-                        <Grid item xs={12} sx={{ animation: 'fadeInPanel 220ms ease-in-out', '@keyframes fadeInPanel': { from: { opacity: 0 }, to: { opacity: 1 } } }}>
+                        <Grid item xs={12} sx={{ animation: 'opacityEase 420ms ease-in-out', '@keyframes opacityEase': { from: { opacity: 0 }, to: { opacity: 1 } } }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                 <Button size='small' variant='outlined' startIcon={<ArrowBackIcon fontSize='small' />} onClick={() => setSelectedGroupKey('')}>
                                     Back
