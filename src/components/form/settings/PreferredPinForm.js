@@ -29,6 +29,7 @@ function PreferredPinForm({
     const [ pinList, setPinList ] = useState([])
     const [ groupedPins, setGroupedPins ] = useState([])
     const [ selectedPinId, setPinId ] = useState(-1)
+    const [ selectedGroupKey, setSelectedGroupKey ] = useState('all')
     const [ pinLoading, setPinLoading ] = useState(false)
     const [ pinError, setPinError ] = useState('')
 
@@ -41,6 +42,7 @@ function PreferredPinForm({
 
     useEffect(() => {
         setPinId(normalizePinID(pinInfo?.pin_id))
+        setSelectedGroupKey('all')
     }, [pinInfo, open])
 
     useEffect(() => {
@@ -87,7 +89,44 @@ function PreferredPinForm({
         }})
     }
 
-    const sections = groupedPins.length ? groupedPins : [ { group_name: 'Ungrouped', pins: pinList } ]
+    const allPins = useMemo(() => (Array.isArray(pinList) ? pinList : []), [pinList])
+    const ungroupedSection = useMemo(
+        () => groupedPins.find((section) => (section.group_name || '').toLowerCase() === 'ungrouped'),
+        [groupedPins],
+    )
+    const groupedOnly = useMemo(
+        () => groupedPins.filter((section) => (section.group_name || '').toLowerCase() !== 'ungrouped'),
+        [groupedPins],
+    )
+
+    const pickPreviewPin = (groupKey, pins) => {
+        if (!Array.isArray(pins) || pins.length === 0) return null
+        let hash = 0
+        for (let i = 0; i < groupKey.length; i += 1) {
+            hash = ((hash << 5) - hash) + groupKey.charCodeAt(i)
+            hash |= 0
+        }
+        const index = Math.abs(hash) % pins.length
+        return pins[index]
+    }
+
+    const groupOptions = useMemo(() => {
+        const options = [
+            { key: 'all', label: 'All', pins: allPins },
+            ...groupedOnly.map((section, index) => ({
+                key: `group-${section.group_id ?? section.group_name ?? index}`,
+                label: section.group_name || `Group ${index + 1}`,
+                pins: Array.isArray(section.pins) ? section.pins : [],
+            })),
+            { key: 'ungrouped', label: 'Ungrouped', pins: Array.isArray(ungroupedSection?.pins) ? ungroupedSection.pins : [] },
+        ]
+        return options
+    }, [allPins, groupedOnly, ungroupedSection])
+
+    const displayedPins = useMemo(() => {
+        const selectedGroup = groupOptions.find((group) => group.key === selectedGroupKey)
+        return selectedGroup?.pins || []
+    }, [groupOptions, selectedGroupKey])
 
     return (
         <>
@@ -107,61 +146,112 @@ function PreferredPinForm({
                     </Alert>
                 ) : null}
                 <Grid container spacing={2}>
-                    {sections.map((section, sectionIndex) => (
-                        <Grid item xs={12} key={`${section.group_name}-${sectionIndex}`}>
-                            <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
-                                {section.group_name || 'Ungrouped'}
-                            </Typography>
-                            <Grid container spacing={2}>
-                                {(section.pins || []).map((item, index) => (
-                                    <Grid
-                                        item xs={4} md={4} lg={4}
-                                        key={`${section.group_name}-${index}-${item.id}`}
-                                        style={{
-                                            marginBottom: '8px',
-                                            borderRadius: '5px',
-                                            paddingLeft: '4px',
-                                            paddingRight: '4px',
-                                        }}
-                                    >
+                    <Grid item xs={12}>
+                        <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
+                            Step 1: Pick Group
+                        </Typography>
+                        <Grid container spacing={2}>
+                            {groupOptions.map((group) => {
+                                const previewPin = pickPreviewPin(group.key, group.pins)
+                                return (
+                                    <Grid item xs={4} md={3} lg={2} key={group.key}>
                                         <Box
                                             sx={{
                                                 width: '100%',
-                                                backgroundColor: '#dbfdff',
+                                                backgroundColor: '#eef8ff',
                                                 padding: '6px',
-                                        border: (selectedPinId === Number(item.id)) ? '2px solid red' : '2px solid black',
-                                        borderRadius: '6px',
-                                        cursor: 'pointer',
-                                    }}
-                                    onClick={() => setPinId(Number(item.id))}
-                                >
+                                                border: selectedGroupKey === group.key ? '2px solid red' : '2px solid black',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                            }}
+                                            onClick={() => setSelectedGroupKey(group.key)}
+                                        >
                                             <Box
                                                 sx={{
                                                     fontSize: '13px',
-                                                    fontWeight: 600,
+                                                    fontWeight: 700,
                                                     whiteSpace: 'nowrap',
                                                     overflow: 'hidden',
                                                     textOverflow: 'ellipsis',
                                                     mb: '4px',
                                                 }}
                                             >
-                                                {item.label}
+                                                {group.label}
                                             </Box>
-                                            <img
-                                                width='100%'
-                                                src={backend.IMAGE_LINK + item.display_path}
-                                                alt={item.label}
-                                                style={{
-                                                    height: '72px',
-                                                    objectFit: 'contain',
-                                                }}
-                                            />
+                                            {previewPin ? (
+                                                <img
+                                                    width='100%'
+                                                    src={backend.IMAGE_LINK + previewPin.display_path}
+                                                    alt={group.label}
+                                                    style={{
+                                                        height: '72px',
+                                                        objectFit: 'contain',
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Box sx={{ height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: 'text.secondary' }}>
+                                                    No Pin
+                                                </Box>
+                                            )}
                                         </Box>
                                     </Grid>
-                                ))}
-                            </Grid>
+                                )
+                            })}
                         </Grid>
-                    ))}
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
+                            Step 2: Pick Pin
+                        </Typography>
+                        <Grid container spacing={2}>
+                            {displayedPins.map((item, index) => (
+                                <Grid
+                                    item xs={4} md={4} lg={4}
+                                    key={`${selectedGroupKey}-${index}-${item.id}`}
+                                    style={{
+                                        marginBottom: '8px',
+                                        borderRadius: '5px',
+                                        paddingLeft: '4px',
+                                        paddingRight: '4px',
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            width: '100%',
+                                            backgroundColor: '#dbfdff',
+                                            padding: '6px',
+                                            border: (selectedPinId === Number(item.id)) ? '2px solid red' : '2px solid black',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                        }}
+                                        onClick={() => setPinId(Number(item.id))}
+                                    >
+                                        <Box
+                                            sx={{
+                                                fontSize: '13px',
+                                                fontWeight: 600,
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                mb: '4px',
+                                            }}
+                                        >
+                                            {item.label}
+                                        </Box>
+                                        <img
+                                            width='100%'
+                                            src={backend.IMAGE_LINK + item.display_path}
+                                            alt={item.label}
+                                            style={{
+                                                height: '72px',
+                                                objectFit: 'contain',
+                                            }}
+                                        />
+                                    </Box>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Grid>
                 </Grid>
             </BaseForm>
         </>
