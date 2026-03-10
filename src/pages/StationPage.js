@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import { useLazyQuery, useMutation } from '@apollo/client'
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
 
@@ -34,6 +35,8 @@ function StationPage({
     jwt,
 }) {
     const history = useHistory()
+    const theme = useTheme()
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
     const [ listStationGQL, { data: listData, error: listError } ] = useLazyQuery(graphql.stations.list, { fetchPolicy: 'no-cache' })
     const [ updateStationGQL ] = useMutation(graphql.stations.update_active, { errorPolicy: 'all' })
@@ -106,6 +109,10 @@ function StationPage({
     }, [selectedStation, displayStations])
 
     const pinchZoomRef = useRef(null)
+    const mapViewRef = useRef(null)
+    const mapTitleRef = useRef(null)
+    const lastAnimatedMapRef = useRef(null)
+    const lastAnimatedTitleRef = useRef(null)
 
     const [ openSettingForm, setOpenSettingForm ] = useState(false)
     const [ mapImage, setMapImage ] = useState(stationImage)
@@ -120,6 +127,62 @@ function StationPage({
             reset()
         }
     }, [pinchZoomRef])
+
+    useEffect(() => {
+        const currentMapAsset = mapImage || stationImage || ''
+        if (!currentMapAsset) return
+        if (lastAnimatedMapRef.current === null) {
+            lastAnimatedMapRef.current = currentMapAsset
+            return
+        }
+        if (lastAnimatedMapRef.current === currentMapAsset) return
+        lastAnimatedMapRef.current = currentMapAsset
+
+        const element = mapViewRef.current
+        if (!element || !element.animate) return
+        const animation = element.animate(
+            [
+                { opacity: 0.18, transform: 'scale(0.992)' },
+                { opacity: 1, transform: 'scale(1)' },
+            ],
+            {
+                duration: 780,
+                easing: 'ease-out',
+                fill: 'both',
+            },
+        )
+        return () => {
+            animation.cancel()
+        }
+    }, [mapImage, stationImage])
+
+    useEffect(() => {
+        const titleKey = mapName || ''
+        if (!titleKey) return
+        if (lastAnimatedTitleRef.current === null) {
+            lastAnimatedTitleRef.current = titleKey
+            return
+        }
+        if (lastAnimatedTitleRef.current === titleKey) return
+        lastAnimatedTitleRef.current = titleKey
+
+        const element = mapTitleRef.current
+        if (!element || !element.animate) return
+        const animation = element.animate(
+            [
+                { opacity: 0.2, transform: 'translateY(-2px) scale(0.985)' },
+                { opacity: 1, transform: 'translateY(0) scale(1)' },
+            ],
+            {
+                duration: 700,
+                easing: 'ease-out',
+                fill: 'both',
+            },
+        )
+        return () => {
+            animation.cancel()
+        }
+    }, [mapName])
 
     useEffect(() => {
         const fetchMapAsset = async () => {
@@ -303,84 +366,124 @@ function StationPage({
 
     return (
         <Base>
-            <TopBar
-                onBackHandler={() => history.replace('/home')}
-                label='Station Page'
-            />
             <div style={{
-                height: '80%',
+                height: '95%',
                 width: '100%',
-                paddingTop: '10px',
-                overflow: 'hidden',
-                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-start',
+                alignItems: 'stretch',
+                boxSizing: 'border-box',
             }}>
-                <div style={{ position: 'absolute', top: '3%', left: '30px' }}>
+                <div style={{ flex: '0 0 auto' }}>
+                    <TopBar
+                        onBackHandler={() => history.replace('/home')}
+                        label='Station Page'
+                    />
+                </div>
+                <div style={{
+                    flex: 1,
+                    width: '100%',
+                    paddingTop: isMobile ? '14px' : '16px',
+                    paddingBottom: isMobile ? '14px' : '16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start',
+                    gap: isMobile ? '20px' : '24px',
+                    boxSizing: 'border-box',
+                    minHeight: 0,
+                }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isMobile ? '16px' : '18px',
+                    padding: isMobile ? '0 12px' : '0 22px',
+                }}
+                >
                     <CircleIconButton onClickHandler={refresh}>
                         <RotateLeftIcon />
                     </CircleIconButton>
-                </div>
-                <div style={{
-                    position: 'absolute',
-                    top: '3%',
-                    left: '25%',
-                    height: '40px',
-                    width: '50%',
-                    backgroundColor: constants.colors.CardBackground,
-                    color: 'white',
-                    borderRadius: '5px',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    boxShadow: '2px 2px 6px',
-                    gap: '8px',
-                    cursor: 'pointer',
-                }}
-                onClick={() => setOpenMapChange(true)}
-                >
-                    {mapIcon ? (
-                        <img
-                            src={mapIcon}
-                            alt='Map icon'
-                            style={{
-                                width: '24px',
-                                height: '24px',
-                                objectFit: 'contain',
-                                backgroundColor: '#ffffff',
-                                borderRadius: '4px',
-                                padding: '2px',
-                            }}
-                        />
-                    ) : null}
-                    {stationLabel}
-                </div>
-                <div style={{ position: 'absolute', top: '3%', right: '30px' }}>
+                    <div style={{
+                        height: '40px',
+                        flex: 1,
+                        backgroundColor: constants.colors.CardBackground,
+                        color: 'white',
+                        borderRadius: '5px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        boxShadow: '2px 2px 6px',
+                        gap: '8px',
+                        cursor: 'pointer',
+                        minWidth: 0,
+                    }}
+                    ref={mapTitleRef}
+                    onClick={() => setOpenMapChange(true)}
+                    >
+                        {mapIcon ? (
+                            <img
+                                src={mapIcon}
+                                alt='Map icon'
+                                style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    objectFit: 'contain',
+                                    backgroundColor: '#ffffff',
+                                    borderRadius: '4px',
+                                    padding: '2px',
+                                }}
+                            />
+                        ) : null}
+                        <span style={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}>
+                            {stationLabel}
+                        </span>
+                    </div>
                     <CircleIconButton onClickHandler={() => setOpenSettingForm(true)}>
                         <SettingsIcon />
                     </CircleIconButton>
                 </div>
                 <div style={{
-                    top: '12%',
-                    height: '50%',
                     width: '100%',
-                    position: 'absolute',
                     display: 'flex',
                     justifyContent: 'center',
+                    padding: isMobile ? '0 12px' : '0 22px',
+                    position: 'relative',
                 }}>
-                    <StationMap
-                        mapImage={mapImage || stationImage}
-                        stations={displayStations}
-                        dimension={currentDimension}
-                        pinchZoomRef={pinchZoomRef}
-                        onItemClickHandler={onLocationClick}
-                    />
+                    <div ref={mapViewRef} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                        <StationMap
+                            mapImage={mapImage || stationImage}
+                            stations={displayStations}
+                            dimension={currentDimension}
+                            pinchZoomRef={pinchZoomRef}
+                            onItemClickHandler={onLocationClick}
+                            isMobile={isMobile}
+                        />
+                    </div>
+                    <div
+                        style={{
+                            position: 'absolute',
+                            bottom: '12px',
+                            right: isMobile ? '22px' : '30px',
+                        }}
+                    >
+                        <CircleIconButton onClickHandler={reset}>
+                            <CenterFocusStrongIcon />
+                        </CircleIconButton>
+                    </div>
                 </div>
                 <div style={{
-                    height: '34%',
-                    top: '55%',
                     width: '100%',
-                    position: 'absolute',
                     display: 'flex',
                     justifyContent: 'center',
+                    padding: isMobile ? '0 12px' : '0 22px',
+                    flex: '0 0 auto',
+                    height: isMobile ? '34dvh' : '30dvh',
+                    minHeight: isMobile ? '220px' : '200px',
+                    maxHeight: isMobile ? '320px' : '290px',
                 }}>
                     <StationInfo
                         currentMap={mapName}
@@ -389,12 +492,9 @@ function StationPage({
                         onStationUpdate={onLocationStateChange}
                         onStationError={onLocationError}
                         onLineClick={onLineClick}
+                        isMobile={isMobile}
                     />
                 </div>
-                <div style={{ position: 'absolute', top: '15%', right: '30px' }}>
-                    <CircleIconButton onClickHandler={reset}>
-                        <CenterFocusStrongIcon />
-                    </CircleIconButton>
                 </div>
             </div>
             <StationSettingForm
@@ -469,7 +569,7 @@ function StationPage({
                             <div
                                 style={{
                                     position: 'relative',
-                                    minWidth: `${Math.max(lineStations.length * 78, 380)}px`,
+                                    minWidth: `${Math.max(lineStations.length * 78, isMobile ? 320 : 380)}px`,
                                     height: '132px',
                                     display: 'flex',
                                     alignItems: 'flex-start',

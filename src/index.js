@@ -15,6 +15,9 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 import reportWebVitals from './reportWebVitals'
 
 import store from './store'
+import { installAuthFetchInterceptor } from './scripts/authSession'
+
+installAuthFetchInterceptor()
 
 const root = createRoot(document.getElementById('root'))
 root.render(

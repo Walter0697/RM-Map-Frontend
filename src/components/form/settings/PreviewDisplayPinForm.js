@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Alert, Box, Grid, Typography } from '@mui/material'
+import { Alert, Box, Typography } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 
 import backend from '../../../constant/backend'
 import BaseForm from '../BaseForm'
@@ -95,6 +96,8 @@ function PreviewDisplayPinForm({
         }
     }
 
+    const sections = groupedPins.length ? groupedPins : [ { group_name: 'Ungrouped', pins: pinList } ]
+
     return (
         <BaseForm
             open={open}
@@ -112,7 +115,7 @@ function PreviewDisplayPinForm({
                 </Alert>
             ) : null}
             <Grid container spacing={2}>
-                {(groupedPins.length ? groupedPins : [ { group_name: 'Ungrouped', pins: pinList } ]).map((section, sectionIndex) => (
+                {sections.map((section, sectionIndex) => (
                     <Grid item xs={12} key={`${section.group_name}-${sectionIndex}`}>
                         <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
                             {section.group_name || 'Ungrouped'}
@@ -120,30 +123,46 @@ function PreviewDisplayPinForm({
                         <Grid container spacing={2}>
                             {(section.pins || []).map((item, index) => (
                                 <Grid
-                                    item xs={6} md={4} lg={3}
+                                    item xs={4} md={4} lg={4}
                                     key={`${section.group_name}-${index}-${item.id}`}
                                     style={{
-                                        marginBottom: '15px',
+                                        marginBottom: '8px',
                                         borderRadius: '5px',
-                                        paddingLeft: '5px',
-                                        paddingRight: '5px',
+                                        paddingLeft: '4px',
+                                        paddingRight: '4px',
                                     }}
                                 >
                                     <Box
                                         sx={{
                                             width: '100%',
                                             backgroundColor: '#dbfdff',
-                                            padding: '5px',
-                                            border: (selectedPinId === item.id) ? '3px solid red' : '3px solid black',
+                                            padding: '6px',
+                                            border: (selectedPinId === item.id) ? '2px solid red' : '2px solid black',
+                                            borderRadius: '6px',
                                             cursor: 'pointer',
                                         }}
                                         onClick={() => setSelectedPinId(item.id)}
                                     >
-                                        {item.label}
+                                        <Box
+                                            sx={{
+                                                fontSize: '13px',
+                                                fontWeight: 600,
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                mb: '4px',
+                                            }}
+                                        >
+                                            {item.label}
+                                        </Box>
                                         <img
                                             width='100%'
                                             src={backend.IMAGE_LINK + item.display_path}
                                             alt={item.label}
+                                            style={{
+                                                height: '72px',
+                                                objectFit: 'contain',
+                                            }}
                                         />
                                     </Box>
                                 </Grid>

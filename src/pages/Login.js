@@ -2,14 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useHistory } from 'react-router'
 import { useMutation } from '@apollo/client'
-import {
-    useSpring,
-    config,
-    animated,
-} from '@react-spring/web'
 import { 
     Box,
     Grid,
+    Alert,
     TextField,
     Typography,
     LinearProgress,
@@ -19,17 +15,18 @@ import {
 } from '@mui/lab'
 import useMobileDetect from 'use-mobile-detect-hook'
 
-import LockOpenIcon from '@mui/icons-material/LockOpen'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import LockOpenIcon from '@mui/icons-material/LockOpen'
+import Logo from '../images/logo.png'
 
 import useObject from '../hooks/useObject'
-import useOpacityTransition from '../hooks/useOpacityTransition'
 
 import actions from '../store/actions'
 import graphql from '../graphql'
 import backend from '../constant/backend'
 import httpScript from '../scripts/http'
 import deepLinkScript from '../scripts/deepLink'
+import { consumeTerminalUnauthorizedMessage } from '../scripts/authSession'
 
 import styles from '../styles/login.module.css'
 
@@ -59,6 +56,7 @@ function Login({ jwt, pendingDeepLink, dispatch }) {
     const [ error, setError ] = useObject({})
     const [ authMode, setAuthMode ] = useState('local-password')
     const [ modeLoading, setModeLoading ] = useState(true)
+    const [ terminalMessage, setTerminalMessage ] = useState('')
 
     // to lock button from being pressed
     const [ sending, setSending ] = useState(false)
@@ -71,23 +69,6 @@ function Login({ jwt, pendingDeepLink, dispatch }) {
         if (!informationFetched) return false
         return true
     }, [animationEnd, informationFetched])
-
-    const formWidth = detectMobile.isMobile() ? '90%' : '30%'
-    const iconWidth = detectMobile.isMobile() ? '35%' : '15%'
-
-    // animation related
-    const { ...rest } = useSpring({
-        config: config.stiff,
-        from: { height: '10%', width: '10%', opacity: 1 },
-        to: {
-            height: (loginState === 'prompt') ? '80%' : (loginState === 'success' || loginState === 'redirecting' ? '20%' : '5%'),
-            width: (loginState === 'success' || loginState === 'redirecting') ? iconWidth : formWidth,
-            opacity: (loginState === 'redirecting') ? 0 : 1,
-        },
-    })
-
-    // transition animation for the form
-    const transition = useOpacityTransition(loginState)
 
     // if jwt exists, just redirect to home screen
     useEffect(() => {
@@ -111,6 +92,13 @@ function Login({ jwt, pendingDeepLink, dispatch }) {
             window.history.replaceState({}, document.title, '/login')
         }
     }, [dispatch, callbackParams])
+
+    useEffect(() => {
+        const message = consumeTerminalUnauthorizedMessage()
+        if (message) {
+            setTerminalMessage(message)
+        }
+    }, [])
 
     useEffect(() => {
         const loadMode = async () => {
@@ -299,7 +287,7 @@ function Login({ jwt, pendingDeepLink, dispatch }) {
                             </Box>
                         </Grid>
                         <Grid item xs={12}>
-                            <Box mt={10}>
+                            <Box mt={4}>
                                 <LoadingButton
                                     fullWidth
                                     variant="outlined"
@@ -337,31 +325,23 @@ function Login({ jwt, pendingDeepLink, dispatch }) {
 
     return (
        <div className={styles.wrapper}>
-            <animated.div
-                style={{ ...rest }}
-                className={styles.container}
-            >
-                <Grid
-                    container
-                    fullWidth
-                    spacing={0}
-                    direction="column"
-                    alignItems="center"
-                    justify="center"
-                >
-                    {transition( ( { opacity }, item ) => (
-                        <animated.div
-                            style={{
-                                width: '90%',
-                                position: 'absolute',
-                                opacity: opacity.to({ range: [0.0, 1.0], output: [0, 1]}),
-                            }}
-                        >
-                            {renderLayer(item)}
-                        </animated.div>
-                    ))}
-                </Grid>
-            </animated.div>
+            <div className={styles.container}>
+                {terminalMessage ? (
+                    <Alert severity='warning' sx={{ mb: 2, width: '100%' }}>
+                        {terminalMessage}
+                    </Alert>
+                ) : null}
+                <div className={styles.iconWrap}>
+                    <img
+                        src={Logo}
+                        alt='RoRoadMap'
+                        className={styles.loginLogo}
+                    />
+                </div>
+                <div style={{ width: '100%' }}>
+                    {renderLayer(loginState)}
+                </div>
+            </div>
         </div>
     )
 }

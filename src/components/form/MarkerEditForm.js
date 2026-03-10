@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { connect } from 'react-redux'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import {
@@ -6,7 +6,6 @@ import {
     Stack,
     TextField,
     Button,
-    ButtonGroup,
     FormControl,
     FormLabel,
     Menu,
@@ -15,11 +14,24 @@ import {
     ListItemIcon,
 } from '@mui/material'
 
-import AddLinkIcon from '@mui/icons-material/AddLink'
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
-import VisibilityIcon from '@mui/icons-material/Visibility'
 import DeleteIcon from '@mui/icons-material/Delete'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
+import FlashOnIcon from '@mui/icons-material/FlashOn'
+import TimelapseIcon from '@mui/icons-material/Timelapse'
+import HourglassBottomIcon from '@mui/icons-material/HourglassBottom'
+import MoneyOffIcon from '@mui/icons-material/MoneyOff'
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
+import PaidIcon from '@mui/icons-material/Paid'
+import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange'
+import BlockIcon from '@mui/icons-material/Block'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import CancelIcon from '@mui/icons-material/Cancel'
+import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import LocalOfferIcon from '@mui/icons-material/LocalOffer'
+import HomeIcon from '@mui/icons-material/Home'
+import EventAvailableIcon from '@mui/icons-material/EventAvailable'
+import CategoryIcon from '@mui/icons-material/Category'
+import ImageIcon from '@mui/icons-material/Image'
 import RiceBowlIcon from '@mui/icons-material/RiceBowl'
 import StorefrontIcon from '@mui/icons-material/Storefront'
 import RamenDiningIcon from '@mui/icons-material/RamenDining'
@@ -29,14 +41,14 @@ import useObject from '../../hooks/useObject'
 import BaseForm from './BaseForm'
 import ScrapperForm from './ScrapperForm'
 import ImageLinkValidate from './image/ImageLinkValidate'
-import ImagePreview from './image/ImagePreview'
-import Selectable from '../field/Selectable'
+import ImageSquarePicker from './image/ImageSquarePicker'
 import NullableDatePicker from '../field/NullableDatePicker'
 
 import generic from '../../scripts/generic'
 import image from '../../scripts/image'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
+import backend from '../../constant/backend'
 
 import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
@@ -62,8 +74,8 @@ function MarkerEditForm({
         description: '', 
         estimate_time: '',
         price: '',
-        need_booking: false,
-        permanent:  false,
+        need_booking: '',
+        permanent:  '',
         from_time: null,
         to_time: null,    
     })
@@ -72,12 +84,6 @@ function MarkerEditForm({
 
     const [ imageFormState , setImageState ] = useState('') // weblink, preview
     const [ imageSubmitMessage, setImageMessage ] = useState('')
-
-    // storing the image information, to determined if it is using the compressed one, or the original one
-    let rawImageCaches = {}
-    const [ imageCache, setImageCache ] = useState({})
-    const [ imageVersion, setImageVersion ] = useState(null)
-    const uploadInputRef = useRef(null)
 
     const [ shouldRemoveRestaurantData, setShouldRemoveRestaurantData ] = useState(false)
 
@@ -92,6 +98,44 @@ function MarkerEditForm({
     // menu for website
     const [ anchorEl, setAnchorEl ] = useState(null)
     const menuOpen = Boolean(anchorEl)
+    const [ estimateAnchorEl, setEstimateAnchorEl ] = useState(null)
+    const [ pricingAnchorEl, setPricingAnchorEl ] = useState(null)
+    const [ permanentAnchorEl, setPermanentAnchorEl ] = useState(null)
+    const [ bookingAnchorEl, setBookingAnchorEl ] = useState(null)
+    const [ typeAnchorEl, setTypeAnchorEl ] = useState(null)
+
+    const estimateOptions = [
+        { value: '', label: 'Unset', icon: <BlockIcon sx={{ color: 'error.main', fontSize: 22 }} /> },
+        { value: 'short', label: 'Short', icon: <FlashOnIcon sx={{ fontSize: 22 }} /> },
+        { value: 'medium', label: 'Medium', icon: <TimelapseIcon sx={{ fontSize: 22 }} /> },
+        { value: 'long', label: 'Long', icon: <HourglassBottomIcon sx={{ fontSize: 22 }} /> },
+    ]
+
+    const pricingOptions = [
+        { value: '', label: 'Unset', icon: <BlockIcon sx={{ color: 'error.main', fontSize: 22 }} /> },
+        { value: 'free', label: 'Free', icon: <MoneyOffIcon sx={{ fontSize: 22 }} /> },
+        { value: 'cheap', label: 'Cheap $', icon: <AttachMoneyIcon sx={{ fontSize: 22 }} /> },
+        { value: 'middle', label: 'Middle $$', icon: <PaidIcon sx={{ fontSize: 22 }} /> },
+        { value: 'expensive', label: 'Expensive $$$', icon: <CurrencyExchangeIcon sx={{ fontSize: 22 }} /> },
+    ]
+
+    const selectedEstimateOption = estimateOptions.find((item) => item.value === formValue.estimate_time) || estimateOptions[0]
+    const selectedPricingOption = pricingOptions.find((item) => item.value === formValue.price) || pricingOptions[0]
+    const yesNoOptions = [
+        { value: '', label: 'Unset', icon: <BlockIcon sx={{ color: 'error.main', fontSize: 22 }} /> },
+        { value: false, label: 'No', icon: <CancelIcon sx={{ fontSize: 22 }} /> },
+        { value: true, label: 'Yes', icon: <CheckCircleIcon sx={{ fontSize: 22 }} /> },
+    ]
+    const selectedPermanentOption = yesNoOptions.find((item) => item.value === formValue.permanent) || yesNoOptions[0]
+    const selectedBookingOption = yesNoOptions.find((item) => item.value === formValue.need_booking) || yesNoOptions[0]
+    const selectedTypeOption = eventtypes.find((item) => item.value === formValue.type) || null
+
+    const getTypeIconSrc = (item) => {
+        const raw = `${item?.icon_path || ''}`.trim()
+        if (!raw) return ''
+        if (/^https?:\/\//i.test(raw) || raw.startsWith('data:')) return raw
+        return `${backend.IMAGE_LINK}${raw}`
+    }
 
     useEffect(() => {
         if (!marker) return
@@ -115,9 +159,6 @@ function MarkerEditForm({
         setFormValue('from_time', marker.from_time ? new Date(dayjs.utc(marker.from_time).format('MM/DD/YYYY HH:mm')) : null)
         setFormValue('to_time', marker.to_time ? new Date(dayjs.utc(marker.to_time).format('MM/DD/YYYY HH:mm')) : null)
         setWebsiteLink('')
-        setImageCache({})
-        rawImageCaches = {}
-        setImageVersion(null)
 
         if (marker.image_link) {
             setFormValue('imageLink', {
@@ -173,7 +214,7 @@ function MarkerEditForm({
         if (!open) return
         if (!websiteLink) return
         if (!formValue.imageLink) {
-            setImageMessage('scrapping image from website...')
+            setImageMessage('the internet...')
         }
         scrapimageGQL({ variables: { link: websiteLink }})
     }, [ open, websiteLink, formValue.imageLink ])
@@ -193,17 +234,7 @@ function MarkerEditForm({
             type: 'weblink',
             value: link,
         })
-        setImageMessage('image from the internet')
-    }
-
-    const chooseImageVersion = (selected) => {
-        const target = imageCache[selected]
-        setFormValue('imageLink', {
-            type: 'upload',
-            value: target.data,
-            name: target.data.name,
-        })
-        setImageVersion(selected)
+        setImageMessage('the internet')
     }
 
     const handleCompressedImage = (result) => {
@@ -212,42 +243,24 @@ function MarkerEditForm({
             value: result,
             name: result.name
         })
-        setImageVersion('compressed')
-        const caches = Object.assign({}, rawImageCaches)
-        caches['compressed'] = {
-            size: result.size,
-            data: result,
-        }
-        rawImageCaches = caches
-        setImageCache(caches)
     }
 
     // handle image upload
-    const handleImageChange = (e) => {
-        if (e.target.files.length) {
-            const fileValue = e.target.files[0]
-            const isImage = image.compress.isImage(fileValue)
-            if (!isImage) return
-            setImageMessage('image from user upload')
-            setFormValue('imageLink', {
-                type: 'upload',
-                value: e.target.files[0],
-                name: e.target.files[0].name,
+    const handleImageFile = (fileValue) => {
+        if (!fileValue) return
+        const isImage = image.compress.isImage(fileValue)
+        if (!isImage) return
+        setImageMessage('user upload')
+        setFormValue('imageLink', {
+            type: 'upload',
+            value: fileValue,
+            name: fileValue.name,
+        })
+        const sc = image.compress.shouldCompress(fileValue)
+        if (sc) {
+            image.compress.compressImage(fileValue).then(result => {
+                handleCompressedImage(result)
             })
-            setImageVersion('original')
-            const caches = Object.assign({}, rawImageCaches)
-            caches['original'] = {
-                size: e.target.files[0].size,
-                data: e.target.files[0],
-            }
-            rawImageCaches = caches
-            setImageCache(caches)
-            const sc = image.compress.shouldCompress(fileValue)
-            if (sc) {
-                image.compress.compressImage(fileValue).then(result => {
-                    handleCompressedImage(result)
-                })
-            }
         }
     }
 
@@ -327,8 +340,8 @@ function MarkerEditForm({
             description: formValue.description,
             estimate_time: formValue.estimate_time,
             price: formValue.price,
-            permanent: formValue.permanent,
-            need_booking: formValue.need_booking,
+            permanent: formValue.permanent === '' ? false : formValue.permanent,
+            need_booking: formValue.need_booking === '' ? false : formValue.need_booking,
             to_time: to,
             from_time: from,
             restaurant_id: restaurant_id,
@@ -365,6 +378,24 @@ function MarkerEditForm({
         }
     }, [scrapperData, marker, setShouldRemoveRestaurantData])
 
+    const format5Sig = (value) => {
+        const n = Number(value)
+        if (Number.isNaN(n)) return ''
+        return n.toPrecision(5)
+    }
+
+    const footerLatLon = (
+        <Box
+            sx={{
+                fontSize: '12px',
+                color: 'text.secondary',
+                whiteSpace: 'nowrap',
+            }}
+        >
+            {marker ? `${format5Sig(marker.latitude)}, ${format5Sig(marker.longitude)}` : ''}
+        </Box>
+    )
+
     return (
         <>
             <BaseForm
@@ -379,6 +410,7 @@ function MarkerEditForm({
                 isSubmitUnauthorized={isUnauthorized}
                 alertMessage={alertMessage}
                 clearAlertMessage={() => setAlertMessage(null)}
+                footerStart={footerLatLon}
             >
                 <Stack spacing={2}>
                     <TextField
@@ -391,38 +423,6 @@ function MarkerEditForm({
                         error={!!error.label}
                         helperText={error.label}
                     />
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                        <TextField
-                            InputLabelProps={{ shrink: true }}
-                            variant='outlined'
-                            size='small'
-                            fullWidth
-                            label='longitude'
-                            value={marker?.longitude}
-                            disabled
-                        />
-                        <TextField
-                            InputLabelProps={{ shrink: true }}
-                            variant='outlined'
-                            size='small'
-                            fullWidth
-                            label='latitude'
-                            value={marker?.latitude}
-                            disabled
-                        />
-                    </Box>
-                    <Selectable
-                        label='type'
-                        required
-                        value={formValue.type}
-                        onValueChange={(e) => onValueChangeHandler('type', e.target.value)}
-                        defaultSelectaValue={''}
-                        defaultSelectText={''}
-                        errorMessage={error.type}
-                        list={eventtypes}
-                        valueKey={'value'}
-                        textKey={'label'}
-                    />
                     <TextField
                         InputLabelProps={{ shrink: !!formValue.address }}
                         variant='outlined'
@@ -434,6 +434,275 @@ function MarkerEditForm({
                         error={!!error.address}
                         helperText={error.address}
                     />
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                        <FormControl sx={{ flex: 1, minWidth: 0 }}>
+                            <FormLabel component='legend'>
+                                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+                                    <CategoryIcon sx={{ fontSize: 14 }} />
+                                    <span>marker type</span>
+                                </Box>
+                            </FormLabel>
+                            <Button
+                                variant='outlined'
+                                onClick={(event) => setTypeAnchorEl(event.currentTarget)}
+                                sx={{
+                                    width: '100%',
+                                    aspectRatio: '1 / 1',
+                                    minWidth: 0,
+                                    borderRadius: 1.5,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 0.75,
+                                    textTransform: 'none',
+                                    borderColor: error.type ? 'error.main' : undefined,
+                                }}
+                            >
+                                {selectedTypeOption ? (
+                                    <Box
+                                        component='img'
+                                        src={getTypeIconSrc(selectedTypeOption)}
+                                        alt=''
+                                        sx={{ width: 40, height: 40, objectFit: 'contain' }}
+                                    />
+                                ) : (
+                                    <BlockIcon sx={{ color: 'error.main', fontSize: 36 }} />
+                                )}
+                                <span style={{ fontSize: '11px', lineHeight: 1.2 }}>
+                                    {selectedTypeOption?.label || 'Unset'}
+                                </span>
+                            </Button>
+                            {error.type ? (
+                                <FormLabel sx={{ color: 'error.main', mt: 0.5 }}>{error.type}</FormLabel>
+                            ) : null}
+                            <Menu
+                                anchorEl={typeAnchorEl}
+                                open={!!typeAnchorEl}
+                                onClose={() => setTypeAnchorEl(null)}
+                            >
+                                {eventtypes.map((option) => (
+                                    <MenuItem
+                                        key={`type-${option.value}`}
+                                        onClick={() => {
+                                            onValueChangeHandler('type', option.value)
+                                            setTypeAnchorEl(null)
+                                        }}
+                                    >
+                                        <ListItemIcon>
+                                            <Box
+                                                component='img'
+                                                src={getTypeIconSrc(option)}
+                                                alt=''
+                                                sx={{ width: 20, height: 20, objectFit: 'contain' }}
+                                            />
+                                        </ListItemIcon>
+                                        <ListItemText>{option.label}</ListItemText>
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                        </FormControl>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <ImageSquarePicker
+                                title={(
+                                    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+                                        <ImageIcon sx={{ fontSize: 14 }} />
+                                        <span>image</span>
+                                    </Box>
+                                )}
+                                imageInfo={formValue.imageLink}
+                                message={imageSubmitMessage}
+                                onOpenLink={() => setImageState('weblink')}
+                                onUploadFile={handleImageFile}
+                                onCancelImage={removeImage}
+                            />
+                        </Box>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                        <FormControl sx={{ flex: 1, minWidth: 0 }}>
+                            <FormLabel component='legend'>
+                                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+                                    <AccessTimeIcon sx={{ fontSize: 14 }} />
+                                    <span>estimate time</span>
+                                </Box>
+                            </FormLabel>
+                            <Button
+                                variant='outlined'
+                                onClick={(event) => setEstimateAnchorEl(event.currentTarget)}
+                                sx={{
+                                    width: '100%',
+                                    height: 92,
+                                    minWidth: 0,
+                                    borderRadius: 1.5,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 0.5,
+                                    textTransform: 'none',
+                                    '& .MuiSvgIcon-root': { fontSize: 36 },
+                                }}
+                            >
+                                {selectedEstimateOption.icon}
+                                <span style={{ fontSize: '11px', lineHeight: 1.2 }}>{selectedEstimateOption.label}</span>
+                            </Button>
+                            <Menu anchorEl={estimateAnchorEl} open={!!estimateAnchorEl} onClose={() => setEstimateAnchorEl(null)}>
+                                {estimateOptions.map((option) => (
+                                    <MenuItem
+                                        key={`estimate-${option.value || 'unset'}`}
+                                        onClick={() => {
+                                            onValueChangeHandler('estimate_time', option.value)
+                                            setEstimateAnchorEl(null)
+                                        }}
+                                    >
+                                        <ListItemIcon>{option.icon}</ListItemIcon>
+                                        <ListItemText>{option.label}</ListItemText>
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                        </FormControl>
+                        <FormControl sx={{ flex: 1, minWidth: 0 }}>
+                            <FormLabel component='legend'>
+                                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+                                    <LocalOfferIcon sx={{ fontSize: 14 }} />
+                                    <span>pricing</span>
+                                </Box>
+                            </FormLabel>
+                            <Button
+                                variant='outlined'
+                                onClick={(event) => setPricingAnchorEl(event.currentTarget)}
+                                sx={{
+                                    width: '100%',
+                                    height: 92,
+                                    minWidth: 0,
+                                    borderRadius: 1.5,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 0.5,
+                                    textTransform: 'none',
+                                    '& .MuiSvgIcon-root': { fontSize: 36 },
+                                }}
+                            >
+                                {selectedPricingOption.icon}
+                                <span style={{ fontSize: '11px', lineHeight: 1.2 }}>{selectedPricingOption.label}</span>
+                            </Button>
+                            <Menu anchorEl={pricingAnchorEl} open={!!pricingAnchorEl} onClose={() => setPricingAnchorEl(null)}>
+                                {pricingOptions.map((option) => (
+                                    <MenuItem
+                                        key={`price-${option.value || 'unset'}`}
+                                        onClick={() => {
+                                            onValueChangeHandler('price', option.value)
+                                            setPricingAnchorEl(null)
+                                        }}
+                                    >
+                                        <ListItemIcon>{option.icon}</ListItemIcon>
+                                        <ListItemText>{option.label}</ListItemText>
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                        </FormControl>
+                    </Box>
+                    <NullableDatePicker
+                        label={'from'}
+                        value={formValue.from_time}
+                        onValueChange={(e) => onValueChangeHandler('from_time', e)}
+                        errorMessage={error.from_time}
+                    />
+                    <NullableDatePicker
+                        label={'to'}
+                        noPast
+                        value={formValue.to_time}
+                        onValueChange={(e) => onValueChangeHandler('to_time', e)}
+                        errorMessage={error.to_time}
+                    />
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                        <FormControl sx={{ flex: 1, minWidth: 0 }}>
+                            <FormLabel component='legend'>
+                                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+                                    <HomeIcon sx={{ fontSize: 14 }} />
+                                    <span>permanent</span>
+                                </Box>
+                            </FormLabel>
+                            <Button
+                                variant='outlined'
+                                onClick={(event) => setPermanentAnchorEl(event.currentTarget)}
+                                sx={{
+                                    width: '100%',
+                                    height: 92,
+                                    minWidth: 0,
+                                    borderRadius: 1.5,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 0.5,
+                                    textTransform: 'none',
+                                    '& .MuiSvgIcon-root': { fontSize: 36 },
+                                }}
+                            >
+                                {selectedPermanentOption.icon}
+                                <span style={{ fontSize: '11px', lineHeight: 1.2 }}>{selectedPermanentOption.label}</span>
+                            </Button>
+                            <Menu anchorEl={permanentAnchorEl} open={!!permanentAnchorEl} onClose={() => setPermanentAnchorEl(null)}>
+                                {yesNoOptions.map((option) => (
+                                    <MenuItem
+                                        key={`permanent-${String(option.value) || 'unset'}`}
+                                        onClick={() => {
+                                            onValueChangeHandler('permanent', option.value)
+                                            setPermanentAnchorEl(null)
+                                        }}
+                                    >
+                                        <ListItemIcon>{option.icon}</ListItemIcon>
+                                        <ListItemText>{option.label}</ListItemText>
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                        </FormControl>
+                        <FormControl sx={{ flex: 1, minWidth: 0 }}>
+                            <FormLabel component='legend'>
+                                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+                                    <EventAvailableIcon sx={{ fontSize: 14 }} />
+                                    <span>need booking</span>
+                                </Box>
+                            </FormLabel>
+                            <Button
+                                variant='outlined'
+                                onClick={(event) => setBookingAnchorEl(event.currentTarget)}
+                                sx={{
+                                    width: '100%',
+                                    height: 92,
+                                    minWidth: 0,
+                                    borderRadius: 1.5,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 0.5,
+                                    textTransform: 'none',
+                                    '& .MuiSvgIcon-root': { fontSize: 36 },
+                                }}
+                            >
+                                {selectedBookingOption.icon}
+                                <span style={{ fontSize: '11px', lineHeight: 1.2 }}>{selectedBookingOption.label}</span>
+                            </Button>
+                            <Menu anchorEl={bookingAnchorEl} open={!!bookingAnchorEl} onClose={() => setBookingAnchorEl(null)}>
+                                {yesNoOptions.map((option) => (
+                                    <MenuItem
+                                        key={`booking-${String(option.value) || 'unset'}`}
+                                        onClick={() => {
+                                            onValueChangeHandler('need_booking', option.value)
+                                            setBookingAnchorEl(null)
+                                        }}
+                                    >
+                                        <ListItemIcon>{option.icon}</ListItemIcon>
+                                        <ListItemText>{option.label}</ListItemText>
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                        </FormControl>
+                    </Box>
                     <Stack spacing={0}>
                         <Box sx={{ display: 'flex' }}>
                             <Box sx={{ flex: 9 }}>
@@ -512,111 +781,16 @@ function MarkerEditForm({
                             </MenuItem>
                         </Menu>
                     </Stack>
-                    <FormControl component='image' fullWidth>
-                        <FormLabel component='legend'>Preview</FormLabel>
-                        <FormLabel>{imageSubmitMessage}</FormLabel>
-                        <ButtonGroup fullWidth variant='outlined'>
-                            <Button onClick={() => setImageState('weblink')}>
-                                <AddLinkIcon />
-                            </Button>
-                            <Button onClick={() => uploadInputRef.current?.click()}>
-                                <InsertDriveFileIcon />
-                            </Button>
-                            <Button disabled={!formValue.imageLink} onClick={() => setImageState('preview')}>
-                                <VisibilityIcon />
-                            </Button>
-                        </ButtonGroup>
-                        <input ref={uploadInputRef} type='file' style={{ display: 'none' }} onChange={handleImageChange} />
-                        <FormLabel>
-                            {formValue.imageLink && (
-                                <div
-                                    style={{ color: 'red' }}
-                                    onClick={removeImage}
-                                >
-                                    <DeleteIcon sx={{ verticalAlign: 'middle', display: 'inline-block', fontSize: '18px' }}/>
-                                    <span style={{ verticalAlign: 'middle', display: 'inline-block' }}>Remove Image</span>
-                                </div>
-                            )}
-                        </FormLabel>
-                    </FormControl>
                     <TextField
                         variant='outlined'
                         fullWidth
                         label='description'
+                        multiline
+                        minRows={3}
                         value={formValue.description}
                         onChange={(e) => onValueChangeHandler('description', e.target.value)}
                         error={!!error.description}
                         helperText={error.description}
-                    />
-                    <Selectable
-                        label='estimate time'
-                        value={formValue.estimate_time}
-                        onValueChange={(e) => onValueChangeHandler('estimate_time', e.target.value)}
-                        defaultSelectaValue={''}
-                        defaultSelectText={''}
-                        errorMessage={''}
-                        list={[
-                            { value: 'short', label: 'Short' },
-                            { value: 'medium', label: 'Medium' },
-                            { value: 'long', label: 'Long' },
-                        ]}
-                        valueKey={'value'}
-                        textKey={'label'}
-                    />
-                    <Selectable
-                        label='pricing'
-                        value={formValue.price}
-                        onValueChange={(e) => onValueChangeHandler('price', e.target.value)}
-                        defaultSelectaValue={''}
-                        defaultSelectText={''}
-                        errorMessage={''}
-                        list={[
-                            { value: 'free', label: 'Free' },
-                            { value: 'cheap', label: 'Cheap $' },
-                            { value: 'middle', label: 'Middle $$' },
-                            { value: 'expensive', label: 'Expensive $$$'},
-                        ]}
-                        valueKey={'value'}
-                        textKey={'label'}
-                    />
-                    <NullableDatePicker
-                        label={'from'}
-                        value={formValue.from_time}
-                        onValueChange={(e) => onValueChangeHandler('from_time', e)}
-                        errorMessage={error.from_time}
-                    />
-                    <NullableDatePicker
-                        label={'to'}
-                        noPast
-                        value={formValue.to_time}
-                        onValueChange={(e) => onValueChangeHandler('to_time', e)}
-                        errorMessage={error.to_time}
-                    />
-                    <Selectable
-                        label='permanent'
-                        value={formValue.permanent}
-                        onValueChange={(e) => onValueChangeHandler('permanent', e.target.value)}
-                        noDefault
-                        errorMessage={''}
-                        list={[
-                            { value: false, label: 'no' },
-                            { value: true, label: 'yes' },
-                        ]}
-                        valueKey={'value'}
-                        textKey={'label'}
-                    />
-                    <Selectable
-                        label='need booking'
-                        value={formValue.need_booking}
-                        onValueChange={(e) => onValueChangeHandler('need_booking', e.target.value)}
-                        noDefault
-                        errorMessage={''}
-                        list={[
-                            { value: false, label: 'no' },
-                            { value: true, label: 'yes' },
-                        ]}
-                        valueKey={'value'}
-                        textKey={'label'}
                     />
                 </Stack>
             </BaseForm>
@@ -625,14 +799,6 @@ function MarkerEditForm({
                 handleClose={() => setImageState('')}
                 imageLink={(formValue.imageLink && formValue.imageLink.type === 'weblink') ? formValue.imageLink.value : ''}
                 setImageLink={onImageLinkChangeHandler}
-            />
-            <ImagePreview
-                shouldOpen={imageFormState === 'preview'}
-                handleClose={() => setImageState('')}
-                imageInfo={formValue.imageLink}
-                imageVersion={imageVersion}
-                chooseImageVersion={chooseImageVersion}
-                imageCache={imageCache}
             />
             <ScrapperForm 
                 open={!!scrapperOpen}

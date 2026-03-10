@@ -8,6 +8,9 @@ import {
     List,
     ListItem,
     ListItemButton,
+    IconButton,
+    Typography,
+    Box,
     Grid,
 } from '@mui/material'
 
@@ -15,6 +18,8 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
+import RoomOutlinedIcon from '@mui/icons-material/RoomOutlined'
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined'
 
 import ExtraContentDisplay from './contentpart/ExtraContentDisplay'
 import CircleIconButton from '../../field/CircleIconButton'
@@ -32,51 +37,54 @@ function SearchResultBox({
     category,
 }) {
     return (
-        <ListItem key={id}>
+        <ListItem
+            key={id}
+            disablePadding
+            style={{ marginBottom: '14px' }}
+        >
             <ListItemButton
                 style={{
-                    height: '85px',
+                    minHeight: '96px',
                     width: '100%',
-                    borderRadius: '5px',
+                    borderRadius: '8px',
                     background: '#f5f5f5',
+                    alignItems: 'flex-start',
+                    padding: '10px 12px',
                 }}
                 onClick={() => onClickEvent(id)}
             >
-                <Grid container>
-                    <Grid item xs={6}></Grid>
-                    <Grid 
-                        item 
-                        xs={12}
+                <Box style={{ width: '100%' }}>
+                    <Typography
                         style={{
                             fontSize: '18px',
-                            paddingLeft: '5px',
-                            paddingTop: '5px',
                             color: '#002a89',
-                            fontWeight: '500',
-                        }}>
+                            fontWeight: 600,
+                            lineHeight: 1.2,
+                            marginBottom: '4px',
+                        }}
+                    >
                         {title}
-                    </Grid>
-                    <Grid
-                        item
-                        xs={12}
+                    </Typography>
+                    <Typography
                         style={{
-                            paddingLeft: '5px',
-                            paddingTop: '2px',
+                            color: '#2f3b59',
+                            fontSize: '13px',
+                            lineHeight: 1.35,
+                            marginBottom: '4px',
                         }}
                     >
                         {address}
-                    </Grid>
-                    <Grid
-                        item
-                        xs={12}
+                    </Typography>
+                    <Typography
                         style={{
-                            padding: '5px',
                             color: '#919191',
+                            fontSize: '12px',
+                            lineHeight: 1.2,
                         }}
                     >
                         {category}
-                    </Grid>
-                </Grid>
+                    </Typography>
+                </Box>
             </ListItemButton>
         </ListItem>
     )
@@ -96,60 +104,115 @@ function LocationDetail({
     }
 
     return (
-        <Grid
-            container
+        <Box
             style={{
                 height: '100%',
                 width: '100%',
                 background: '#c3c9c9',
                 overflow: 'auto',
-                paddingTop: '5px',
-                paddingLeft: '15px',
-                paddingRight: '15px',
-                display: 'flex',
+                paddingTop: '12px',
+                paddingLeft: '16px',
+                paddingRight: '16px',
+                paddingBottom: '16px',
+                boxSizing: 'border-box',
             }}
         >
-            <Grid 
-                item xs={6}
-            >
-                <CircleIconButton
-                    onClickHandler={onBackHandler}
-                >
-                    <ArrowBackIcon />
-                </CircleIconButton>
-            </Grid>
-            <Grid 
-                item xs={6} fullWidth
-            >
-                <CircleIconButton
-                    float='right'
-                    onClickHandler={setLocationToCreateForm}
-                >
-                    <BookmarkIcon />
-                </CircleIconButton>
-            </Grid>
-            <Grid 
-                item xs={12}
+            <Box
                 style={{
                     width: '100%',
-                    fontSize: '20px',
+                }}
+            >
+                <Box
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        marginBottom: '14px',
+                    }}
+                >
+                    <IconButton
+                        size='medium'
+                        style={{
+                            backgroundColor: 'white',
+                            boxShadow: '2px 2px 6px',
+                            padding: '11px',
+                        }}
+                        onClick={onBackHandler}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <IconButton
+                        size='medium'
+                        style={{
+                            backgroundColor: 'white',
+                            boxShadow: '2px 2px 6px',
+                            padding: '11px',
+                        }}
+                        onClick={setLocationToCreateForm}
+                    >
+                        <BookmarkIcon />
+                    </IconButton>
+                </Box>
+            </Box>
+            <Box
+                style={{
+                    width: '100%',
+                    fontSize: '22px',
                     fontWeight: 'bold',
                     color: '#002a89',
+                    marginTop: '14px',
+                    marginBottom: '14px',
+                    lineHeight: 1.2,
                 }}
             >
                  {location.title}
-            </Grid>
-            <Grid 
-                item xs={12}
+            </Box>
+            <Box
                 style={{
                     width: '100%',
                 }}
             >
-                { maphelper.generic.getAddress(location.details.address) }
-                <br/><br/>
-                { location.details.poi.categories.join(',') }
-            </Grid>
-        </Grid>
+                <Box style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '14px' }}>
+                    <RoomOutlinedIcon
+                        sx={{
+                            fontSize: 20,
+                            color: '#1d4f8c',
+                            mt: '2px',
+                            flexShrink: 0,
+                        }}
+                    />
+                    <Typography
+                        style={{
+                            fontSize: '16px',
+                            color: '#102544',
+                            lineHeight: 1.4,
+                        }}
+                    >
+                        { maphelper.generic.getAddress(location.details.address) }
+                    </Typography>
+                </Box>
+                <Box style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '6px' }}>
+                    <CategoryOutlinedIcon
+                        sx={{
+                            fontSize: 19,
+                            color: '#6a7587',
+                            mt: '2px',
+                            flexShrink: 0,
+                        }}
+                    />
+                    <Typography
+                        style={{
+                            fontSize: '15px',
+                            color: '#5a6475',
+                            lineHeight: 1.35,
+                        }}
+                    >
+                        { location?.details?.poi?.categories?.join(', ') || 'Unknown category' }
+                    </Typography>
+                </Box>
+            </Box>
+        </Box>
     )
 }
 
@@ -164,6 +227,8 @@ function SearchResultList({
                 height: '100%',
                 width: '100%',
                 overflow: 'auto',
+                padding: '12px',
+                boxSizing: 'border-box',
             }}
         >
             {locationList && locationList.map((location) => (

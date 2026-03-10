@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Button } from '@mui/material'
-import Grid from '@mui/material/GridLegacy'
 import backend from '../../constant/backend'
 
 import { useLazyQuery } from '@apollo/client'
@@ -13,14 +12,11 @@ import BottomUpTrail from '../animatein/BottomUpTrail'
 import WrapperBox from '../wrapper/WrapperBox'
 import CircleIconButton from '../field/CircleIconButton'
 
-import constant from '../../constant'
-
 import actions from '../../store/actions'
 import graphql from '../../graphql'
 
 function MovieItem({
     item,
-    movieTypeIcon,
     movies,
     schedules,
     onClickHandler,
@@ -52,12 +48,14 @@ function MovieItem({
                 backgroundColor: '#48acdb',
                 borderRadius: '5px',
                 height: '100%',
-                minHeight: '162px',
+                minHeight: '138px',
                 width: '100%',
                 boxShadow: '2px 2px 6px',
-                alignItems: 'flex-start',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
                 textTransform: 'none',
-                padding: '0',
+                padding: '12px',
                 border: isScheduled ? '3px solid green' : '',
             }}
             onClick={() => onClickHandler(item)}
@@ -71,80 +69,64 @@ function MovieItem({
                     <StarIcon sx={{ color: 'yellow' }} />
                 </div>
             )}
-            <Grid
-                container
-                fullWidth
+            <div
                 style={{
-                    height: '100%',
-                    flexWrap: 'nowrap',
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                    minWidth: 0,
                 }}
             >
-                <Grid 
-                    item xs={4}
-                    style={{
-                        padding: '12px 8px 12px 12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                >
-                    {item.image_link ? (
-                        <img
-                            style={{
-                                width: '90px',
-                                height: '136px',
-                                objectFit: 'cover',
-                                borderRadius: '5px',
-                            }}
-                            src={item.image_link}
-                        />
-                    ) : (
-                        <img 
-                            style={{
-                                width: '90px',
-                                maxHeight: '136px',
-                                objectFit: 'contain',
-                            }}
-                            src={backend.IMAGE_LINK + movieTypeIcon}
-                        />
-                    )}
-                    
-                </Grid>
-                <Grid 
-                    item xs={8}
-                    style={{
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        justifyContent: 'center',
-                        flexDirection: 'column',
-                        padding: '12px 12px 12px 8px',
-                        minWidth: 0,
-                    }}
-                >
+                {item.image_link ? (
+                    <img
+                        style={{
+                            width: '74px',
+                            height: '108px',
+                            objectFit: 'cover',
+                            borderRadius: '6px',
+                            marginRight: '12px',
+                            boxShadow: '0 1px 5px rgba(0,0,0,0.25)',
+                            flexShrink: 0,
+                        }}
+                        src={item.image_link.startsWith('http') ? item.image_link : `${backend.IMAGE_LINK}${item.image_link}`}
+                        alt={item.title || 'Movie poster'}
+                    />
+                ) : null}
+                <div style={{
+                    flex: 1,
+                    minWidth: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                }}>
                     <div
                         style={{
                             fontSize: '18px',
                             color: 'black',
-                            fontWeight: '600',
+                            fontWeight: '700',
                             width: '100%',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
-                            textAlign: 'left',
+                            lineHeight: 1.25,
                         }}
                     >
                         {item.title}
                     </div>
                     <div style={{
+                        marginTop: '6px',
                         fontSize: '12px',
-                        color: '#455295',
-                        textAlign: 'left',
+                        color: '#28356f',
+                        fontWeight: '500',
                     }}>
                         {item.release_date || 'No release date'}
                     </div>
-                </Grid>
-            </Grid>
+                </div>
+            </div>
         </Button>
     )
 }
@@ -155,7 +137,6 @@ function MovieList({
     list,
     setList,
     openMovieForm,
-    eventtypes,
     movies,
     schedules,
 }) {
@@ -178,14 +159,6 @@ function MovieList({
             return `Searching By '${searchQuery.query}'`
         }
     }, [searchQuery])
-
-    const movieIconImage = useMemo(() => {
-        const movieType = eventtypes.find(s => s.value === constant.identifiers.movieTypeIdentifier)
-        if (movieType) {
-            return movieType.icon_path
-        }
-        return ''
-    }, [eventtypes])
 
     useEffect(() => {
         let variables = {
@@ -250,7 +223,6 @@ function MovieList({
                         >
                             <MovieItem
                                 item={item}
-                                movieTypeIcon={movieIconImage}
                                 movies={movies}
                                 schedules={schedules}
                                 onClickHandler={openMovieForm}
@@ -275,7 +247,6 @@ function MovieList({
 }
 
 export default connect(state => ({
-    eventtypes: state.marker.eventtypes,
     movies: state.movie.movies,
     schedules: state.schedule.schedules,
 }))(MovieList)

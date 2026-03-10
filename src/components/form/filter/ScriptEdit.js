@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { connect } from 'react-redux'
 import {
-    Grid,
     TextField,
 } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 
 import BaseForm from '../BaseForm'
 
@@ -112,7 +112,7 @@ function ScriptEdit({
                         variant="outlined"
                         value={value}
                         onChange={onTextChangeHandler}
-                        error={error}
+                        error={!!error}
                     />
                 </Grid>
                 {error && (
