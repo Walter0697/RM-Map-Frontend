@@ -10,6 +10,11 @@ const adminNavItems = [
         path: '/admin/pin',
     },
     {
+        label: 'Pin Group',
+        description: 'Group names for pin organization',
+        path: '/admin/pin-groups',
+    },
+    {
         label: 'Default Pin',
         description: 'Fallback pin assignments',
         path: '/admin/defaultpin',

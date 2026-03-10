@@ -125,6 +125,7 @@ describe('PinForm save integration', () => {
                 bottom_right_x: 0,
                 bottom_right_y: 0,
                 image_upload: uploadFile,
+                group_ids: [],
             },
         })
     })
@@ -173,6 +174,7 @@ describe('PinForm save integration', () => {
                 bottom_right_x: 50,
                 bottom_right_y: 50,
                 image_upload: null,
+                group_ids: [],
             },
         })
     })
