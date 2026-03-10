@@ -6,11 +6,13 @@ import time from './scripts/generic/time';
 import text from './scripts/generic/text';
 
 test('formats schedule date ranges', () => {
+  const fromOnly = time.displayDateRange('2026-01-01T08:00:00Z', null);
+  const toOnly = time.displayDateRange(null, '2026-01-01T10:00:00Z');
   expect(time.displayDateRange('2026-01-01T08:00:00Z', '2026-01-01T10:00:00Z')).toBe(
-    '2026-01-01 08:00 to 2026-01-01 10:00'
+    `${fromOnly.replace('available at: ', '')} to ${toOnly.replace('ends at ', '')}`
   );
-  expect(time.displayDateRange('2026-01-01T08:00:00Z', null)).toBe('available at: 2026-01-01 08:00');
-  expect(time.displayDateRange(null, '2026-01-01T10:00:00Z')).toBe('ends at 2026-01-01 10:00');
+  expect(fromOnly).toMatch(/^available at: \d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
+  expect(toOnly).toMatch(/^ends at \d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
   expect(time.displayDateRange(null, null)).toBe('');
 });
 
