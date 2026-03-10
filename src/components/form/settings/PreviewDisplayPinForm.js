@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Box, Button, Typography } from '@mui/material'
 import Grid from '@mui/material/GridLegacy'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -26,6 +26,7 @@ function PreviewDisplayPinForm({
     const [ pinLoading, setPinLoading ] = useState(false)
     const [ updateLoading, setUpdateLoading ] = useState(false)
     const [ updateError, setUpdateError ] = useState('')
+    const panelRef = useRef(null)
 
     useEffect(() => {
         const loadPins = async () => {
@@ -61,6 +62,26 @@ function PreviewDisplayPinForm({
         setSelectedGroupKey('')
         setUpdateError('')
     }, [currentPinId, open])
+
+    useEffect(() => {
+        if (!open) return
+        const element = panelRef.current
+        if (!element || !element.animate) return
+        const animation = element.animate(
+            [
+                { opacity: 0.2, transform: 'translateY(2px)' },
+                { opacity: 1, transform: 'translateY(0)' },
+            ],
+            {
+                duration: 420,
+                easing: 'ease-in-out',
+                fill: 'both',
+            },
+        )
+        return () => {
+            animation.cancel()
+        }
+    }, [open, selectedGroupKey])
 
     const confirmLoading = useMemo(() => {
         if (pinLoading) return true
@@ -163,7 +184,7 @@ function PreviewDisplayPinForm({
             ) : null}
             <Grid container spacing={2}>
                 {!selectedGroup ? (
-                    <Grid item xs={12} sx={{ animation: 'opacityEase 420ms ease-in-out', '@keyframes opacityEase': { from: { opacity: 0 }, to: { opacity: 1 } } }}>
+                    <Grid item xs={12} ref={panelRef}>
                         <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
                             Groups
                         </Typography>
@@ -218,7 +239,7 @@ function PreviewDisplayPinForm({
                         </Grid>
                     </Grid>
                 ) : (
-                    <Grid item xs={12} sx={{ animation: 'opacityEase 420ms ease-in-out', '@keyframes opacityEase': { from: { opacity: 0 }, to: { opacity: 1 } } }}>
+                    <Grid item xs={12} ref={panelRef}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                             <Button size='small' variant='outlined' startIcon={<ArrowBackIcon fontSize='small' />} onClick={() => setSelectedGroupKey('')}>
                                 Back

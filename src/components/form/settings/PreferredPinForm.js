@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useMutation } from '@apollo/client'
 import {
     Alert,
@@ -35,6 +35,7 @@ function PreferredPinForm({
     const [ selectedGroupKey, setSelectedGroupKey ] = useState('')
     const [ pinLoading, setPinLoading ] = useState(false)
     const [ pinError, setPinError ] = useState('')
+    const panelRef = useRef(null)
 
     const confirmLoading = useMemo(() => {
         if (selectedPinId === -1) return true
@@ -83,6 +84,26 @@ function PreferredPinForm({
         }
 
     }, [updateData, updateError])
+
+    useEffect(() => {
+        if (!open) return
+        const element = panelRef.current
+        if (!element || !element.animate) return
+        const animation = element.animate(
+            [
+                { opacity: 0.2, transform: 'translateY(2px)' },
+                { opacity: 1, transform: 'translateY(0)' },
+            ],
+            {
+                duration: 420,
+                easing: 'ease-in-out',
+                fill: 'both',
+            },
+        )
+        return () => {
+            animation.cancel()
+        }
+    }, [open, selectedGroupKey])
 
     const onSubmitHandler = () => {
         if (selectedPinId <= 0) return 
@@ -151,7 +172,7 @@ function PreferredPinForm({
                 ) : null}
                 <Grid container spacing={2}>
                     {!selectedGroup ? (
-                        <Grid item xs={12} sx={{ animation: 'opacityEase 420ms ease-in-out', '@keyframes opacityEase': { from: { opacity: 0 }, to: { opacity: 1 } } }}>
+                        <Grid item xs={12} ref={panelRef}>
                             <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
                                 Groups
                             </Typography>
@@ -206,7 +227,7 @@ function PreferredPinForm({
                             </Grid>
                         </Grid>
                     ) : (
-                        <Grid item xs={12} sx={{ animation: 'opacityEase 420ms ease-in-out', '@keyframes opacityEase': { from: { opacity: 0 }, to: { opacity: 1 } } }}>
+                        <Grid item xs={12} ref={panelRef}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                 <Button size='small' variant='outlined' startIcon={<ArrowBackIcon fontSize='small' />} onClick={() => setSelectedGroupKey('')}>
                                     Back
