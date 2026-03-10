@@ -6,6 +6,9 @@ import {
     Button,
     Card,
     CardContent,
+    Checkbox,
+    Chip,
+    FormControlLabel,
     Stack,
     TextField,
     Typography,
@@ -19,8 +22,10 @@ function PinGroupManage({ jwt }) {
     const [ saving, setSaving ] = useState(false)
     const [ list, setList ] = useState([])
     const [ createName, setCreateName ] = useState('')
+    const [ createIsNew, setCreateIsNew ] = useState(false)
     const [ editingID, setEditingID ] = useState(null)
     const [ editingName, setEditingName ] = useState('')
+    const [ editingIsNew, setEditingIsNew ] = useState(false)
     const [ errorMessage, setErrorMessage ] = useState('')
     const [ successMessage, setSuccessMessage ] = useState('')
 
@@ -67,7 +72,7 @@ function PinGroupManage({ jwt }) {
                     'Content-Type': 'application/json',
                     Authorization: jwt,
                 },
-                body: JSON.stringify({ name: createName.trim() }),
+                body: JSON.stringify({ name: createName.trim(), is_new: createIsNew }),
             })
             if (!response.ok) {
                 const text = await response.text()
@@ -75,6 +80,7 @@ function PinGroupManage({ jwt }) {
                 return
             }
             setCreateName('')
+            setCreateIsNew(false)
             setSuccessMessage('Pin group created')
             fetchGroups()
         } catch (error) {
@@ -96,7 +102,7 @@ function PinGroupManage({ jwt }) {
                     'Content-Type': 'application/json',
                     Authorization: jwt,
                 },
-                body: JSON.stringify({ name: editingName.trim() }),
+                body: JSON.stringify({ name: editingName.trim(), is_new: editingIsNew }),
             })
             if (!response.ok) {
                 const text = await response.text()
@@ -105,6 +111,7 @@ function PinGroupManage({ jwt }) {
             }
             setEditingID(null)
             setEditingName('')
+            setEditingIsNew(false)
             setSuccessMessage('Pin group updated')
             fetchGroups()
         } catch (error) {
@@ -160,6 +167,15 @@ function PinGroupManage({ jwt }) {
                                 onChange={(event) => setCreateName(event.target.value)}
                                 fullWidth
                             />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={createIsNew}
+                                        onChange={(event) => setCreateIsNew(event.target.checked)}
+                                    />
+                                }
+                                label='Mark as New'
+                            />
                             <Button variant='contained' disabled={!canCreate} onClick={createGroup}>
                                 Add Group
                             </Button>
@@ -177,14 +193,28 @@ function PinGroupManage({ jwt }) {
                             <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ xs: 'stretch', md: 'center' }}>
                                 <Box sx={{ flex: 1 }}>
                                     {editingID === item.id ? (
-                                        <TextField
-                                            fullWidth
-                                            label='Group name'
-                                            value={editingName}
-                                            onChange={(event) => setEditingName(event.target.value)}
-                                        />
+                                        <Stack spacing={1}>
+                                            <TextField
+                                                fullWidth
+                                                label='Group name'
+                                                value={editingName}
+                                                onChange={(event) => setEditingName(event.target.value)}
+                                            />
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={editingIsNew}
+                                                        onChange={(event) => setEditingIsNew(event.target.checked)}
+                                                    />
+                                                }
+                                                label='Mark as New'
+                                            />
+                                        </Stack>
                                     ) : (
-                                        <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>{item.name}</Typography>
+                                        <Stack direction='row' spacing={1} alignItems='center'>
+                                            <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>{item.name}</Typography>
+                                            {item.is_new ? <Chip size='small' color='warning' label='NEW' /> : null}
+                                        </Stack>
                                     )}
                                 </Box>
                                 {editingID === item.id ? (
@@ -201,6 +231,7 @@ function PinGroupManage({ jwt }) {
                                             onClick={() => {
                                                 setEditingID(null)
                                                 setEditingName('')
+                                                setEditingIsNew(false)
                                             }}
                                             disabled={saving}
                                         >
@@ -214,6 +245,7 @@ function PinGroupManage({ jwt }) {
                                             onClick={() => {
                                                 setEditingID(item.id)
                                                 setEditingName(item.name || '')
+                                                setEditingIsNew(Boolean(item.is_new))
                                             }}
                                         >
                                             Edit

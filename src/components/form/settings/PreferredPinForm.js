@@ -3,7 +3,9 @@ import { useMutation } from '@apollo/client'
 import {
     Alert,
     Box,
+    Chip,
     IconButton,
+    Stack,
     Typography,
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -138,13 +140,14 @@ function PreferredPinForm({
 
     const groupOptions = useMemo(() => {
         const options = [
-            { key: 'all', label: 'All', pins: allPins },
+            { key: 'all', label: 'All', pins: allPins, isNew: false },
             ...groupedOnly.map((section, index) => ({
                 key: `group-${section.group_id ?? section.group_name ?? index}`,
                 label: section.group_name || `Group ${index + 1}`,
+                isNew: Boolean(section.is_new),
                 pins: Array.isArray(section.pins) ? section.pins : [],
             })),
-            { key: 'ungrouped', label: 'Ungrouped', pins: Array.isArray(ungroupedSection?.pins) ? ungroupedSection.pins : [] },
+            { key: 'ungrouped', label: 'Ungrouped', pins: Array.isArray(ungroupedSection?.pins) ? ungroupedSection.pins : [], isNew: false },
         ]
         return options
     }, [allPins, groupedOnly, ungroupedSection])
@@ -221,9 +224,12 @@ function PreferredPinForm({
                                                     </Box>
                                                 )}
                                                 <Box>
-                                                    <Typography variant='body2' sx={{ fontWeight: 700 }}>
-                                                        {group.label}
-                                                    </Typography>
+                                                    <Stack direction='row' spacing={0.75} alignItems='center'>
+                                                        <Typography variant='body2' sx={{ fontWeight: 700 }}>
+                                                            {group.label}
+                                                        </Typography>
+                                                        {group.isNew ? <Chip size='small' color='warning' label='NEW' /> : null}
+                                                    </Stack>
                                                     <Typography variant='caption' color='text.secondary'>
                                                         {group.pins.length} pins
                                                     </Typography>
@@ -257,6 +263,7 @@ function PreferredPinForm({
                                 <Typography variant='subtitle2' sx={{ fontWeight: 700 }}>
                                     {selectedGroup.label}
                                 </Typography>
+                                {selectedGroup.isNew ? <Chip size='small' color='warning' label='NEW' /> : null}
                             </Box>
                             <Grid container spacing={2}>
                                 {displayedPins.map((item, index) => (
