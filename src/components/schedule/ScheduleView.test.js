@@ -154,9 +154,8 @@ describe('ScheduleView layout contracts', () => {
 
         expect(document.body.textContent).toContain('Sync failed')
         expect(document.body.textContent).toContain('Token expired')
-        expect(document.body.textContent).toContain('Sync Whole Schedule')
 
-        const syncButton = Array.from(document.querySelectorAll('button')).find((button) => button.textContent.includes('Sync Whole Schedule'))
+        const syncButton = document.querySelector('button[aria-label="sync whole schedule"]')
         expect(syncButton).toBeTruthy()
 
         await act(async () => {

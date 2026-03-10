@@ -282,14 +282,16 @@ function SettingPage({
         if (!previewDisplayPin?.pin_id) {
             setPreviewDisplayPin((prev) => ({
                 ...prev,
+                pin_label: '',
                 pin_image_path: '',
             }))
             return
         }
         if (!pinSelectData?.pins) return
-        const selectedPin = pinSelectData.pins.find((item) => item.id === previewDisplayPin.pin_id)
+        const selectedPin = pinSelectData.pins.find((item) => Number(item.id) === Number(previewDisplayPin.pin_id))
         setPreviewDisplayPin((prev) => ({
             ...prev,
+            pin_label: prev?.pin_label || selectedPin?.label || '',
             pin_image_path: selectedPin?.display_path || '',
         }))
     }, [pinSelectData, previewDisplayPin.pin_id])

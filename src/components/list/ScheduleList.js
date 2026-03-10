@@ -464,7 +464,7 @@ function TodayList({
     const todayListOnClick = () => {
         if (!list || (list && list.length === 0)) return
 
-        const dayKey = dayjs.utc(list[0].selected_date).format('YYYY-MM-DD')
+        const dayKey = dayjs(list[0].selected_date).format('YYYY-MM-DD')
         onClickHandler(list, dayKey)
     }
 
@@ -591,8 +591,8 @@ function ScheduleList({
         // use dictionary for grouping the schedules into each day
         let result = {}
         upcoming_list.forEach((sd) => {
-            const dayKey = dayjs.utc(sd.selected_date).format('YYYY-MM-DD')
-            const displayDate = dayjs.utc(sd.selected_date).format('MM/DD/YYYY')
+            const dayKey = dayjs(sd.selected_date).format('YYYY-MM-DD')
+            const displayDate = dayjs(sd.selected_date).format('MM/DD/YYYY')
             if (dayKey in result) {
                 result[dayKey].items.push(sd)
             } else {
@@ -622,8 +622,8 @@ function ScheduleList({
         if (location.pathname === '/schedule/open') {
             timeout = window.setTimeout(() => {
                 const dayKey = today_schedules && today_schedules.length > 0
-                    ? dayjs.utc(today_schedules[0].selected_date).format('YYYY-MM-DD')
-                    : dayjs.utc().format('YYYY-MM-DD')
+                    ? dayjs(today_schedules[0].selected_date).format('YYYY-MM-DD')
+                    : dayjs().format('YYYY-MM-DD')
                 openScheduleView(today_schedules, dayKey)
             }, 800)
             
