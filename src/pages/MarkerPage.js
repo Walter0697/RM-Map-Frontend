@@ -10,6 +10,8 @@ import {
     animated,
 } from '@react-spring/web'
 import { nanoid } from 'nanoid'
+import { useTheme } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
 
 import ExploreIcon from '@mui/icons-material/Explore'
 
@@ -43,6 +45,8 @@ function MarkerPage({
     pendingDeepLink,
     dispatch,
 }) {
+    const theme = useTheme()
+    const isWebView = useMediaQuery(theme.breakpoints.up('lg'))
     const location = useLocation()
     const suffix = location.pathname.replace('/markers', '')
 
@@ -412,9 +416,10 @@ function MarkerPage({
                     transform: fakeTranform.to({ range: [0.0, 0.5, 1.0], output: ['rotateY(0deg)', 'rotateY(180deg)', 'rotateY(0deg)']}),
                     position: 'absolute',
                     top: '5%',
-                    left: '22%',
-                    width: '68%',
-                    maxWidth: '700px',
+                    left: isWebView ? 'clamp(48px, 8vw, 160px)' : '22%',
+                    right: isWebView ? '72px' : 'auto',
+                    width: isWebView ? 'auto' : '68%',
+                    maxWidth: isWebView ? 'none' : '700px',
                 }}
             >
                 <CountrySelect />
