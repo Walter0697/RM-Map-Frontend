@@ -167,6 +167,11 @@ function PreviewDisplayPinForm({
         [groupOptions, selectedGroupKey],
     )
     const displayedPins = selectedGroup?.pins || []
+    const isPinSelected = selectedPinId > 0
+    const getSelectedPinForGroup = (group) => {
+        if (!isPinSelected) return null
+        return (group.pins || []).find((pin) => Number(pin.id) === selectedPinId) || null
+    }
 
     return (
         <BaseForm
@@ -193,6 +198,8 @@ function PreviewDisplayPinForm({
                         <Grid container spacing={1.5}>
                             {groupOptions.map((group) => {
                                 const previewPin = pickPreviewPin(group.key, group.pins)
+                                const selectedPinInGroup = getSelectedPinForGroup(group)
+                                const isSelectedGroup = Boolean(selectedPinInGroup)
                                 return (
                                     <Grid item xs={12} md={6} key={group.key}>
                                         <Box
@@ -202,7 +209,8 @@ function PreviewDisplayPinForm({
                                                 alignItems: 'center',
                                                 gap: 1.5,
                                                 padding: '10px',
-                                                border: '1px solid #8a8a8a',
+                                                border: isSelectedGroup ? '2px solid #d32f2f' : '1px solid #8a8a8a',
+                                                backgroundColor: isSelectedGroup ? '#ffe7a8' : '#fff',
                                                 borderRadius: '6px',
                                                 cursor: 'pointer',
                                             }}
@@ -231,7 +239,18 @@ function PreviewDisplayPinForm({
                                                     {group.pins.length} pins
                                                 </Typography>
                                             </Box>
-                                            <Box sx={{ marginLeft: 'auto', color: '#6e6e6e' }}>
+                                            <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 1, color: '#6e6e6e' }}>
+                                                {selectedPinInGroup ? (
+                                                    <img
+                                                        width='30'
+                                                        src={backend.IMAGE_LINK + getPinImagePath(selectedPinInGroup)}
+                                                        alt={selectedPinInGroup.label}
+                                                        style={{
+                                                            height: '30px',
+                                                            objectFit: 'contain',
+                                                        }}
+                                                    />
+                                                ) : null}
                                                 <ChevronRightIcon fontSize='small' />
                                             </Box>
                                         </Box>
@@ -277,6 +296,7 @@ function PreviewDisplayPinForm({
                                             sx={{
                                                 fontSize: '13px',
                                                 fontWeight: 600,
+                                                textAlign: 'center',
                                                 whiteSpace: 'nowrap',
                                                 overflow: 'hidden',
                                                 textOverflow: 'ellipsis',
