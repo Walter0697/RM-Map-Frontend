@@ -8,7 +8,7 @@ import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
 import backend from './constant/backend'
 import store from './store'
-import actions from './store/actions'
+import { handleTerminalUnauthorized } from './scripts/authSession'
 
 const httpLink = createUploadLink({
     uri: backend.GRAPHQL_BACKEND,
@@ -41,20 +41,6 @@ const authLink = setContext((_, { headers }) => {
     }
 })
 
-let isRedirectingUnauthorized = false
-
-const redirectToLoginOnUnauthorized = () => {
-    store.dispatch(actions.clearDeepLinkIntent())
-    store.dispatch(actions.logout())
-
-    if (typeof window === 'undefined') return
-    if (window.location.pathname.startsWith('/login')) return
-    if (isRedirectingUnauthorized) return
-
-    isRedirectingUnauthorized = true
-    window.location.replace('/login')
-}
-
 const errorLink = onError(({ graphQLErrors, networkError }) => {
     const hasUnauthorizedGraphQLError = (graphQLErrors || []).some((error) => {
         const code = error?.extensions?.code
@@ -71,7 +57,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     const hasUnauthorizedNetworkError = statusCode === 401
 
     if (hasUnauthorizedGraphQLError || hasUnauthorizedNetworkError) {
-        redirectToLoginOnUnauthorized()
+        handleTerminalUnauthorized()
     }
 })
 
