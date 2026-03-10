@@ -19,6 +19,11 @@ function PreferredPinForm({
     onCreated,
     jwt,
 }) {
+    const normalizePinID = (value) => {
+        const parsed = Number(value)
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : -1
+    }
+
     const [ updatePreferredPinGQL, { data: updateData, loading: updateLoading, error: updateError } ] = useMutation(graphql.users.update_pin, { errorPolicy: 'all' })
 
     const [ pinList, setPinList ] = useState([])
@@ -35,7 +40,7 @@ function PreferredPinForm({
     }, [ selectedPinId, pinLoading, updateLoading ])
 
     useEffect(() => {
-        setPinId(pinInfo?.pin_id ?? -1)
+        setPinId(normalizePinID(pinInfo?.pin_id))
     }, [pinInfo, open])
 
     useEffect(() => {
@@ -75,8 +80,8 @@ function PreferredPinForm({
     }, [updateData, updateError])
 
     const onSubmitHandler = () => {
-        if (selectedPinId === -1) return
-        updatePreferredPinGQL({ variables: {
+        if (selectedPinId <= 0) return 
+        updatePreferredPinGQL({ variables: { 
             label: pinInfo.label,
             pin_id: selectedPinId,
         }})
@@ -124,12 +129,12 @@ function PreferredPinForm({
                                                 width: '100%',
                                                 backgroundColor: '#dbfdff',
                                                 padding: '6px',
-                                                border: (selectedPinId === item.id) ? '2px solid red' : '2px solid black',
-                                                borderRadius: '6px',
-                                                cursor: 'pointer',
-                                            }}
-                                            onClick={() => setPinId(item.id)}
-                                        >
+                                        border: (selectedPinId === Number(item.id)) ? '2px solid red' : '2px solid black',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                    }}
+                                    onClick={() => setPinId(Number(item.id))}
+                                >
                                             <Box
                                                 sx={{
                                                     fontSize: '13px',

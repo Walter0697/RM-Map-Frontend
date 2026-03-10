@@ -93,7 +93,12 @@ function PinManage({ jwt }) {
 
     useEffect(() => {
         if (pinData) {
-            setList(pinData.pins)
+            const sorted = [ ...(pinData.pins || []) ].sort((a, b) => {
+                const aTime = new Date(a.created_at || 0).getTime()
+                const bTime = new Date(b.created_at || 0).getTime()
+                return bTime - aTime
+            })
+            setList(sorted)
         }
 
     }, [pinData, pinError])

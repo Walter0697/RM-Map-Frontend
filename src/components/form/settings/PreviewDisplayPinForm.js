@@ -12,6 +12,11 @@ function PreviewDisplayPinForm({
     currentPinId,
     onUpdated,
 }) {
+    const normalizePinID = (value) => {
+        const parsed = Number(value)
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : -1
+    }
+
     const [ pinList, setPinList ] = useState([])
     const [ groupedPins, setGroupedPins ] = useState([])
     const [ selectedPinId, setSelectedPinId ] = useState(-1)
@@ -49,7 +54,7 @@ function PreviewDisplayPinForm({
     }, [jwt, open])
 
     useEffect(() => {
-        setSelectedPinId(currentPinId || -1)
+        setSelectedPinId(normalizePinID(currentPinId))
         setUpdateError('')
     }, [currentPinId, open])
 
@@ -134,15 +139,15 @@ function PreviewDisplayPinForm({
                                 >
                                     <Box
                                         sx={{
-                                            width: '100%',
-                                            backgroundColor: '#dbfdff',
-                                            padding: '6px',
-                                            border: (selectedPinId === item.id) ? '2px solid red' : '2px solid black',
-                                            borderRadius: '6px',
-                                            cursor: 'pointer',
-                                        }}
-                                        onClick={() => setSelectedPinId(item.id)}
-                                    >
+                                width: '100%',
+                                backgroundColor: '#dbfdff',
+                                padding: '6px',
+                                border: (selectedPinId === Number(item.id)) ? '2px solid red' : '2px solid black',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                            }}
+                            onClick={() => setSelectedPinId(Number(item.id))}
+                        >
                                         <Box
                                             sx={{
                                                 fontSize: '13px',
