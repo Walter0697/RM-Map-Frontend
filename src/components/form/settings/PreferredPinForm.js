@@ -3,7 +3,7 @@ import { useMutation } from '@apollo/client'
 import {
     Alert,
     Box,
-    Button,
+    IconButton,
     Typography,
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -134,6 +134,8 @@ function PreferredPinForm({
         return pins[index]
     }
 
+    const getPinImagePath = (pin) => pin?.image_path || pin?.display_path || ''
+
     const groupOptions = useMemo(() => {
         const options = [
             { key: 'all', label: 'All', pins: allPins },
@@ -197,7 +199,7 @@ function PreferredPinForm({
                                                 {previewPin ? (
                                                     <img
                                                         width='52'
-                                                        src={backend.IMAGE_LINK + previewPin.display_path}
+                                                        src={backend.IMAGE_LINK + getPinImagePath(previewPin)}
                                                         alt={group.label}
                                                         style={{
                                                             height: '52px',
@@ -229,9 +231,9 @@ function PreferredPinForm({
                     ) : (
                         <Grid item xs={12} ref={panelRef}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                <Button size='small' variant='outlined' startIcon={<ArrowBackIcon fontSize='small' />} onClick={() => setSelectedGroupKey('')}>
-                                    Back
-                                </Button>
+                                <IconButton size='small' onClick={() => setSelectedGroupKey('')} aria-label='Back to groups'>
+                                    <ArrowBackIcon fontSize='small' />
+                                </IconButton>
                                 <Typography variant='subtitle2' sx={{ fontWeight: 700 }}>
                                     {selectedGroup.label}
                                 </Typography>
@@ -251,9 +253,9 @@ function PreferredPinForm({
                                         <Box
                                             sx={{
                                                 width: '100%',
-                                                backgroundColor: '#fff',
+                                                backgroundColor: (selectedPinId === Number(item.id)) ? '#ffe7a8' : '#fff',
                                                 padding: '6px',
-                                                border: (selectedPinId === Number(item.id)) ? '2px solid red' : '2px solid black',
+                                                border: (selectedPinId === Number(item.id)) ? '2px solid #d32f2f' : '2px solid black',
                                                 borderRadius: '6px',
                                                 cursor: 'pointer',
                                             }}
@@ -273,7 +275,7 @@ function PreferredPinForm({
                                             </Box>
                                             <img
                                                 width='100%'
-                                                src={backend.IMAGE_LINK + item.display_path}
+                                                src={backend.IMAGE_LINK + getPinImagePath(item)}
                                                 alt={item.label}
                                                 style={{
                                                     height: '72px',

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Alert, Box, Button, Typography } from '@mui/material'
+import { Alert, Box, IconButton, Typography } from '@mui/material'
 import Grid from '@mui/material/GridLegacy'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -147,6 +147,8 @@ function PreviewDisplayPinForm({
         return pins[index]
     }
 
+    const getPinImagePath = (pin) => pin?.image_path || pin?.display_path || ''
+
     const groupOptions = useMemo(() => {
         const options = [
             { key: 'all', label: 'All', pins: allPins },
@@ -209,7 +211,7 @@ function PreviewDisplayPinForm({
                                             {previewPin ? (
                                                 <img
                                                     width='52'
-                                                    src={backend.IMAGE_LINK + previewPin.display_path}
+                                                    src={backend.IMAGE_LINK + getPinImagePath(previewPin)}
                                                     alt={group.label}
                                                     style={{
                                                         height: '52px',
@@ -241,9 +243,9 @@ function PreviewDisplayPinForm({
                 ) : (
                     <Grid item xs={12} ref={panelRef}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                            <Button size='small' variant='outlined' startIcon={<ArrowBackIcon fontSize='small' />} onClick={() => setSelectedGroupKey('')}>
-                                Back
-                            </Button>
+                            <IconButton size='small' onClick={() => setSelectedGroupKey('')} aria-label='Back to groups'>
+                                <ArrowBackIcon fontSize='small' />
+                            </IconButton>
                             <Typography variant='subtitle2' sx={{ fontWeight: 700 }}>
                                 {selectedGroup.label}
                             </Typography>
@@ -263,9 +265,9 @@ function PreviewDisplayPinForm({
                                     <Box
                                         sx={{
                                             width: '100%',
-                                            backgroundColor: '#fff',
+                                            backgroundColor: (selectedPinId === Number(item.id)) ? '#ffe7a8' : '#fff',
                                             padding: '6px',
-                                            border: (selectedPinId === Number(item.id)) ? '2px solid red' : '2px solid black',
+                                            border: (selectedPinId === Number(item.id)) ? '2px solid #d32f2f' : '2px solid black',
                                             borderRadius: '6px',
                                             cursor: 'pointer',
                                         }}
@@ -285,7 +287,7 @@ function PreviewDisplayPinForm({
                                         </Box>
                                         <img
                                             width='100%'
-                                            src={backend.IMAGE_LINK + item.display_path}
+                                            src={backend.IMAGE_LINK + getPinImagePath(item)}
                                             alt={item.label}
                                             style={{
                                                 height: '72px',
