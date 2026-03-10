@@ -148,7 +148,7 @@ function PreferredPinForm({
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
-                            Step 1: Pick Group
+                            Groups
                         </Typography>
                         <Grid container spacing={2}>
                             {groupOptions.map((group) => {
@@ -158,9 +158,9 @@ function PreferredPinForm({
                                         <Box
                                             sx={{
                                                 width: '100%',
-                                                backgroundColor: '#eef8ff',
+                                                backgroundColor: selectedGroupKey === group.key ? '#f7f9fc' : '#fff',
                                                 padding: '6px',
-                                                border: selectedGroupKey === group.key ? '2px solid red' : '2px solid black',
+                                                border: selectedGroupKey === group.key ? '2px dashed #1976d2' : '1px solid #8a8a8a',
                                                 borderRadius: '6px',
                                                 cursor: 'pointer',
                                             }}
@@ -201,7 +201,7 @@ function PreferredPinForm({
                     </Grid>
                     <Grid item xs={12}>
                         <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
-                            Step 2: Pick Pin
+                            Pins
                         </Typography>
                         <Grid container spacing={2}>
                             {displayedPins.map((item, index) => (
@@ -218,7 +218,7 @@ function PreferredPinForm({
                                     <Box
                                         sx={{
                                             width: '100%',
-                                            backgroundColor: '#dbfdff',
+                                            backgroundColor: '#fff',
                                             padding: '6px',
                                             border: (selectedPinId === Number(item.id)) ? '2px solid red' : '2px solid black',
                                             borderRadius: '6px',
