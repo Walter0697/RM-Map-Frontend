@@ -288,6 +288,9 @@ function PinManage({ jwt }) {
                                         {item.label}
                                     </Typography>
                                     <Typography variant='body2' color='text.secondary'>
+                                        group: {Array.isArray(item.group_names) && item.group_names.length ? item.group_names[0] : 'Ungrouped'}
+                                    </Typography>
+                                    <Typography variant='body2' color='text.secondary'>
                                         topleft: {item.top_left_x}, {item.top_left_y}
                                     </Typography>
                                     <Typography variant='body2' color='text.secondary'>
