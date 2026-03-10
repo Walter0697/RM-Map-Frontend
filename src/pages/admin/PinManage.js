@@ -287,14 +287,15 @@ function PinManage({ jwt }) {
                                     <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
                                         {item.label}
                                     </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        group: {Array.isArray(item.group_names) && item.group_names.length ? item.group_names[0] : 'Ungrouped'}
-                                    </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        topleft: {item.top_left_x}, {item.top_left_y}
-                                    </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        bottomright: {item.bottom_right_x}, {item.bottom_right_y}
+                                    <Typography
+                                        variant='body1'
+                                        sx={{
+                                            fontWeight: 700,
+                                            color: 'primary.main',
+                                            mt: 0.25,
+                                        }}
+                                    >
+                                        Group: {Array.isArray(item.group_names) && item.group_names.length ? item.group_names[0] : 'Ungrouped'}
                                     </Typography>
                                     <Box sx={{ mt: 1 }}>
                                         <Typography variant='caption' color='text.secondary' sx={{ display: 'block', mb: 0.75 }}>
