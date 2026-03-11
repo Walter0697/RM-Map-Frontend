@@ -130,8 +130,9 @@ describe('ScheduleExportPanel', () => {
                 headers: expect.objectContaining({
                     Authorization: 'jwt-token',
                 }),
+                body: expect.stringContaining('"timezone":"America/Toronto"'),
             }))
-            expect(screen.getByText(/Job/)).toBeInTheDocument()
+            expect(screen.getAllByText('queued').length).toBeGreaterThan(0)
         })
 
         await act(async () => {
@@ -184,19 +185,18 @@ describe('ScheduleExportPanel', () => {
         fireEvent.click(screen.getByText('Create Export'))
 
         await waitFor(() => {
-            expect(screen.getByText(/Job/)).toBeInTheDocument()
-            expect(screen.getByText('Download')).toBeInTheDocument()
-            expect(screen.getByText('Preview')).toBeInTheDocument()
+            expect(screen.getByRole('button', { name: /download text/i })).toBeInTheDocument()
+            expect(screen.getByRole('button', { name: /preview image/i })).toBeInTheDocument()
         })
 
-        fireEvent.click(screen.getByText('Download'))
+        fireEvent.click(screen.getByRole('button', { name: /download text/i }))
 
         await waitFor(() => {
             expect(window.URL.createObjectURL).toHaveBeenCalled()
             expect(appendSpy).toHaveBeenCalled()
         })
 
-        fireEvent.click(screen.getByText('Share'))
+        fireEvent.click(screen.getByRole('button', { name: /share text/i }))
 
         await waitFor(() => {
             expect(navigator.share).toHaveBeenCalled()
@@ -214,7 +214,7 @@ describe('ScheduleExportPanel', () => {
         await waitFor(() => {
             expect(global.fetch).not.toHaveBeenCalled()
             expect(screen.getByText('Local image preview ready')).toBeInTheDocument()
-            expect(screen.getByText('Preview')).toBeInTheDocument()
+            expect(screen.getByRole('button', { name: /preview image/i })).toBeInTheDocument()
         })
     })
 })

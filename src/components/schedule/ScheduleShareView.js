@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { connect } from 'react-redux'
 import {
+    Box,
     CircularProgress,
     Dialog,
     DialogContent,
@@ -179,18 +180,35 @@ function ScheduleShareView({
     return (
         <Dialog
             fullWidth
-            maxWidth='lg'
+            maxWidth='md'
             open={open}
             onClose={handleClose}
             scroll='paper'
             TransitionComponent={TransitionUp}
         >
             <DialogTitle>{scheduleTitle}</DialogTitle>
-            <DialogContent dividers>
+            <DialogContent
+                dividers
+                sx={{
+                    background: 'linear-gradient(180deg, rgba(244, 251, 240, 0.78) 0%, rgba(255, 255, 255, 1) 100%)',
+                }}
+            >
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <div
-                            style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '280px', alignItems: 'center', gap: '12px' }}
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                minHeight: '280px',
+                                alignItems: 'center',
+                                gap: '12px',
+                                padding: '14px 16px 18px 16px',
+                                borderRadius: '24px',
+                                border: '1px solid rgba(69, 82, 149, 0.10)',
+                                background: 'rgba(255,255,255,0.86)',
+                                boxShadow: '0 20px 44px rgba(69, 82, 149, 0.08)',
+                            }}
                             onTouchStart={onTouchStart}
                             onTouchEnd={onTouchEnd}
                         >
@@ -205,14 +223,14 @@ function ScheduleShareView({
                                         key={activePreview.dateKey}
                                         style={{
                                             width: '100%',
-                                            maxWidth: '420px',
+                                            maxWidth: '440px',
                                             transition: 'opacity 160ms ease, transform 160ms ease',
                                             ...getPreviewCardStyle(transitionPhase, animationDirection),
                                         }}
                                     >
                                         {activePreview?.imageUrl ? (
                                             <img
-                                                style={{ width: '100%', maxWidth: '420px', borderRadius: '18px', boxShadow: '0 16px 40px rgba(38, 62, 108, 0.18)' }}
+                                                style={{ width: '100%', maxWidth: '440px', borderRadius: '22px', boxShadow: '0 20px 52px rgba(38, 62, 108, 0.18)' }}
                                                 src={activePreview.imageUrl}
                                                 alt='Schedule share preview'
                                             />
@@ -247,9 +265,23 @@ function ScheduleShareView({
                         </div>
                     </Grid>
                     <Grid item xs={12}>
-                        <Grid container alignItems='center'>
-                            <Grid item xs={4} style={{ display: 'flex', justifyContent: 'flex-start', paddingRight: '18px' }}>
-                                {navigator.share ? (
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                justifyContent: 'center',
+                                gap: { xs: 1.5, sm: 2.5 },
+                                mt: 0.5,
+                            }}
+                        >
+                            {navigator.share ? (
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: { xs: 'center', sm: 'flex-start' },
+                                        width: { xs: 'calc(50% - 6px)', sm: 'auto' },
+                                    }}
+                                >
                                     <CircleIconButton
                                         onClickHandler={shareImage}
                                         disabled={generating || !activePreview?.imageUrl}
@@ -258,9 +290,15 @@ function ScheduleShareView({
                                     >
                                         <SendIcon />
                                     </CircleIconButton>
-                                ) : null}
-                            </Grid>
-                            <Grid item xs={4} style={{ display: 'flex', justifyContent: 'center', paddingLeft: '9px', paddingRight: '9px' }}>
+                                </Box>
+                            ) : null}
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    width: { xs: navigator.share ? 'calc(50% - 6px)' : 'calc(50% - 6px)', sm: 'auto' },
+                                }}
+                            >
                                 <CircleIconButton
                                     onClickHandler={downloadAllImages}
                                     disabled={generating || previewItems.length === 0}
@@ -269,8 +307,14 @@ function ScheduleShareView({
                                 >
                                     <DownloadForOfflineIcon />
                                 </CircleIconButton>
-                            </Grid>
-                            <Grid item xs={4} style={{ display: 'flex', justifyContent: 'flex-end', paddingLeft: '18px' }}>
+                            </Box>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    width: { xs: navigator.share ? '100%' : 'calc(50% - 6px)', sm: 'auto' },
+                                }}
+                            >
                                 <CircleIconButton
                                     onClickHandler={downloadImage}
                                     disabled={generating || !activePreview?.imageUrl}
@@ -279,8 +323,8 @@ function ScheduleShareView({
                                 >
                                     <SaveIcon />
                                 </CircleIconButton>
-                            </Grid>
-                        </Grid>
+                            </Box>
+                        </Box>
                     </Grid>
                 </Grid>
             </DialogContent>

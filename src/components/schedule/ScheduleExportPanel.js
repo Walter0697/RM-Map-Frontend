@@ -5,14 +5,15 @@ import dayjsPluginUTC from 'dayjs-plugin-utc'
 import {
     Alert,
     Button,
-    Checkbox,
+    Box,
     Chip,
     CircularProgress,
+    Divider,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
-    FormControlLabel,
+    Grid,
     Stack,
     TextField,
     Typography,
@@ -20,6 +21,11 @@ import {
 import IosShareIcon from '@mui/icons-material/IosShare'
 import DownloadIcon from '@mui/icons-material/Download'
 import FileDownloadIcon from '@mui/icons-material/FileDownload'
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
+import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined'
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 
 import backend from '../../constant/backend'
 import CircleIconButton from '../field/CircleIconButton'
@@ -28,9 +34,9 @@ import ScheduleShareView from './ScheduleShareView'
 dayjs.extend(dayjsPluginUTC)
 
 const exportFormats = [
-    { id: 'text', label: 'Text' },
-    { id: 'image', label: 'Image' },
-    { id: 'notion', label: 'Notion' },
+    { id: 'text', label: 'Text', icon: DescriptionOutlinedIcon },
+    { id: 'image', label: 'Image', icon: ImageOutlinedIcon },
+    { id: 'notion', label: 'Notion', icon: NotesOutlinedIcon },
 ]
 
 const isOfflineExportEnabled = () => {
@@ -108,6 +114,7 @@ function ScheduleExportPanel({ jwt, schedules }) {
     const [ downloadLoadingFormat, setDownloadLoadingFormat ] = useState('')
     const [ localImageRequested, setLocalImageRequested ] = useState(false)
     const [ sharePreviewOpen, setSharePreviewOpen ] = useState(false)
+    const [ notionHelpOpen, setNotionHelpOpen ] = useState(false)
 
     useEffect(() => {
         if (!exportJob) return undefined
@@ -218,7 +225,7 @@ function ScheduleExportPanel({ jwt, schedules }) {
                 },
                 body: JSON.stringify({
                     formats: backendFormatIDs,
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+                    timezone: 'America/Toronto',
                     schedule_from: toRFC3339Window(scheduleFrom, false),
                     schedule_to: toRFC3339Window(scheduleTo, true),
                 }),
@@ -305,112 +312,225 @@ function ScheduleExportPanel({ jwt, schedules }) {
                     <FileDownloadIcon sx={{ color: '#455295' }} />
                 </CircleIconButton>
             </div>
-            <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm'>
+            <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='md'>
                 <DialogTitle>Offline Export</DialogTitle>
-                <DialogContent>
+                <DialogContent sx={{ background: 'linear-gradient(180deg, rgba(244, 251, 240, 0.72) 0%, rgba(255, 255, 255, 1) 100%)' }}>
                     <Stack spacing={2} sx={{ pt: 1 }}>
                         {errorMessage ? <Alert severity='error'>{errorMessage}</Alert> : null}
                         {successMessage ? <Alert severity='success'>{successMessage}</Alert> : null}
-                        <Typography variant='body2' color='text.secondary'>
-                            Choose the formats and schedule window to generate offline artifacts from your current relation.
-                        </Typography>
-                        <Stack direction='row' spacing={1} flexWrap='wrap'>
-                            {visibleExportFormats.map((format) => (
-                                <FormControlLabel
-                                    key={format.id}
-                                    control={(
-                                        <Checkbox
-                                            checked={selectedFormats[format.id]}
-                                            onChange={() => toggleFormat(format.id)}
-                                        />
-                                    )}
-                                    label={format.label}
-                                />
-                            ))}
-                        </Stack>
-                        <Stack direction='row' spacing={2}>
-                            <TextField
-                                label='From'
-                                type='date'
-                                value={scheduleFrom}
-                                onChange={(event) => setScheduleFrom(event.target.value)}
-                                InputLabelProps={{ shrink: true }}
-                                fullWidth
-                            />
-                            <TextField
-                                label='To'
-                                type='date'
-                                value={scheduleTo}
-                                onChange={(event) => setScheduleTo(event.target.value)}
-                                InputLabelProps={{ shrink: true }}
-                                fullWidth
-                            />
-                        </Stack>
-                        {(exportJob || localImageRequested) ? (
-                            <Stack spacing={1.5} sx={{ borderTop: '1px solid #e6ebf0', pt: 2 }}>
-                                {exportJob ? (
-                                    <>
-                                        <Typography variant='subtitle2'>
-                                            Job `{exportJob.job_id}`
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} md={7}>
+                                <Stack
+                                    spacing={2}
+                                    sx={{
+                                        p: 2,
+                                        borderRadius: 3,
+                                        border: '1px solid rgba(69, 82, 149, 0.12)',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.92)',
+                                        boxShadow: '0 18px 40px rgba(69, 82, 149, 0.08)',
+                                    }}
+                                >
+                                    <Box>
+                                        <Typography variant='subtitle1' sx={{ color: '#344861', fontWeight: 700 }}>
+                                            Export Setup
                                         </Typography>
-                                        <Stack direction='row' spacing={1} alignItems='center'>
-                                            <Chip label={exportJob.status} color={formatStatusColor(exportJob.status)} size='small' />
-                                            {statusLoading ? <CircularProgress size={16} /> : null}
-                                        </Stack>
-                                    </>
-                                ) : (
-                                    <Typography variant='subtitle2'>
-                                        Local image preview ready
-                                    </Typography>
-                                )}
-                                {exportJob?.snapshot ? (
-                                    <Typography variant='body2' color='text.secondary'>
-                                        Generated: {exportJob.snapshot.generated_at || exportJob.created_at} | Timezone: {exportJob.snapshot.timezone || 'UTC'}
-                                    </Typography>
-                                ) : null}
-                                {displayArtifacts.map((artifact) => (
-                                    <Stack key={artifact.format} direction='row' spacing={1} alignItems='center' justifyContent='space-between'>
-                                        <Stack direction='row' spacing={1} alignItems='center'>
-                                            <Typography variant='body2' sx={{ minWidth: 62 }}>
-                                                {artifact.format}
-                                            </Typography>
-                                            <Chip label={artifact.status} color={formatStatusColor(artifact.status)} size='small' />
-                                        </Stack>
-                                        <Stack direction='row' spacing={1}>
-                                            {artifact.source === 'local' ? (
-                                                <Button
+                                        <Typography variant='body2' color='text.secondary'>
+                                            Choose the formats and schedule window to generate offline artifacts from your current relation.
+                                        </Typography>
+                                    </Box>
+                                    <Stack spacing={1}>
+                                        {visibleExportFormats.map((format) => (
+                                            <Box
+                                                key={format.id}
+                                                role='button'
+                                                aria-label={format.label}
+                                                onClick={() => toggleFormat(format.id)}
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between',
+                                                    px: 1.75,
+                                                    py: 1.5,
+                                                    borderRadius: 2.5,
+                                                    border: '2px solid',
+                                                    borderColor: selectedFormats[format.id] ? '#48acdb' : '#d5e2cd',
+                                                    backgroundColor: selectedFormats[format.id] ? 'rgba(72, 172, 219, 0.12)' : 'rgba(245, 251, 240, 0.86)',
+                                                    cursor: 'pointer',
+                                                    transition: 'transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease',
+                                                    '&:hover': {
+                                                        transform: 'translateY(-1px)',
+                                                        boxShadow: '0 10px 20px rgba(69, 82, 149, 0.08)',
+                                                    },
+                                                }}
+                                            >
+                                                <Stack direction='row' spacing={1.25} alignItems='center'>
+                                                    <format.icon sx={{ color: selectedFormats[format.id] ? '#455295' : '#6b7b95' }} />
+                                                    <Typography sx={{ color: '#344861', fontWeight: 600 }}>
+                                                        {format.label}
+                                                    </Typography>
+                                                </Stack>
+                                                <Chip
+                                                    label={selectedFormats[format.id] ? 'Active' : 'Off'}
                                                     size='small'
-                                                    startIcon={<IosShareIcon />}
-                                                    disabled={artifact.status !== 'ready'}
-                                                    onClick={() => setSharePreviewOpen(true)}
-                                                >
-                                                    Preview
-                                                </Button>
-                                            ) : (
-                                                <>
-                                                    <Button
-                                                        size='small'
-                                                        startIcon={<DownloadIcon />}
-                                                        disabled={artifact.status !== 'succeeded' || downloadLoadingFormat === artifact.format}
-                                                        onClick={() => downloadArtifact(artifact.format, false)}
-                                                    >
-                                                        Download
-                                                    </Button>
-                                                    <Button
-                                                        size='small'
-                                                        startIcon={<IosShareIcon />}
-                                                        disabled={artifact.status !== 'succeeded' || shareLoadingFormat === artifact.format}
-                                                        onClick={() => downloadArtifact(artifact.format, true)}
-                                                    >
-                                                        Share
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </Stack>
+                                                    color={selectedFormats[format.id] ? 'primary' : 'default'}
+                                                    variant={selectedFormats[format.id] ? 'filled' : 'outlined'}
+                                                />
+                                            </Box>
+                                        ))}
                                     </Stack>
-                                ))}
-                            </Stack>
-                        ) : null}
+                                    <Divider flexItem />
+                                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                                        <TextField
+                                            label='From'
+                                            type='date'
+                                            value={scheduleFrom}
+                                            onChange={(event) => setScheduleFrom(event.target.value)}
+                                            InputLabelProps={{ shrink: true }}
+                                            fullWidth
+                                        />
+                                        <TextField
+                                            label='To'
+                                            type='date'
+                                            value={scheduleTo}
+                                            onChange={(event) => setScheduleTo(event.target.value)}
+                                            InputLabelProps={{ shrink: true }}
+                                            fullWidth
+                                        />
+                                    </Stack>
+                                    <Typography variant='caption' color='text.secondary'>
+                                        Export timezone: America/Toronto
+                                    </Typography>
+                                </Stack>
+                            </Grid>
+                            <Grid item xs={12} md={5}>
+                                <Stack
+                                    spacing={1.5}
+                                    sx={{
+                                        p: 2,
+                                        minHeight: '100%',
+                                        borderRadius: 3,
+                                        border: '1px solid rgba(72, 172, 219, 0.16)',
+                                        backgroundColor: 'rgba(244, 251, 240, 0.95)',
+                                        boxShadow: '0 18px 40px rgba(72, 172, 219, 0.08)',
+                                    }}
+                                >
+                                    <Box>
+                                        <Typography variant='subtitle1' sx={{ color: '#344861', fontWeight: 700 }}>
+                                            Downloads
+                                        </Typography>
+                                        <Typography variant='body2' color='text.secondary'>
+                                            Generated files and local image preview appear here.
+                                        </Typography>
+                                    </Box>
+                                    {(exportJob || localImageRequested) ? (
+                                        <>
+                                            {exportJob ? (
+                                                <Stack direction='row' spacing={1} alignItems='center'>
+                                                    <Chip label={exportJob.status} color={formatStatusColor(exportJob.status)} size='small' />
+                                                    {statusLoading ? <CircularProgress size={16} /> : null}
+                                                </Stack>
+                                            ) : (
+                                                <Typography variant='subtitle2'>
+                                                    Local image preview ready
+                                                </Typography>
+                                            )}
+                                            {exportJob?.snapshot ? (
+                                                <Typography variant='body2' color='text.secondary'>
+                                                    Generated: {exportJob.snapshot.generated_at || exportJob.created_at} | Timezone: {exportJob.snapshot.timezone || 'UTC'}
+                                                </Typography>
+                                            ) : null}
+                                            <Stack spacing={1.25}>
+                                                {displayArtifacts.map((artifact) => (
+                                                    <Box
+                                                        key={artifact.format}
+                                                        sx={{
+                                                            p: 1.5,
+                                                            borderRadius: 2.5,
+                                                            background: 'rgba(255, 255, 255, 0.86)',
+                                                            border: '1px solid rgba(69, 82, 149, 0.10)',
+                                                        }}
+                                                    >
+                                                        <Stack
+                                                            direction={{ xs: 'column', sm: 'row' }}
+                                                            spacing={1.25}
+                                                            alignItems={{ xs: 'stretch', sm: 'center' }}
+                                                            justifyContent='space-between'
+                                                        >
+                                                            <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap' useFlexGap>
+                                                                <Typography variant='body2' sx={{ minWidth: 62, textTransform: 'capitalize', fontWeight: 600 }}>
+                                                                    {artifact.format}
+                                                                </Typography>
+                                                                <Chip label={artifact.status} color={formatStatusColor(artifact.status)} size='small' />
+                                                            </Stack>
+                                                            <Stack
+                                                                direction='row'
+                                                                spacing={1}
+                                                                flexWrap='wrap'
+                                                                useFlexGap
+                                                                justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
+                                                            >
+                                                                {artifact.source === 'local' ? (
+                                                                    <CircleIconButton
+                                                                        onClickHandler={() => setSharePreviewOpen(true)}
+                                                                        disabled={artifact.status !== 'ready'}
+                                                                        ariaLabel={`Preview ${artifact.format}`}
+                                                                        background='#ffffff'
+                                                                    >
+                                                                        <VisibilityOutlinedIcon />
+                                                                    </CircleIconButton>
+                                                                ) : (
+                                                                    <>
+                                                                        {artifact.format === 'notion' ? (
+                                                                            <CircleIconButton
+                                                                                onClickHandler={() => setNotionHelpOpen(true)}
+                                                                                ariaLabel='How to import in Notion'
+                                                                                background='#ffffff'
+                                                                            >
+                                                                                <HelpOutlineOutlinedIcon />
+                                                                            </CircleIconButton>
+                                                                        ) : null}
+                                                                        <CircleIconButton
+                                                                            onClickHandler={() => downloadArtifact(artifact.format, false)}
+                                                                            disabled={artifact.status !== 'succeeded' || downloadLoadingFormat === artifact.format}
+                                                                            ariaLabel={`Download ${artifact.format}`}
+                                                                            background='#ffffff'
+                                                                        >
+                                                                            <DownloadIcon />
+                                                                        </CircleIconButton>
+                                                                        <CircleIconButton
+                                                                            onClickHandler={() => downloadArtifact(artifact.format, true)}
+                                                                            disabled={artifact.status !== 'succeeded' || shareLoadingFormat === artifact.format}
+                                                                            ariaLabel={`Share ${artifact.format}`}
+                                                                            background='#ffffff'
+                                                                        >
+                                                                            <IosShareIcon />
+                                                                        </CircleIconButton>
+                                                                    </>
+                                                                )}
+                                                            </Stack>
+                                                        </Stack>
+                                                    </Box>
+                                                ))}
+                                            </Stack>
+                                        </>
+                                    ) : (
+                                        <Box
+                                            sx={{
+                                                px: 2,
+                                                py: 3,
+                                                borderRadius: 2.5,
+                                                border: '1px dashed rgba(69, 82, 149, 0.18)',
+                                                backgroundColor: 'rgba(255, 255, 255, 0.72)',
+                                            }}
+                                        >
+                                            <Typography variant='body2' color='text.secondary'>
+                                                Create an export to see text and Notion downloads here. Image preview appears here too.
+                                            </Typography>
+                                        </Box>
+                                    )}
+                                </Stack>
+                            </Grid>
+                        </Grid>
                     </Stack>
                 </DialogContent>
                 <DialogActions>
@@ -431,6 +551,34 @@ function ScheduleExportPanel({ jwt, schedules }) {
                 scheduleFrom={scheduleFrom}
                 scheduleTo={scheduleTo}
             />
+            <Dialog open={notionHelpOpen} onClose={() => setNotionHelpOpen(false)} fullWidth maxWidth='sm'>
+                <DialogTitle>Import Into Notion</DialogTitle>
+                <DialogContent>
+                    <Stack spacing={1.25} sx={{ pt: 1 }}>
+                        <Typography variant='body2'>
+                            The Notion export is downloaded as a `.notion.json` file.
+                        </Typography>
+                        <Typography variant='body2'>
+                            1. Download the Notion export from this dialog.
+                        </Typography>
+                        <Typography variant='body2'>
+                            2. In Notion, open the page where you want the content.
+                        </Typography>
+                        <Typography variant='body2'>
+                            3. Use `Import` and choose `Text & Markdown` or drag the JSON file into the page if your Notion workspace accepts it.
+                        </Typography>
+                        <Typography variant='body2'>
+                            4. If Notion does not recognize the JSON directly, open the file, copy the structured content, and paste it into a page as a fallback.
+                        </Typography>
+                        <Typography variant='body2' color='text.secondary'>
+                            Current export shape: header + metadata + marker blocks + schedule blocks.
+                        </Typography>
+                    </Stack>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setNotionHelpOpen(false)}>Close</Button>
+                </DialogActions>
+            </Dialog>
         </>
     )
 }
