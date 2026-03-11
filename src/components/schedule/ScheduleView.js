@@ -12,6 +12,8 @@ import {
     DialogActions,
     Popover,
     Slide,
+    Tooltip,
+    CircularProgress,
 } from '@mui/material'
 import backend from '../../constant/backend'
 
@@ -26,6 +28,10 @@ import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt
 import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral'
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
+import RefreshIcon from '@mui/icons-material/Refresh'
+import SyncIcon from '@mui/icons-material/Sync'
+import LinkIcon from '@mui/icons-material/Link'
+import AltRouteIcon from '@mui/icons-material/AltRoute'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -37,8 +43,6 @@ import actions from '../../store/actions'
 import graphql from '../../graphql'
 
 import dayjs from 'dayjs'
-import dayjsPluginUTC from 'dayjs-plugin-utc'
-dayjs.extend(dayjsPluginUTC)
 
 const TransitionUp = (props) => {
     return <Slide {...props} direction='up' />
@@ -94,6 +98,24 @@ const formatSignedSeconds = (seconds) => {
     return `${seconds >= 0 ? '+' : '-'}${formatted}`
 }
 
+const formatDurationFromSeconds = (seconds) => {
+    const parsed = Number(seconds)
+    if (Number.isNaN(parsed) || parsed < 0) return 'N/A'
+    if (parsed < 60) return 'less than a minute'
+
+    const totalMinutes = Math.round(parsed / 60)
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
+
+    if (hours <= 0) {
+        return `${minutes} minute${minutes === 1 ? '' : 's'}`
+    }
+    if (minutes <= 0) {
+        return `${hours} hour${hours === 1 ? '' : 's'}`
+    }
+    return `${hours} hour${hours === 1 ? '' : 's'} ${minutes} minute${minutes === 1 ? '' : 's'}`
+}
+
 const toNumberOrFallback = (...values) => {
     for (let i = 0; i < values.length; i++) {
         const value = values[i]
@@ -102,6 +124,164 @@ const toNumberOrFallback = (...values) => {
         if (!Number.isNaN(parsed)) return parsed
     }
     return 0
+}
+
+const extractTransitionCoordinate = (endpoint = {}) => {
+    const lat = toNumberOrFallback(endpoint?.lat, endpoint?.latitude)
+    const lon = toNumberOrFallback(endpoint?.lon, endpoint?.longitude)
+    if (lat === 0 && lon === 0) return null
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null
+    return { lat, lon }
+}
+
+const parseRouteGeometryPoints = (geometry) => {
+    const raw = `${geometry || ''}`.trim()
+    if (!raw) return []
+    return raw
+        .split(';')
+        .map((item) => item.trim())
+        .filter((item) => item)
+        .map((item) => {
+            const [latRaw, lonRaw] = item.split(',').map((value) => `${value || ''}`.trim())
+            const lat = Number(latRaw)
+            const lon = Number(lonRaw)
+            if (Number.isNaN(lat) || Number.isNaN(lon)) return null
+            if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null
+            return { lat, lon }
+        })
+        .filter((item) => item)
+}
+
+const formatCoordinateLabel = (value) => {
+    const parsed = Number(value)
+    if (Number.isNaN(parsed)) return 'N/A'
+    return parsed.toFixed(5)
+}
+
+const routeModeStyles = {
+    driving: { label: 'Driving', color: '#1a73e8' },
+    walking: { label: 'Walking', color: '#2e7d32' },
+    bus: { label: 'Bus', color: '#ef6c00' },
+    public_transit: { label: 'Transit', color: '#8e24aa' },
+    direct: { label: 'Direct', color: '#546e7a' },
+}
+
+const appendRoutePoints = (existing, incoming) => {
+    const base = Array.isArray(existing) ? [...existing] : []
+    if (!Array.isArray(incoming) || incoming.length === 0) return base
+    if (base.length === 0) return [...incoming]
+
+    const last = base[base.length - 1]
+    incoming.forEach((point, index) => {
+        if (
+            index === 0
+            && last
+            && Math.abs(last.lat - point.lat) < 1e-7
+            && Math.abs(last.lon - point.lon) < 1e-7
+        ) {
+            return
+        }
+        base.push(point)
+    })
+    return base
+}
+
+const encodeRouteGeometryPoints = (points = []) => {
+    if (!Array.isArray(points) || points.length === 0) return ''
+    return points
+        .map((point) => `${Number(point.lat).toFixed(5)},${Number(point.lon).toFixed(5)}`)
+        .join(';')
+}
+
+const buildCombinedRoutePreview = (segments = [], stops = []) => {
+    if (!Array.isArray(segments) || segments.length === 0) return null
+
+    const first = segments[0]
+    const last = segments[segments.length - 1]
+    const modePoints = {}
+    let totalDistanceMeters = 0
+
+    const etaModes = ['walking', 'bus', 'public_transit']
+    const etaStats = {}
+    etaModes.forEach((mode) => {
+        etaStats[mode] = { availableCount: 0, totalSeconds: 0 }
+    })
+
+    segments.forEach((segment) => {
+        const route = segment?.route || {}
+        const distance = Number(route?.distance_meters || 0)
+        if (!Number.isNaN(distance) && distance > 0) {
+            totalDistanceMeters += distance
+        }
+
+        const rawPaths = route?.paths || {}
+        const segmentPathEntries = Object.entries(rawPaths).length > 0
+            ? Object.entries(rawPaths)
+            : [['driving', route?.geometry || '']]
+        segmentPathEntries.forEach(([mode, geometry]) => {
+            const parsedPoints = parseRouteGeometryPoints(geometry)
+            if (parsedPoints.length < 2) return
+            modePoints[mode] = appendRoutePoints(modePoints[mode], parsedPoints)
+        })
+
+        etaModes.forEach((mode) => {
+            const eta = route?.eta?.[mode]
+            const seconds = Number(eta?.seconds)
+            if (eta?.available && !Number.isNaN(seconds) && seconds >= 0) {
+                etaStats[mode].availableCount += 1
+                etaStats[mode].totalSeconds += seconds
+            }
+        })
+    })
+
+    const paths = {}
+    Object.entries(modePoints).forEach(([mode, points]) => {
+        const geometry = encodeRouteGeometryPoints(points)
+        if (geometry) {
+            paths[mode] = geometry
+        }
+    })
+
+    const eta = {}
+    etaModes.forEach((mode) => {
+        const stats = etaStats[mode]
+        if (stats.availableCount === segments.length) {
+            eta[mode] = {
+                available: true,
+                seconds: Math.round(stats.totalSeconds),
+            }
+            return
+        }
+        eta[mode] = {
+            available: false,
+            code: 'partial_eta_unavailable',
+            message: `available on ${stats.availableCount}/${segments.length} segments`,
+        }
+    })
+
+    return {
+        route: {
+            origin: first?.route?.origin || null,
+            destination: last?.route?.destination || null,
+            distance_meters: Math.round(totalDistanceMeters),
+            geometry: paths.driving || '',
+            paths,
+            eta,
+        },
+        originLabel: first?.originLabel || '',
+        destinationLabel: last?.destinationLabel || '',
+        stops,
+    }
+}
+
+const scheduleFooterIconButtonStyle = {
+    border: '1px solid rgba(18, 36, 77, 0.35)',
+    borderRadius: '10px',
+    backgroundColor: '#eef4ff',
+    padding: '8px',
+    '&:hover': {
+        backgroundColor: '#dfeaff',
+    },
 }
 
 const getMarkerTypeIconPath = (item, eventtypes = []) => {
@@ -151,6 +331,8 @@ function ScheduleItem({
     isToday,
     onEditClick,
     onDeleteClick,
+    onRoutePreviewClick,
+    routePreviewLoading,
 }) {
     // const imageLink = useMemo(() => {
     //     // if (!item || !item.marker) return ''
@@ -178,7 +360,7 @@ function ScheduleItem({
 
     const title = (item) => {
         let color = '#0e0eb7'
-        let display_time = dayjs.utc(item.selected_date).format('HH:mm')
+        let display_time = dayjs(item.selected_date).format('HH:mm')
         let display_icon = false
         if (item.status === constants.status.arrived) {
             color = '#27c31e'
@@ -278,8 +460,9 @@ function ScheduleItem({
     })()
 
     const syncError = syncInfo?.last_error_message || ''
+    const hasTransitionCoordinates = !!extractTransitionCoordinate(transition?.origin) && !!extractTransitionCoordinate(transition?.destination)
     const googleCalendarOpenUrl = (() => {
-        const eventDate = dayjs.utc(item?.selected_date)
+        const eventDate = dayjs(item?.selected_date)
         if (!eventDate.isValid()) return 'https://calendar.google.com/calendar/u/0/r'
         return `https://calendar.google.com/calendar/u/0/r/day/${eventDate.format('YYYY/M/D')}`
     })()
@@ -428,11 +611,6 @@ function ScheduleItem({
                     />
                 </div>
             )}
-            {item.marker && !item.marker.restaurant && item.marker.link && (
-                <div style={{ marginTop: '10px', fontSize: '13px', color: '#6c7787' }}>
-                    Website integration unavailable for this marker.
-                </div>
-            )}
             {item.movie && (
                 <div style={{ marginTop: '8px', fontSize: '13px', color: '#455295' }}>
                     Movie: {item.movie.label}
@@ -498,6 +676,34 @@ function ScheduleItem({
                                         <FaceIcon fontSize='medium' />
                                     </IconButton>
                                     <DirectionsWalkIcon sx={{ color: transitionVisual.color, fontSize: '24px' }} />
+                                    {hasTransitionCoordinates && (
+                                        <Tooltip title='Route Preview'>
+                                            <span>
+                                                <IconButton
+                                                    size='medium'
+                                                    onClick={() => onRoutePreviewClick && onRoutePreviewClick(transition)}
+                                                    disabled={routePreviewLoading}
+                                                    sx={{
+                                                        color: transitionVisual.color,
+                                                        border: `1px solid ${transitionVisual.color}`,
+                                                        borderRadius: '10px',
+                                                        backgroundColor: '#f4f8ff',
+                                                        padding: '10px',
+                                                        boxShadow: '0 1px 2px rgba(0,0,0,0.12)',
+                                                        '&:hover': {
+                                                            backgroundColor: '#e8f0ff',
+                                                        },
+                                                        '&.Mui-disabled': {
+                                                            borderColor: '#aeb8c4',
+                                                            backgroundColor: '#f2f4f7',
+                                                        },
+                                                    }}
+                                                >
+                                                    <AltRouteIcon fontSize='medium' />
+                                                </IconButton>
+                                            </span>
+                                        </Tooltip>
+                                    )}
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', minWidth: '94px' }}>
                                     <div style={{ fontSize: '11px', color: '#5f6f83', textAlign: 'center', lineHeight: 1.2 }}>
@@ -540,6 +746,7 @@ function ScheduleView({
     fetchError,
     onRetry,
     onRefresh,
+    onScheduleRemoved,
     openArriveForm,
     openEditForm,
     jwt,
@@ -576,7 +783,12 @@ function ScheduleView({
             if (deletingId !== -1) {
                 dispatch(actions.updateMarkerStatus(removeData.removeSchedule))
                 dispatch(actions.removeSchedule(deletingId))
-                handleClose()
+                if (onScheduleRemoved) {
+                    onScheduleRemoved(deletingId)
+                } else if (onRefresh) {
+                    onRefresh()
+                }
+                setDeleting(-1)
             }
         }
 
@@ -584,7 +796,7 @@ function ScheduleView({
             setFailMessage(removeError.message)
             fail()
         }
-    }, [removeData, removeError, deletingId])
+    }, [removeData, removeError, deletingId, onScheduleRemoved, onRefresh])
 
     const isToday = useMemo(() => {
         return todayString === selected_date
@@ -599,6 +811,22 @@ function ScheduleView({
     const [ providerConnected, setProviderConnected ] = useState(false)
     const [ syncStatusBySchedule, setSyncStatusBySchedule ] = useState({})
     const [ syncActionLoading, setSyncActionLoading ] = useState({})
+    const [ routePreviewOpen, setRoutePreviewOpen ] = useState(false)
+    const [ routePreviewLoading, setRoutePreviewLoading ] = useState(false)
+    const [ routePreviewError, setRoutePreviewError ] = useState('')
+    const [ routePreviewResult, setRoutePreviewResult ] = useState(null)
+    const [ routePreviewTitle, setRoutePreviewTitle ] = useState('Route Preview')
+    const [ routeModeFilter, setRouteModeFilter ] = useState('all')
+    const routeMapContainerRef = useRef(null)
+    const routeMapRef = useRef(null)
+
+    const availableRouteModes = useMemo(() => {
+        if (!routePreviewResult?.route) return []
+        const keys = Object.keys(routePreviewResult.route.paths || {})
+        if (keys.length > 0) return keys
+        const hasDefaultGeometry = `${routePreviewResult?.route?.geometry || ''}`.trim() !== ''
+        return hasDefaultGeometry ? ['driving'] : []
+    }, [routePreviewResult])
 
     const onEditClickHandler = (schedule) => {
         openEditForm(schedule)
@@ -830,6 +1058,336 @@ function ScheduleView({
         })
     }
 
+    const onOpenRoutePreview = async (transition) => {
+        const origin = extractTransitionCoordinate(transition?.origin)
+        const destination = extractTransitionCoordinate(transition?.destination)
+        if (!origin || !destination) {
+            setFailMessage('Route preview is unavailable because coordinates are missing.')
+            fail()
+            return
+        }
+        if (!jwt) {
+            setFailMessage('You must be logged in to load route preview.')
+            fail()
+            return
+        }
+
+        setRoutePreviewOpen(true)
+        setRoutePreviewLoading(true)
+        setRoutePreviewError('')
+        setRoutePreviewResult(null)
+        setRoutePreviewTitle('Route Preview')
+        setRouteModeFilter('all')
+
+        try {
+            const response = await fetch(backend.withBasePath('schedules/route-preview'), {
+                method: 'POST',
+                headers: {
+                    Authorization: jwt,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ origin, destination }),
+            })
+            if (!response.ok) {
+                const text = await response.text()
+                setRoutePreviewError(text || `Route preview request failed (${response.status})`)
+                return
+            }
+            let payload = null
+            try {
+                payload = await response.json()
+            } catch (error) {
+                const raw = await response.text()
+                setRoutePreviewError(raw || 'Route preview response was not valid JSON')
+                return
+            }
+            setRoutePreviewResult({
+                ...payload,
+                originLabel: transition?.origin?.label || '',
+                destinationLabel: transition?.destination?.label || '',
+            })
+        } catch (error) {
+            setRoutePreviewError(error?.message || 'Failed to load route preview')
+        } finally {
+            setRoutePreviewLoading(false)
+        }
+    }
+
+    const onOpenWholeScheduleRoutePreview = async () => {
+        if (!jwt) {
+            setFailMessage('You must be logged in to load route preview.')
+            fail()
+            return
+        }
+        if (!sortedList || sortedList.length < 2) {
+            setFailMessage('At least 2 schedule items are required for whole-schedule route preview.')
+            fail()
+            return
+        }
+
+        const pairs = []
+        const stopMap = {}
+        const orderedStops = []
+        sortedList.forEach((schedule) => {
+            const coordinate = extractTransitionCoordinate({
+                lat: schedule?.marker?.latitude,
+                lon: schedule?.marker?.longitude,
+            })
+            if (!coordinate) return
+            const key = `${coordinate.lat.toFixed(6)},${coordinate.lon.toFixed(6)}`
+            if (stopMap[key]) return
+            const stop = {
+                lat: coordinate.lat,
+                lon: coordinate.lon,
+                label: schedule?.label || schedule?.marker?.label || '',
+            }
+            stopMap[key] = stop
+            orderedStops.push(stop)
+        })
+        for (let index = 0; index < sortedList.length - 1; index++) {
+            const current = sortedList[index]
+            const next = sortedList[index + 1]
+            const origin = extractTransitionCoordinate({
+                lat: current?.marker?.latitude,
+                lon: current?.marker?.longitude,
+            })
+            const destination = extractTransitionCoordinate({
+                lat: next?.marker?.latitude,
+                lon: next?.marker?.longitude,
+            })
+            if (!origin || !destination) continue
+            pairs.push({
+                origin,
+                destination,
+                originLabel: current?.label || current?.marker?.label || '',
+                destinationLabel: next?.label || next?.marker?.label || '',
+            })
+        }
+
+        if (pairs.length === 0) {
+            setFailMessage('Whole-schedule preview is unavailable because schedule markers are missing coordinates.')
+            fail()
+            return
+        }
+
+        setRoutePreviewOpen(true)
+        setRoutePreviewLoading(true)
+        setRoutePreviewError('')
+        setRoutePreviewResult(null)
+        setRoutePreviewTitle('Whole Schedule Route Preview')
+        setRouteModeFilter('all')
+
+        try {
+            const responses = await Promise.all(
+                pairs.map(async (pair) => {
+                    const response = await fetch(backend.withBasePath('schedules/route-preview'), {
+                        method: 'POST',
+                        headers: {
+                            Authorization: jwt,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            origin: pair.origin,
+                            destination: pair.destination,
+                        }),
+                    })
+                    if (!response.ok) {
+                        return null
+                    }
+                    const payload = await response.json()
+                    return {
+                        ...payload,
+                        originLabel: pair.originLabel,
+                        destinationLabel: pair.destinationLabel,
+                    }
+                })
+            )
+
+            const validResponses = responses.filter((item) => !!item)
+            if (validResponses.length === 0) {
+                setRoutePreviewError('Whole-schedule route preview failed for all segments.')
+                return
+            }
+
+            const combined = buildCombinedRoutePreview(validResponses, orderedStops)
+            if (!combined) {
+                setRoutePreviewError('Whole-schedule route preview is unavailable.')
+                return
+            }
+
+            if (validResponses.length < pairs.length) {
+                combined.route = {
+                    ...combined.route,
+                    warnings: [
+                        `${pairs.length - validResponses.length} segment(s) failed to load and were skipped.`,
+                    ],
+                }
+            }
+            setRoutePreviewResult(combined)
+        } catch (error) {
+            setRoutePreviewError(error?.message || 'Failed to load whole schedule route preview')
+        } finally {
+            setRoutePreviewLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        if (!routePreviewOpen || !routePreviewResult || !routeMapContainerRef.current) {
+            return
+        }
+        const apiKey = `${process.env.REACT_APP_MAP_APIKEY || ''}`.trim()
+        if (!apiKey) {
+            return
+        }
+        const originCoordinate = extractTransitionCoordinate(routePreviewResult?.route?.origin)
+        const destinationCoordinate = extractTransitionCoordinate(routePreviewResult?.route?.destination)
+        const stopCoordinates = Array.isArray(routePreviewResult?.stops)
+            ? routePreviewResult.stops
+                .map((stop) => ({
+                    ...stop,
+                    coordinate: extractTransitionCoordinate(stop),
+                }))
+                .filter((stop) => !!stop.coordinate)
+            : []
+        const rawPaths = routePreviewResult?.route?.paths || {}
+        const routePathsByMode = Object.entries(rawPaths)
+            .map(([mode, geometry]) => ({
+                mode,
+                points: parseRouteGeometryPoints(geometry),
+            }))
+            .filter((item) => item.points.length >= 2)
+        const defaultGeometryPoints = parseRouteGeometryPoints(routePreviewResult?.route?.geometry)
+        if (routePathsByMode.length === 0 && defaultGeometryPoints.length >= 2) {
+            routePathsByMode.push({ mode: 'driving', points: defaultGeometryPoints })
+        }
+        if (routePathsByMode.length === 0 && originCoordinate && destinationCoordinate) {
+            routePathsByMode.push({ mode: 'direct', points: [originCoordinate, destinationCoordinate] })
+        }
+        if (routePathsByMode.length === 0) {
+            return
+        }
+        const effectivePathsByMode = routeModeFilter === 'all'
+            ? routePathsByMode
+            : routePathsByMode.filter((path) => path.mode === routeModeFilter)
+        const activePathsByMode = effectivePathsByMode.length > 0 ? effectivePathsByMode : routePathsByMode
+
+        let cancelled = false
+
+        const mountRouteMap = async () => {
+            const ttModule = await import('@tomtom-international/web-sdk-maps')
+            if (cancelled) return
+            const tt = ttModule?.default || ttModule
+
+            if (routeMapRef.current) {
+                routeMapRef.current.remove()
+                routeMapRef.current = null
+            }
+
+            const initialPoint = activePathsByMode[0].points[0]
+            const map = tt.map({
+                key: apiKey,
+                container: routeMapContainerRef.current,
+                center: [initialPoint.lon, initialPoint.lat],
+                zoom: 10,
+            })
+            routeMapRef.current = map
+
+            map.on('load', () => {
+                if (cancelled) return
+                const boundsCoordinates = []
+                activePathsByMode.forEach((path, index) => {
+                    const coordinates = path.points.map((point) => [point.lon, point.lat])
+                    boundsCoordinates.push(...coordinates)
+                    const sourceId = `route-preview-line-${index}`
+                    const layerId = `route-preview-line-layer-${index}`
+                    const style = routeModeStyles[path.mode] || { color: '#546e7a' }
+                    map.addSource(sourceId, {
+                        type: 'geojson',
+                        data: {
+                            type: 'Feature',
+                            properties: {},
+                            geometry: {
+                                type: 'LineString',
+                                coordinates,
+                            },
+                        },
+                    })
+                    map.addLayer({
+                        id: layerId,
+                        type: 'line',
+                        source: sourceId,
+                        layout: {
+                            'line-cap': 'round',
+                            'line-join': 'round',
+                        },
+                        paint: {
+                            'line-color': style.color,
+                            'line-width': 5,
+                            'line-opacity': 0.9,
+                        },
+                    })
+                })
+
+                if (originCoordinate) {
+                    new tt.Marker({ color: '#0f9d58' }).setLngLat([originCoordinate.lon, originCoordinate.lat]).addTo(map)
+                    boundsCoordinates.push([originCoordinate.lon, originCoordinate.lat])
+                }
+                if (destinationCoordinate) {
+                    new tt.Marker({ color: '#db4437' }).setLngLat([destinationCoordinate.lon, destinationCoordinate.lat]).addTo(map)
+                    boundsCoordinates.push([destinationCoordinate.lon, destinationCoordinate.lat])
+                }
+                if (stopCoordinates.length > 0) {
+                    stopCoordinates.forEach((stop, index) => {
+                        const { coordinate } = stop
+                        const element = document.createElement('div')
+                        element.style.width = '20px'
+                        element.style.height = '20px'
+                        element.style.borderRadius = '50%'
+                        element.style.backgroundColor = '#122d57'
+                        element.style.color = '#ffffff'
+                        element.style.fontSize = '11px'
+                        element.style.fontWeight = '700'
+                        element.style.display = 'flex'
+                        element.style.alignItems = 'center'
+                        element.style.justifyContent = 'center'
+                        element.style.border = '1px solid #ffffff'
+                        element.textContent = `${index + 1}`
+                        const marker = new tt.Marker({ element }).setLngLat([coordinate.lon, coordinate.lat])
+                        if (stop.label) {
+                            marker.setPopup(new tt.Popup({ offset: 12 }).setText(`${index + 1}. ${stop.label}`))
+                        }
+                        marker.addTo(map)
+                        boundsCoordinates.push([coordinate.lon, coordinate.lat])
+                    })
+                }
+
+                let minLon = boundsCoordinates[0][0]
+                let minLat = boundsCoordinates[0][1]
+                let maxLon = boundsCoordinates[0][0]
+                let maxLat = boundsCoordinates[0][1]
+                boundsCoordinates.forEach(([lon, lat]) => {
+                    minLon = Math.min(minLon, lon)
+                    minLat = Math.min(minLat, lat)
+                    maxLon = Math.max(maxLon, lon)
+                    maxLat = Math.max(maxLat, lat)
+                })
+                map.fitBounds([[minLon, minLat], [maxLon, maxLat]], { padding: 36, duration: 0 })
+            })
+        }
+
+        mountRouteMap().catch(() => {
+            // Keep static image visible as fallback when map SDK cannot initialize.
+        })
+
+        return () => {
+            cancelled = true
+            if (routeMapRef.current) {
+                routeMapRef.current.remove()
+                routeMapRef.current = null
+            }
+        }
+    }, [routePreviewOpen, routePreviewResult, routeModeFilter])
+
     const onOpenCalendarSettings = () => {
         handleClose()
         history.push('/setting')
@@ -888,6 +1446,8 @@ function ScheduleView({
                                                 isToday={isToday}
                                                 onEditClick={onEditClickHandler}
                                                 onDeleteClick={onDeleteClickHandler}
+                                                onRoutePreviewClick={onOpenRoutePreview}
+                                                routePreviewLoading={routePreviewLoading}
                                             />
                                         ))}
                                     </div>
@@ -898,22 +1458,58 @@ function ScheduleView({
                 )}
                 {(normalizedViewStatus === 'success' || normalizedViewStatus === 'error') && (
                     <DialogActions>
-                        <Button onClick={onRefresh}>Refresh</Button>
-                        <Button
-                            variant='text'
-                            startIcon={<CalendarTodayIcon />}
-                            onClick={onOpenCalendarSettings}
-                        >
-                            Calendar Settings
-                        </Button>
+                        <Tooltip title='Refresh'>
+                            <span>
+                                <IconButton aria-label='refresh schedule' onClick={onRefresh} sx={scheduleFooterIconButtonStyle}>
+                                    <RefreshIcon />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                        <Tooltip title='Calendar Settings'>
+                            <span>
+                                <IconButton aria-label='open calendar settings' onClick={onOpenCalendarSettings} sx={scheduleFooterIconButtonStyle}>
+                                    <CalendarTodayIcon />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                        <Tooltip title='Whole Schedule Route Preview'>
+                            <span>
+                                <IconButton
+                                    aria-label='preview whole schedule route'
+                                    onClick={onOpenWholeScheduleRoutePreview}
+                                    disabled={routePreviewLoading || !sortedList || sortedList.length < 2}
+                                    sx={scheduleFooterIconButtonStyle}
+                                >
+                                    <AltRouteIcon />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
                         {!providerConnected ? (
-                            <Button variant='outlined' onClick={onConnectProvider} disabled={Object.values(syncActionLoading).some((value) => !!value)}>
-                                Connect Google
-                            </Button>
+                            <Tooltip title='Connect Google Calendar'>
+                                <span>
+                                    <IconButton
+                                        aria-label='connect google calendar'
+                                        onClick={onConnectProvider}
+                                        disabled={Object.values(syncActionLoading).some((value) => !!value)}
+                                        sx={scheduleFooterIconButtonStyle}
+                                    >
+                                        <LinkIcon />
+                                    </IconButton>
+                                </span>
+                            </Tooltip>
                         ) : (
-                            <Button variant='outlined' onClick={onSyncNow} disabled={Object.values(syncActionLoading).some((value) => !!value)}>
-                                Sync Whole Schedule
-                            </Button>
+                            <Tooltip title='Sync Whole Schedule'>
+                                <span>
+                                    <IconButton
+                                        aria-label='sync whole schedule'
+                                        onClick={onSyncNow}
+                                        disabled={Object.values(syncActionLoading).some((value) => !!value)}
+                                        sx={scheduleFooterIconButtonStyle}
+                                    >
+                                        <SyncIcon />
+                                    </IconButton>
+                                </span>
+                            </Tooltip>
                         )}
                         {isToday && normalizedViewStatus === 'success' && (
                             <Button onClick={openArriveForm}>Arrived</Button>
@@ -921,6 +1517,99 @@ function ScheduleView({
                     </DialogActions>
                 )}
                 
+            </Dialog>
+            <Dialog
+                fullWidth
+                maxWidth={'md'}
+                open={routePreviewOpen}
+                onClose={() => setRoutePreviewOpen(false)}
+            >
+                <DialogTitle>{routePreviewTitle}</DialogTitle>
+                <DialogContent dividers>
+                    {routePreviewLoading && (
+                        <div style={{ minHeight: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CircularProgress size={28} />
+                        </div>
+                    )}
+                    {!routePreviewLoading && routePreviewError && (
+                        <div style={{ color: '#b33434', fontSize: '14px' }}>
+                            {routePreviewError}
+                        </div>
+                    )}
+                    {!routePreviewLoading && !routePreviewError && routePreviewResult && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div style={{ fontSize: '14px', color: '#33496a' }}>
+                                {routePreviewResult.originLabel && routePreviewResult.destinationLabel
+                                    ? `${routePreviewResult.originLabel} -> ${routePreviewResult.destinationLabel}`
+                                    : 'Selected schedule transition'}
+                            </div>
+                            <div
+                                ref={routeMapContainerRef}
+                                style={{
+                                    width: '100%',
+                                    height: '300px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #d7deea',
+                                    overflow: 'hidden',
+                                }}
+                            />
+                            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', fontSize: '13px', color: '#425878' }}>
+                                <span>Distance: {routePreviewResult?.route?.distance_meters ?? 'N/A'} m</span>
+                                <span>Walk ETA: {formatDurationFromSeconds(routePreviewResult?.route?.eta?.walking?.seconds)}</span>
+                                <span>Bus ETA: {formatDurationFromSeconds(routePreviewResult?.route?.eta?.bus?.seconds)}</span>
+                                <span>Transit ETA: {formatDurationFromSeconds(routePreviewResult?.route?.eta?.public_transit?.seconds)}</span>
+                                {Array.isArray(routePreviewResult?.stops) && routePreviewResult.stops.length > 0 && (
+                                    <span>Stops: {routePreviewResult.stops.length}</span>
+                                )}
+                            </div>
+                            {Array.isArray(routePreviewResult?.route?.warnings) && routePreviewResult.route.warnings.length > 0 && (
+                                <div style={{ fontSize: '12px', color: '#8a6d3b' }}>
+                                    {routePreviewResult.route.warnings.join(' ')}
+                                </div>
+                            )}
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '12px' }}>
+                                {availableRouteModes.length > 1 && (
+                                    <Chip
+                                        size='small'
+                                        label='All'
+                                        clickable
+                                        color={routeModeFilter === 'all' ? 'primary' : 'default'}
+                                        variant={routeModeFilter === 'all' ? 'filled' : 'outlined'}
+                                        onClick={() => setRouteModeFilter('all')}
+                                    />
+                                )}
+                                {availableRouteModes.map((mode) => {
+                                    const style = routeModeStyles[mode] || { label: mode, color: '#546e7a' }
+                                    return (
+                                        <Chip
+                                            key={mode}
+                                            size='small'
+                                            clickable
+                                            label={style.label}
+                                            onClick={() => setRouteModeFilter(mode)}
+                                            color={routeModeFilter === mode ? 'primary' : 'default'}
+                                            variant={routeModeFilter === mode ? 'filled' : 'outlined'}
+                                            sx={{
+                                                borderColor: style.color,
+                                            }}
+                                        />
+                                    )
+                                })}
+                            </div>
+                            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', fontSize: '12px', color: '#5d6f8e' }}>
+                                <span>
+                                    Start marker: {formatCoordinateLabel(routePreviewResult?.route?.origin?.lat)}, {formatCoordinateLabel(routePreviewResult?.route?.origin?.lon)}
+                                </span>
+                                <span>
+                                    End marker: {formatCoordinateLabel(routePreviewResult?.route?.destination?.lat)}, {formatCoordinateLabel(routePreviewResult?.route?.destination?.lon)}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setRoutePreviewOpen(false)}>Close</Button>
+                </DialogActions>
             </Dialog>
             <AutoHideAlert 
                 open={failedAlert}

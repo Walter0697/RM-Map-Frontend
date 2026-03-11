@@ -31,7 +31,7 @@ const displayDateRange = (from_time, to_time) => {
 }
 
 const toLocalTime = (input, format = 'YYYY-MM-DD HH:mm') => {
-    return dayjs.utc(input).format(format)
+    return dayjs(input).format(format)
 }
 
 const time = {
