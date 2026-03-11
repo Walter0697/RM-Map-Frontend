@@ -18,14 +18,16 @@ function MarkerItem({
 }) {
 
     const [ imageExist, setImageExist ] = useState(false)
+    const historyPreview = item?.history_preview
+    const historyPreviewReady = historyPreview?.state === 'ready' && !!historyPreview?.image_src
 
     useEffect(() => {
-        if (item?.image_link) {
+        if (historyPreviewReady || item?.image_link) {
         setImageExist(true)
         } else {
         setImageExist(false)
         }
-    }, [item])
+    }, [item, historyPreviewReady])
 
     const onImageFailedToLoad = () => {
         setImageExist(false)
@@ -85,8 +87,9 @@ function MarkerItem({
                             objectFit: 'cover',
                             borderRadius: '6px',
                         }}
-                        src={backend.IMAGE_LINK + item.image_link}
+                        src={historyPreviewReady ? historyPreview.image_src : backend.IMAGE_LINK + item.image_link}
                         onError={onImageFailedToLoad}
+                        alt={historyPreviewReady ? `${item.label} map preview` : `${item.label} preview`}
                     />
                 </div>
             ) : (
@@ -102,14 +105,37 @@ function MarkerItem({
                         justifyContent: 'center',
                     }}
                 >
-                    <img
-                        style={{
-                            maxHeight: '84px',
-                            maxWidth: '92%',
-                            objectFit: 'contain',
-                        }}
-                        src={backend.IMAGE_LINK + typeIcon}
-                    />
+                    {item?.history_preview ? (
+                        <div
+                            style={{
+                                width: '100%',
+                                height: '88px',
+                                borderRadius: '6px',
+                                border: '1px solid #d6e2ec',
+                                background: 'linear-gradient(135deg, #e8f0f6 0%, #f9fbfc 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                textAlign: 'center',
+                                color: '#5d7282',
+                                fontSize: '12px',
+                                lineHeight: 1.3,
+                                padding: '8px',
+                            }}
+                        >
+                            {item.history_preview?.fallback_reason === 'no_coordinates' ? 'No map preview' : 'Preview unavailable'}
+                        </div>
+                    ) : (
+                        <img
+                            style={{
+                                maxHeight: '84px',
+                                maxWidth: '92%',
+                                objectFit: 'contain',
+                            }}
+                            src={backend.IMAGE_LINK + typeIcon}
+                            alt={`${item.label} type icon`}
+                        />
+                    )}
                 </div>
             )}
                 <div

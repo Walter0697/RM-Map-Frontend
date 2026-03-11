@@ -13,6 +13,7 @@ import {
 } from '@mui/material'
 import backend from '../../constant/backend'
 
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 
 import dayjs from 'dayjs'
@@ -36,6 +37,7 @@ function PreviousMarkerView({
     handleClose,
     marker,
     onUpdated,
+    openSchedule,
     eventtypes,
     dispatch,
 }) {
@@ -133,6 +135,40 @@ function PreviousMarkerView({
                                         </Grid>
                                     )}
                                     <Grid item xs={12} md={12} lg={12}>
+                                        {marker.history_preview?.state === 'ready' && marker.history_preview?.image_src ? (
+                                            <img
+                                                width='100%'
+                                                style={{
+                                                    maxHeight: '220px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '8px',
+                                                    marginBottom: '8px',
+                                                }}
+                                                src={marker.history_preview.image_src}
+                                                alt={`${marker.label} history preview`}
+                                            />
+                                        ) : (
+                                            <div
+                                                style={{
+                                                    width: '100%',
+                                                    minHeight: '180px',
+                                                    borderRadius: '8px',
+                                                    background: 'linear-gradient(135deg, #e0ecf4 0%, #f8fbfd 100%)',
+                                                    border: '1px solid #d7e2ea',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: '#577084',
+                                                    marginBottom: '8px',
+                                                    textAlign: 'center',
+                                                    padding: '12px',
+                                                }}
+                                            >
+                                                {marker.history_preview?.fallback_reason === 'no_coordinates' ? 'No saved coordinates for preview.' : 'Static map preview unavailable.'}
+                                            </div>
+                                        )}
+                                    </Grid>
+                                    <Grid item xs={12} md={12} lg={12}>
                                         { marker.address } 
                                         <IconButton
                                             onClick={() => { 
@@ -164,6 +200,20 @@ function PreviousMarkerView({
                                             {item.label} at {dayjs(item.selected_date).format('YYYY-MM-DD')}
                                         </Grid>
                                     ))}
+                                    <Grid item xs={12} md={12} lg={12}>
+                                        <Button
+                                            variant='contained'
+                                            size='middle'
+                                            style={{
+                                                marginLeft: '10%',
+                                                width: '80%',
+                                                boxShadow: '2px 2px 6px',
+                                                marginBottom: '10px',
+                                            }}
+                                            startIcon={<CalendarTodayIcon />}
+                                            onClick={() => openSchedule && openSchedule()}
+                                        >Schedule this marker</Button>
+                                    </Grid>
                                     <Grid item xs={12} md={12} lg={12}>
                                         <Button 
                                             variant='contained'

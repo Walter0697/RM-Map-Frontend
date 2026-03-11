@@ -43,4 +43,33 @@ describe('MarkerItem', () => {
         })
         container.remove()
     })
+
+    test('renders history preview fallback copy when map preview is unavailable', () => {
+        const container = document.createElement('div')
+        document.body.appendChild(container)
+        const root = createRoot(container)
+
+        act(() => {
+            root.render(
+                <MarkerItem
+                    item={{
+                        ...marker,
+                        history_preview: {
+                            state: 'fallback',
+                            fallback_reason: 'no_coordinates',
+                        },
+                    }}
+                    typeIcon='/pin/test.png'
+                    onClickHandler={() => {}}
+                />
+            )
+        })
+
+        expect(container.textContent).toContain('No map preview')
+
+        act(() => {
+            root.unmount()
+        })
+        container.remove()
+    })
 })
