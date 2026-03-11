@@ -24,8 +24,6 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
-import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined'
-import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 
 import backend from '../../constant/backend'
 import CircleIconButton from '../field/CircleIconButton'
@@ -36,7 +34,6 @@ dayjs.extend(dayjsPluginUTC)
 const exportFormats = [
     { id: 'text', label: 'Text', icon: DescriptionOutlinedIcon },
     { id: 'image', label: 'Image', icon: ImageOutlinedIcon },
-    { id: 'notion', label: 'Notion', icon: NotesOutlinedIcon },
 ]
 
 const isOfflineExportEnabled = () => {
@@ -46,12 +43,12 @@ const isOfflineExportEnabled = () => {
 
 const getAllowedFormatSet = () => {
     if (!isOfflineExportEnabled()) return new Set()
-    const rawValue = `${process.env.REACT_APP_OFFLINE_EXPORT_FORMATS || 'text,image,notion'}`.trim()
+    const rawValue = `${process.env.REACT_APP_OFFLINE_EXPORT_FORMATS || 'text,image'}`.trim()
     const values = rawValue
         .split(',')
         .map((item) => item.trim().toLowerCase())
-        .filter((item) => [ 'text', 'image', 'notion' ].includes(item))
-    return new Set(values.length > 0 ? values : [ 'text', 'image', 'notion' ])
+        .filter((item) => [ 'text', 'image' ].includes(item))
+    return new Set(values.length > 0 ? values : [ 'text', 'image' ])
 }
 
 const formatStatusColor = (status) => {
@@ -97,7 +94,6 @@ function ScheduleExportPanel({ jwt, schedules }) {
     const [ selectedFormats, setSelectedFormats ] = useState({
         text: allowedFormatSet.has('text'),
         image: allowedFormatSet.has('image'),
-        notion: allowedFormatSet.has('notion'),
     })
     const [ scheduleFrom, setScheduleFrom ] = useState(() => toDateInputValue(new Date()))
     const [ scheduleTo, setScheduleTo ] = useState(() => {
@@ -114,7 +110,6 @@ function ScheduleExportPanel({ jwt, schedules }) {
     const [ downloadLoadingFormat, setDownloadLoadingFormat ] = useState('')
     const [ localImageRequested, setLocalImageRequested ] = useState(false)
     const [ sharePreviewOpen, setSharePreviewOpen ] = useState(false)
-    const [ notionHelpOpen, setNotionHelpOpen ] = useState(false)
 
     useEffect(() => {
         if (!exportJob) return undefined
@@ -236,7 +231,7 @@ function ScheduleExportPanel({ jwt, schedules }) {
             const payload = await response.json()
             setExportJob(payload?.job || null)
             setSuccessMessage(wantsImagePreview
-                ? 'Text and Notion exports are processing. Image preview is ready now.'
+                ? 'Text export is processing. Image preview is ready now.'
                 : 'Export requested. Status will update automatically.')
         } catch (error) {
             setErrorMessage(error.message || 'Failed to create export')
@@ -480,15 +475,6 @@ function ScheduleExportPanel({ jwt, schedules }) {
                                                                     </CircleIconButton>
                                                                 ) : (
                                                                     <>
-                                                                        {artifact.format === 'notion' ? (
-                                                                            <CircleIconButton
-                                                                                onClickHandler={() => setNotionHelpOpen(true)}
-                                                                                ariaLabel='How to import in Notion'
-                                                                                background='#ffffff'
-                                                                            >
-                                                                                <HelpOutlineOutlinedIcon />
-                                                                            </CircleIconButton>
-                                                                        ) : null}
                                                                         <CircleIconButton
                                                                             onClickHandler={() => downloadArtifact(artifact.format, false)}
                                                                             disabled={artifact.status !== 'succeeded' || downloadLoadingFormat === artifact.format}
@@ -524,7 +510,7 @@ function ScheduleExportPanel({ jwt, schedules }) {
                                             }}
                                         >
                                             <Typography variant='body2' color='text.secondary'>
-                                                Create an export to see text and Notion downloads here. Image preview appears here too.
+                                                Create an export to see text downloads here. Image preview appears here too.
                                             </Typography>
                                         </Box>
                                     )}
@@ -551,34 +537,6 @@ function ScheduleExportPanel({ jwt, schedules }) {
                 scheduleFrom={scheduleFrom}
                 scheduleTo={scheduleTo}
             />
-            <Dialog open={notionHelpOpen} onClose={() => setNotionHelpOpen(false)} fullWidth maxWidth='sm'>
-                <DialogTitle>Import Into Notion</DialogTitle>
-                <DialogContent>
-                    <Stack spacing={1.25} sx={{ pt: 1 }}>
-                        <Typography variant='body2'>
-                            The Notion export is downloaded as a `.notion.json` file.
-                        </Typography>
-                        <Typography variant='body2'>
-                            1. Download the Notion export from this dialog.
-                        </Typography>
-                        <Typography variant='body2'>
-                            2. In Notion, open the page where you want the content.
-                        </Typography>
-                        <Typography variant='body2'>
-                            3. Use `Import` and choose `Text & Markdown` or drag the JSON file into the page if your Notion workspace accepts it.
-                        </Typography>
-                        <Typography variant='body2'>
-                            4. If Notion does not recognize the JSON directly, open the file, copy the structured content, and paste it into a page as a fallback.
-                        </Typography>
-                        <Typography variant='body2' color='text.secondary'>
-                            Current export shape: header + metadata + marker blocks + schedule blocks.
-                        </Typography>
-                    </Stack>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setNotionHelpOpen(false)}>Close</Button>
-                </DialogActions>
-            </Dialog>
         </>
     )
 }

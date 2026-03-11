@@ -17,7 +17,7 @@ describe('ScheduleExportPanel', () => {
     beforeEach(() => {
         jest.useFakeTimers()
         process.env.REACT_APP_OFFLINE_EXPORT_ENABLED = 'true'
-        process.env.REACT_APP_OFFLINE_EXPORT_FORMATS = 'text,image,notion'
+        process.env.REACT_APP_OFFLINE_EXPORT_FORMATS = 'text,image'
         global.fetch = jest.fn()
         window.URL.createObjectURL = jest.fn(() => 'blob:test')
         window.URL.revokeObjectURL = jest.fn()
@@ -208,7 +208,6 @@ describe('ScheduleExportPanel', () => {
 
         fireEvent.click(screen.getByLabelText('Open export'))
         fireEvent.click(screen.getByLabelText('Text'))
-        fireEvent.click(screen.getByLabelText('Notion'))
         fireEvent.click(screen.getByText('Create Export'))
 
         await waitFor(() => {
