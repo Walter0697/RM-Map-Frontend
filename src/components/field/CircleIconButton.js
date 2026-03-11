@@ -10,12 +10,14 @@ function CircleIconButton({
     disabled,
     badgeNumber,
     float,
+    ariaLabel,
     children,
 }) {
     const buttonComponent = useMemo(() => {
         return (
             <IconButton
                 size='large'
+                aria-label={ariaLabel}
                 style={{
                     float: float ?? 'left',
                     backgroundColor: background ?? 'white',
@@ -27,7 +29,7 @@ function CircleIconButton({
                 {children}
             </IconButton>
         )
-    }, [onClickHandler, background, disabled, float, children])
+    }, [onClickHandler, background, disabled, float, ariaLabel, children])
 
     if (!badgeNumber) {
         return buttonComponent

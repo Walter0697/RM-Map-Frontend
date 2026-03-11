@@ -12,6 +12,7 @@ import useBoop from '../hooks/useBoop'
 
 import ScheduleList from '../components/list/ScheduleList'
 import ScheduleView from '../components/schedule/ScheduleView'
+import ScheduleExportPanel from '../components/schedule/ScheduleExportPanel'
 import ScheduleArriveForm from '../components/schedule/ScheduleArriveForm'
 import ScheduleEditForm from '../components/form/ScheduleEditForm'
 import AutoHideAlert from '../components/AutoHideAlert'
@@ -24,6 +25,7 @@ import actions from '../store/actions'
 function SchedulePage({
     schedules,
     pendingDeepLink,
+    jwt,
     dispatch,
 }) {
     const history = useHistory()
@@ -258,6 +260,7 @@ function SchedulePage({
 
     return (
         <Base>
+            <ScheduleExportPanel jwt={jwt} schedules={scheduleItems} />
             <ScheduleList
                 openScheduleView={setScheduleView}
                 schedulesOverride={scheduleItems}
@@ -321,4 +324,5 @@ function SchedulePage({
 export default connect(state => ({
     schedules: state.schedule.schedules,
     pendingDeepLink: state.deepLink.pending,
+    jwt: state.auth.jwt,
 }))(SchedulePage)
