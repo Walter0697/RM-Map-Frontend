@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import {
-    Grid,
+    Box,
     TextField,
     Button,
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogContentText,
     DialogActions,
     Slide,
 } from '@mui/material'
@@ -74,28 +73,24 @@ function ImageLinkValidate({
     return (
         <Dialog
             fullWidth
-            maxWidth={'xl'}
+            maxWidth={'sm'}
             open={shouldOpen}
             TransitionComponent={TransitionFromLeft}
             onClose={handleClose}
         >
-            <DialogTitle>Preview Image</DialogTitle>
+            <DialogTitle>Set Image Link</DialogTitle>
             <DialogContent dividers>
-                <DialogContentText>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} md={12} lg={12}>
-                            <TextField
-                                variant='outlined'
-                                fullWidth
-                                label='image link'
-                                value={link}
-                                onChange={onLinkChangeHandler}
-                                error={hasError}
-                                helperText={helperMessage}
-                            />
-                        </Grid>
-                    </Grid>
-                </DialogContentText>
+                <Box sx={{ width: '100%' }}>
+                    <TextField
+                        variant='outlined'
+                        fullWidth
+                        label='Image Link URL'
+                        value={link}
+                        onChange={onLinkChangeHandler}
+                        error={hasError}
+                        helperText={helperMessage}
+                    />
+                </Box>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose}>Cancel</Button>

@@ -22,27 +22,30 @@ function AttributeFilter({
                 title={'Attribute'}
             />
             <FilterBorder />
-            <Grid container>
-                <Grid item xs={12}>
+            <Grid container spacing={1} sx={{ px: 1, pt: 0.5 }}>
+                <Grid item xs={4}>
                     <FilterButton 
                         icon={(<StarIcon />)}
-                        text={'Favourite'}
+                        showText={false}
+                        tooltipText={'Favourite'}
                         isActive={selectedAttribute.includes('favourite')}
                         onClickHandler={() => toggleAttribute('favourite')}
                     />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={4}>
                     <FilterButton 
                         icon={(<CalendarMonthIcon />)}
-                        text={'Timed'}
+                        showText={false}
+                        tooltipText={'Timed'}
                         isActive={selectedAttribute.includes('timed')}
                         onClickHandler={() => toggleAttribute('timed')}
                     />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={4}>
                     <FilterButton 
                         icon={(<AccessAlarmIcon />)}
-                        text={'Hurry'}
+                        showText={false}
+                        tooltipText={'Hurry'}
                         isActive={selectedAttribute.includes('hurry')}
                         onClickHandler={() => toggleAttribute('hurry')}
                     />

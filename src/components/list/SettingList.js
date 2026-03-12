@@ -156,7 +156,7 @@ function SettingList({
           />
         </WrapperBox>
         <WrapperBox
-            height={30}
+            height={110}
             marginBottom={'30px'}
         >
             <PreviewDisplayPinButton

@@ -202,14 +202,8 @@ function ScrapperForm({
 
     const onSubmitHandler = (e) => {
         e.preventDefault()
-        if (!fetchData || !fetchData.restaurant) {
-            setAlertMessage({
-                type: 'warning',
-                message: 'Website integration is not ready yet. Please fetch and confirm restaurant data first.',
-            })
-            return
-        }
-        setValue(link, fetchData)
+        // Missing restaurant metadata is allowed; caller will simply hide restaurant info.
+        setValue(link, fetchData?.restaurant ? fetchData : null)
     }
 
     return (

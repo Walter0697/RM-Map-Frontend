@@ -13,10 +13,7 @@ import BaseForm from './BaseForm'
 import generic from '../../scripts/generic'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
-
 import dayjs from 'dayjs'
-import dayjsPluginUTC from 'dayjs-plugin-utc'
-dayjs.extend(dayjsPluginUTC)
 
 function toDateTimeLocalValue(value) {
     if (!value || Number.isNaN(value.getTime?.())) return ''
@@ -67,7 +64,7 @@ function ScheduleEditForm({
 
         setFormValue('label', schedule.label)
         setFormValue('description', schedule.description)
-        setFormValue('selected_time', new Date(dayjs.utc(schedule.selected_date).format('MM/DD/YYYY HH:mm')))
+        setFormValue('selected_time', schedule.selected_date ? new Date(schedule.selected_date) : null)
 
     }, [schedule])
 

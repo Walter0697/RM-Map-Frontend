@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useRef } from 'react'
+import React, { useMemo, useCallback, useRef, useState, useEffect } from 'react'
 
 import QuickPinchZoom, {
     make2dTransformValue,
@@ -23,16 +23,76 @@ function StationMap({
     dimension,
     pinchZoomRef,
     onItemClickHandler,
+    isMobile,
 }) {
+    const FADE_DURATION_MS = 700
     const elementRef = useRef(null)
+    const fadeTimeoutRef = useRef(null)
+    const [ viewport, setViewport ] = useState({
+        width: window.innerWidth,
+        height: window.innerHeight,
+    })
+    const [ activeImage, setActiveImage ] = useState(mapImage || '')
+    const [ previousImage, setPreviousImage ] = useState(null)
+    const [ activeOpacity, setActiveOpacity ] = useState(1)
 
-    const expectedWidth = useMemo(() => {
-        return window.innerWidth * 0.9
+    useEffect(() => {
+        const onResize = () => {
+            setViewport({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            })
+        }
+
+        window.addEventListener('resize', onResize)
+        return () => window.removeEventListener('resize', onResize)
     }, [])
 
-    const expectedHeight = useMemo(() => {
-        return expectedWidth * (dimension.height / dimension.width)
-    }, [dimension, expectedWidth])
+    useEffect(() => {
+        if (!mapImage) return
+        if (!activeImage) {
+            setActiveImage(mapImage)
+            setActiveOpacity(1)
+            return
+        }
+        if (mapImage === activeImage) return
+
+        if (fadeTimeoutRef.current) {
+            window.clearTimeout(fadeTimeoutRef.current)
+            fadeTimeoutRef.current = null
+        }
+
+        setPreviousImage(activeImage)
+        setActiveImage(mapImage)
+        setActiveOpacity(0)
+    }, [mapImage, activeImage])
+
+    useEffect(() => (
+        () => {
+            if (fadeTimeoutRef.current) {
+                window.clearTimeout(fadeTimeoutRef.current)
+            }
+        }
+    ), [])
+
+    const expectedWidth = useMemo(() => {
+        const viewportWidth = Math.max(320, viewport.width || 320)
+        const viewportHeight = Math.max(480, viewport.height || 480)
+        const horizontalRatio = isMobile ? 0.94 : 0.9
+        const maxHeightRatio = isMobile ? 0.44 : 0.5
+        const naturalWidth = Math.min(viewportWidth * horizontalRatio, 1200)
+        const naturalHeight = naturalWidth * (dimension.height / dimension.width)
+        const maxHeight = viewportHeight * maxHeightRatio
+
+        if (naturalHeight <= maxHeight) {
+            return naturalWidth
+        }
+        return maxHeight * (dimension.width / dimension.height)
+    }, [dimension, isMobile, viewport])
+
+    const expectedHeight = useMemo(() => (
+        expectedWidth * (dimension.height / dimension.width)
+    ), [dimension, expectedWidth])
 
     const ratio = useMemo(() => {
         return expectedWidth / dimension.width
@@ -46,6 +106,22 @@ function StationMap({
             element.style.setProperty('transform', value)
         }
     }, [])
+
+    const onActiveImageLoaded = () => {
+        // Force a frame boundary so cached-image loads still animate visibly.
+        window.requestAnimationFrame(() => {
+            setActiveOpacity(1)
+        })
+
+        if (!previousImage) return
+        if (fadeTimeoutRef.current) {
+            window.clearTimeout(fadeTimeoutRef.current)
+        }
+        fadeTimeoutRef.current = window.setTimeout(() => {
+            setPreviousImage(null)
+            fadeTimeoutRef.current = null
+        }, FADE_DURATION_MS + 60)
+    }
 
     return (
         <div
@@ -70,13 +146,32 @@ function StationMap({
                         position: 'relative',
                     }}
                 >
+                    {previousImage ? (
+                        <img
+                            style={{
+                                position: 'absolute',
+                                width: expectedWidth,
+                                height: expectedHeight,
+                                opacity: 1 - activeOpacity,
+                                transition: `opacity ${FADE_DURATION_MS}ms ease-in-out`,
+                                willChange: 'opacity',
+                            }}
+                            src={previousImage}
+                            alt='Previous station map'
+                        />
+                    ) : null}
                     <img
                         style={{
                             position: 'absolute',
                             width: expectedWidth,
                             height: expectedHeight,
+                            opacity: activeOpacity,
+                            transition: `opacity ${FADE_DURATION_MS}ms ease-in-out`,
+                            willChange: 'opacity',
                         }}
-                        src={mapImage}
+                        src={activeImage || mapImage}
+                        alt='Station map'
+                        onLoad={onActiveImageLoaded}
                     />
                     {stations.map((station, index) => (
                         <StationButton
