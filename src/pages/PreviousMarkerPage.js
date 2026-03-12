@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux'
+import { useLazyQuery } from '@apollo/client'
 import Base from './Base'
 
-import { useQuery } from '@apollo/client'
-
 import useBoop from '../hooks/useBoop'
+import usePagedDataController from '../hooks/usePagedDataController'
 
 import TopBar from '../components/topbar/TopBar'
 import MarkerDisplayList from '../components/list/MarkerDisplayList'
@@ -22,11 +22,26 @@ function PreviousMarkerPage({
     jwt,
 }) {
     const history = useHistory()
+    const [ listPagedPreviousMarkersGQL ] = useLazyQuery(graphql.markers.pagedprevious, { fetchPolicy: 'no-cache' })
+    const pagedPreviousMarkerController = usePagedDataController({
+        resource: 'previous_markers_list',
+        queryIdentity: { scope: 'history' },
+        fetchPage: async (cursor) => {
+            const response = await listPagedPreviousMarkersGQL({
+                variables: {
+                    cursor: cursor || null,
+                    limit: 30,
+                }
+            })
+            const payload = response?.data?.pagedpreviousmarkers || {}
+            return {
+                items: payload.items || [],
+                nextCursor: payload.next_cursor || null,
+            }
+        }
+    })
 
-    // graphql request
-    const { data: listData, loading: listLoading, error: listError } = useQuery(graphql.markers.previous, { fetchPolicy: 'no-cache' })
-
-    const [ previousMarkers, setMarkers ] = useState([])
+    const previousMarkers = pagedPreviousMarkerController.items
 
     // selected marker
     const [ selectedMarker, setSelected ] = useState(null)
@@ -42,6 +57,7 @@ function PreviousMarkerPage({
     const [ filterValue, setFilterValue ] = useState('')
     const [ finalFilterValue, setFinalFilterValue ] = useState('')
     const [ isFilterExpanded, setExpandFilter ] = useState(false)
+    const [ previewByID, setPreviewByID ] = useState({})
     const finalFilterDisplay = useMemo(() => {
         if (finalFilterValue === '') return null
         let list = filters.parser.parseStringToDisplayArr(filterOption, finalFilterValue)
@@ -54,14 +70,12 @@ function PreviousMarkerPage({
             ...marker,
             history_preview: previewByID[marker.id] || historyMarkerPreview.buildIdlePreviewState(marker),
         }))
-        //if (finalFilterValue === '' && customFilterValue === '') return previousMarkers
         const filteredByQuery = filters.map.filterByQuery(markersWithPreview, customFilterValue, eventtypes)
         const list = filters.map.mapMarkerWithFilter(filteredByQuery, finalFilterValue, filterOption)
         return list
     }, [previousMarkers, previewByID, finalFilterValue, customFilterValue, filterOption, selectedMarker, eventtypes])
 
     const [ showFilter, setShowFilter ] = useState(false)
-    const [ previewByID, setPreviewByID ] = useState({})
 
     useEffect(() => {
         let options = []
@@ -76,33 +90,25 @@ function PreviousMarkerPage({
     }, [eventtypes])
 
     useEffect(() => {
-        if (listData) {
-            setMarkers(listData.previousmarkers)
-        }
+        pagedPreviousMarkerController.refresh()
+    }, [])
 
-        if (listError) {
-            setFailMessage(listError.message)
-            fail()
-        }
-    }, [listData, listError])
+    useEffect(() => {
+        if (!pagedPreviousMarkerController.error) return
+        setFailMessage(pagedPreviousMarkerController.error.message)
+        fail()
+    }, [pagedPreviousMarkerController.error])
 
     useEffect(() => {
         if (!historyMarkerPreview.isEnabled() || !jwt || previousMarkers.length === 0) return undefined
 
-        const targets = previousMarkers.filter((marker) => historyMarkerPreview.hasValidCoordinates(marker))
+        const targets = previousMarkers.filter((marker) => {
+            if (!historyMarkerPreview.hasValidCoordinates(marker)) return false
+            return !previewByID[marker.id]
+        })
         if (targets.length === 0) return undefined
 
         const abortController = new AbortController()
-
-        setPreviewByID((current) => {
-            const next = { ...current }
-            targets.forEach((marker) => {
-                if (!next[marker.id]) {
-                    next[marker.id] = historyMarkerPreview.buildIdlePreviewState(marker)
-                }
-            })
-            return next
-        })
 
         Promise.all(targets.map(async (marker) => {
             try {
@@ -133,7 +139,7 @@ function PreviousMarkerPage({
         return () => {
             abortController.abort()
         }
-    }, [jwt, previousMarkers])
+    }, [jwt, previousMarkers, previewByID])
 
     useEffect(() => {
         if (!selectedMarker) return
@@ -150,9 +156,12 @@ function PreviousMarkerPage({
 
     const onMarkerRevoked = (marker) => {
         if (marker) {
-            let list = previousMarkers
-            list = list.filter(s => s.id !== marker.id)
-            setMarkers(list)
+            setPreviewByID((current) => {
+                const next = { ...current }
+                delete next[marker.id]
+                return next
+            })
+            pagedPreviousMarkerController.refresh()
         }
         setSelected(null)
         confirmCreated()
@@ -206,6 +215,15 @@ function PreviousMarkerPage({
                     finalFilterValue={finalFilterDisplay} // for filter options
                     filterOpen={showFilter}
                     setShowFilter={setShowFilter}
+                    onReachEnd={pagedPreviousMarkerController.loadMore}
+                    hasMore={!!pagedPreviousMarkerController.nextCursor}
+                    loadingMore={pagedPreviousMarkerController.loading}
+                    loadingError={pagedPreviousMarkerController.error}
+                    onRetry={pagedPreviousMarkerController.retry}
+                    staleData={pagedPreviousMarkerController.stale}
+                    offlineCached={pagedPreviousMarkerController.offlineCached}
+                    onRefreshTop={pagedPreviousMarkerController.refresh}
+                    refreshing={pagedPreviousMarkerController.refreshing}
                 />
                 <PreviousMarkerView 
                     open={!!selectedMarker}

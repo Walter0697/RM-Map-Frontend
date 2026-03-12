@@ -128,46 +128,28 @@ function PreviousMarkerView({
                                 <Grid container spacing={2}>
                                     { marker.image_link && (
                                         <Grid item xs={12} md={12} lg={12}>
+                                            <div
+                                                style={{
+                                                    marginTop: '6px',
+                                                    color: '#4f6474',
+                                                    fontSize: '13px',
+                                                }}
+                                            >
+                                                Saved marker image
+                                            </div>
                                             <img
                                                 width='100%'
-                                                src={backend.IMAGE_LINK + marker.image_link}                                            
+                                                style={{
+                                                    maxHeight: '240px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '8px',
+                                                    marginTop: '8px',
+                                                }}
+                                                src={backend.IMAGE_LINK + marker.image_link}
+                                                alt={`${marker.label} saved marker`}
                                             />
                                         </Grid>
                                     )}
-                                    <Grid item xs={12} md={12} lg={12}>
-                                        {marker.history_preview?.state === 'ready' && marker.history_preview?.image_src ? (
-                                            <img
-                                                width='100%'
-                                                style={{
-                                                    maxHeight: '220px',
-                                                    objectFit: 'cover',
-                                                    borderRadius: '8px',
-                                                    marginBottom: '8px',
-                                                }}
-                                                src={marker.history_preview.image_src}
-                                                alt={`${marker.label} history preview`}
-                                            />
-                                        ) : (
-                                            <div
-                                                style={{
-                                                    width: '100%',
-                                                    minHeight: '180px',
-                                                    borderRadius: '8px',
-                                                    background: 'linear-gradient(135deg, #e0ecf4 0%, #f8fbfd 100%)',
-                                                    border: '1px solid #d7e2ea',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    color: '#577084',
-                                                    marginBottom: '8px',
-                                                    textAlign: 'center',
-                                                    padding: '12px',
-                                                }}
-                                            >
-                                                {marker.history_preview?.fallback_reason === 'no_coordinates' ? 'No saved coordinates for preview.' : 'Static map preview unavailable.'}
-                                            </div>
-                                        )}
-                                    </Grid>
                                     <Grid item xs={12} md={12} lg={12}>
                                         { marker.address } 
                                         <IconButton
@@ -227,6 +209,40 @@ function PreviousMarkerView({
                                             }}
                                             onClick={onRevokeClick}
                                         >Revoke</Button>
+                                    </Grid>
+                                    <Grid item xs={12} md={12} lg={12}>
+                                        {marker.history_preview?.state === 'ready' && marker.history_preview?.image_src ? (
+                                            <img
+                                                width='100%'
+                                                style={{
+                                                    maxHeight: '220px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '8px',
+                                                    marginBottom: '8px',
+                                                }}
+                                                src={marker.history_preview.image_src}
+                                                alt={`${marker.label} history preview`}
+                                            />
+                                        ) : (
+                                            <div
+                                                style={{
+                                                    width: '100%',
+                                                    minHeight: '180px',
+                                                    borderRadius: '8px',
+                                                    background: 'linear-gradient(135deg, #e0ecf4 0%, #f8fbfd 100%)',
+                                                    border: '1px solid #d7e2ea',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: '#577084',
+                                                    marginBottom: '8px',
+                                                    textAlign: 'center',
+                                                    padding: '12px',
+                                                }}
+                                            >
+                                                {marker.history_preview?.fallback_reason === 'no_coordinates' ? 'No saved coordinates for preview.' : 'Static map preview unavailable.'}
+                                            </div>
+                                        )}
                                     </Grid>
                                 </Grid>
                             </DialogContentText>

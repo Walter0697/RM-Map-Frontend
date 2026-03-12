@@ -72,4 +72,38 @@ describe('MarkerItem', () => {
         })
         container.remove()
     })
+
+    test('renders both map preview and marker image when both are available', () => {
+        const container = document.createElement('div')
+        document.body.appendChild(container)
+        const root = createRoot(container)
+
+        act(() => {
+            root.render(
+                <MarkerItem
+                    item={{
+                        ...marker,
+                        image_link: '/markers/test-image.png',
+                        history_preview: {
+                            state: 'ready',
+                            image_src: 'https://example.com/map-preview.png',
+                        },
+                    }}
+                    typeIcon='/pin/test.png'
+                    onClickHandler={() => {}}
+                />
+            )
+        })
+
+        const images = container.querySelectorAll('img')
+        const altValues = Array.from(images).map((node) => node.getAttribute('alt'))
+        expect(altValues).toContain('Test Marker map preview')
+        expect(altValues).toContain('Test Marker marker image')
+        expect(altValues.indexOf('Test Marker marker image')).toBeLessThan(altValues.indexOf('Test Marker map preview'))
+
+        act(() => {
+            root.unmount()
+        })
+        container.remove()
+    })
 })

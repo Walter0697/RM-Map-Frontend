@@ -73,4 +73,48 @@ describe('PreviousMarkerView', () => {
         })
         container.remove()
     })
+
+    test('renders marker image before map preview when both are available', () => {
+        const store = configureStore({ reducer: rootReducer })
+        const container = document.createElement('div')
+        document.body.appendChild(container)
+        const root = createRoot(container)
+
+        act(() => {
+            root.render(
+                <Provider store={store}>
+                    <PreviousMarkerView
+                        open={true}
+                        handleClose={() => {}}
+                        marker={{
+                            id: 5,
+                            type: 'food',
+                            label: 'Saved Photo Spot',
+                            address: '456 Test Road',
+                            description: 'Has image',
+                            image_link: '/markers/photo.png',
+                            history_preview: {
+                                state: 'ready',
+                                image_src: 'https://example.com/map-preview.png',
+                            },
+                        }}
+                        openSchedule={() => {}}
+                    />
+                </Provider>
+            )
+        })
+
+        expect(document.body.textContent).toContain('Saved marker image')
+        const images = Array.from(document.querySelectorAll('img'))
+        expect(images.some((node) => node.getAttribute('alt') === 'Saved Photo Spot saved marker')).toBe(true)
+        expect(images.some((node) => node.getAttribute('alt') === 'Saved Photo Spot history preview')).toBe(true)
+        const markerImageIndex = images.findIndex((node) => node.getAttribute('alt') === 'Saved Photo Spot saved marker')
+        const mapPreviewIndex = images.findIndex((node) => node.getAttribute('alt') === 'Saved Photo Spot history preview')
+        expect(markerImageIndex).toBeLessThan(mapPreviewIndex)
+
+        act(() => {
+            root.unmount()
+        })
+        container.remove()
+    })
 })

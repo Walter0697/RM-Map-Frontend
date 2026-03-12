@@ -2,11 +2,9 @@ import React, { useMemo } from 'react'
 import { connect } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 
-import BottomUpTrail from '../animatein/BottomUpTrail'
-import WrapperBox from '../wrapper/WrapperBox'
 import FilterCircleButton from '../wrapper/FilterCircleButton'
 // import FilterBox from '../filterbox/FilterBox'
-import MarkerItem from './listitem/MarkerItem'
+import MarkerList from './MarkerList'
 
 import search from '../../scripts/search'
 
@@ -15,6 +13,15 @@ function MarkerDisplayList({
     setSelectedById,
     eventtypes,
     filterlist,
+    onReachEnd,
+    hasMore,
+    loadingMore,
+    loadingError,
+    onRetry,
+    staleData,
+    offlineCached,
+    onRefreshTop,
+    refreshing,
     // filterOption,   // below filter related
     // filterValue,
     // setFilterValue,
@@ -51,31 +58,30 @@ function MarkerDisplayList({
 
     return (
         <>
-            <div 
+        <div 
                 style={{
                     position: 'absolute',
                     height: '90%',
                     width: '95%',
                     paddingLeft: '5%',
                     paddingTop: '20px',
-                    overflow: 'auto',
                 }}
             >
-                <BottomUpTrail>
-                    {filteredMarkers.map((item, index) => (
-                        <WrapperBox
-                            key={index}
-                            height='120px'
-                            marginBottom='10px'
-                        >
-                            <MarkerItem
-                                item={item}
-                                typeIcon={eventtypes.find(s => s.value === item.type).icon_path}
-                                onClickHandler={() => setSelectedById(item.id)}
-                            />
-                        </WrapperBox>
-                    ))}
-                </BottomUpTrail>
+                <MarkerList
+                    top={'10px'}
+                    height={'100%'}
+                    markers={filteredMarkers}
+                    setSelectedById={setSelectedById}
+                    onReachEnd={onReachEnd}
+                    hasMore={hasMore}
+                    loadingMore={loadingMore}
+                    onRetry={onRetry}
+                    staleData={staleData}
+                    offlineCached={offlineCached}
+                    onRefreshTop={onRefreshTop}
+                    refreshing={refreshing}
+                    loadingError={loadingError}
+                />
             </div>
             {/* filter related */}
             {/* button to open */}
