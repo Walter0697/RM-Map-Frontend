@@ -32,6 +32,12 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import SyncIcon from '@mui/icons-material/Sync'
 import LinkIcon from '@mui/icons-material/Link'
 import AltRouteIcon from '@mui/icons-material/AltRoute'
+import AcUnitIcon from '@mui/icons-material/AcUnit'
+import CloudOffOutlinedIcon from '@mui/icons-material/CloudOffOutlined'
+import OpacityIcon from '@mui/icons-material/Opacity'
+import SensorsIcon from '@mui/icons-material/Sensors'
+import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined'
+import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -47,6 +53,8 @@ import dayjs from 'dayjs'
 const TransitionUp = (props) => {
     return <Slide {...props} direction='up' />
 }
+
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
 
 const formatMinutesCompact = (minutes) => {
     const absoluteMinutes = Math.abs(minutes)
@@ -164,6 +172,81 @@ const routeModeStyles = {
     bus: { label: 'Bus', color: '#ef6c00' },
     public_transit: { label: 'Transit', color: '#8e24aa' },
     direct: { label: 'Direct', color: '#546e7a' },
+}
+
+const getWeatherConditionLabel = (type = '') => {
+    const normalized = `${type || ''}`.trim().toLowerCase()
+    if (!normalized || normalized === 'none') return 'Clear'
+    if (normalized === 'rain') return 'Rain'
+    if (normalized === 'snow') return 'Snow'
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1)
+}
+
+const getWeatherStatusLabel = (status = '') => {
+    const normalized = `${status || ''}`.trim().toLowerCase()
+    if (normalized === 'fresh') return 'Fresh'
+    if (normalized === 'stale') return 'Stale'
+    if (normalized === 'unavailable') return 'Unavailable'
+    if (normalized === 'loading') return 'Loading'
+    return 'Fresh'
+}
+
+const getWeatherSourceMeta = (source = '') => {
+    const normalized = `${source || ''}`.trim().toLowerCase()
+    if (normalized === 'cache') {
+        return {
+            label: 'Source: Cache',
+            color: '#5a6c82',
+            Icon: StorageOutlinedIcon,
+        }
+    }
+    if (normalized === 'provider') {
+        return {
+            label: 'Source: Provider',
+            color: '#3a7a2e',
+            Icon: SensorsIcon,
+        }
+    }
+    return {
+        label: 'Source: Degraded',
+        color: '#a14f08',
+        Icon: CloudOffOutlinedIcon,
+    }
+}
+
+const getWeatherVisual = (summary) => {
+    const status = `${summary?.status || ''}`.trim().toLowerCase()
+    const condition = `${summary?.condition || ''}`.trim().toLowerCase()
+    if (status === 'unavailable') {
+        return {
+            Icon: CloudOffOutlinedIcon,
+            color: '#9e2e1b',
+        }
+    }
+    if (condition === 'snow') {
+        return {
+            Icon: AcUnitIcon,
+            color: '#3d8bda',
+        }
+    }
+    if (condition === 'rain') {
+        return {
+            Icon: OpacityIcon,
+            color: '#2962b8',
+        }
+    }
+    return {
+        Icon: WbSunnyOutlinedIcon,
+        color: '#cf8a05',
+    }
+}
+
+const toWeatherCacheKey = (schedule) => {
+    const lat = Number(schedule?.marker?.latitude)
+    const lon = Number(schedule?.marker?.longitude)
+    const selectedAt = dayjs(schedule?.selected_date)
+    if (!selectedAt.isValid() || Number.isNaN(lat) || Number.isNaN(lon)) return ''
+    return `${lat.toFixed(5)}:${lon.toFixed(5)}:${selectedAt.format('YYYY-MM-DDTHH:mm')}`
 }
 
 const appendRoutePoints = (existing, incoming) => {
@@ -327,6 +410,8 @@ function ScheduleItem({
     eventtypes,
     transition,
     syncInfo,
+    weatherSummary,
+    weatherLoading,
     triggerCopyMessage,
     isToday,
     onEditClick,
@@ -466,6 +551,13 @@ function ScheduleItem({
         if (!eventDate.isValid()) return 'https://calendar.google.com/calendar/u/0/r'
         return `https://calendar.google.com/calendar/u/0/r/day/${eventDate.format('YYYY/M/D')}`
     })()
+    const weatherVisual = getWeatherVisual(weatherSummary)
+    const WeatherIcon = weatherVisual.Icon
+    const weatherSource = getWeatherSourceMeta(weatherSummary?.source)
+    const WeatherSourceIcon = weatherSource.Icon
+    const weatherChipLabel = weatherLoading
+        ? 'Weather Loading'
+        : `Weather ${getWeatherConditionLabel(weatherSummary?.condition)} / ${getWeatherStatusLabel(weatherSummary?.status)}`
 
     return (
         <div style={{ width: '100%' }}>
@@ -618,6 +710,15 @@ function ScheduleItem({
             )}
             <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
                 <Chip size='small' color={syncStatusColor} label={syncStatusLabel} />
+                <Chip
+                    size='small'
+                    variant='outlined'
+                    icon={<WeatherIcon sx={{ color: `${weatherVisual.color} !important` }} />}
+                    label={weatherChipLabel}
+                />
+                <Tooltip title={weatherSource.label}>
+                    <WeatherSourceIcon sx={{ fontSize: '15px', color: weatherSource.color }} />
+                </Tooltip>
                 <div style={{ flex: 1 }} />
                 <IconButton
                     size='small'
@@ -817,6 +918,9 @@ function ScheduleView({
     const [ routePreviewResult, setRoutePreviewResult ] = useState(null)
     const [ routePreviewTitle, setRoutePreviewTitle ] = useState('Route Preview')
     const [ routeModeFilter, setRouteModeFilter ] = useState('all')
+    const [ weatherByScheduleId, setWeatherByScheduleId ] = useState({})
+    const [ weatherLoadingByScheduleId, setWeatherLoadingByScheduleId ] = useState({})
+    const weatherPreviewCacheRef = useRef({})
     const routeMapContainerRef = useRef(null)
     const routeMapRef = useRef(null)
 
@@ -894,6 +998,124 @@ function ScheduleView({
 
         fetchTransitionAnalysis()
     }, [open, jwt, sortedList, activeScheduleId, fetchStatus])
+
+    useEffect(() => {
+        if (!open || !jwt || !sortedList || sortedList.length === 0) {
+            setWeatherByScheduleId({})
+            setWeatherLoadingByScheduleId({})
+            return
+        }
+
+        const loadingState = {}
+        const nextWeatherState = {}
+        const pending = []
+
+        sortedList.forEach((schedule) => {
+            const scheduleId = schedule?.id
+            if (!scheduleId) return
+            const cacheKey = toWeatherCacheKey(schedule)
+            if (!cacheKey) {
+                nextWeatherState[scheduleId] = {
+                    status: 'unavailable',
+                    condition: 'unavailable',
+                    source: 'degraded',
+                }
+                return
+            }
+            const cached = weatherPreviewCacheRef.current[cacheKey]
+            if (cached) {
+                nextWeatherState[scheduleId] = cached
+                return
+            }
+            loadingState[scheduleId] = true
+            pending.push({ schedule, cacheKey })
+        })
+
+        setWeatherByScheduleId(nextWeatherState)
+        setWeatherLoadingByScheduleId(loadingState)
+
+        if (pending.length === 0) return
+        let cancelled = false
+
+        const loadWeather = async () => {
+            const resolvedState = {}
+            const resolvedLoadingState = {}
+            await Promise.all(pending.map(async ({ schedule, cacheKey }) => {
+                const scheduleId = schedule?.id
+                if (!scheduleId) return
+
+                const lat = Number(schedule?.marker?.latitude)
+                const lon = Number(schedule?.marker?.longitude)
+                const selectedAt = dayjs(schedule?.selected_date)
+                if (!selectedAt.isValid() || Number.isNaN(lat) || Number.isNaN(lon)) {
+                    const fallback = {
+                        status: 'unavailable',
+                        condition: 'unavailable',
+                        source: 'degraded',
+                    }
+                    weatherPreviewCacheRef.current[cacheKey] = fallback
+                    resolvedState[scheduleId] = fallback
+                    resolvedLoadingState[scheduleId] = false
+                    return
+                }
+
+                const now = dayjs()
+                const offsetDays = clamp(selectedAt.startOf('day').diff(now.startOf('day'), 'day'), 0, 16)
+                const query = new URLSearchParams({
+                    min_lat: lat.toFixed(5),
+                    max_lat: lat.toFixed(5),
+                    min_lon: lon.toFixed(5),
+                    max_lon: lon.toFixed(5),
+                    center_lat: lat.toFixed(5),
+                    center_lon: lon.toFixed(5),
+                    zoom: '13',
+                    forecast_window_h: `${clamp((offsetDays + 1) * 24, 24, 16 * 24)}`,
+                    forecast_day_offset: `${offsetDays}`,
+                })
+
+                try {
+                    const response = await fetch(`${backend.withBasePath('weather/planning')}?${query.toString()}`, {
+                        headers: {
+                            Authorization: jwt,
+                        },
+                    })
+                    if (!response.ok) {
+                        throw new Error(`weather request failed (${response.status})`)
+                    }
+                    const payload = await response.json()
+                    const topItem = payload?.items?.[0] || {}
+                    const freshness = payload?.freshness || {}
+                    const unavailable = `${payload?.error_message || ''}`.trim() !== ''
+                    const summary = {
+                        status: unavailable ? 'unavailable' : (freshness?.status || 'fresh'),
+                        condition: unavailable ? 'unavailable' : (topItem?.precipitation_type || 'none'),
+                        source: freshness?.source || payload?.provider || 'degraded',
+                    }
+                    weatherPreviewCacheRef.current[cacheKey] = summary
+                    resolvedState[scheduleId] = summary
+                } catch (error) {
+                    const fallback = {
+                        status: 'unavailable',
+                        condition: 'unavailable',
+                        source: 'degraded',
+                    }
+                    weatherPreviewCacheRef.current[cacheKey] = fallback
+                    resolvedState[scheduleId] = fallback
+                } finally {
+                    resolvedLoadingState[scheduleId] = false
+                }
+            }))
+
+            if (cancelled) return
+            setWeatherByScheduleId((prev) => ({ ...prev, ...resolvedState }))
+            setWeatherLoadingByScheduleId((prev) => ({ ...prev, ...resolvedLoadingState }))
+        }
+
+        loadWeather()
+        return () => {
+            cancelled = true
+        }
+    }, [open, jwt, sortedList, fetchStatus])
 
     const normalizedViewStatus = useMemo(() => {
         if (fetchStatus === 'loading' || fetchStatus === 'error') return fetchStatus
@@ -1442,6 +1664,8 @@ function ScheduleView({
                                                 eventtypes={eventtypes}
                                                 transition={transitionAnalysis[index] || null}
                                                 syncInfo={syncStatusBySchedule[schedule.id] || null}
+                                                weatherSummary={weatherByScheduleId[schedule.id] || null}
+                                                weatherLoading={!!weatherLoadingByScheduleId[schedule.id]}
                                                 triggerCopyMessage={triggerCopyMessage}
                                                 isToday={isToday}
                                                 onEditClick={onEditClickHandler}
