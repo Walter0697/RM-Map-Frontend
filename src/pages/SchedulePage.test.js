@@ -68,6 +68,7 @@ jest.mock('../components/schedule/ScheduleView', () => (props) => (
     </div>
 ))
 
+jest.mock('../components/schedule/ScheduleExportPanel', () => () => <div data-testid='schedule-export-panel'>export-panel</div>)
 jest.mock('../components/schedule/ScheduleArriveForm', () => () => <div />)
 jest.mock('../components/form/ScheduleEditForm', () => () => <div />)
 jest.mock('../components/AutoHideAlert', () => (props) => (
@@ -92,6 +93,7 @@ const setup = ({
     const store = createTestStore({
         schedule: { schedules: [baseSchedule] },
         deepLink: { pending: pendingDeepLink },
+        auth: { jwt: 'test-token' },
     })
 
     mockUsePagedDataController.mockReturnValue({
@@ -214,6 +216,7 @@ test('rapid deep-link switching ignores stale out-of-order responses', async () 
     const store = createTestStore({
         schedule: { schedules: [] },
         deepLink: { pending: null },
+        auth: { jwt: 'test-token' },
     })
 
     mockUsePagedDataController.mockReturnValue({

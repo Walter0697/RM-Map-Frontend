@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { useQuery } from '@apollo/client'
-import { Alert, Grid } from '@mui/material'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Alert, Box, Chip, IconButton, Stack, Typography } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 import backend from '../../../constant/backend'
 import BaseForm from '../BaseForm'
-import graphql from '../../../graphql'
 
 function PreviewDisplayPinForm({
     open,
@@ -13,26 +14,74 @@ function PreviewDisplayPinForm({
     currentPinId,
     onUpdated,
 }) {
-    const { data: pinData, loading: pinLoading, error: pinError } = useQuery(graphql.pins.select, { fetchPolicy: 'no-cache' })
+    const normalizePinID = (value) => {
+        const parsed = Number(value)
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : -1
+    }
 
     const [ pinList, setPinList ] = useState([])
+    const [ groupedPins, setGroupedPins ] = useState([])
     const [ selectedPinId, setSelectedPinId ] = useState(-1)
+    const [ selectedGroupKey, setSelectedGroupKey ] = useState('')
+    const [ pinLoading, setPinLoading ] = useState(false)
     const [ updateLoading, setUpdateLoading ] = useState(false)
     const [ updateError, setUpdateError ] = useState('')
+    const panelRef = useRef(null)
 
     useEffect(() => {
-        if (pinData?.pins) {
-            setPinList(pinData.pins)
+        const loadPins = async () => {
+            if (!jwt || !open) return
+            setPinLoading(true)
+            setUpdateError('')
+            try {
+                const response = await fetch(backend.withBasePath('settings/pins'), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
+                })
+                if (!response.ok) {
+                    const text = await response.text()
+                    setUpdateError(text || `Failed to load pin options (${response.status})`)
+                    return
+                }
+                const body = await response.json()
+                setPinList(Array.isArray(body?.pins) ? body.pins : [])
+                setGroupedPins(Array.isArray(body?.groups) ? body.groups : [])
+            } catch (error) {
+                setUpdateError(error.message || 'Failed to load pin options')
+            } finally {
+                setPinLoading(false)
+            }
         }
-        if (pinError) {
-            setUpdateError(pinError.message || 'Failed to load pin options')
-        }
-    }, [pinData, pinError])
+        loadPins()
+    }, [jwt, open])
 
     useEffect(() => {
-        setSelectedPinId(currentPinId || -1)
+        setSelectedPinId(normalizePinID(currentPinId))
+        setSelectedGroupKey('')
         setUpdateError('')
     }, [currentPinId, open])
+
+    useEffect(() => {
+        if (!open) return
+        const element = panelRef.current
+        if (!element || !element.animate) return
+        const animation = element.animate(
+            [
+                { opacity: 0.2, transform: 'translateY(2px)' },
+                { opacity: 1, transform: 'translateY(0)' },
+            ],
+            {
+                duration: 420,
+                easing: 'ease-in-out',
+                fill: 'both',
+            },
+        )
+        return () => {
+            animation.cancel()
+        }
+    }, [open, selectedGroupKey])
 
     const confirmLoading = useMemo(() => {
         if (pinLoading) return true
@@ -77,6 +126,55 @@ function PreviewDisplayPinForm({
         }
     }
 
+    const allPins = useMemo(() => (Array.isArray(pinList) ? pinList : []), [pinList])
+    const ungroupedSection = useMemo(
+        () => groupedPins.find((section) => (section.group_name || '').toLowerCase() === 'ungrouped'),
+        [groupedPins],
+    )
+    const groupedOnly = useMemo(
+        () => groupedPins.filter((section) => (section.group_name || '').toLowerCase() !== 'ungrouped'),
+        [groupedPins],
+    )
+
+    const pickPreviewPin = (groupKey, pins) => {
+        if (!Array.isArray(pins) || pins.length === 0) return null
+        let hash = 0
+        for (let i = 0; i < groupKey.length; i += 1) {
+            hash = ((hash << 5) - hash) + groupKey.charCodeAt(i)
+            hash |= 0
+        }
+        const index = Math.abs(hash) % pins.length
+        return pins[index]
+    }
+
+    const getPinImagePath = (pin) => pin?.image_path || pin?.display_path || ''
+
+    const groupOptions = useMemo(() => {
+        const options = [
+            { key: 'all', label: 'All', pins: allPins, isNew: false },
+            ...groupedOnly.map((section, index) => ({
+                key: `group-${section.group_id ?? section.group_name ?? index}`,
+                label: section.group_name || `Group ${index + 1}`,
+                isNew: Boolean(section.is_new),
+                pins: Array.isArray(section.pins) ? section.pins : [],
+            })),
+            { key: 'ungrouped', label: 'Ungrouped', pins: Array.isArray(ungroupedSection?.pins) ? ungroupedSection.pins : [], isNew: false },
+        ]
+        return options
+    }, [allPins, groupedOnly, ungroupedSection])
+
+    const selectedGroup = useMemo(
+        () => groupOptions.find((group) => group.key === selectedGroupKey) || null,
+        [groupOptions, selectedGroupKey],
+    )
+    const displayedPins = selectedGroup?.pins || []
+    const isPinSelected = selectedPinId > 0
+    const getSelectedPinForGroup = (group) => {
+        if (!isPinSelected) return null
+        if (group?.key === 'all') return null
+        return (group.pins || []).find((pin) => Number(pin.id) === selectedPinId) || null
+    }
+
     return (
         <BaseForm
             open={open}
@@ -94,36 +192,140 @@ function PreviewDisplayPinForm({
                 </Alert>
             ) : null}
             <Grid container spacing={2}>
-                {pinList.map((item, index) => (
-                    <Grid
-                        item xs={6} md={6} lg={6}
-                        key={index}
-                        style={{
-                            marginBottom: '15px',
-                            borderRadius: '5px',
-                            paddingLeft: '5px',
-                            paddingRight: '5px',
-                        }}
-                    >
-                        <div
-                            style={{
-                                width: '100%',
-                                backgroundColor: '#dbfdff',
-                                padding: '5px',
-                                border: (selectedPinId === item.id) ? '3px solid red' : '3px solid black',
-                                cursor: 'pointer',
-                            }}
-                            onClick={() => setSelectedPinId(item.id)}
-                        >
-                            {item.label}
-                            <img
-                                width='100%'
-                                src={backend.IMAGE_LINK + item.display_path}
-                                alt={item.label}
-                            />
-                        </div>
+                {!selectedGroup ? (
+                    <Grid item xs={12} ref={panelRef}>
+                        <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700 }}>
+                            Groups
+                        </Typography>
+                        <Grid container spacing={1.5}>
+                            {groupOptions.map((group) => {
+                                const previewPin = pickPreviewPin(group.key, group.pins)
+                                const selectedPinInGroup = getSelectedPinForGroup(group)
+                                const isSelectedGroup = Boolean(selectedPinInGroup)
+                                return (
+                                    <Grid item xs={12} md={6} key={group.key}>
+                                        <Box
+                                            sx={{
+                                                width: '100%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 1.5,
+                                                padding: '10px',
+                                                border: isSelectedGroup ? '2px solid #d32f2f' : '1px solid #8a8a8a',
+                                                backgroundColor: isSelectedGroup ? '#ffe7a8' : '#fff',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                            }}
+                                            onClick={() => setSelectedGroupKey(group.key)}
+                                        >
+                                            {previewPin ? (
+                                                <img
+                                                    width='52'
+                                                    src={backend.IMAGE_LINK + getPinImagePath(previewPin)}
+                                                    alt={group.label}
+                                                    style={{
+                                                        height: '52px',
+                                                        objectFit: 'contain',
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Box sx={{ width: '52px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: 'text.secondary' }}>
+                                                    -
+                                                </Box>
+                                            )}
+                                            <Box>
+                                                <Stack direction='row' spacing={0.75} alignItems='center'>
+                                                    <Typography variant='body2' sx={{ fontWeight: 700 }}>
+                                                        {group.label}
+                                                    </Typography>
+                                                    {group.isNew ? <Chip size='small' color='warning' label='NEW' /> : null}
+                                                </Stack>
+                                                <Typography variant='caption' color='text.secondary'>
+                                                    {group.pins.length} pins
+                                                </Typography>
+                                            </Box>
+                                            <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 1, color: '#6e6e6e' }}>
+                                                {selectedPinInGroup ? (
+                                                    <img
+                                                        width='30'
+                                                        src={backend.IMAGE_LINK + getPinImagePath(selectedPinInGroup)}
+                                                        alt={selectedPinInGroup.label}
+                                                        style={{
+                                                            height: '30px',
+                                                            objectFit: 'contain',
+                                                        }}
+                                                    />
+                                                ) : null}
+                                                <ChevronRightIcon fontSize='small' />
+                                            </Box>
+                                        </Box>
+                                    </Grid>
+                                )
+                            })}
+                        </Grid>
                     </Grid>
-                ))}
+                ) : (
+                    <Grid item xs={12} ref={panelRef}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                            <IconButton size='small' onClick={() => setSelectedGroupKey('')} aria-label='Back to groups'>
+                                <ArrowBackIcon fontSize='small' />
+                            </IconButton>
+                            <Typography variant='subtitle2' sx={{ fontWeight: 700 }}>
+                                {selectedGroup.label}
+                            </Typography>
+                            {selectedGroup.isNew ? <Chip size='small' color='warning' label='NEW' /> : null}
+                        </Box>
+                        <Grid container spacing={2}>
+                            {displayedPins.map((item, index) => (
+                                <Grid
+                                    item xs={4} md={4} lg={4}
+                                    key={`${selectedGroupKey}-${index}-${item.id}`}
+                                    style={{
+                                        marginBottom: '8px',
+                                        borderRadius: '5px',
+                                        paddingLeft: '4px',
+                                        paddingRight: '4px',
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            width: '100%',
+                                            backgroundColor: (selectedPinId === Number(item.id)) ? '#ffe7a8' : '#fff',
+                                            padding: '6px',
+                                            border: (selectedPinId === Number(item.id)) ? '2px solid #d32f2f' : '2px solid black',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                        }}
+                                        onClick={() => setSelectedPinId(Number(item.id))}
+                                    >
+                                        <Box
+                                            sx={{
+                                                fontSize: '13px',
+                                                fontWeight: 600,
+                                                textAlign: 'center',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                mb: '4px',
+                                            }}
+                                        >
+                                            {item.label}
+                                        </Box>
+                                        <img
+                                            width='100%'
+                                            src={backend.IMAGE_LINK + getPinImagePath(item)}
+                                            alt={item.label}
+                                            style={{
+                                                height: '72px',
+                                                objectFit: 'contain',
+                                            }}
+                                        />
+                                    </Box>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Grid>
+                )}
             </Grid>
         </BaseForm>
     )

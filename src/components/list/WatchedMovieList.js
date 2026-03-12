@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react'
 import { connect } from 'react-redux'
 import {
-    Grid,
     Button,
 } from '@mui/material'
 import backend from '../../constant/backend'
@@ -16,6 +15,11 @@ function MovieItem({
     item,
     movieTypeIcon,
 }) {
+    const posterPath = item?.movie?.image_path
+    const posterSrc = posterPath
+        ? (posterPath.startsWith('http') ? posterPath : `${backend.IMAGE_LINK}${posterPath}`)
+        : `${backend.IMAGE_LINK}${movieTypeIcon}`
+
     return (
         <Button
             variant='contained'
@@ -25,73 +29,86 @@ function MovieItem({
                 backgroundColor: '#48acdb',
                 borderRadius: '5px',
                 height: '100%',
+                minHeight: '138px',
                 width: '100%',
                 boxShadow: '2px 2px 6px',
-                alignItems: 'flex-start',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
                 textTransform: 'none',
-                padding: '0',
+                padding: '12px',
             }}
         >
-            <Grid
-                container
-                fullWidth
+            <div
                 style={{
-                    height: '100%',
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                    minWidth: 0,
                 }}
             >
-                <Grid 
-                    item xs={5}
-                    style={{ marginTop: '15px'}}
-                >
-                    {item?.movie?.image_path ? (
-                        <img
-                            style={{
-                                width: '80%',
-                            }}
-                            src={backend.IMAGE_LINK + item.movie.image_path}
-                        />
-                    ) : (
-                        <img 
-                            style={{
-                                width: '80%',
-                            }}
-                            src={backend.IMAGE_LINK + movieTypeIcon}
-                        />
-                    )}
-                </Grid>
-                <Grid 
-                    item xs={7}
+                <img
                     style={{
-                        height: '100%',
+                        width: '74px',
+                        height: '108px',
+                        objectFit: 'cover',
+                        borderRadius: '6px',
+                        marginRight: '12px',
+                        boxShadow: '0 1px 5px rgba(0,0,0,0.25)',
+                        flexShrink: 0,
+                    }}
+                    src={posterSrc}
+                    alt={item?.movie?.label || 'Watched movie poster'}
+                />
+                <div
+                    style={{
+                        flex: 1,
+                        minWidth: 0,
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
                         flexDirection: 'column',
-                        marginTop: '40px',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        textAlign: 'center',
                     }}
                 >
                     <div
                         style={{
                             fontSize: '18px',
                             color: 'black',
+                            fontWeight: '700',
+                            width: '100%',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            lineHeight: 1.25,
                         }}
                     >
                         {item?.movie?.label}
                     </div>
                     <div style={{
-                        fontSize: '15px',
-                        color: '#455295',
+                        marginTop: '6px',
+                        fontSize: '12px',
+                        color: '#28356f',
+                        fontWeight: '500',
                     }}>
                         Watched at: {dayjs(item.selected_date).format('YYYY-MM-DD')}
                     </div>
                     <div style={{
-                        fontSize: '15px',
-                        color: '#455295',
+                        marginTop: '3px',
+                        fontSize: '12px',
+                        color: '#28356f',
+                        fontWeight: '500',
+                        width: '100%',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
                     }}>
                         in {item?.marker?.label}
                     </div>
-                </Grid>
-            </Grid>
+                </div>
+            </div>
         </Button>
     )
 }

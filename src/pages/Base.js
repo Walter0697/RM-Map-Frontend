@@ -86,6 +86,9 @@ function Base({
         from: { x: 0 },
         x: blink ? 0 : 1,
     })
+
+    if (!jwt) return null
+
     return (
         <>
             <animated.div

@@ -15,8 +15,7 @@ import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import RoomIcon from '@mui/icons-material/Room'
 import AddLocationIcon from '@mui/icons-material/AddLocation'
 import TheatersIcon from '@mui/icons-material/Theaters'
-import ManageSearchIcon from '@mui/icons-material/ManageSearch'
-import LocationSearchingIcon from '@mui/icons-material/LocationSearching'
+import SearchIcon from '@mui/icons-material/Search'
 
 import useMap from '../../hooks/useMap'
 import useBoop from '../../hooks/useBoop'
@@ -28,8 +27,7 @@ import AutoHideAlert from '../AutoHideAlert'
 import CircleIconButton from '../field/CircleIconButton'
 import BookmarkButton from '../field/BookmarkButton'
 
-import SearchStreetForm from '../form/SearchStreetForm'
-import LatLonLocationForm from '../form/LatLonLocationForm'
+import SearchLocationForm from '../form/SearchLocationForm'
 
 import maphelper from '../../scripts/map'
 import constants from '../../constant'
@@ -41,6 +39,41 @@ function SearchMap({
     stations,   // for stations display in map
     showInMap,
 }) {
+    const getLocationTitle = (item) => {
+        const poiName = `${item?.poi?.name || ''}`.trim()
+        if (poiName) return poiName
+        const freeform = `${item?.address?.freeformAddress || ''}`.trim()
+        if (freeform) return freeform
+        const street = `${item?.address?.streetNumber || ''} ${item?.address?.streetName || ''}`.trim()
+        if (street) return street
+        return 'Unknown Place'
+    }
+
+    const getLocationAddress = (item) => {
+        const freeform = `${item?.address?.freeformAddress || ''}`.trim()
+        if (freeform) return freeform
+        const street = `${item?.address?.streetNumber || ''} ${item?.address?.streetName || ''}`.trim()
+        if (street) return street
+        const municipality = `${item?.address?.municipality || ''}`.trim()
+        if (municipality) return municipality
+        return 'Address unavailable'
+    }
+
+    const normalizeSearchResults = (list) => {
+        return (list || []).map((item, index) => ({
+            id: index,
+            title: getLocationTitle(item),
+            location: item?.position || null,
+            address: getLocationAddress(item),
+            category: item?.poi?.categories?.[0] || 'Unknown category',
+            details: {
+                poi: item?.poi || { categories: [] },
+                address: item?.address || {},
+            },
+            pin: 'regular',
+        })).filter((item) => item.location && typeof item.location.lon === 'number' && typeof item.location.lat === 'number')
+    }
+
     const history = useHistory()
     // reference of the div to render the map
     const mapElement = useRef(null) 
@@ -101,13 +134,11 @@ function SearchMap({
     // if center marker is set, show the button
     const [ showCenterPinButton, setCenterPinButton ] = useState(false)
 
-    // open form for user to search by street name and number
-    const [ showStreetNameSearch, setShowStreetNameSearch ] = useState(false)
+    // open form for user to search by street name or lat/lon
+    const [ showLocationSearch, setShowLocationSearch ] = useState(false)
+    const [ locationSearchMethod, setLocationSearchMethod ] = useState('street')
     const [ streetSearchAlert, setSearchAlert ] = useBoop(3000)
     const [ streetSearchResult, setSearchResult ] = useState(null)
-
-    // open form for user to search by location code
-    const [ showLatLonSearch, setShowLatLonSearch ] = useState(false)
 
     const [ 
         map, 
@@ -214,36 +245,14 @@ function SearchMap({
         setLoading(true)
         let result = await apis.maps.search(text, searchingLocation.lon, searchingLocation.lat, 30)
         if (result.status === 200) {
-            const list = result.data.results
-            if (list.length !== 0) {
-                let output = []
-                let id = 0
-                list.forEach(item => {
-                    const address = (item.address.streetNumber) ? `${item.address.streetNumber} ${item.address.streetName}` : item.address.streetName
-                    output.push({
-                        id: id,
-                        title: item.poi.name,
-                        location: item.position,
-                        address: address,
-                        category: item.poi.categories[0],
-                        details: {
-                            poi: item.poi,
-                            address: item.address,
-                        },
-                        pin: 'regular',
-                    })
-                    id++
-                })
-
-                // resetMarkers(output)
+            const list = result?.data?.results || []
+            const output = normalizeSearchResults(list)
+            if (output.length !== 0) {
                 setLocation(output)
-                // set for bottom result list
                 setSearchResults(output)
                 setSelectedSearch(-1)
                 setExtraContent(null)
                 setViewContent(true)
-
-                // change color whenever markers are active
                 setHasContent(true)
             } else {
                 setRetrieveFail()
@@ -272,22 +281,19 @@ function SearchMap({
     }
 
     const openSearchByStreetName = () => {
-        setShowStreetNameSearch(true)
-    }
-
-    const openSearchByLocationCode = () => {
-        setShowLatLonSearch(true)
+        setLocationSearchMethod('street')
+        setShowLocationSearch(true)
     }
 
     const setLocationOnMap = (lonlat, address) => {
-        setShowStreetNameSearch(false)
+        setShowLocationSearch(false)
         setSearchAlert()
         setSearchResult(address)
         setCenterToLocation(lonlat, address)
     }
 
     const setLatLonOnMap = (lonlat) => {
-        setShowLatLonSearch(false)
+        setShowLocationSearch(false)
         setSearchAlert()
         setSearchResult('Success')
         setCenterToLocation(lonlat, '', true)
@@ -355,7 +361,7 @@ function SearchMap({
                     submitHandler={onSearchTextSubmitHandler}
                     isLoading={loading}
                     isBottomOpen={viewSearchContent}
-                    isSearchFormOpen={showStreetNameSearch}
+                    isSearchFormOpen={showLocationSearch}
                 />
             </div>
 
@@ -369,21 +375,7 @@ function SearchMap({
                 <BookmarkButton
                     onClickHandler={openSearchByStreetName}
                 >
-                    <ManageSearchIcon />
-                </BookmarkButton>
-            </div>
-
-            <div 
-                style={{
-                    position: 'absolute',
-                    top: '160px',
-                    right: '-5px',
-                }}
-            >
-                <BookmarkButton
-                    onClickHandler={openSearchByLocationCode}
-                >
-                    <LocationSearchingIcon />
+                    <SearchIcon />
                 </BookmarkButton>
             </div>
             
@@ -499,15 +491,17 @@ function SearchMap({
             />
 
             {/* form */}
-            <SearchStreetForm
-                open={showStreetNameSearch}
-                handleClose={() => setShowStreetNameSearch(false)}
-                onFinished={setLocationOnMap}
-            />
-            <LatLonLocationForm
-                open={showLatLonSearch}
-                handleClose={() => setShowLatLonSearch(false)}
-                onFinished={setLatLonOnMap}
+            <SearchLocationForm
+                open={showLocationSearch}
+                handleClose={() => setShowLocationSearch(false)}
+                initialMethod={locationSearchMethod}
+                onFinished={(lonlat, address, method) => {
+                    if (method === 'latlon') {
+                        setLatLonOnMap(lonlat)
+                        return
+                    }
+                    setLocationOnMap(lonlat, address)
+                }}
             />
         </>
     )

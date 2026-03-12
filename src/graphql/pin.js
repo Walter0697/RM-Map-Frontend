@@ -24,6 +24,8 @@ const select = gql`
             id
             label
             display_path
+            group_ids
+            group_names
         }
     }
 `
@@ -35,6 +37,8 @@ const list = gql`
             label
             image_path
             display_path
+            group_ids
+            group_names
             top_left_x
             top_left_y
             bottom_right_x
@@ -59,6 +63,7 @@ const create = gql`
                     $top_left_y: Int!,
                     $bottom_right_x: Int!,
                     $bottom_right_y: Int!,
+                    $group_ids: [Int!],
                     $image_upload: Upload) {
         createPin(input: {
             label: $label,
@@ -66,6 +71,7 @@ const create = gql`
             top_left_y: $top_left_y,
             bottom_right_x: $bottom_right_x,
             bottom_right_y: $bottom_right_y,
+            group_ids: $group_ids,
             image_upload: $image_upload,
         }) {
             id
@@ -80,6 +86,7 @@ const edit = gql`
                     $top_left_y: Int,
                     $bottom_right_x: Int,
                     $bottom_right_y: Int,
+                    $group_ids: [Int!],
                     $image_upload: Upload) {
         editPin(input: {
             id: $id,
@@ -88,6 +95,7 @@ const edit = gql`
             top_left_y: $top_left_y,
             bottom_right_x: $bottom_right_x,
             bottom_right_y: $bottom_right_y,
+            group_ids: $group_ids,
             image_upload: $image_upload,
         }) {
             id

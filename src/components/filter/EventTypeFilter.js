@@ -38,18 +38,19 @@ function EventTypeFilter({
             >
                 {displayEventTypes.map((item, index) => (
                     <Grid item
-                        xs={6}
+                        xs={3}
                         fullWidth
                         key={index}
                         style={{
                             padding: '4px',
-                            height: '50px',
-                            marginBottom: '10px',
+                            height: '44px',
+                            marginBottom: '8px',
                         }}    
                     >
                         <FilterButton 
                             imageLink={item.icon}
-                            text={item.label}
+                            showText={false}
+                            tooltipText={item.label}
                             isActive={selectedEventTypes.includes(item.value)}
                             onClickHandler={() => toggleEventType(item.value)}
                         />

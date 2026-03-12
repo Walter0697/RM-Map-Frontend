@@ -397,13 +397,6 @@ function MarkerView({
                                             />
                                         </Grid>
                                     )}
-                                    {!marker.restaurant && marker.link && (
-                                        <Grid item xs={12} md={12} lg={12}>
-                                            <div style={{ color: '#6c7787', fontSize: '13px' }}>
-                                                Website integration unavailable for this marker.
-                                            </div>
-                                        </Grid>
-                                    )}
                                 </Grid>
                             </DialogContentText>
                         </DialogContent>
