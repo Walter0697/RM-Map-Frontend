@@ -5,6 +5,7 @@ import { Alert, Grid } from '@mui/material'
 import backend from '../../../constant/backend'
 import BaseForm from '../BaseForm'
 import graphql from '../../../graphql'
+import { getPinDisplayLabel } from './pinDisplayLabel'
 
 function PreviewDisplayPinForm({
     open,
@@ -115,11 +116,11 @@ function PreviewDisplayPinForm({
                             }}
                             onClick={() => setSelectedPinId(item.id)}
                         >
-                            {item.label}
+                            {getPinDisplayLabel(item)}
                             <img
                                 width='100%'
                                 src={backend.IMAGE_LINK + item.display_path}
-                                alt={item.label}
+                                alt={getPinDisplayLabel(item)}
                             />
                         </div>
                     </Grid>

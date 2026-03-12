@@ -4,6 +4,7 @@ import {
     Grid,
 } from '@mui/material'
 import backend from '../../../constant/backend'
+import { getPinDisplayLabel } from './pinDisplayLabel'
 
 import BaseForm from '../BaseForm'
 
@@ -89,10 +90,11 @@ function PreferredPinForm({
                                     }}
                                     onClick={() => setPinId(item.id)}
                                 >
-                                    {item.label}  
+                                    {getPinDisplayLabel(item)}
                                     <img
                                         width='100%'
                                         src={backend.IMAGE_LINK + item.display_path}
+                                        alt={getPinDisplayLabel(item)}
                                     />  
                                 </div>
                             </Grid>
