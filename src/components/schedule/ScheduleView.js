@@ -751,6 +751,14 @@ function ScheduleItem({
                 onClose={() => setWeatherDetailAnchor(null)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                PaperProps={{
+                    sx: {
+                        borderRadius: '12px',
+                        border: '1px solid #d9e3f2',
+                        boxShadow: '0 10px 28px rgba(18, 44, 77, 0.28)',
+                        backgroundColor: '#f9fcff',
+                    },
+                }}
             >
                 <div style={{ padding: '10px 12px', maxWidth: '280px', fontSize: '13px', color: '#344861' }}>
                     <div style={{ fontWeight: 700, marginBottom: '4px' }}>Weather Details</div>

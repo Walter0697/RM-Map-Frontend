@@ -249,6 +249,14 @@ function ScheduleWeatherPreview({
                 onClose={() => setWeatherDetailAnchor(null)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                PaperProps={{
+                    sx: {
+                        borderRadius: '12px',
+                        border: '1px solid #d9e3f2',
+                        boxShadow: '0 10px 28px rgba(18, 44, 77, 0.28)',
+                        backgroundColor: '#f9fcff',
+                    },
+                }}
             >
                 <Box sx={{ p: 1.25, maxWidth: 280 }}>
                     <Typography variant='caption' sx={{ display: 'block', color: '#2c3f55', fontWeight: 700 }}>
