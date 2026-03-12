@@ -19,6 +19,8 @@ import dayjs from 'dayjs'
 import apis from '../../apis'
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
+const WEATHER_PREVIEW_CACHE_TTL_MS = 3 * 60 * 1000
+const weatherPreviewCache = new Map()
 
 const formatForecastTime = (value) => {
     if (!value) return ''
@@ -81,6 +83,32 @@ const normalizeUnavailableMessage = (value = '') => {
     return raw
 }
 
+const toWeatherPreviewCacheKey = (marker, selected) => {
+    const lat = Number(marker?.latitude)
+    const lon = Number(marker?.longitude)
+    if (Number.isNaN(lat) || Number.isNaN(lon) || !selected?.isValid?.()) return ''
+    return `${lat.toFixed(5)}:${lon.toFixed(5)}:${selected.startOf('day').format('YYYY-MM-DD')}`
+}
+
+const getCachedWeatherPreview = (key) => {
+    if (!key) return null
+    const item = weatherPreviewCache.get(key)
+    if (!item) return null
+    if (Date.now() - item.storedAt > WEATHER_PREVIEW_CACHE_TTL_MS) {
+        weatherPreviewCache.delete(key)
+        return null
+    }
+    return item.data
+}
+
+const setCachedWeatherPreview = (key, data) => {
+    if (!key || !data) return
+    weatherPreviewCache.set(key, {
+        data,
+        storedAt: Date.now(),
+    })
+}
+
 function ScheduleWeatherPreview({
     marker,
     selectedTime,
@@ -116,26 +144,36 @@ function ScheduleWeatherPreview({
             return () => {}
         }
 
+        const offsetDays = clamp(selected.startOf('day').diff(dayjs().startOf('day'), 'day'), 0, 16)
+        const query = {
+            min_lat: Number(marker.latitude).toFixed(5),
+            max_lat: Number(marker.latitude).toFixed(5),
+            min_lon: Number(marker.longitude).toFixed(5),
+            max_lon: Number(marker.longitude).toFixed(5),
+            center_lat: Number(marker.latitude).toFixed(5),
+            center_lon: Number(marker.longitude).toFixed(5),
+            zoom: 13,
+            forecast_window_h: clamp((offsetDays + 1) * 24, 24, 16 * 24),
+            forecast_day_offset: offsetDays,
+        }
+        const cacheKey = toWeatherPreviewCacheKey(marker, selected)
+        const cached = getCachedWeatherPreview(cacheKey)
+        if (cached) {
+            setLoading(false)
+            setFetchError('')
+            setWeatherData(cached)
+            return () => {}
+        }
+
         timer = window.setTimeout(async () => {
             try {
                 setLoading(true)
                 setFetchError('')
-                const now = dayjs()
-                const offsetDays = clamp(selected.startOf('day').diff(now.startOf('day'), 'day'), 0, 16)
-                const query = {
-                    min_lat: Number(marker.latitude).toFixed(5),
-                    max_lat: Number(marker.latitude).toFixed(5),
-                    min_lon: Number(marker.longitude).toFixed(5),
-                    max_lon: Number(marker.longitude).toFixed(5),
-                    center_lat: Number(marker.latitude).toFixed(5),
-                    center_lon: Number(marker.longitude).toFixed(5),
-                    zoom: 13,
-                    forecast_window_h: clamp((offsetDays + 1) * 24, 24, 16 * 24),
-                    forecast_day_offset: offsetDays,
-                }
                 const response = await apis.weather.planning(query)
                 if (cancelled) return
-                setWeatherData(response?.data || null)
+                const data = response?.data || null
+                setWeatherData(data)
+                setCachedWeatherPreview(cacheKey, data)
                 setLoading(false)
             } catch (error) {
                 if (cancelled) return
