@@ -17,20 +17,19 @@ function MarkerItem({
     onClickHandler,
 }) {
 
-    const historyPreview = item?.history_preview
-    const historyPreviewReady = historyPreview?.state === 'ready' && !!historyPreview?.image_src
-    const markerImageReady = !!item?.image_link
-
-    const [ previewVisible, setPreviewVisible ] = useState(historyPreviewReady)
-    const [ markerImageVisible, setMarkerImageVisible ] = useState(markerImageReady)
+    const [ imageExist, setImageExist ] = useState(false)
 
     useEffect(() => {
-        setPreviewVisible(historyPreviewReady)
-    }, [historyPreviewReady])
+        if (item?.image_link) {
+        setImageExist(true)
+        } else {
+        setImageExist(false)
+        }
+    }, [item])
 
-    useEffect(() => {
-        setMarkerImageVisible(markerImageReady)
-    }, [markerImageReady])
+    const onImageFailedToLoad = () => {
+        setImageExist(false)
+    }
 
     const shortDescription = (() => {
         const text = item?.description || ''
@@ -63,38 +62,59 @@ function MarkerItem({
                     height: '100%',
                     width: '100%',
                     display: 'flex',
-                    alignItems: 'stretch',
                 }}
             >
-                {markerImageVisible && (
-                    <div
-                        style={{
-                            width: '24%',
-                            minWidth: '74px',
-                            maxWidth: '92px',
-                            paddingLeft: '10px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <img
-                            style={{
-                                width: '100%',
-                                height: '88px',
-                                objectFit: 'cover',
-                                borderRadius: '6px',
-                            }}
-                            src={backend.IMAGE_LINK + item.image_link}
-                            onError={() => setMarkerImageVisible(false)}
-                            alt={`${item.label} marker image`}
-                        />
-                    </div>
-                )}
-                
+            { imageExist ? (
                 <div
                     style={{
-                        padding: '12px 10px 10px 12px',
+                        overflow: 'hidden',
+                        width: '34%',
+                        minWidth: '110px',
+                        maxWidth: '130px',
+                        paddingLeft: '12px',
+                        borderRadius: '5px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <img
+                        style={{
+                            width: '100%',
+                            height: '88px',
+                            objectFit: 'cover',
+                            borderRadius: '6px',
+                        }}
+                        src={backend.IMAGE_LINK + item.image_link}
+                        onError={onImageFailedToLoad}
+                    />
+                </div>
+            ) : (
+                <div
+                    style={{
+                        overflow: 'hidden',
+                        width: '34%',
+                        minWidth: '110px',
+                        maxWidth: '130px',
+                        paddingLeft: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <img
+                        style={{
+                            maxHeight: '84px',
+                            maxWidth: '92%',
+                            objectFit: 'contain',
+                        }}
+                        src={backend.IMAGE_LINK + typeIcon}
+                    />
+                </div>
+            )}
+                <div
+                    style={{
+                        padding: '12px 12px 10px 12px',
                         minWidth: 0,
                         flex: 1,
                     }}
@@ -139,63 +159,6 @@ function MarkerItem({
                         )} 
                         {shortDescription}
                     </div>
-                </div>
-                <div
-                    style={{
-                        overflow: 'hidden',
-                        width: '30%',
-                        minWidth: '92px',
-                        maxWidth: '112px',
-                        paddingRight: '10px',
-                        borderRadius: '5px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                >
-                    {previewVisible ? (
-                        <img
-                            style={{
-                                width: '100%',
-                                height: '88px',
-                                objectFit: 'cover',
-                                borderRadius: '6px',
-                            }}
-                            src={historyPreview.image_src}
-                            onError={() => setPreviewVisible(false)}
-                            alt={`${item.label} map preview`}
-                        />
-                    ) : item?.history_preview ? (
-                        <div
-                            style={{
-                                width: '100%',
-                                height: '88px',
-                                borderRadius: '6px',
-                                border: '1px solid #d6e2ec',
-                                background: 'linear-gradient(135deg, #e8f0f6 0%, #f9fbfc 100%)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                textAlign: 'center',
-                                color: '#5d7282',
-                                fontSize: '12px',
-                                lineHeight: 1.3,
-                                padding: '8px',
-                            }}
-                        >
-                            {item.history_preview?.fallback_reason === 'no_coordinates' ? 'No map preview' : 'Preview unavailable'}
-                        </div>
-                    ) : (
-                        <img
-                            style={{
-                                maxHeight: '84px',
-                                maxWidth: '92%',
-                                objectFit: 'contain',
-                            }}
-                            src={backend.IMAGE_LINK + typeIcon}
-                            alt={`${item.label} type icon`}
-                        />
-                    )}
                 </div>
             </div>
         {item.is_fav && (

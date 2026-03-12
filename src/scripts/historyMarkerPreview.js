@@ -45,7 +45,9 @@ const fetchPreview = async (markerID, jwt, signal) => {
 
     if (!response.ok) {
         const raw = await response.text()
-        throw new Error(raw || 'Failed to load history marker preview')
+        const error = new Error(raw || 'Failed to load history marker preview')
+        error.status = response.status
+        throw error
     }
 
     return response.json()

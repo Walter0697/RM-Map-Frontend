@@ -23,17 +23,65 @@ function PreviousMarkerPage({
 }) {
     const history = useHistory()
     const [ listPagedPreviousMarkersGQL ] = useLazyQuery(graphql.markers.pagedprevious, { fetchPolicy: 'no-cache' })
+    const [ listPreviousMarkersGQL ] = useLazyQuery(graphql.markers.previous, { fetchPolicy: 'no-cache' })
+
+    const isPagedPreviousMarkerUnsupported = (error) => {
+        const message = `${error?.message || ''}`.toLowerCase()
+        const graphQLErrors = error?.graphQLErrors || error?.networkError?.result?.errors || []
+        const hasFieldError = graphQLErrors.some((item) => {
+            const msg = `${item?.message || ''}`.toLowerCase()
+            return msg.includes('cannot query field') && msg.includes('pagedpreviousmarkers')
+        })
+        const statusCode = Number(
+            error?.networkError?.statusCode
+            || error?.networkError?.status
+            || error?.statusCode
+            || 0
+        )
+        const has422 = statusCode === 422 || message.includes('status code 422')
+        return hasFieldError || has422
+    }
+
     const pagedPreviousMarkerController = usePagedDataController({
         resource: 'previous_markers_list',
         queryIdentity: { scope: 'history' },
         fetchPage: async (cursor) => {
-            const response = await listPagedPreviousMarkersGQL({
-                variables: {
-                    cursor: cursor || null,
-                    limit: 30,
+            if (cursor) {
+                return {
+                    items: [],
+                    nextCursor: null,
                 }
-            })
-            const payload = response?.data?.pagedpreviousmarkers || {}
+            }
+
+            // Prefer legacy query for compatibility with backends that don't expose pagedpreviousmarkers.
+            const legacy = await listPreviousMarkersGQL()
+            const legacyItems = legacy?.data?.previousmarkers || []
+            if (legacyItems.length > 0) {
+                return {
+                    items: legacyItems,
+                    nextCursor: null,
+                }
+            }
+
+            let payload = null
+            try {
+                const response = await listPagedPreviousMarkersGQL({
+                    variables: {
+                        cursor: cursor || null,
+                        limit: 30,
+                    }
+                })
+                payload = response?.data?.pagedpreviousmarkers || {}
+            } catch (error) {
+                if (!isPagedPreviousMarkerUnsupported(error)) {
+                    throw error
+                }
+                const legacy = await listPreviousMarkersGQL()
+                return {
+                    items: legacy?.data?.previousmarkers || [],
+                    nextCursor: null,
+                }
+            }
             return {
                 items: payload.items || [],
                 nextCursor: payload.next_cursor || null,
@@ -58,6 +106,7 @@ function PreviousMarkerPage({
     const [ finalFilterValue, setFinalFilterValue ] = useState('')
     const [ isFilterExpanded, setExpandFilter ] = useState(false)
     const [ previewByID, setPreviewByID ] = useState({})
+    const [ previewRouteUnavailable, setPreviewRouteUnavailable ] = useState(false)
     const finalFilterDisplay = useMemo(() => {
         if (finalFilterValue === '') return null
         let list = filters.parser.parseStringToDisplayArr(filterOption, finalFilterValue)
@@ -101,6 +150,7 @@ function PreviousMarkerPage({
 
     useEffect(() => {
         if (!historyMarkerPreview.isEnabled() || !jwt || previousMarkers.length === 0) return undefined
+        if (previewRouteUnavailable) return undefined
 
         const targets = previousMarkers.filter((marker) => {
             if (!historyMarkerPreview.hasValidCoordinates(marker)) return false
@@ -117,7 +167,17 @@ function PreviousMarkerPage({
                     ...payload,
                     image_src: historyMarkerPreview.toRenderableImageURL(payload),
                 } ]
-            } catch {
+            } catch (error) {
+                const statusCode = Number(error?.status || 0)
+                if (statusCode === 404) {
+                    setPreviewRouteUnavailable(true)
+                    return [ marker.id, {
+                        profile: historyMarkerPreview.PROFILE,
+                        state: 'fallback',
+                        fallback_reason: 'feature_unavailable',
+                        cache_hit: false,
+                    } ]
+                }
                 return [ marker.id, {
                     profile: historyMarkerPreview.PROFILE,
                     state: 'fallback',
@@ -139,7 +199,7 @@ function PreviousMarkerPage({
         return () => {
             abortController.abort()
         }
-    }, [jwt, previousMarkers, previewByID])
+    }, [jwt, previousMarkers, previewByID, previewRouteUnavailable])
 
     useEffect(() => {
         if (!selectedMarker) return
@@ -230,8 +290,8 @@ function PreviousMarkerPage({
                     handleClose={() => setSelected(null)}
                     onUpdated={onMarkerRevoked}
                     marker={selectedMarker}
-                    openSchedule={() => {
-                        setScheduleMarker(selectedMarker)
+                    openSchedule={(markerFromDialog) => {
+                        setScheduleMarker(markerFromDialog || selectedMarker)
                         setSelected(null)
                     }}
                 />

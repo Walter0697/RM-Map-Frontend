@@ -193,7 +193,7 @@ function PreviousMarkerView({
                                                 marginBottom: '10px',
                                             }}
                                             startIcon={<CalendarTodayIcon />}
-                                            onClick={() => openSchedule && openSchedule()}
+                                            onClick={() => openSchedule && openSchedule(marker)}
                                         >Schedule this marker</Button>
                                     </Grid>
                                     <Grid item xs={12} md={12} lg={12}>
