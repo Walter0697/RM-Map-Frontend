@@ -428,6 +428,7 @@ function ScheduleItem({
 
     const [ imageExist, setImageExist ] = useState(false)
     const [ explanationAnchor, setExplanationAnchor ] = useState(null)
+    const [ weatherDetailAnchor, setWeatherDetailAnchor ] = useState(null)
 
     const imageSrc = toScheduleImageSrc(item, eventtypes)
 
@@ -558,6 +559,7 @@ function ScheduleItem({
     const weatherChipLabel = weatherLoading
         ? 'Weather Loading'
         : `Weather ${getWeatherConditionLabel(weatherSummary?.condition)} / ${getWeatherStatusLabel(weatherSummary?.status)}`
+    const weatherDetailOpen = !!weatherDetailAnchor
 
     return (
         <div style={{ width: '100%' }}>
@@ -710,15 +712,25 @@ function ScheduleItem({
             )}
             <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
                 <Chip size='small' color={syncStatusColor} label={syncStatusLabel} />
-                <Chip
-                    size='small'
-                    variant='outlined'
-                    icon={<WeatherIcon sx={{ color: `${weatherVisual.color} !important` }} />}
-                    label={weatherChipLabel}
-                />
-                <Tooltip title={weatherSource.label}>
-                    <WeatherSourceIcon sx={{ fontSize: '15px', color: weatherSource.color }} />
-                </Tooltip>
+                <div
+                    onClick={(event) => setWeatherDetailAnchor(event.currentTarget)}
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        cursor: 'pointer',
+                    }}
+                >
+                    <Chip
+                        size='small'
+                        variant='outlined'
+                        icon={<WeatherIcon sx={{ color: `${weatherVisual.color} !important` }} />}
+                        label={weatherChipLabel}
+                    />
+                    <Tooltip title={weatherSource.label}>
+                        <WeatherSourceIcon sx={{ fontSize: '15px', color: weatherSource.color }} />
+                    </Tooltip>
+                </div>
                 <div style={{ flex: 1 }} />
                 <IconButton
                     size='small'
@@ -733,6 +745,24 @@ function ScheduleItem({
                     {syncError}
                 </div>
             )}
+            <Popover
+                open={weatherDetailOpen}
+                anchorEl={weatherDetailAnchor}
+                onClose={() => setWeatherDetailAnchor(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+            >
+                <div style={{ padding: '10px 12px', maxWidth: '280px', fontSize: '13px', color: '#344861' }}>
+                    <div style={{ fontWeight: 700, marginBottom: '4px' }}>Weather Details</div>
+                    <div>Condition: {getWeatherConditionLabel(weatherSummary?.condition)}</div>
+                    <div>Status: {getWeatherStatusLabel(weatherSummary?.status)}</div>
+                    <div>Source: {weatherSource.label.replace('Source: ', '')}</div>
+                    <div>Forecast at: {weatherSummary?.forecastAt || 'N/A'}</div>
+                    {weatherSummary?.errorMessage ? (
+                        <div style={{ color: '#b33434', marginTop: '4px' }}>{weatherSummary.errorMessage}</div>
+                    ) : null}
+                </div>
+            </Popover>
             </div>
             {transition && (
                 <div style={{ marginTop: '14px' }}>
@@ -1052,6 +1082,8 @@ function ScheduleView({
                         status: 'unavailable',
                         condition: 'unavailable',
                         source: 'degraded',
+                        forecastAt: '',
+                        errorMessage: 'Marker location is incomplete.',
                     }
                     weatherPreviewCacheRef.current[cacheKey] = fallback
                     resolvedState[scheduleId] = fallback
@@ -1085,11 +1117,18 @@ function ScheduleView({
                     const payload = await response.json()
                     const topItem = payload?.items?.[0] || {}
                     const freshness = payload?.freshness || {}
-                    const unavailable = `${payload?.error_message || ''}`.trim() !== ''
+                    const errorMessage = `${payload?.error_message || ''}`.trim()
+                    const unavailable = errorMessage !== ''
+                    const forecastAtRaw = `${topItem?.forecast_timestamp || ''}`.trim()
+                    const forecastAt = forecastAtRaw
+                        ? (dayjs(forecastAtRaw).isValid() ? dayjs(forecastAtRaw).format('YYYY-MM-DD HH:mm') : forecastAtRaw)
+                        : ''
                     const summary = {
                         status: unavailable ? 'unavailable' : (freshness?.status || 'fresh'),
                         condition: unavailable ? 'unavailable' : (topItem?.precipitation_type || 'none'),
                         source: freshness?.source || payload?.provider || 'degraded',
+                        forecastAt,
+                        errorMessage,
                     }
                     weatherPreviewCacheRef.current[cacheKey] = summary
                     resolvedState[scheduleId] = summary
@@ -1098,6 +1137,8 @@ function ScheduleView({
                         status: 'unavailable',
                         condition: 'unavailable',
                         source: 'degraded',
+                        forecastAt: '',
+                        errorMessage: error?.message || 'Weather request failed',
                     }
                     weatherPreviewCacheRef.current[cacheKey] = fallback
                     resolvedState[scheduleId] = fallback

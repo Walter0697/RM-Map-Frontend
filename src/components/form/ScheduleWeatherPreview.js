@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import {
     Box,
     CircularProgress,
+    Popover,
     Stack,
     Tooltip,
     Typography,
@@ -87,6 +88,7 @@ function ScheduleWeatherPreview({
     const [ loading, setLoading ] = useState(false)
     const [ fetchError, setFetchError ] = useState('')
     const [ weatherData, setWeatherData ] = useState(null)
+    const [ weatherDetailAnchor, setWeatherDetailAnchor ] = useState(null)
 
     const markerCoordinateReady = useMemo(() => {
         if (!marker) return false
@@ -182,6 +184,7 @@ function ScheduleWeatherPreview({
                 : '#cf8a05'
     const sourceValue = freshness?.source || weatherData?.provider || 'N/A'
     const sourceInfo = sourceMeta(sourceValue)
+    const weatherDetailOpen = !!weatherDetailAnchor
 
     return (
         <Box
@@ -194,7 +197,13 @@ function ScheduleWeatherPreview({
                 position: 'relative',
             }}
         >
-            <Stack direction='row' spacing={0.75} alignItems='center'>
+            <Stack
+                direction='row'
+                spacing={0.75}
+                alignItems='center'
+                onClick={(event) => setWeatherDetailAnchor(event.currentTarget)}
+                sx={{ cursor: 'pointer' }}
+            >
                 <WeatherIcon sx={{ color: iconColor, fontSize: 18 }} />
                 <Typography variant='caption' sx={{ color: '#2c3f55', fontWeight: 700 }}>
                     Weather Preview
@@ -234,6 +243,36 @@ function ScheduleWeatherPreview({
                     <sourceInfo.Icon sx={{ fontSize: 14, color: sourceInfo.color }} />
                 </Box>
             </Tooltip>
+            <Popover
+                open={weatherDetailOpen}
+                anchorEl={weatherDetailAnchor}
+                onClose={() => setWeatherDetailAnchor(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+            >
+                <Box sx={{ p: 1.25, maxWidth: 280 }}>
+                    <Typography variant='caption' sx={{ display: 'block', color: '#2c3f55', fontWeight: 700 }}>
+                        Weather Details
+                    </Typography>
+                    <Typography variant='caption' sx={{ display: 'block', color: '#607286', mt: 0.5 }}>
+                        Condition: {conditionLabel(resolvedCondition)}
+                    </Typography>
+                    <Typography variant='caption' sx={{ display: 'block', color: '#607286' }}>
+                        Status: {statusLabel(resolvedStatus)}
+                    </Typography>
+                    <Typography variant='caption' sx={{ display: 'block', color: '#607286' }}>
+                        Source: {sourceInfo.label.replace('Source: ', '')}
+                    </Typography>
+                    <Typography variant='caption' sx={{ display: 'block', color: '#607286' }}>
+                        Forecast at: {formatForecastTime(forecastAt) || 'N/A'}
+                    </Typography>
+                    {unavailableMessage ? (
+                        <Typography variant='caption' sx={{ display: 'block', color: '#ab3d2a', mt: 0.5 }}>
+                            {unavailableMessage}
+                        </Typography>
+                    ) : null}
+                </Box>
+            </Popover>
         </Box>
     )
 }
