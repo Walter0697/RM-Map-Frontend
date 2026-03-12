@@ -1,32 +1,99 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useHistory } from 'react-router-dom'
 import { connect } from 'react-redux'
+import { useLazyQuery } from '@apollo/client'
 import Base from './Base'
 
-import { useQuery } from '@apollo/client'
-
 import useBoop from '../hooks/useBoop'
+import usePagedDataController from '../hooks/usePagedDataController'
 
 import TopBar from '../components/topbar/TopBar'
 import MarkerDisplayList from '../components/list/MarkerDisplayList'
 import PreviousMarkerView from '../components/marker/PreviousMarkerView'
 import AutoHideAlert from '../components/AutoHideAlert'
+import ScheduleForm from '../components/form/ScheduleForm'
 
 import filters from '../scripts/filter'
+import historyMarkerPreview from '../scripts/historyMarkerPreview'
 import graphql from '../graphql'
 
 function PreviousMarkerPage({ 
     eventtypes,
+    jwt,
 }) {
     const history = useHistory()
+    const [ listPagedPreviousMarkersGQL ] = useLazyQuery(graphql.markers.pagedprevious, { fetchPolicy: 'no-cache' })
+    const [ listPreviousMarkersGQL ] = useLazyQuery(graphql.markers.previous, { fetchPolicy: 'no-cache' })
 
-    // graphql request
-    const { data: listData, loading: listLoading, error: listError } = useQuery(graphql.markers.previous, { fetchPolicy: 'no-cache' })
+    const isPagedPreviousMarkerUnsupported = (error) => {
+        const message = `${error?.message || ''}`.toLowerCase()
+        const graphQLErrors = error?.graphQLErrors || error?.networkError?.result?.errors || []
+        const hasFieldError = graphQLErrors.some((item) => {
+            const msg = `${item?.message || ''}`.toLowerCase()
+            return msg.includes('cannot query field') && msg.includes('pagedpreviousmarkers')
+        })
+        const statusCode = Number(
+            error?.networkError?.statusCode
+            || error?.networkError?.status
+            || error?.statusCode
+            || 0
+        )
+        const has422 = statusCode === 422 || message.includes('status code 422')
+        return hasFieldError || has422
+    }
 
-    const [ previousMarkers, setMarkers ] = useState([])
+    const pagedPreviousMarkerController = usePagedDataController({
+        resource: 'previous_markers_list',
+        queryIdentity: { scope: 'history' },
+        fetchPage: async (cursor) => {
+            if (cursor) {
+                return {
+                    items: [],
+                    nextCursor: null,
+                }
+            }
+
+            // Prefer legacy query for compatibility with backends that don't expose pagedpreviousmarkers.
+            const legacy = await listPreviousMarkersGQL()
+            const legacyItems = legacy?.data?.previousmarkers || []
+            if (legacyItems.length > 0) {
+                return {
+                    items: legacyItems,
+                    nextCursor: null,
+                }
+            }
+
+            let payload = null
+            try {
+                const response = await listPagedPreviousMarkersGQL({
+                    variables: {
+                        cursor: cursor || null,
+                        limit: 30,
+                    }
+                })
+                payload = response?.data?.pagedpreviousmarkers || {}
+            } catch (error) {
+                if (!isPagedPreviousMarkerUnsupported(error)) {
+                    throw error
+                }
+                const legacy = await listPreviousMarkersGQL()
+                return {
+                    items: legacy?.data?.previousmarkers || [],
+                    nextCursor: null,
+                }
+            }
+            return {
+                items: payload.items || [],
+                nextCursor: payload.next_cursor || null,
+            }
+        }
+    })
+
+    const previousMarkers = pagedPreviousMarkerController.items
 
     // selected marker
     const [ selectedMarker, setSelected ] = useState(null)
+    const [ scheduleMarker, setScheduleMarker ] = useState(null)
     const [ createAlert, confirmCreated ] = useBoop(3000)
    
     // if request failed
@@ -38,6 +105,8 @@ function PreviousMarkerPage({
     const [ filterValue, setFilterValue ] = useState('')
     const [ finalFilterValue, setFinalFilterValue ] = useState('')
     const [ isFilterExpanded, setExpandFilter ] = useState(false)
+    const [ previewByID, setPreviewByID ] = useState({})
+    const [ previewRouteUnavailable, setPreviewRouteUnavailable ] = useState(false)
     const finalFilterDisplay = useMemo(() => {
         if (finalFilterValue === '') return null
         let list = filters.parser.parseStringToDisplayArr(filterOption, finalFilterValue)
@@ -46,11 +115,14 @@ function PreviousMarkerPage({
     const [ customFilterValue, setCustomFilterValue ] = useState('')
 
     const displayMarker = useMemo(() => {
-        //if (finalFilterValue === '' && customFilterValue === '') return previousMarkers
-        const filteredByQuery = filters.map.filterByQuery(previousMarkers, customFilterValue, eventtypes)
+        const markersWithPreview = previousMarkers.map((marker) => ({
+            ...marker,
+            history_preview: previewByID[marker.id] || historyMarkerPreview.buildIdlePreviewState(marker),
+        }))
+        const filteredByQuery = filters.map.filterByQuery(markersWithPreview, customFilterValue, eventtypes)
         const list = filters.map.mapMarkerWithFilter(filteredByQuery, finalFilterValue, filterOption)
         return list
-    }, [previousMarkers, finalFilterValue, customFilterValue, filterOption, selectedMarker, eventtypes])
+    }, [previousMarkers, previewByID, finalFilterValue, customFilterValue, filterOption, selectedMarker, eventtypes])
 
     const [ showFilter, setShowFilter ] = useState(false)
 
@@ -67,21 +139,89 @@ function PreviousMarkerPage({
     }, [eventtypes])
 
     useEffect(() => {
-        if (listData) {
-            setMarkers(listData.previousmarkers)
-        }
+        pagedPreviousMarkerController.refresh()
+    }, [])
 
-        if (listError) {
-            setFailMessage(listError.message)
-            fail()
+    useEffect(() => {
+        if (!pagedPreviousMarkerController.error) return
+        setFailMessage(pagedPreviousMarkerController.error.message)
+        fail()
+    }, [pagedPreviousMarkerController.error])
+
+    useEffect(() => {
+        if (!historyMarkerPreview.isEnabled() || !jwt || previousMarkers.length === 0) return undefined
+        if (previewRouteUnavailable) return undefined
+
+        const targets = previousMarkers.filter((marker) => {
+            if (!historyMarkerPreview.hasValidCoordinates(marker)) return false
+            return !previewByID[marker.id]
+        })
+        if (targets.length === 0) return undefined
+
+        const abortController = new AbortController()
+
+        Promise.all(targets.map(async (marker) => {
+            try {
+                const payload = await historyMarkerPreview.fetchPreview(marker.id, jwt, abortController.signal)
+                return [ marker.id, {
+                    ...payload,
+                    image_src: historyMarkerPreview.toRenderableImageURL(payload),
+                } ]
+            } catch (error) {
+                const statusCode = Number(error?.status || 0)
+                if (statusCode === 404) {
+                    setPreviewRouteUnavailable(true)
+                    return [ marker.id, {
+                        profile: historyMarkerPreview.PROFILE,
+                        state: 'fallback',
+                        fallback_reason: 'feature_unavailable',
+                        cache_hit: false,
+                    } ]
+                }
+                return [ marker.id, {
+                    profile: historyMarkerPreview.PROFILE,
+                    state: 'fallback',
+                    fallback_reason: 'preview_request_failed',
+                    cache_hit: false,
+                } ]
+            }
+        })).then((results) => {
+            if (abortController.signal.aborted) return
+            setPreviewByID((current) => {
+                const next = { ...current }
+                results.forEach(([ id, payload ]) => {
+                    next[id] = payload
+                })
+                return next
+            })
+        })
+
+        return () => {
+            abortController.abort()
         }
-    }, [listData, listError])
+    }, [jwt, previousMarkers, previewByID, previewRouteUnavailable])
+
+    useEffect(() => {
+        if (!selectedMarker) return
+        const previewState = previewByID[selectedMarker.id]
+        if (!previewState) return
+        setSelected((current) => {
+            if (!current || current.id !== selectedMarker.id) return current
+            return {
+                ...current,
+                history_preview: previewState,
+            }
+        })
+    }, [previewByID, selectedMarker])
 
     const onMarkerRevoked = (marker) => {
         if (marker) {
-            let list = previousMarkers
-            list = list.filter(s => s.id !== marker.id)
-            setMarkers(list)
+            setPreviewByID((current) => {
+                const next = { ...current }
+                delete next[marker.id]
+                return next
+            })
+            pagedPreviousMarkerController.refresh()
         }
         setSelected(null)
         confirmCreated()
@@ -96,7 +236,10 @@ function PreviousMarkerPage({
         let selected = null
         previousMarkers.forEach(m => {
             if (m.id === id) {
-                selected = m
+                selected = {
+                    ...m,
+                    history_preview: previewByID[m.id] || historyMarkerPreview.buildIdlePreviewState(m),
+                }
                 return
             }
         })
@@ -132,18 +275,40 @@ function PreviousMarkerPage({
                     finalFilterValue={finalFilterDisplay} // for filter options
                     filterOpen={showFilter}
                     setShowFilter={setShowFilter}
+                    onReachEnd={pagedPreviousMarkerController.loadMore}
+                    hasMore={!!pagedPreviousMarkerController.nextCursor}
+                    loadingMore={pagedPreviousMarkerController.loading}
+                    loadingError={pagedPreviousMarkerController.error}
+                    onRetry={pagedPreviousMarkerController.retry}
+                    staleData={pagedPreviousMarkerController.stale}
+                    offlineCached={pagedPreviousMarkerController.offlineCached}
+                    onRefreshTop={pagedPreviousMarkerController.refresh}
+                    refreshing={pagedPreviousMarkerController.refreshing}
                 />
                 <PreviousMarkerView 
                     open={!!selectedMarker}
                     handleClose={() => setSelected(null)}
                     onUpdated={onMarkerRevoked}
                     marker={selectedMarker}
+                    openSchedule={(markerFromDialog) => {
+                        setScheduleMarker(markerFromDialog || selectedMarker)
+                        setSelected(null)
+                    }}
                 />
             </div>
+            <ScheduleForm
+                open={!!scheduleMarker}
+                handleClose={() => setScheduleMarker(null)}
+                onCreated={() => {
+                    setScheduleMarker(null)
+                    confirmCreated()
+                }}
+                marker={scheduleMarker}
+            />
             <AutoHideAlert 
                 open={createAlert}
                 type={'success'}
-                message={'Successfully revoke marker!'}
+                message={'Successfully completed previous marker action!'}
                 timing={3000}
             />
             <AutoHideAlert 
@@ -158,4 +323,5 @@ function PreviousMarkerPage({
 
 export default connect(state => ({
     eventtypes: state.marker.eventtypes,
+    jwt: state.auth.jwt,
 })) (PreviousMarkerPage)

@@ -242,6 +242,59 @@ const previous = gql`
     }
 `
 
+const pagedprevious = gql`
+    query pagedPreviousMarkerGQL(
+        $cursor: String,
+        $limit: Int
+    ) {
+        pagedpreviousmarkers(params: {
+            cursor: $cursor,
+            limit: $limit,
+        }) {
+            next_cursor
+            items {
+                id
+                type
+                description
+                latitude
+                longitude
+                label
+                address
+                link
+                image_link
+                type
+                estimate_time
+                price
+                status
+                to_time
+                from_time
+                is_fav
+                country_code
+                country_part
+                restaurant {
+                    id
+                    name
+                    source
+                    source_id
+                    price_range
+                    restaurant_type
+                    address
+                    rating
+                    direction
+                    telephone
+                    introduction
+                    opening_hours
+                    payment_method
+                    seat_number
+                    website
+                    other_info
+                }
+                created_at
+            }
+        }
+    }
+`
+
 const expired = gql`
     query expiredMarkerGQL{
         expiredmarkers{
@@ -414,6 +467,59 @@ const edit = gql`
     }
 `
 
+const pagedexpired = gql`
+    query pagedExpiredMarkerGQL(
+        $cursor: String,
+        $limit: Int
+    ) {
+        pagedexpiredmarkers(params: {
+            cursor: $cursor,
+            limit: $limit,
+        }) {
+            next_cursor
+            items {
+                id
+                type
+                description
+                latitude
+                longitude
+                label
+                address
+                link
+                image_link
+                type
+                estimate_time
+                price
+                status
+                to_time
+                from_time
+                is_fav
+                country_code
+                country_part
+                restaurant {
+                    id
+                    name
+                    source
+                    source_id
+                    price_range
+                    restaurant_type
+                    address
+                    rating
+                    direction
+                    telephone
+                    introduction
+                    opening_hours
+                    payment_method
+                    seat_number
+                    website
+                    other_info
+                }
+                created_at
+            }
+        }
+    }
+`
+
 // retrieving the marker after deleting the schedule
 const remove = gql`
     mutation removeMarkerGQL($id: Int!) {
@@ -438,7 +544,9 @@ const markers = {
     create,
     update_fav,
     previous,
+    pagedprevious,
     expired,
+    pagedexpired,
     revoke,
     edit,
     remove,

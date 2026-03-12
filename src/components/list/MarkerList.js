@@ -4,6 +4,7 @@ import { Virtuoso } from 'react-virtuoso'
 
 import WrapperBox from '../wrapper/WrapperBox'
 import MarkerItem from './listitem/MarkerItem'
+import HistoryMarkerItem from './listitem/HistoryMarkerItem'
 
 function MarkerList({
   top,
@@ -120,13 +121,14 @@ function MarkerList({
           itemContent={(_, item) => {
             const currentType = eventtypes.find(s => s.value === item.type)
             const typeIcon = currentType?.icon_path || ''
+            const ListItemComponent = item?.history_preview ? HistoryMarkerItem : MarkerItem
             return (
               <WrapperBox
                 key={item.id}
                 height={'120px'}
                 marginBottom='10px'
               >
-                <MarkerItem
+                <ListItemComponent
                   item={item}
                   typeIcon={typeIcon}
                   onClickHandler={() => setSelectedById(item.id)}

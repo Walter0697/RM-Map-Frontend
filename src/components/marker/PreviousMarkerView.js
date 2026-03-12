@@ -2,28 +2,30 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import {
-    Button,
     IconButton,
     Dialog,
     DialogContent,
     DialogContentText,
     DialogTitle,
-    Grid,
+    Box,
     Slide,
 } from '@mui/material'
+import Grid from '@mui/material/GridLegacy'
 import backend from '../../constant/backend'
 
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import UndoIcon from '@mui/icons-material/Undo'
 
 import dayjs from 'dayjs'
 
 import useBoop from '../../hooks/useBoop'
 
+import CircleIconButton from '../field/CircleIconButton'
 import ImageHeadText from '../wrapper/ImageHeadText'
 import AutoHideAlert from '../AutoHideAlert'
 import MarkerDescription from './MarkerDescription'
 
-import generic from '../../scripts/generic'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
 
@@ -36,6 +38,9 @@ function PreviousMarkerView({
     handleClose,
     marker,
     onUpdated,
+    openSchedule,
+    allowRevoke = true,
+    showHistory = true,
     eventtypes,
     dispatch,
 }) {
@@ -58,8 +63,12 @@ function PreviousMarkerView({
         const currentType = eventtypes.find(s => s.value === marker.type)
         setIcon(backend.IMAGE_LINK + currentType.icon_path)
 
-        listMarkerScheduleGQL({ variables: { id: marker.id } })
-    }, [marker])
+        if (showHistory) {
+            listMarkerScheduleGQL({ variables: { id: marker.id } })
+        } else {
+            setSchedules([])
+        }
+    }, [marker, showHistory])
 
     useEffect(() => {
         if (listData) {
@@ -111,6 +120,39 @@ function PreviousMarkerView({
                                         overflowX: 'auto',
                                     }}
                                 >
+                                    <Box
+                                        sx={{
+                                            width: '100%',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            gap: 0.5,
+                                            flexWrap: 'nowrap',
+                                            marginBottom: '10px',
+                                        }}
+                                    >
+                                        <Box sx={{ minWidth: 44, display: 'flex', justifyContent: 'flex-start', gap: 1 }}>
+                                            {openSchedule && (
+                                                <CircleIconButton
+                                                    ariaLabel='Schedule marker'
+                                                    onClickHandler={() => openSchedule(marker)}
+                                                >
+                                                    <CalendarTodayIcon />
+                                                </CircleIconButton>
+                                            )}
+                                        </Box>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, justifyContent: 'flex-end', marginLeft: 'auto', paddingRight: '8px' }}>
+                                            {allowRevoke && (
+                                                <CircleIconButton
+                                                    ariaLabel='Revoke marker'
+                                                    background='#f44336'
+                                                    onClickHandler={onRevokeClick}
+                                                >
+                                                    <UndoIcon style={{ color: 'white' }} />
+                                                </CircleIconButton>
+                                            )}
+                                        </Box>
+                                    </Box>
                                     <ImageHeadText
                                         iconPath={typeIcon}
                                         iconSize='35px'
@@ -128,7 +170,14 @@ function PreviousMarkerView({
                                         <Grid item xs={12} md={12} lg={12}>
                                             <img
                                                 width='100%'
-                                                src={backend.IMAGE_LINK + marker.image_link}                                            
+                                                style={{
+                                                    maxHeight: '240px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '8px',
+                                                    marginTop: '8px',
+                                                }}
+                                                src={backend.IMAGE_LINK + marker.image_link}
+                                                alt={`${marker.label} saved marker`}
                                             />
                                         </Grid>
                                     )}
@@ -149,34 +198,57 @@ function PreviousMarkerView({
                                             onHashTagClick={handleClose}
                                         />
                                     </Grid>
-                                    <Grid item xs={12} md={12} lg={12}>
-                                        History:
-                                    </Grid>
-                                    {scheduleList.map((item, index) => (
-                                        <Grid 
-                                            item 
+                                    {showHistory && (
+                                        <Grid item xs={12} md={12} lg={12}>
+                                            History:
+                                        </Grid>
+                                    )}
+                                    {showHistory && scheduleList.map((item, index) => (
+                                        <Grid
+                                            item
                                             xs={12} md={12} lg={12}
-                                            key={'sl'+index}
+                                            key={'sl' + index}
                                             style={{
                                                 fontStyle: 'italic',
                                                 fontSize: 'small',
-                                            }}>
+                                            }}
+                                        >
                                             {item.label} at {dayjs(item.selected_date).format('YYYY-MM-DD')}
                                         </Grid>
                                     ))}
                                     <Grid item xs={12} md={12} lg={12}>
-                                        <Button 
-                                            variant='contained'
-                                            size='middle'
-                                            style={{
-                                                backgroundColor: 'red',
-                                                color: 'white',
-                                                marginLeft: '10%',
-                                                width: '80%',
-                                                boxShadow: '2px 2px 6px'
-                                            }}
-                                            onClick={onRevokeClick}
-                                        >Revoke</Button>
+                                        {marker.history_preview?.state === 'ready' && marker.history_preview?.image_src ? (
+                                            <img
+                                                width='100%'
+                                                style={{
+                                                    maxHeight: '220px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '8px',
+                                                    marginBottom: '8px',
+                                                }}
+                                                src={marker.history_preview.image_src}
+                                                alt={`${marker.label} history preview`}
+                                            />
+                                        ) : (
+                                            <div
+                                                style={{
+                                                    width: '100%',
+                                                    minHeight: '180px',
+                                                    borderRadius: '8px',
+                                                    background: 'linear-gradient(135deg, #e0ecf4 0%, #f8fbfd 100%)',
+                                                    border: '1px solid #d7e2ea',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: '#577084',
+                                                    marginBottom: '8px',
+                                                    textAlign: 'center',
+                                                    padding: '12px',
+                                                }}
+                                            >
+                                                {marker.history_preview?.fallback_reason === 'no_coordinates' ? 'No saved coordinates for preview.' : 'Static map preview unavailable.'}
+                                            </div>
+                                        )}
                                     </Grid>
                                 </Grid>
                             </DialogContentText>

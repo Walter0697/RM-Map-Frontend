@@ -98,6 +98,12 @@ function ScheduleForm({
             hasError = true
         }
 
+        const markerID = Number(marker?.id ?? marker?.marker_id)
+        if (!Number.isInteger(markerID) || markerID <= 0) {
+            setError('label', 'selected marker is invalid')
+            hasError = true
+        }
+
         if (hasError) {
             setSubmitting(false)
             return
@@ -109,7 +115,7 @@ function ScheduleForm({
             label: formValue.label,
             description: formValue.description,
             selected_time,
-            marker_id: marker.id,
+            marker_id: markerID,
         }})
     }
 
