@@ -9,6 +9,7 @@ import {
 import useObject from '../../hooks/useObject'
 
 import BaseForm from './BaseForm'
+import ScheduleWeatherPreview from './ScheduleWeatherPreview'
 
 import generic from '../../scripts/generic'
 import actions from '../../store/actions'
@@ -168,6 +169,10 @@ function ScheduleEditForm({
                         onChange={(e) => onValueChangeHandler('description', e.target.value)}
                         error={!!error.description}
                         helperText={error.description}
+                    />
+                    <ScheduleWeatherPreview
+                        marker={schedule?.marker}
+                        selectedTime={formValue.selected_time}
                     />
                 </Stack>
             </BaseForm>

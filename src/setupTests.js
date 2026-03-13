@@ -4,6 +4,15 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 
+if (typeof window !== 'undefined' && window.URL) {
+    if (typeof window.URL.createObjectURL !== 'function') {
+        window.URL.createObjectURL = jest.fn(() => 'blob:mock-url')
+    }
+    if (typeof window.URL.revokeObjectURL !== 'function') {
+        window.URL.revokeObjectURL = jest.fn()
+    }
+}
+
 const suppressedWarningPatterns = [
     /MUI Grid: The `item` prop has been removed/i,
     /MUI Grid: The `xs` prop has been removed/i,
