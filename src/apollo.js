@@ -42,6 +42,26 @@ const authLink = setContext((_, { headers }) => {
 })
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
+    const extractReasonFromText = (text) => {
+        const source = `${text || ''}`
+        const match = source.match(/invalid token:\s*([a-z0-9_:-]+)/i)
+        if (!match || !match[1]) return ''
+        return match[1].toLowerCase()
+    }
+
+    const reasonToMessage = (reason) => {
+        const code = `${reason || ''}`.toLowerCase()
+        if (!code) return 'Your session expired or was revoked. Please log in again.'
+        if (code === 'jwt_parse_failed') return 'Session ended (`jwt_parse_failed`). Please log in again.'
+        if (code === 'auth_state_mismatch') return 'Session ended (`auth_state_mismatch`). Please log in again.'
+        if (code === 'auth_state_error') return 'Session ended (`auth_state_error`). Please log in again.'
+        if (code === 'user_not_found') return 'Session ended (`user_not_found`). Please log in again.'
+        if (code === 'user_lookup_failed') return 'Session ended (`user_lookup_failed`). Please log in again.'
+        if (code === 'missing_user_context') return 'Session ended (`missing_user_context`). Please log in again.'
+        if (code === 'user_inactive') return 'Session ended (`user_inactive`). Please contact an admin.'
+        return `Session ended (\`${code}\`). Please log in again.`
+    }
+
     const hasUnauthorizedGraphQLError = (graphQLErrors || []).some((error) => {
         const code = error?.extensions?.code
         const message = `${error?.message || ''}`.toLowerCase()
@@ -57,7 +77,13 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     const hasUnauthorizedNetworkError = statusCode === 401
 
     if (hasUnauthorizedGraphQLError || hasUnauthorizedNetworkError) {
-        handleTerminalUnauthorized()
+        const graphMessage = (graphQLErrors || []).map((error) => `${error?.message || ''}`).join(' ')
+        const networkMessage = `${networkError?.message || ''}`
+        const headerReason = networkError?.response?.headers?.get?.('X-RM-Auth-Reason')
+            || networkError?.response?.headers?.get?.('x-rm-auth-reason')
+            || ''
+        const reason = (headerReason || extractReasonFromText(graphMessage) || extractReasonFromText(networkMessage) || '').toLowerCase()
+        handleTerminalUnauthorized({ message: reasonToMessage(reason) })
     }
 })
 
