@@ -15,6 +15,20 @@ jest.mock('@apollo/client', () => {
     }
 })
 
+jest.mock('./ScheduleDateTimeSelector', () => (props) => {
+    const {
+        onValueChange,
+    } = props
+    return (
+        <input
+            aria-label='selected time'
+            onChange={(event) => onValueChange(new Date(event.target.value))}
+        />
+    )
+})
+
+jest.mock('./ScheduleWeatherPreview', () => () => <div data-testid='weather-preview' />)
+
 function rootReducer(state = { auth: { jwt: 'jwt-token' } }, action) {
     return state
 }

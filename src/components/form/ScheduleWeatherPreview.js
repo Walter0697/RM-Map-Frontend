@@ -20,6 +20,7 @@ import apis from '../../apis'
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
 const WEATHER_PREVIEW_CACHE_TTL_MS = 3 * 60 * 1000
+const WEATHER_FORECAST_MAX_DAYS = 7
 const weatherPreviewCache = new Map()
 
 const formatForecastTime = (value) => {
@@ -74,11 +75,15 @@ const normalizeUnavailableMessage = (value = '') => {
     const raw = `${value}`.trim()
     const lower = raw.toLowerCase()
     if (!raw) return ''
-    if (lower.includes('invalid weather viewport input')) {
-        return 'Marker location is incomplete, so weather preview is unavailable.'
+    if (
+        lower.includes('forecast day offset too large')
+        || lower.includes('forecast horizon')
+        || lower.includes('forecast window too large')
+    ) {
+        return `Weather forecast supports up to ${WEATHER_FORECAST_MAX_DAYS} days ahead.`
     }
-    if (lower.includes('forecast horizon')) {
-        return 'Selected date is outside forecast horizon.'
+    if (lower.includes('invalid weather viewport input')) {
+        return `Weather preview is unavailable for the selected forecast range (max ${WEATHER_FORECAST_MAX_DAYS} days).`
     }
     return raw
 }
@@ -145,6 +150,12 @@ function ScheduleWeatherPreview({
         }
 
         const offsetDays = clamp(selected.startOf('day').diff(dayjs().startOf('day'), 'day'), 0, 16)
+        if (offsetDays > WEATHER_FORECAST_MAX_DAYS) {
+            setLoading(false)
+            setWeatherData(null)
+            setFetchError(`Weather forecast supports up to ${WEATHER_FORECAST_MAX_DAYS} days ahead.`)
+            return () => {}
+        }
         const query = {
             min_lat: Number(marker.latitude).toFixed(5),
             max_lat: Number(marker.latitude).toFixed(5),

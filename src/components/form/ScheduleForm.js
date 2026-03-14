@@ -9,28 +9,12 @@ import {
 import useObject from '../../hooks/useObject'
 
 import BaseForm from './BaseForm'
+import ScheduleDateTimeSelector from './ScheduleDateTimeSelector'
 import ScheduleWeatherPreview from './ScheduleWeatherPreview'
 
 import generic from '../../scripts/generic'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
-
-function toDateTimeLocalValue(value) {
-    if (!value || Number.isNaN(value.getTime?.())) return ''
-    const year = value.getFullYear()
-    const month = `${value.getMonth() + 1}`.padStart(2, '0')
-    const day = `${value.getDate()}`.padStart(2, '0')
-    const hour = `${value.getHours()}`.padStart(2, '0')
-    const minute = `${value.getMinutes()}`.padStart(2, '0')
-    return `${year}-${month}-${day}T${hour}:${minute}`
-}
-
-function parseDateTimeLocalValue(raw) {
-    if (!raw) return null
-    const parsed = new Date(raw)
-    if (Number.isNaN(parsed.getTime())) return null
-    return parsed
-}
 
 function ScheduleForm({
     open,
@@ -52,7 +36,6 @@ function ScheduleForm({
     const [ isUnauthorized, setUnauthorized ] = useState(false)
 
     const [ alertMessage, setAlertMessage ] = useState(null)
-
     useEffect(() => {
         if (!marker) return
 
@@ -146,18 +129,10 @@ function ScheduleForm({
                         error={!!error.label}
                         helperText={error.label}
                     />
-                    <TextField
-                        type='datetime-local'
-                        variant='outlined'
-                        fullWidth
-                        required
-                        label='selected time'
-                        InputLabelProps={{ shrink: true }}
-                        inputProps={{ min: toDateTimeLocalValue(new Date()) }}
-                        value={toDateTimeLocalValue(formValue.selected_time)}
-                        onChange={(e) => onValueChangeHandler('selected_time', parseDateTimeLocalValue(e.target.value))}
-                        error={!!error.selected_time}
-                        helperText={error.selected_time}
+                    <ScheduleDateTimeSelector
+                        value={formValue.selected_time}
+                        onValueChange={(value) => onValueChangeHandler('selected_time', value)}
+                        errorMessage={error.selected_time}
                     />
                     <TextField
                         variant='outlined'

@@ -1,7 +1,8 @@
 import React from 'react'
 import {
-    Grid,
+    Box,
     Button,
+    Typography,
 } from '@mui/material'
 
 function SectionHeader({
@@ -19,20 +20,29 @@ function SectionHeader({
                 textTransform: 'none',
             }}
         >
-            <Grid 
-                container 
-                fullWidth
+            <Box
                 style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
                     paddingTop: '6px',
                 }}
             >
-                <Grid item xs={3}>
+                <span
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
                     {icon}
-                </Grid>
-                <Grid item xs={6}>
+                </span>
+                <Typography component='span'>
                     {title}
-                </Grid>
-            </Grid>
+                </Typography>
+            </Box>
         </Button>
     )
 }
