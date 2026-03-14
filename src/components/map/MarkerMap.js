@@ -47,6 +47,34 @@ import {
 import viewportState from '../../scripts/map/viewportState'
 import actions from '../../store/actions'
 
+const WEATHER_FORECAST_MAX_DAY_OFFSET = 7
+
+const resolveWeatherUnavailableMessage = (payload = {}, selectedDayOffset = 0) => {
+    const maxDays = WEATHER_FORECAST_MAX_DAY_OFFSET
+    const forecastLimitMessage = `Weather preview supports up to ${maxDays} days ahead.`
+    if (selectedDayOffset > maxDays) {
+        return forecastLimitMessage
+    }
+
+    const errorCode = `${payload?.error_code || ''}`.trim().toLowerCase()
+    const rawMessage = `${payload?.error_message || ''}`.trim()
+    const errorMessage = rawMessage.toLowerCase()
+    if (errorCode === 'invalid_input') {
+        if (
+            errorMessage.includes('forecast day offset too large')
+            || errorMessage.includes('forecast horizon')
+            || errorMessage.includes('forecast window too large')
+        ) {
+            return forecastLimitMessage
+        }
+        if (errorMessage.includes('invalid weather viewport input')) {
+            return 'Weather preview is unavailable for this map view.'
+        }
+    }
+
+    return rawMessage || (errorCode ? 'Weather data unavailable' : '')
+}
+
 function MarkerMap({
     showingList,
     toListView,
@@ -458,6 +486,14 @@ function MarkerMap({
         if (!map || !weatherFeatureEnabled || !planningModeEnabled) return undefined
 
         const fetchWeather = _.debounce(async () => {
+            if (forecastDayOffset > WEATHER_FORECAST_MAX_DAY_OFFSET) {
+                setWeatherUnavailable(`Weather preview supports up to ${WEATHER_FORECAST_MAX_DAY_OFFSET} days ahead.`)
+                setWeatherData([])
+                hasWeatherLoadedRef.current = true
+                setWeatherLoading(false)
+                return
+            }
+
             try {
                 const bounds = map.getBounds()
                 const center = map.getCenter()
@@ -486,7 +522,7 @@ function MarkerMap({
                 setWeatherViewport(nextViewport)
                 previousWeatherViewportRef.current = nextViewport
                 setWeatherData(payload.items || [])
-                setWeatherUnavailable(payload.error_code ? (payload.error_message || 'Weather data unavailable') : '')
+                setWeatherUnavailable(resolveWeatherUnavailableMessage(payload, forecastDayOffset))
                 hasWeatherLoadedRef.current = true
                 if (shouldAnimate) {
                     setWeatherTransitionIndex(prev => prev + 1)
