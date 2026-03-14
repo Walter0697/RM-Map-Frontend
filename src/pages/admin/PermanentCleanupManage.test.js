@@ -14,6 +14,7 @@ function rootReducer(state = { auth: { jwt: 'test-jwt', username: 'admin' } }) {
 }
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0))
+const renderedRoots = []
 
 function createRenderedPage() {
     const store = configureStore({ reducer: rootReducer })
@@ -30,6 +31,7 @@ function createRenderedPage() {
             </Provider>
         )
     })
+    renderedRoots.push(root)
 
     return { container, root }
 }
@@ -61,6 +63,12 @@ describe('PermanentCleanupManage', () => {
     })
 
     afterEach(() => {
+        act(() => {
+            while (renderedRoots.length > 0) {
+                const root = renderedRoots.pop()
+                root.unmount()
+            }
+        })
         jest.resetAllMocks()
         document.body.innerHTML = ''
     })
