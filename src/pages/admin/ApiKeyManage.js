@@ -45,21 +45,32 @@ const availableScopes = [
 function ApiKeyManage({ jwt }) {
     const authBackend = backend.AUTH_BACKEND
     const apiKeyBackend = backend.APIKEY_BACKEND || authBackend
+    const adminBackend = backend.withBasePath('admin')
 
     const [ loading, setLoading ] = useState(false)
     const [ items, setItems ] = useState([])
-    const [ users, setUsers ] = useState([])
+    const [ testingFilter, setTestingFilter ] = useState('all')
+    const [ serviceAccounts, setServiceAccounts ] = useState([])
     const [ relations, setRelations ] = useState([])
+    const [ serviceAccountsLoading, setServiceAccountsLoading ] = useState(false)
     const [ errorMessage, setErrorMessage ] = useState('')
     const [ healthErrorMessage, setHealthErrorMessage ] = useState('')
     const [ authHealth, setAuthHealth ] = useState(null)
 
     const [ form, setForm ] = useState({
         name: '',
+        testing: false,
         relation_id: '',
-        actor_user_id: '',
+        service_account_id: '',
         expires_at: '',
         scopes: ['markers:read'],
+    })
+    const [ serviceAccountForm, setServiceAccountForm ] = useState({
+        name: '',
+        description: '',
+        role: 'user',
+        relation_id: '',
+        active: true,
     })
 
     const [ latestToken, setLatestToken ] = useState('')
@@ -73,10 +84,13 @@ function ApiKeyManage({ jwt }) {
     const canCreate = useMemo(() => {
         if (!form.name.trim()) return false
         if (!form.relation_id.trim()) return false
-        if (!form.actor_user_id.trim()) return false
+        if (!form.service_account_id.trim()) return false
         return form.scopes.length > 0
     }, [form])
     const allScopesSelected = form.scopes.length === availableScopes.length
+    const canCreateServiceAccount = useMemo(() => (
+        !!serviceAccountForm.name.trim() && !!serviceAccountForm.role.trim() && !!serviceAccountForm.relation_id.trim()
+    ), [serviceAccountForm])
 
     const parseJsonError = async (resp) => {
         if (resp.status === 503) {
@@ -124,7 +138,12 @@ function ApiKeyManage({ jwt }) {
         setLoading(true)
         setErrorMessage('')
         try {
-            const resp = await fetch(`${apiKeyBackend}/apikeys`, {
+            const params = new URLSearchParams()
+            if (testingFilter === 'true' || testingFilter === 'false') {
+                params.set('testing', testingFilter)
+            }
+            const queryString = params.toString()
+            const resp = await fetch(`${apiKeyBackend}/apikeys${queryString ? `?${queryString}` : ''}`, {
                 method: 'GET',
                 headers: {
                     Authorization: jwt,
@@ -160,28 +179,61 @@ function ApiKeyManage({ jwt }) {
                 return
             }
             const body = await resp.json()
-            const fetchedUsers = Array.isArray(body.users) ? body.users : []
             const fetchedRelations = Array.isArray(body.relations) ? body.relations : []
-            setUsers(fetchedUsers)
+            const fetchedServiceAccounts = Array.isArray(body.service_accounts) ? body.service_accounts : []
             setRelations(fetchedRelations)
+            setServiceAccounts(fetchedServiceAccounts)
 
             setForm((prev) => ({
                 ...prev,
                 relation_id: prev.relation_id || (fetchedRelations[0] ? String(fetchedRelations[0].id) : ''),
-                actor_user_id: prev.actor_user_id || (fetchedUsers[0] ? String(fetchedUsers[0].id) : ''),
+                service_account_id: prev.service_account_id || (fetchedServiceAccounts[0] ? String(fetchedServiceAccounts[0].id) : ''),
+            }))
+            setServiceAccountForm((prev) => ({
+                ...prev,
+                relation_id: prev.relation_id || (fetchedRelations[0] ? String(fetchedRelations[0].id) : ''),
             }))
         } catch (e) {
             setErrorMessage(`Failed to load API key options: ${e.message}`)
         }
     }
 
+    const fetchServiceAccounts = async () => {
+        if (!adminBackend || !jwt) return
+        setServiceAccountsLoading(true)
+        setErrorMessage('')
+        try {
+            const resp = await fetch(`${adminBackend}/service-accounts`, {
+                method: 'GET',
+                headers: {
+                    Authorization: jwt,
+                },
+            })
+            if (!resp.ok) {
+                const errText = await parseJsonError(resp)
+                setErrorMessage(`Failed to load service accounts: ${errText}`)
+                return
+            }
+            const body = await resp.json()
+            setServiceAccounts(Array.isArray(body.items) ? body.items : [])
+        } catch (e) {
+            setErrorMessage(`Failed to load service accounts: ${e.message}`)
+        } finally {
+            setServiceAccountsLoading(false)
+        }
+    }
+
     useEffect(() => {
         fetchKeys()
-    }, [apiKeyBackend, jwt])
+    }, [apiKeyBackend, jwt, testingFilter])
 
     useEffect(() => {
         fetchOptions()
     }, [apiKeyBackend, jwt])
+
+    useEffect(() => {
+        fetchServiceAccounts()
+    }, [adminBackend, jwt])
 
     useEffect(() => {
         fetchAuthHealth()
@@ -217,8 +269,9 @@ function ApiKeyManage({ jwt }) {
         try {
             const payload = {
                 name: form.name.trim(),
+                testing: !!form.testing,
                 relation_id: Number(form.relation_id),
-                actor_user_id: Number(form.actor_user_id),
+                service_account_id: Number(form.service_account_id),
                 scopes: form.scopes,
             }
             if (form.expires_at.trim()) {
@@ -246,6 +299,7 @@ function ApiKeyManage({ jwt }) {
             setForm({
                 ...form,
                 name: '',
+                testing: false,
                 expires_at: '',
             })
             await fetchOptions()
@@ -256,6 +310,87 @@ function ApiKeyManage({ jwt }) {
             return false
         } finally {
             setLoading(false)
+        }
+    }
+
+    const onServiceAccountFormChange = (field) => (event) => {
+        setServiceAccountForm({
+            ...serviceAccountForm,
+            [field]: event.target.value,
+        })
+    }
+
+    const onCreateServiceAccount = async () => {
+        if (!canCreateServiceAccount || !adminBackend || !jwt) return
+        setServiceAccountsLoading(true)
+        setErrorMessage('')
+        try {
+            const payload = {
+                name: serviceAccountForm.name.trim(),
+                description: serviceAccountForm.description.trim(),
+                role: serviceAccountForm.role.trim(),
+                relation_id: Number(serviceAccountForm.relation_id),
+                active: !!serviceAccountForm.active,
+            }
+            const resp = await fetch(`${adminBackend}/service-accounts`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: jwt,
+                },
+                body: JSON.stringify(payload),
+            })
+            if (!resp.ok) {
+                const errText = await parseJsonError(resp)
+                setErrorMessage(`Failed to create service account: ${errText}`)
+                return
+            }
+            setAlertMessage('Service account created')
+            triggerAlert()
+            setServiceAccountForm({
+                ...serviceAccountForm,
+                name: '',
+                description: '',
+                relation_id: serviceAccountForm.relation_id,
+                active: true,
+            })
+            await fetchServiceAccounts()
+            await fetchOptions()
+        } catch (e) {
+            setErrorMessage(`Failed to create service account: ${e.message}`)
+        } finally {
+            setServiceAccountsLoading(false)
+        }
+    }
+
+    const onToggleServiceAccountActive = async (item) => {
+        if (!adminBackend || !jwt) return
+        setServiceAccountsLoading(true)
+        setErrorMessage('')
+        try {
+            const resp = await fetch(`${adminBackend}/service-accounts/${item.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: jwt,
+                },
+                body: JSON.stringify({
+                    active: !item.active,
+                }),
+            })
+            if (!resp.ok) {
+                const errText = await parseJsonError(resp)
+                setErrorMessage(`Failed to update service account: ${errText}`)
+                return
+            }
+            setAlertMessage(`Service account ${item.active ? 'deactivated' : 'activated'}`)
+            triggerAlert()
+            await fetchServiceAccounts()
+            await fetchOptions()
+        } catch (e) {
+            setErrorMessage(`Failed to update service account: ${e.message}`)
+        } finally {
+            setServiceAccountsLoading(false)
         }
     }
 
@@ -372,6 +507,19 @@ function ApiKeyManage({ jwt }) {
                     >
                         Refresh Keys
                     </Button>
+                    <FormControl size='small' sx={{ minWidth: 160 }}>
+                        <InputLabel id='apikey-testing-filter-label'>Testing</InputLabel>
+                        <Select
+                            labelId='apikey-testing-filter-label'
+                            value={testingFilter}
+                            label='Testing'
+                            onChange={(event) => setTestingFilter(event.target.value)}
+                        >
+                            <MenuItem value='all'>All</MenuItem>
+                            <MenuItem value='false'>Production</MenuItem>
+                            <MenuItem value='true'>Testing</MenuItem>
+                        </Select>
+                    </FormControl>
                     <Button
                         className='admin-action-button'
                         variant='outlined'
@@ -439,6 +587,126 @@ function ApiKeyManage({ jwt }) {
                             <Typography variant='body1'>{authHealth?.authState?.metrics?.revocationErrorCount ?? '-'}</Typography>
                         </Grid>
                     </Grid>
+                </CardContent>
+            </Card>
+            <Card className='admin-panel'>
+                <CardContent>
+                    <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                        <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>Service Accounts</Typography>
+                        <Stack direction='row' spacing={1} alignItems='center'>
+                            <Chip label={`${serviceAccounts.length} account(s)`} size='small' />
+                            <Button
+                                className='admin-action-button'
+                                variant='outlined'
+                                size='small'
+                                disabled={serviceAccountsLoading}
+                                onClick={fetchServiceAccounts}
+                            >
+                                Refresh
+                            </Button>
+                        </Stack>
+                    </Stack>
+                    <Divider sx={{ my: 1.25 }} />
+                    <Grid container spacing={1.5}>
+                        <Grid item xs={12} md={3}>
+                            <TextField
+                                fullWidth
+                                label='Name'
+                                value={serviceAccountForm.name}
+                                onChange={onServiceAccountFormChange('name')}
+                                placeholder='integration-bot-prod'
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            <TextField
+                                fullWidth
+                                label='Description'
+                                value={serviceAccountForm.description}
+                                onChange={onServiceAccountFormChange('description')}
+                                placeholder='Used by integration jobs'
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={2}>
+                            <FormControl fullWidth>
+                                <InputLabel id='service-account-role-label'>Role</InputLabel>
+                                <Select
+                                    labelId='service-account-role-label'
+                                    label='Role'
+                                    value={serviceAccountForm.role}
+                                    onChange={onServiceAccountFormChange('role')}
+                                >
+                                    <MenuItem value='user'>user</MenuItem>
+                                    <MenuItem value='admin'>admin</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            <FormControl fullWidth>
+                                <InputLabel id='service-account-relation-label'>Relation</InputLabel>
+                                <Select
+                                    labelId='service-account-relation-label'
+                                    label='Relation'
+                                    value={serviceAccountForm.relation_id}
+                                    onChange={onServiceAccountFormChange('relation_id')}
+                                >
+                                    {relations.map((item) => (
+                                        <MenuItem key={item.id} value={String(item.id)}>
+                                            {item.display} (#{item.id})
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={1}>
+                            <Button
+                                fullWidth
+                                variant='contained'
+                                disabled={!canCreateServiceAccount || serviceAccountsLoading}
+                                onClick={onCreateServiceAccount}
+                                sx={{ height: '100%' }}
+                            >
+                                Add
+                            </Button>
+                        </Grid>
+                    </Grid>
+                    <Stack spacing={0.75} sx={{ mt: 2 }}>
+                        {serviceAccounts.length === 0 ? (
+                            <Typography variant='body2' color='text.secondary'>
+                                {serviceAccountsLoading ? 'Loading service accounts...' : 'No service accounts found.'}
+                            </Typography>
+                        ) : serviceAccounts.map((item) => (
+                            <Card key={item.id} variant='outlined' sx={{ borderRadius: 1.5 }}>
+                                <CardContent sx={{ py: 0.9, '&:last-child': { pb: 0.9 } }}>
+                                    <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                                        <Box sx={{ minWidth: 0 }}>
+                                            <Stack direction='row' spacing={0.75} alignItems='center'>
+                                                <Typography variant='subtitle2' sx={{ fontWeight: 700 }}>
+                                                    {item.name}
+                                                </Typography>
+                                                <Chip size='small' label={item.role || 'user'} />
+                                                <Chip size='small' color={item.active ? 'success' : 'default'} label={item.active ? 'active' : 'inactive'} />
+                                            </Stack>
+                                            <Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
+                                                Relation #{item.relation_id}
+                                            </Typography>
+                                            <Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
+                                                {item.description || '-'}
+                                            </Typography>
+                                        </Box>
+                                        <Button
+                                            className='admin-action-button'
+                                            variant='outlined'
+                                            size='small'
+                                            disabled={serviceAccountsLoading}
+                                            onClick={() => onToggleServiceAccountActive(item)}
+                                        >
+                                            {item.active ? 'Deactivate' : 'Activate'}
+                                        </Button>
+                                    </Stack>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </Stack>
                 </CardContent>
             </Card>
 
@@ -509,12 +777,18 @@ function ApiKeyManage({ jwt }) {
                                                             color={isRevoked ? 'default' : 'success'}
                                                             label={item.status || 'active'}
                                                         />
+                                                        <Chip
+                                                            size='small'
+                                                            variant='outlined'
+                                                            color={item.testing ? 'warning' : 'default'}
+                                                            label={item.testing ? 'testing' : 'production'}
+                                                        />
                                                     </Stack>
                                                     <Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
                                                         Prefix: <Box component='span' sx={{ fontFamily: 'monospace' }}>{item.prefix || '-'}</Box>
                                                     </Typography>
                                                     <Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
-                                                        Relation #{item.relation_id} | Actor #{item.actor_user_id}
+                                                        Relation #{item.relation_id} | {item.service_account_id ? `Service Account: ${item.service_account_name || `#${item.service_account_id}`}` : `Actor #${item.actor_user_id}`}
                                                     </Typography>
                                                     <Stack direction='row' spacing={0.5} flexWrap='wrap' sx={{ mt: 0.5 }}>
                                                         {visibleScopes.map((scope) => (
@@ -609,6 +883,7 @@ function ApiKeyManage({ jwt }) {
                                         label='Relation'
                                         value={form.relation_id}
                                         onChange={onFormChange('relation_id')}
+                                        disabled
                                     >
                                         {relations.map((item) => (
                                             <MenuItem key={item.id} value={String(item.id)}>
@@ -620,20 +895,42 @@ function ApiKeyManage({ jwt }) {
                             </Grid>
                             <Grid item xs={12} md={6}>
                                 <FormControl fullWidth sx={formFieldSx}>
-                                    <InputLabel id='actor-select-label'>Actor User</InputLabel>
+                                    <InputLabel id='service-account-select-label'>Service Account</InputLabel>
                                     <Select
-                                        labelId='actor-select-label'
-                                        label='Actor User'
-                                        value={form.actor_user_id}
-                                        onChange={onFormChange('actor_user_id')}
+                                        labelId='service-account-select-label'
+                                        label='Service Account'
+                                        value={form.service_account_id}
+                                        onChange={(event) => {
+                                            const selectedId = event.target.value
+                                            const selectedAccount = serviceAccounts.find((item) => String(item.id) === String(selectedId))
+                                            setForm({
+                                                ...form,
+                                                service_account_id: selectedId,
+                                                relation_id: selectedAccount?.relation_id ? String(selectedAccount.relation_id) : form.relation_id,
+                                            })
+                                        }}
                                     >
-                                        {users.map((item) => (
+                                        {serviceAccounts.map((item) => (
                                             <MenuItem key={item.id} value={String(item.id)}>
-                                                {item.username} ({item.role}) #{item.id}
+                                                {item.name} ({item.role}) - relation #{item.relation_id}{item.active ? '' : ' [inactive]'}
                                             </MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <FormControlLabel
+                                    control={(
+                                        <Checkbox
+                                            checked={!!form.testing}
+                                            onChange={(event) => setForm({
+                                                ...form,
+                                                testing: event.target.checked,
+                                            })}
+                                        />
+                                    )}
+                                    label='Testing key (hidden from non-admin by default)'
+                                />
                             </Grid>
                         </Grid>
 

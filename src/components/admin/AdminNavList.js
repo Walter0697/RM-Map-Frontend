@@ -8,7 +8,7 @@ import {
 } from '@mui/material'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 
-import adminNavItems from './adminNavItems'
+import adminNavItems, { isAdminNavPathActive } from './adminNavItems'
 
 function AdminNavList({ onNavigate }) {
     const history = useHistory()
@@ -22,7 +22,7 @@ function AdminNavList({ onNavigate }) {
     return (
         <Stack spacing={1.25}>
             {adminNavItems.map((item) => {
-                const active = location.pathname === item.path
+                const active = isAdminNavPathActive(location.pathname, item.path)
                 return (
                     <Button
                         key={item.path}
