@@ -29,6 +29,42 @@ function validateShortcutURL(value) {
     }
 }
 
+function validateTelegramBotURL(value) {
+    const trimmed = (value || '').trim()
+    if (!trimmed) return false
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        try {
+            const parsed = new URL(trimmed)
+            if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false
+            return !!parsed.hostname
+        } catch (error) {
+            return false
+        }
+    }
+
+    const handle = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed
+    if (!handle) return false
+    for (let i = 0; i < handle.length; i += 1) {
+        const char = handle[i]
+        const isAlphaNum = /[a-zA-Z0-9]/.test(char)
+        if (!isAlphaNum && char !== '_') {
+            return false
+        }
+    }
+    return true
+}
+
+function normalizeTelegramBotPreviewURL(value) {
+    const trimmed = (value || '').trim()
+    if (!trimmed) return ''
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        return validateTelegramBotURL(trimmed) ? trimmed : ''
+    }
+    const handle = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed
+    if (!handle) return ''
+    return validateTelegramBotURL(trimmed) ? `https://t.me/${handle}` : ''
+}
+
 function parsePositiveInteger(value) {
     const trimmed = `${value ?? ''}`.trim()
     if (!trimmed) return null
@@ -44,6 +80,7 @@ function SystemSettingsManage({ jwt }) {
     const [ errorMessage, setErrorMessage ] = useState('')
     const [ successMessage, setSuccessMessage ] = useState('')
     const [ shortcutURL, setShortcutURL ] = useState('')
+    const [ telegramBotURL, setTelegramBotURL ] = useState('')
     const [ easyThresholdMinutes, setEasyThresholdMinutes ] = useState('')
     const [ difficultThresholdMinutes, setDifficultThresholdMinutes ] = useState('')
     const [ calendarShortMinutes, setCalendarShortMinutes ] = useState('')
@@ -51,8 +88,12 @@ function SystemSettingsManage({ jwt }) {
     const [ calendarLongMinutes, setCalendarLongMinutes ] = useState('')
     const [ calendarAutoMinutes, setCalendarAutoMinutes ] = useState('')
     const trimmedShortcutURL = shortcutURL.trim()
+    const trimmedTelegramBotURL = telegramBotURL.trim()
     const hasShortcutURL = trimmedShortcutURL !== ''
+    const hasTelegramBotURL = trimmedTelegramBotURL !== ''
     const isShortcutURLValid = validateShortcutURL(trimmedShortcutURL)
+    const isTelegramBotURLValid = validateTelegramBotURL(trimmedTelegramBotURL)
+    const telegramBotPreviewURL = normalizeTelegramBotPreviewURL(trimmedTelegramBotURL)
     const parsedEasyThresholdMinutes = parsePositiveInteger(easyThresholdMinutes)
     const parsedDifficultThresholdMinutes = parsePositiveInteger(difficultThresholdMinutes)
     const areThresholdsPresent = parsedEasyThresholdMinutes !== null && parsedDifficultThresholdMinutes !== null
@@ -77,8 +118,14 @@ function SystemSettingsManage({ jwt }) {
         setLoading(true)
         setErrorMessage('')
         try {
-            const [ shortcutResponse, thresholdResponse, calendarDurationResponse ] = await Promise.all([
+            const [ shortcutResponse, telegramBotResponse, thresholdResponse, calendarDurationResponse ] = await Promise.all([
                 fetch(backend.withBasePath('admin/settings/ios-shortcut-install-url'), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
+                }),
+                fetch(backend.withBasePath('admin/settings/telegram-bot-url'), {
                     method: 'GET',
                     headers: {
                         Authorization: jwt,
@@ -102,6 +149,11 @@ function SystemSettingsManage({ jwt }) {
                 setErrorMessage(text || `Failed to load shortcut setting (${shortcutResponse.status})`)
                 return
             }
+            if (!telegramBotResponse.ok) {
+                const text = await telegramBotResponse.text()
+                setErrorMessage(text || `Failed to load telegram bot setting (${telegramBotResponse.status})`)
+                return
+            }
             if (!thresholdResponse.ok) {
                 const text = await thresholdResponse.text()
                 setErrorMessage(text || `Failed to load travel thresholds (${thresholdResponse.status})`)
@@ -115,6 +167,8 @@ function SystemSettingsManage({ jwt }) {
 
             const shortcutData = await shortcutResponse.json()
             setShortcutURL(shortcutData?.ios_shortcut_install_url || '')
+            const telegramBotData = await telegramBotResponse.json()
+            setTelegramBotURL(telegramBotData?.telegram_bot_url || '')
 
             const thresholdData = await thresholdResponse.json()
             setEasyThresholdMinutes(`${thresholdData?.easy_threshold_minutes ?? ''}`)
@@ -158,6 +212,22 @@ function SystemSettingsManage({ jwt }) {
                 return
             }
 
+            const telegramBotResponse = await fetch(backend.withBasePath('admin/settings/telegram-bot-url'), {
+                method: 'PUT',
+                headers: {
+                    Authorization: jwt,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    telegram_bot_url: telegramBotURL,
+                }),
+            })
+            if (!telegramBotResponse.ok) {
+                const text = await telegramBotResponse.text()
+                setErrorMessage(text || `Failed to save telegram bot setting (${telegramBotResponse.status})`)
+                return
+            }
+
             const thresholdResponse = await fetch(backend.withBasePath('admin/settings/schedule-travel-thresholds'), {
                 method: 'PUT',
                 headers: {
@@ -196,6 +266,8 @@ function SystemSettingsManage({ jwt }) {
 
             const shortcutData = await shortcutResponse.json()
             setShortcutURL(shortcutData?.ios_shortcut_install_url || '')
+            const telegramBotData = await telegramBotResponse.json()
+            setTelegramBotURL(telegramBotData?.telegram_bot_url || '')
 
             const thresholdData = await thresholdResponse.json()
             setEasyThresholdMinutes(`${thresholdData?.easy_threshold_minutes ?? ''}`)
@@ -226,7 +298,7 @@ function SystemSettingsManage({ jwt }) {
                         className='admin-action-button'
                         variant='contained'
                         onClick={onSave}
-                        disabled={loading || saving || (hasShortcutURL && !isShortcutURLValid) || !areThresholdsValid || !areCalendarDurationsValid}
+                        disabled={loading || saving || (hasShortcutURL && !isShortcutURLValid) || (hasTelegramBotURL && !isTelegramBotURLValid) || !areThresholdsValid || !areCalendarDurationsValid}
                     >
                         Save
                     </Button>
@@ -257,9 +329,67 @@ function SystemSettingsManage({ jwt }) {
                                 />
                             </Stack>
                             <Typography variant='body2' color='text.secondary' sx={{ mt: 0.75 }}>
-                                Shown on User Settings as the &quot;Install iOS Shortcut&quot; action. Leave empty to hide the button.
+                                Shown on User Settings as the &quot;Social Media Shortcut (iOS)&quot; action. Leave empty to hide the button.
                             </Typography>
                         </Box>
+
+                        <Divider />
+
+                        <Box
+                            sx={{
+                                p: 1.5,
+                                borderRadius: 1.5,
+                                background: 'linear-gradient(90deg, #e8f8ff 0%, #f5fcff 100%)',
+                                border: '1px solid #d2ecfb',
+                            }}
+                        >
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent='space-between' alignItems={{ xs: 'flex-start', sm: 'center' }}>
+                                <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
+                                    RoroadBot Telegram URL
+                                </Typography>
+                                <Chip
+                                    size='small'
+                                    color={hasTelegramBotURL && isTelegramBotURLValid ? 'success' : 'default'}
+                                    label={hasTelegramBotURL ? (isTelegramBotURLValid ? 'Configured' : 'Invalid URL') : 'Not configured'}
+                                />
+                            </Stack>
+                            <Typography variant='body2' color='text.secondary' sx={{ mt: 0.75 }}>
+                                Shown on User Settings as the &quot;Talk to RoroadBot&quot; action. Leave empty to hide the button.
+                            </Typography>
+                        </Box>
+
+                        <TextField
+                            fullWidth
+                            label='Telegram Bot URL'
+                            placeholder='roroadbot or https://t.me/roroadbot'
+                            value={telegramBotURL}
+                            onChange={(event) => setTelegramBotURL(event.target.value)}
+                            disabled={loading || saving}
+                            error={hasTelegramBotURL && !isTelegramBotURLValid}
+                            helperText={hasTelegramBotURL && !isTelegramBotURLValid
+                                ? 'Use a bot name (roroadbot / @roroadbot) or full URL (https://t.me/roroadbot)'
+                                : 'Supports bot name or URL. Empty value disables the user-facing button.'}
+                        />
+
+                        <Button
+                            className='admin-action-button'
+                            variant='outlined'
+                            onClick={() => setTelegramBotURL('')}
+                            disabled={loading || saving || !hasTelegramBotURL}
+                        >
+                            Clear Telegram URL
+                        </Button>
+
+                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                            <Button
+                                className='admin-action-button'
+                                variant='outlined'
+                                onClick={() => window.open(telegramBotPreviewURL, '_blank', 'noopener,noreferrer')}
+                                disabled={!telegramBotPreviewURL}
+                            >
+                                Open Telegram Preview
+                            </Button>
+                        </Stack>
 
                         <Divider />
 

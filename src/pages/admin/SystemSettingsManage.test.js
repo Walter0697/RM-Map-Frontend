@@ -78,6 +78,13 @@ describe('SystemSettingsManage', () => {
                 ok: true,
                 status: 200,
                 json: async () => ({
+                    telegram_bot_url: 'https://t.me/roroadbot',
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
                     easy_threshold_minutes: 20,
                     difficult_threshold_minutes: 45,
                 }),
@@ -97,6 +104,13 @@ describe('SystemSettingsManage', () => {
                 status: 200,
                 json: async () => ({
                     ios_shortcut_install_url: 'https://www.icloud.com/shortcuts/new',
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    telegram_bot_url: 'https://t.me/new_roroadbot',
                 }),
             })
             .mockResolvedValueOnce({
@@ -125,8 +139,11 @@ describe('SystemSettingsManage', () => {
 
         expect(document.body.textContent).toContain('Configured')
         const input = container.querySelector('input[placeholder=\"https://www.icloud.com/shortcuts/...\"]')
+        const telegramInput = container.querySelector('input[placeholder=\"roroadbot or https://t.me/roroadbot\"]')
         expect(input).toBeTruthy()
+        expect(telegramInput).toBeTruthy()
         expect(input.value).toBe('https://www.icloud.com/shortcuts/old')
+        expect(telegramInput.value).toBe('https://t.me/roroadbot')
         const easyInput = container.querySelector('input[placeholder=\"20\"]')
         const difficultInput = container.querySelector('input[placeholder=\"45\"]')
         const shortInput = container.querySelector('input[placeholder=\"30\"]')
@@ -142,6 +159,7 @@ describe('SystemSettingsManage', () => {
 
         act(() => {
             setInputValue(input, 'https://www.icloud.com/shortcuts/new')
+            setInputValue(telegramInput, 'https://t.me/new_roroadbot')
             setInputValue(easyInput, '18')
             setInputValue(difficultInput, '42')
             setInputValue(shortInput, '35')
@@ -155,18 +173,23 @@ describe('SystemSettingsManage', () => {
             await flushPromises()
         })
 
-        const shortcutSaveCall = global.fetch.mock.calls[3]
+        const shortcutSaveCall = global.fetch.mock.calls[4]
         expect(shortcutSaveCall[0]).toContain('/admin/settings/ios-shortcut-install-url')
         expect(shortcutSaveCall[1].method).toBe('PUT')
         expect(shortcutSaveCall[1].body).toContain('https://www.icloud.com/shortcuts/new')
 
-        const thresholdSaveCall = global.fetch.mock.calls[4]
+        const telegramSaveCall = global.fetch.mock.calls[5]
+        expect(telegramSaveCall[0]).toContain('/admin/settings/telegram-bot-url')
+        expect(telegramSaveCall[1].method).toBe('PUT')
+        expect(telegramSaveCall[1].body).toContain('https://t.me/new_roroadbot')
+
+        const thresholdSaveCall = global.fetch.mock.calls[6]
         expect(thresholdSaveCall[0]).toContain('/admin/settings/schedule-travel-thresholds')
         expect(thresholdSaveCall[1].method).toBe('PUT')
         expect(thresholdSaveCall[1].body).toContain('"easy_threshold_minutes":18')
         expect(thresholdSaveCall[1].body).toContain('"difficult_threshold_minutes":42')
 
-        const durationSaveCall = global.fetch.mock.calls[5]
+        const durationSaveCall = global.fetch.mock.calls[7]
         expect(durationSaveCall[0]).toContain('/admin/settings/calendar-sync-durations')
         expect(durationSaveCall[1].method).toBe('PUT')
         expect(durationSaveCall[1].body).toContain('"short_minutes":35')
@@ -184,6 +207,13 @@ describe('SystemSettingsManage', () => {
                 status: 200,
                 json: async () => ({
                     ios_shortcut_install_url: '',
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    telegram_bot_url: '',
                 }),
             })
             .mockResolvedValueOnce({
@@ -235,6 +265,13 @@ describe('SystemSettingsManage', () => {
                 status: 200,
                 json: async () => ({
                     ios_shortcut_install_url: '',
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    telegram_bot_url: '',
                 }),
             })
             .mockResolvedValueOnce({

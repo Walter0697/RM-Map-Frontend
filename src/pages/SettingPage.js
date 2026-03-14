@@ -9,6 +9,7 @@ import SettingList from '../components/list/SettingList'
 import RelationSearchForm from '../components/form/settings/RelationSearchForm'
 import PreferredPinForm from '../components/form/settings/PreferredPinForm'
 import PreviewDisplayPinForm from '../components/form/settings/PreviewDisplayPinForm'
+import ReminderTimeForm from '../components/form/settings/ReminderTimeForm'
 import ReleaseNoteForm from '../components/form/settings/ReleaseNoteForm'
 
 import constants from '../constant'
@@ -17,6 +18,25 @@ import actions from '../store/actions'
 import graphql from '../graphql'
 
 function validateIOSShortcutInstallURL(rawURL) {
+    if (!rawURL || typeof rawURL !== 'string') return ''
+    const trimmed = rawURL.trim()
+    if (!trimmed) return ''
+
+    try {
+        const parsed = new URL(trimmed)
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+            return ''
+        }
+        if (!parsed.hostname) {
+            return ''
+        }
+        return trimmed
+    } catch (error) {
+        return ''
+    }
+}
+
+function validateTelegramBotURL(rawURL) {
     if (!rawURL || typeof rawURL !== 'string') return ''
     const trimmed = rawURL.trim()
     if (!trimmed) return ''
@@ -46,6 +66,7 @@ function SettingPage({
     const [ isRelationFormOpen, setRelationFormOpen ] = useState(false)
     const [ isPreferredPinFormOpen, setPreferredPinFormOpen ] = useState(false)
     const [ isPreviewDisplayPinFormOpen, setPreviewDisplayPinFormOpen ] = useState(false)
+    const [ isReminderTimeFormOpen, setReminderTimeFormOpen ] = useState(false)
     const [ isReleaseNoteOpen, setReleaseNoteOpen ] = useState(false)
 
     // selected open item
@@ -60,6 +81,8 @@ function SettingPage({
         pin_image_path: '',
     })
     const [ iosShortcutInstallURL, setIOSShortcutInstallURL ] = useState('')
+    const [ telegramBotURL, setTelegramBotURL ] = useState('')
+    const [ reminderTime, setReminderTime ] = useState('09:00')
     const [ calendarProviderStatus, setCalendarProviderStatus ] = useState('')
     const [ calendarProviderLoading, setCalendarProviderLoading ] = useState(false)
     const [ calendarProviderActionLoading, setCalendarProviderActionLoading ] = useState(false)
@@ -138,8 +161,34 @@ function SettingPage({
                     setPreviewDisplayPin({
                         pin_id: data.pin_id || null,
                         pin_label: data.pin_label || '',
-                        pin_image_path: '',
+                        pin_image_path: data.pin_image_path || '',
                     })
+                }
+
+                const reminderResponse = await fetch(backend.withBasePath('settings/reminder-time'), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
+                })
+                if (reminderResponse.ok) {
+                    const reminderData = await reminderResponse.json()
+                    setReminderTime(reminderData?.time || '09:00')
+                } else {
+                    setReminderTime('09:00')
+                }
+
+                const telegramBotResponse = await fetch(backend.withBasePath('settings/telegram-bot-url'), {
+                    method: 'GET',
+                    headers: {
+                        Authorization: jwt,
+                    },
+                })
+                if (telegramBotResponse.ok) {
+                    const telegramBotData = await telegramBotResponse.json()
+                    setTelegramBotURL(validateTelegramBotURL(telegramBotData?.telegram_bot_url))
+                } else {
+                    setTelegramBotURL('')
                 }
 
                 const shortcutResponse = await fetch(backend.withBasePath('settings/ios-shortcut-install-url'), {
@@ -155,6 +204,8 @@ function SettingPage({
                     setIOSShortcutInstallURL('')
                 }
             } catch {
+                setReminderTime('09:00')
+                setTelegramBotURL('')
                 setIOSShortcutInstallURL('')
             }
         }
@@ -193,6 +244,16 @@ function SettingPage({
 
     const openIOSShortcutInstall = () => {
         const validatedURL = validateIOSShortcutInstallURL(iosShortcutInstallURL)
+        if (!validatedURL) return
+
+        const opened = window.open(validatedURL, '_blank', 'noopener,noreferrer')
+        if (opened) {
+            opened.opener = null
+        }
+    }
+
+    const openTalkToRoroadBot = () => {
+        const validatedURL = validateTelegramBotURL(telegramBotURL)
         if (!validatedURL) return
 
         const opened = window.open(validatedURL, '_blank', 'noopener,noreferrer')
@@ -242,6 +303,14 @@ function SettingPage({
         setPreviewDisplayPinFormOpen(false)
     }
 
+    const openReminderTimeForm = () => {
+        setReminderTimeFormOpen(true)
+    }
+
+    const closeReminderTimeForm = () => {
+        setReminderTimeFormOpen(false)
+    }
+
     const onChangePreferredPin = (pin) => {
         setPreferredPin(null)
         setPreferredPinFormOpen(false)
@@ -273,9 +342,14 @@ function SettingPage({
         setPreviewDisplayPin({
             pin_id: payload?.pin_id || null,
             pin_label: payload?.pin_label || '',
-            pin_image_path: '',
+            pin_image_path: payload?.pin_image_path || '',
         })
         setPreviewDisplayPinFormOpen(false)
+    }
+
+    const onReminderTimeUpdated = (payload) => {
+        setReminderTime(payload?.time || '09:00')
+        setReminderTimeFormOpen(false)
     }
 
     useEffect(() => {
@@ -292,7 +366,7 @@ function SettingPage({
         setPreviewDisplayPin((prev) => ({
             ...prev,
             pin_label: prev?.pin_label || selectedPin?.label || '',
-            pin_image_path: selectedPin?.display_path || '',
+            pin_image_path: selectedPin?.image_path || selectedPin?.display_path || prev?.pin_image_path || '',
         }))
     }, [pinSelectData, previewDisplayPin.pin_id])
 
@@ -340,6 +414,10 @@ function SettingPage({
                 isGoogleCalendarLoading={calendarProviderLoading || calendarProviderActionLoading}
                 openGoogleCalendarConnect={openGoogleCalendarConnect}
                 disconnectGoogleCalendar={disconnectGoogleCalendar}
+                reminderTime={reminderTime}
+                openReminderTimeForm={openReminderTimeForm}
+                openTalkToRoroadBot={openTalkToRoroadBot}
+                showTalkToRoroadBot={!!validateTelegramBotURL(telegramBotURL)}
             />
             <RelationSearchForm
                 open={isRelationFormOpen}
@@ -363,6 +441,13 @@ function SettingPage({
                 jwt={jwt}
                 currentPinId={previewDisplayPin.pin_id}
                 onUpdated={onChangePreviewDisplayPin}
+            />
+            <ReminderTimeForm
+                open={isReminderTimeFormOpen}
+                handleClose={closeReminderTimeForm}
+                jwt={jwt}
+                currentTime={reminderTime}
+                onUpdated={onReminderTimeUpdated}
             />
         </Base>
     )

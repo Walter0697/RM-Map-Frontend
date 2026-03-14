@@ -12,8 +12,10 @@ import PreviousMarkerButton from './settings/PreviousMarkerButton'
 import ExpiredMarkerButton from './settings/ExpiredMarkerButton'
 import WatchedMovieListButton from './settings/WatchedMovieListButton'
 import PreviewDisplayPinButton from './settings/PreviewDisplayPinButton'
-import IOSShortcutInstallButton from './settings/IOSShortcutInstallButton'
 import GoogleCalendarConnectionButton from './settings/GoogleCalendarConnectionButton'
+import ReminderTimeButton from './settings/ReminderTimeButton'
+import TalkToRoroadBotButton from './settings/TalkToRoroadBotButton'
+import SocialMediaPostShortcutButton from './settings/SocialMediaPostShortcutButton'
 
 import WrapperBox from '../wrapper/WrapperBox'
 import SectionHeader from './settings/SectionHeader'
@@ -23,6 +25,7 @@ import MapIcon from '@mui/icons-material/Map'
 import TheatersIcon from '@mui/icons-material/Theaters'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone'
+import SmartToyIcon from '@mui/icons-material/SmartToy'
 
 import * as serviceWorkerRegistration from '../../serviceWorkerRegistration'
 
@@ -44,6 +47,10 @@ function SettingList({
   isGoogleCalendarLoading,
   openGoogleCalendarConnect,
   disconnectGoogleCalendar,
+  reminderTime,
+  openReminderTimeForm,
+  openTalkToRoroadBot,
+  showTalkToRoroadBot,
 }) {
   const history = useHistory()
 
@@ -179,7 +186,7 @@ function SettingList({
             {showCalendarConnectionCTA ? (
               <WrapperBox
                 height={30}
-                marginBottom={'15px'}
+                marginBottom={'30px'}
               >
                 <GoogleCalendarConnectionButton
                   connected={isGoogleCalendarConnected}
@@ -189,18 +196,44 @@ function SettingList({
                 />
               </WrapperBox>
             ) : null}
-            {showIOSShortcutInstallCTA ? (
-              <WrapperBox
-                height={30}
-                marginBottom={'30px'}
-              >
-                <IOSShortcutInstallButton
-                  onClickHandler={openIOSShortcutInstall}
-                />
-              </WrapperBox>
-            ) : null}
           </>
         ) : null}
+        <WrapperBox
+          height={50}
+          marginBottom={'15px'}
+        >
+          <SectionHeader
+            title={'RoroadBot'}
+            icon={<SmartToyIcon />}
+          />
+        </WrapperBox>
+        <WrapperBox
+          height={30}
+          marginBottom={'15px'}
+        >
+          <TalkToRoroadBotButton
+            onClickHandler={openTalkToRoroadBot}
+            disabled={!showTalkToRoroadBot}
+          />
+        </WrapperBox>
+        <WrapperBox
+          height={30}
+          marginBottom={'15px'}
+        >
+          <SocialMediaPostShortcutButton
+            onClickHandler={openIOSShortcutInstall}
+            disabled={!showIOSShortcutInstallCTA}
+          />
+        </WrapperBox>
+        <WrapperBox
+          height={30}
+          marginBottom={'30px'}
+        >
+          <ReminderTimeButton
+            reminderTime={reminderTime}
+            onClickHandler={openReminderTimeForm}
+          />
+        </WrapperBox>
         <WrapperBox
           height={50}
           marginBottom={'15px'}
