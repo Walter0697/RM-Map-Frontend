@@ -43,4 +43,31 @@ describe('MarkerItem', () => {
         })
         container.remove()
     })
+
+    test('renders marker image when marker has an image_link', () => {
+        const container = document.createElement('div')
+        document.body.appendChild(container)
+        const root = createRoot(container)
+
+        act(() => {
+            root.render(
+                <MarkerItem
+                    item={{
+                        ...marker,
+                        image_link: '/markers/test-image.png',
+                    }}
+                    typeIcon='/pin/test.png'
+                    onClickHandler={() => {}}
+                />
+            )
+        })
+
+        const images = container.querySelectorAll('img')
+        expect(images.length).toBeGreaterThan(0)
+
+        act(() => {
+            root.unmount()
+        })
+        container.remove()
+    })
 })

@@ -14,6 +14,7 @@ function rootReducer(state = { auth: { jwt: 'test-jwt', username: 'admin' } }) {
 }
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0))
+const renderedRoots = []
 
 function createRenderedPage() {
     const store = configureStore({ reducer: rootReducer })
@@ -30,6 +31,7 @@ function createRenderedPage() {
             </Provider>
         )
     })
+    renderedRoots.push(root)
 
     return { container, root }
 }
@@ -61,6 +63,12 @@ describe('PermanentCleanupManage', () => {
     })
 
     afterEach(() => {
+        act(() => {
+            while (renderedRoots.length > 0) {
+                const root = renderedRoots.pop()
+                root.unmount()
+            }
+        })
         jest.resetAllMocks()
         document.body.innerHTML = ''
     })
@@ -180,5 +188,72 @@ describe('PermanentCleanupManage', () => {
     test('schedule sort key is normalized when entity becomes marker', () => {
         expect(normalizeCleanupSortBy('schedule', 'selected_date')).toBe('selected_date')
         expect(normalizeCleanupSortBy('marker', 'selected_date')).toBe('updated_at')
+    })
+
+    test('shows testing indicator and clears testing items with explicit confirmation', async () => {
+        global.fetch
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    items: [
+                        {
+                            id: 31,
+                            label: 'Testing Marker',
+                            testing: true,
+                            type: 'food',
+                            status: '',
+                            relation_id: 4,
+                            country_code: 'JP',
+                            updated_at: '2026-03-01T10:00:00Z',
+                        },
+                    ],
+                    total: 1,
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    marker_deleted: 2,
+                    schedule_deleted: 4,
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    items: [],
+                    total: 0,
+                }),
+            })
+
+        const { container } = createRenderedPage()
+        await act(async () => {
+            await flushPromises()
+        })
+
+        expect(document.body.textContent).toContain('Testing')
+
+        clickByText(container, 'button', 'Clear Testing Items', true)
+        await act(async () => {
+            await flushPromises()
+        })
+
+        const dialog = document.querySelector('[role="dialog"]')
+        const confirmInput = dialog.querySelector('input')
+        act(() => {
+            setInputValue(confirmInput, 'clear testing')
+        })
+
+        clickByText(dialog, 'button', 'Clear Testing Items', true)
+        await act(async () => {
+            await flushPromises()
+        })
+
+        const clearCall = global.fetch.mock.calls.find((call) => String(call[0]).includes('/admin/cleanup/testing/clear'))
+        expect(clearCall).toBeTruthy()
+        expect(clearCall[1].method).toBe('POST')
+        expect(document.body.textContent).toContain('API keys are preserved')
     })
 })
