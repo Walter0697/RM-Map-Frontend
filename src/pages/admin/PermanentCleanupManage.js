@@ -46,6 +46,7 @@ export const normalizeCleanupSortBy = (entityType, sortBy) => {
 
 function PermanentCleanupManage({ jwt }) {
     const [entityType, setEntityType] = useState('marker')
+    const [testingFilter, setTestingFilter] = useState('all')
     const [search, setSearch] = useState('')
     const [status, setStatus] = useState('')
     const [sortBy, setSortBy] = useState('updated_at')
@@ -66,6 +67,9 @@ function PermanentCleanupManage({ jwt }) {
     const [scheduleConfirmLabel, setScheduleConfirmLabel] = useState('')
     const [scheduleReason, setScheduleReason] = useState('')
     const [scheduleExecuteAt, setScheduleExecuteAt] = useState('')
+    const [clearDialogOpen, setClearDialogOpen] = useState(false)
+    const [clearConfirm, setClearConfirm] = useState('')
+    const [clearResult, setClearResult] = useState(null)
 
     const [alertOpen, triggerAlert] = useBoop(2500)
     const [alertMessage, setAlertMessage] = useState('')
@@ -97,6 +101,9 @@ function PermanentCleanupManage({ jwt }) {
             params.set('order', order)
             if (search.trim()) params.set('search', search.trim())
             if (status.trim()) params.set('status', status.trim())
+            if (testingFilter === 'true' || testingFilter === 'false') {
+                params.set('testing', testingFilter)
+            }
 
             const resp = await fetch(`${listEndpoint}?${params.toString()}`, {
                 method: 'GET',
@@ -131,13 +138,14 @@ function PermanentCleanupManage({ jwt }) {
         setSortBy(entityType === 'marker' ? 'updated_at' : 'selected_date')
         setStatus('')
         setSearch('')
+        setTestingFilter('all')
         setItems([])
         setTotal(0)
     }, [entityType])
 
     useEffect(() => {
         loadItems()
-    }, [jwt, sortBy, order])
+    }, [jwt, sortBy, order, testingFilter])
 
     const openDeleteDialog = (item) => {
         setDeleteTarget(item)
@@ -164,6 +172,15 @@ function PermanentCleanupManage({ jwt }) {
     const closeScheduleDialog = () => {
         setScheduleDialogOpen(false)
         setScheduleTarget(null)
+    }
+
+    const openClearDialog = () => {
+        setClearConfirm('')
+        setClearDialogOpen(true)
+    }
+
+    const closeClearDialog = () => {
+        setClearDialogOpen(false)
     }
 
     const canDelete = deleteTarget && deleteConfirmLabel.trim() === deleteTarget.label
@@ -256,10 +273,47 @@ function PermanentCleanupManage({ jwt }) {
         }
     }
 
+    const submitClearTesting = async () => {
+        if (clearConfirm.trim().toLowerCase() !== 'clear testing' || !jwt) return
+
+        setLoading(true)
+        setErrorMessage('')
+        setClearResult(null)
+        try {
+            const resp = await fetch(backend.withBasePath('admin/cleanup/testing/clear'), {
+                method: 'POST',
+                headers: {
+                    Authorization: jwt,
+                },
+            })
+            if (resp.status === 401 || resp.status === 403) {
+                setAccessDenied(true)
+                setErrorMessage(await parseResponseError(resp))
+                return
+            }
+            if (!resp.ok) {
+                setErrorMessage(await parseResponseError(resp))
+                return
+            }
+
+            const payload = await resp.json()
+            setClearResult(payload)
+            setAlertMessage(`Cleared testing items: ${payload.marker_deleted || 0} marker(s), ${payload.schedule_deleted || 0} schedule(s). API keys were not removed.`)
+            triggerAlert()
+            closeClearDialog()
+            await loadItems()
+        } catch (e) {
+            setErrorMessage(e.message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const renderItemMeta = (item) => {
         if (entityType === 'marker') {
             return (
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 1 }}>
+                    <Chip size='small' color={item.testing ? 'warning' : 'default'} label={item.testing ? 'Testing' : 'Production'} />
                     <Chip size='small' label={`Type: ${item.type || '-'}`} />
                     <Chip size='small' label={`Status: ${item.status || '(empty)'}`} />
                     <Chip size='small' label={`Relation: ${item.relation_id || '-'}`} />
@@ -270,6 +324,7 @@ function PermanentCleanupManage({ jwt }) {
 
         return (
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 1 }}>
+                <Chip size='small' color={item.testing ? 'warning' : 'default'} label={item.testing ? 'Testing' : 'Production'} />
                 <Chip size='small' label={`Status: ${item.status || '(empty)'}`} />
                 <Chip size='small' label={`Relation: ${item.relation_id || '-'}`} />
                 <Chip size='small' label={`Marker: ${item.marker_label || '-'}`} />
@@ -286,6 +341,9 @@ function PermanentCleanupManage({ jwt }) {
             alertMessage={alertMessage}
             actions={(
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                    <Button className='admin-action-button' variant='contained' color='warning' onClick={openClearDialog} disabled={loading || accessDenied}>
+                        Clear Testing Items
+                    </Button>
                     <Button className='admin-action-button' variant='outlined' onClick={loadItems} disabled={loading}>
                         Refresh
                     </Button>
@@ -332,6 +390,21 @@ function PermanentCleanupManage({ jwt }) {
                         </Grid>
                         <Grid size={{ xs: 12, md: 2 }}>
                             <FormControl fullWidth>
+                                <InputLabel id='cleanup-testing-label'>Testing</InputLabel>
+                                <Select
+                                    labelId='cleanup-testing-label'
+                                    value={testingFilter}
+                                    label='Testing'
+                                    onChange={(e) => setTestingFilter(e.target.value)}
+                                >
+                                    <MenuItem value='all'>All</MenuItem>
+                                    <MenuItem value='false'>Production</MenuItem>
+                                    <MenuItem value='true'>Testing</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 2 }}>
+                            <FormControl fullWidth>
                                 <InputLabel id='cleanup-sort-label'>Sort By</InputLabel>
                                 <Select
                                     labelId='cleanup-sort-label'
@@ -365,6 +438,11 @@ function PermanentCleanupManage({ jwt }) {
 
             {errorMessage ? <Alert severity='error'>{errorMessage}</Alert> : null}
             {accessDenied ? <Alert severity='warning'>This admin route requires authenticated admin permissions.</Alert> : null}
+            {clearResult ? (
+                <Alert severity='info'>
+                    Cleared testing items: {clearResult.marker_deleted || 0} marker(s), {clearResult.schedule_deleted || 0} schedule(s). API keys are preserved.
+                </Alert>
+            ) : null}
 
             <Card className='admin-panel'>
                 <CardContent>
@@ -478,6 +556,32 @@ function PermanentCleanupManage({ jwt }) {
                     <Button onClick={closeScheduleDialog}>Cancel</Button>
                     <Button variant='contained' onClick={submitSchedule} disabled={!canSchedule || loading}>
                         Schedule
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={clearDialogOpen} onClose={closeClearDialog} fullWidth maxWidth='sm'>
+                <DialogTitle>Clear Testing Items</DialogTitle>
+                <DialogContent>
+                    <Typography variant='body2' sx={{ mb: 2 }}>
+                        This deletes all markers and schedules with <strong>testing=true</strong>. API keys are not deleted.
+                    </Typography>
+                    <TextField
+                        fullWidth
+                        label='Type clear testing to confirm'
+                        value={clearConfirm}
+                        onChange={(e) => setClearConfirm(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeClearDialog}>Cancel</Button>
+                    <Button
+                        color='warning'
+                        variant='contained'
+                        disabled={loading || clearConfirm.trim().toLowerCase() !== 'clear testing'}
+                        onClick={submitClearTesting}
+                    >
+                        Clear Testing Items
                     </Button>
                 </DialogActions>
             </Dialog>

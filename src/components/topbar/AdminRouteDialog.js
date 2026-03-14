@@ -11,6 +11,7 @@ import {
     Typography,
 } from '@mui/material'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import { isAdminNavPathActive } from '../admin/adminNavItems'
 
 const TransitionRight = (props) => {
     return <Slide {...props} direction='right' />
@@ -80,70 +81,70 @@ function AdminRouteDialog({
                         label='Type'
                         description='Marker type icons and priority'
                         route='/admin/type'
-                        active={location.pathname === '/admin/type'}
+                        active={isAdminNavPathActive(location.pathname, '/admin/type')}
                         directTo={directTo}
                     />
                     <RouteBox
                         label='Pin'
                         description='Pin labels, images, and bounds'
                         route='/admin/pin'
-                        active={location.pathname === '/admin/pin'}
+                        active={isAdminNavPathActive(location.pathname, '/admin/pin')}
                         directTo={directTo}
                     />
                     <RouteBox
                         label='Pin Group'
                         description='Manage reusable pin groups'
                         route='/admin/pin-groups'
-                        active={location.pathname === '/admin/pin-groups'}
+                        active={isAdminNavPathActive(location.pathname, '/admin/pin-groups')}
                         directTo={directTo}
                     />
                     <RouteBox
                         label='Default Pin'
                         description='Fallback pin assignments'
                         route='/admin/defaultpin'
-                        active={location.pathname === '/admin/defaultpin'}
+                        active={isAdminNavPathActive(location.pathname, '/admin/defaultpin')}
                         directTo={directTo}
                     />
                     <RouteBox
                         label='API Key'
                         description='Automation client credentials'
                         route='/admin/apikey'
-                        active={location.pathname === '/admin/apikey'}
+                        active={isAdminNavPathActive(location.pathname, '/admin/apikey')}
                         directTo={directTo}
                     />
                     <RouteBox
                         label='Train Station'
                         description='Map image, pins, lines, and JSON export'
                         route='/admin/station'
-                        active={location.pathname === '/admin/station'}
+                        active={isAdminNavPathActive(location.pathname, '/admin/station')}
                         directTo={directTo}
                     />
                     <RouteBox
                         label='Permanent Cleanup'
                         description='Search, delete, and schedule cleanup actions'
                         route='/admin/cleanup'
-                        active={location.pathname === '/admin/cleanup'}
+                        active={isAdminNavPathActive(location.pathname, '/admin/cleanup')}
                         directTo={directTo}
                     />
                     <RouteBox
                         label='API Usage'
                         description='External API usage summary and trends'
                         route='/admin/api-usage'
-                        active={location.pathname === '/admin/api-usage'}
+                        active={isAdminNavPathActive(location.pathname, '/admin/api-usage')}
                         directTo={directTo}
                     />
                     <RouteBox
                         label='System Settings'
                         description='Runtime integration configuration'
                         route='/admin/system-settings'
-                        active={location.pathname === '/admin/system-settings'}
+                        active={isAdminNavPathActive(location.pathname, '/admin/system-settings')}
                         directTo={directTo}
                     />
                     <RouteBox
                         label='Release Notes'
                         description='Draft, edit, and publish release announcements'
                         route='/admin/release-notes'
-                        active={location.pathname === '/admin/release-notes'}
+                        active={isAdminNavPathActive(location.pathname, '/admin/release-notes')}
                         directTo={directTo}
                     />
                 </Stack>

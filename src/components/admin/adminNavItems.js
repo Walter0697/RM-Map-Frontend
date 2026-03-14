@@ -51,4 +51,14 @@ const adminNavItems = [
     },
 ]
 
+export const isAdminNavPathActive = (pathname, navPath) => {
+    if (pathname === navPath) {
+        return true
+    }
+    if (!pathname || !navPath) {
+        return false
+    }
+    return pathname.startsWith(`${navPath}/`)
+}
+
 export default adminNavItems
