@@ -1,6 +1,4 @@
 import dayjs from 'dayjs'
-import dayjsPluginUTC from 'dayjs-plugin-utc'
-dayjs.extend(dayjsPluginUTC)
 
 // convert to 2006-01-02T15:04:05Z07:00 format
 const toRFC3339Format = (date) => {
@@ -9,7 +7,7 @@ const toRFC3339Format = (date) => {
 }
 
 const toServerFormat = (date) => {
-    const dateOnly = dayjs(date).utc().format('YYYY-MM-DD HH:mm:ss[+00]')
+    const dateOnly = dayjs(date).format('YYYY-MM-DD HH:mm:ss[+00]')
     return dateOnly
 }
 
