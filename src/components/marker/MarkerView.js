@@ -24,6 +24,7 @@ import PinDropIcon from '@mui/icons-material/PinDrop'
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk'
 import InsertPhotoIcon from '@mui/icons-material/InsertPhoto'
+import LinkIcon from '@mui/icons-material/Link'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -137,6 +138,16 @@ function MarkerView({
         }
 
         window.open(url, '_blank')
+    }
+
+    const redirectToSocialMedia = (url) => {
+        if (!url) return
+        let socialUrl = `${url}`
+        if (!/^https?:\/\//i.test(socialUrl)) {
+            socialUrl = 'https://' + socialUrl
+        }
+
+        window.open(socialUrl, '_blank')
     }
 
     const redirectToGoogleMap = () => {
@@ -294,6 +305,20 @@ function MarkerView({
                                                 }}
                                                 onClick={redirectToSite}
                                                 >{marker.link}</a>
+                                        </Grid>
+                                    )}
+                                    {marker.social_media_link && (
+                                        <Grid item xs={12} md={12} lg={12}>
+                                            <LinkIcon sx={{
+                                                verticalAlign: 'middle',
+                                                display: 'inline-block',
+                                            }} />
+                                            <a style={{
+                                                overflowWrap: 'anywhere',
+                                                marginLeft: '10px',
+                                            }}
+                                            onClick={() => redirectToSocialMedia(marker.social_media_link)}
+                                            >{marker.social_media_link}</a>
                                         </Grid>
                                     )}
                                     <Grid item xs={12} md={12} lg={12}>

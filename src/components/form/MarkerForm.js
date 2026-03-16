@@ -71,6 +71,7 @@ function MarkerForm({
         address: '',
         imageLink: false,
         link: '',
+        social_media_link: '',
         type: '',  
         description: '', 
         estimate_time: '',
@@ -391,6 +392,7 @@ function MarkerForm({
             to_time: to,
             from_time: from,
             restaurant_id: restaurant_id,
+            social_media_link: formValue.social_media_link,
         }})
     }
 
@@ -1018,6 +1020,15 @@ function MarkerForm({
                     </Box>
                     ) : null}
                     <Stack spacing={0}>
+                        <TextField
+                            variant='outlined'
+                            fullWidth
+                            label='social media link'
+                            value={formValue.social_media_link}
+                            onChange={(e) => onValueChangeHandler('social_media_link', e.target.value)}
+                            error={!!error.social_media_link}
+                            helperText={error.social_media_link}
+                        />
                         <Box sx={{ display: 'flex' }}>
                             <Box sx={{ flex: 9 }}>
                                 <TextField
