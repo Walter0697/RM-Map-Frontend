@@ -407,6 +407,7 @@ const toScheduleImageSrc = (item, eventtypes = []) => {
 
 function ScheduleItem({
     item,
+    nextItem,
     eventtypes,
     transition,
     syncInfo,
@@ -492,8 +493,17 @@ function ScheduleItem({
         || transition?.between_time_seconds !== undefined
         || transition?.gap_seconds !== undefined
         || transition?.scheduled_gap !== undefined
+    const fallbackGapMinutes = (() => {
+        if (!nextItem?.selected_date || !item?.selected_date) return null
+        const currentTime = dayjs(item.selected_date)
+        const nextTime = dayjs(nextItem.selected_date)
+        if (!currentTime.isValid() || !nextTime.isValid()) return null
+        return Math.max(0, nextTime.diff(currentTime, 'minute'))
+    })()
     const travelTimeDisplay = hasTravelDuration ? formatMinutesCompact(Math.round(transitionTravelSeconds / 60)) : 'N/A'
-    const gapTimeDisplay = hasGapDuration ? formatMinutesCompact(Math.round(transitionGapSeconds / 60)) : 'N/A'
+    const gapTimeDisplay = hasGapDuration
+        ? formatMinutesCompact(Math.round(transitionGapSeconds / 60))
+        : (fallbackGapMinutes === null ? 'N/A' : formatMinutesCompact(fallbackGapMinutes))
     const lineHeight = 70
     const descriptionText = item?.description || item?.marker?.description || ''
 
@@ -1710,6 +1720,7 @@ function ScheduleView({
                                             <ScheduleItem
                                                 key={index}
                                                 item={schedule}
+                                                nextItem={sortedList[index + 1] || null}
                                                 eventtypes={eventtypes}
                                                 transition={transitionAnalysis[index] || null}
                                                 syncInfo={syncStatusBySchedule[schedule.id] || null}

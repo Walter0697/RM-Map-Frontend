@@ -244,20 +244,10 @@ function SchedulePage({
     const onScheduleRemoved = useCallback((removedScheduleId) => {
         if (!removedScheduleId) return
 
-        const nextSelectedSchedules = (selectedSchedules || []).filter((item) => item.id !== removedScheduleId)
-        if (nextSelectedSchedules.length === 0) {
-            // Ensure route/view state resets immediately after removing the last visible item.
-            closeScheduleView()
-            pagedScheduleController.refresh()
-            return
-        }
-
-        const activeStillExists = nextSelectedSchedules.some((item) => item.id === activeScheduleId)
-        const nextActiveScheduleId = activeStillExists ? activeScheduleId : nextSelectedSchedules[0].id
-        const nextDate = dayjs(nextSelectedSchedules[0].selected_date).format('YYYY-MM-DD')
-        setScheduleView(nextSelectedSchedules, nextDate, { activeScheduleId: nextActiveScheduleId })
+        // Always close detail after deletion to avoid stale deep-link state loops.
+        closeScheduleView()
         pagedScheduleController.refresh()
-    }, [activeScheduleId, closeScheduleView, pagedScheduleController, selectedSchedules, setScheduleView])
+    }, [closeScheduleView, pagedScheduleController])
 
     React.useEffect(() => {
         const pendingDeepLinkId = pendingDeepLink?.resourceType === deepLinkScript.resources.schedule
