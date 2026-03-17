@@ -633,13 +633,14 @@ function ScheduleList({
     }, [])
 
     const listRows = useMemo(() => {
-        const rows = [{ kind: 'today' }]
+        const rows = [{ kind: 'today', rowId: 'today-row' }]
         if (upcoming_schedules.length !== 0) {
-            rows.push({ kind: 'header', label: 'Upcoming schedule...' })
+            rows.push({ kind: 'header', rowId: 'upcoming-header', label: 'Upcoming schedule...' })
         }
         upcoming_schedules.forEach((item) => {
             rows.push({
                 kind: 'schedule',
+                rowId: `schedule-${item.dayKey}`,
                 dayKey: item.dayKey,
                 date: item.displayDate,
                 items: item.items,
@@ -732,6 +733,7 @@ function ScheduleList({
                 <Virtuoso
                     style={{ height: '100%', width: '100%' }}
                     data={listRows}
+                    computeItemKey={(_, row) => row?.rowId || `${row?.kind || 'row'}-${row?.dayKey || ''}`}
                     scrollerRef={setScrollerEl}
                     endReached={() => {
                         if (!hasMore || loadingMore || !onReachEnd) return
