@@ -394,7 +394,6 @@ function MarkerForm({
             to_time: to,
             from_time: from,
             restaurant_id: restaurant_id,
-            social_media_link: formValue.social_media_link,
         }})
     }
 
@@ -1123,14 +1122,6 @@ function MarkerForm({
                             </MenuItem>
                         </Menu>
                     </Stack>
-                    <TextField
-                        variant='outlined'
-                        fullWidth
-                        label='social media original link'
-                        value={formValue.social_media_link}
-                        onChange={(e) => onValueChangeHandler('social_media_link', e.target.value)}
-                        helperText='Optional. Keep this separate from website.'
-                    />
                     <TextField
                         variant='outlined'
                         fullWidth
