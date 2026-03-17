@@ -243,25 +243,21 @@ function SchedulePage({
 
     const onScheduleRemoved = useCallback((removedScheduleId) => {
         if (!removedScheduleId) return
-        setSchedules((previous) => {
-            const next = (previous || []).filter((item) => item.id !== removedScheduleId)
-            if (next.length === 0) {
-                setSelectedDate(null)
-                setActiveScheduleId(null)
-                setScheduleViewStatus('empty')
-                setScheduleViewError('')
-                return []
-            }
-            const activeStillExists = next.some((item) => item.id === activeScheduleId)
-            if (!activeStillExists) {
-                setActiveScheduleId(next[0].id)
-            }
-            setScheduleViewStatus('success')
-            setScheduleViewError('')
-            return next
-        })
+
+        const nextSelectedSchedules = (selectedSchedules || []).filter((item) => item.id !== removedScheduleId)
+        if (nextSelectedSchedules.length === 0) {
+            // Ensure route/view state resets immediately after removing the last visible item.
+            closeScheduleView()
+            pagedScheduleController.refresh()
+            return
+        }
+
+        const activeStillExists = nextSelectedSchedules.some((item) => item.id === activeScheduleId)
+        const nextActiveScheduleId = activeStillExists ? activeScheduleId : nextSelectedSchedules[0].id
+        const nextDate = dayjs(nextSelectedSchedules[0].selected_date).format('YYYY-MM-DD')
+        setScheduleView(nextSelectedSchedules, nextDate, { activeScheduleId: nextActiveScheduleId })
         pagedScheduleController.refresh()
-    }, [activeScheduleId, pagedScheduleController])
+    }, [activeScheduleId, closeScheduleView, pagedScheduleController, selectedSchedules, setScheduleView])
 
     React.useEffect(() => {
         const pendingDeepLinkId = pendingDeepLink?.resourceType === deepLinkScript.resources.schedule
