@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { connect } from 'react-redux'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import {
@@ -71,6 +71,7 @@ function MarkerForm({
         address: '',
         imageLink: false,
         link: '',
+        social_media_link: '',
         type: '',  
         description: '', 
         estimate_time: '',
@@ -98,6 +99,7 @@ function MarkerForm({
     const [ isUnauthorized, setUnauthorized ] = useState(false)
 
     const [ alertMessage, setAlertMessage ] = useState(null)
+
 
     // menu for website
     const [ anchorEl, setAnchorEl ] = useState(null)
@@ -381,6 +383,7 @@ function MarkerForm({
             longitude: location.latlon.lon.toString(),
             address: formValue.address,
             link: formValue.link,
+            social_media_link: formValue.social_media_link,
             image_link: (formValue.imageLink && formValue.imageLink.type === 'weblink') ? formValue.imageLink.value : null,
             image_upload: (formValue.imageLink && formValue.imageLink.type === 'upload') ? formValue.imageLink.value : null,
             description: formValue.description,
@@ -392,6 +395,13 @@ function MarkerForm({
             from_time: from,
             restaurant_id: restaurant_id,
         }})
+    }
+
+    const onFormKeyDownHandler = (e) => {
+        // Prevent accidental dialog submit from Enter on single-line inputs.
+        if (e.key === 'Enter' && e.target?.tagName !== 'TEXTAREA') {
+            e.preventDefault()
+        }
     }
 
     return (
@@ -410,7 +420,7 @@ function MarkerForm({
                 clearAlertMessage={() => setAlertMessage(null)}
                 footerStart={footerLatLon}
             >
-                <Stack spacing={2}>
+                <Stack spacing={2} onKeyDown={onFormKeyDownHandler}>
                     <TextField
                         variant='outlined'
                         fullWidth
@@ -1103,6 +1113,14 @@ function MarkerForm({
                             </MenuItem>
                         </Menu>
                     </Stack>
+                    <TextField
+                        variant='outlined'
+                        fullWidth
+                        label='social media original link'
+                        value={formValue.social_media_link}
+                        onChange={(e) => onValueChangeHandler('social_media_link', e.target.value)}
+                        helperText='Optional. Keep this separate from website.'
+                    />
                     <TextField
                         variant='outlined'
                         fullWidth

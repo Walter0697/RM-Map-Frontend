@@ -11,6 +11,7 @@ const list = gql`
             label
             address
             link
+            social_media_link
             image_link
             estimate_time
             permanent
@@ -74,6 +75,7 @@ const viewport_page = gql`
                 label
                 address
                 link
+                social_media_link
                 image_link
                 estimate_time
                 permanent
@@ -116,6 +118,7 @@ const create = gql`
                           $longitude: Float!, 
                           $address: String!, 
                           $link: String, 
+                          $social_media_link: String, 
                           $image_link: String, 
                           $image_upload: Upload,
                           $description: String, 
@@ -133,6 +136,7 @@ const create = gql`
             longitude: $longitude,
             address: $address,
             link: $link,
+            social_media_link: $social_media_link,
             image_link: $image_link,
             image_upload: $image_upload,
             description: $description,
@@ -151,6 +155,8 @@ const create = gql`
             longitude
             label
             address
+            link
+            social_media_link
             image_link
             type
             estimate_time
@@ -209,6 +215,7 @@ const previous = gql`
             label
             address
             link
+            social_media_link
             image_link
             type
             estimate_time
@@ -261,6 +268,7 @@ const pagedprevious = gql`
                 label
                 address
                 link
+                social_media_link
                 image_link
                 type
                 estimate_time
@@ -306,6 +314,7 @@ const expired = gql`
             label
             address
             link
+            social_media_link
             image_link
             type
             estimate_time
@@ -352,6 +361,7 @@ const revoke = gql`
             label
             address
             link
+            social_media_link
             image_link
             type
             estimate_time
@@ -395,6 +405,7 @@ const edit = gql`
                         $image_upload: Upload,
                         $no_image: Boolean!,
                         $link: String,
+                        $social_media_link: String,
                         $type: String,
                         $description: String,
                         $permanent: Boolean,
@@ -413,6 +424,7 @@ const edit = gql`
             image_upload: $image_upload,
             no_image: $no_image,
             link: $link,
+            social_media_link: $social_media_link,
             type: $type,
             description: $description,
             permanent: $permanent,
@@ -432,6 +444,7 @@ const edit = gql`
             label
             address
             link
+            social_media_link
             image_link
             type
             estimate_time
@@ -486,6 +499,7 @@ const pagedexpired = gql`
                 label
                 address
                 link
+                social_media_link
                 image_link
                 type
                 estimate_time

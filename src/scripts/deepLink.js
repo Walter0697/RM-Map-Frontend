@@ -1,12 +1,18 @@
 const MARKER_RESOURCE = 'marker'
 const SCHEDULE_RESOURCE = 'schedule'
 
+const parseNumericResourceId = (raw) => {
+    const id = `${raw || ''}`.trim()
+    if (!/^\d+$/.test(id)) return null
+    return id
+}
+
 const parseDeepLinkPath = (pathname) => {
     if (!pathname) return null
 
     const markerMatch = pathname.match(/^\/markers\/([^/]+)$/)
     if (markerMatch) {
-        const id = `${markerMatch[1] || ''}`.trim()
+        const id = parseNumericResourceId(markerMatch[1])
         if (!id) return null
         return {
             resourceType: MARKER_RESOURCE,
@@ -17,7 +23,7 @@ const parseDeepLinkPath = (pathname) => {
 
     const scheduleMatch = pathname.match(/^\/schedules\/([^/]+)$/)
     if (scheduleMatch) {
-        const id = `${scheduleMatch[1] || ''}`.trim()
+        const id = parseNumericResourceId(scheduleMatch[1])
         if (!id) return null
         return {
             resourceType: SCHEDULE_RESOURCE,
