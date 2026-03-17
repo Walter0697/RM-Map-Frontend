@@ -260,6 +260,15 @@ function SchedulePage({
         resolveScheduleById(targetScheduleId, { forceListContext: true })
     }, [routeScheduleId, pendingDeepLink, resolveScheduleById])
 
+    React.useEffect(() => {
+        if (scheduleViewStatus === 'success' && selectedSchedules.length === 0) {
+            setScheduleViewStatus('idle')
+            setScheduleViewError('')
+            setActiveScheduleId(null)
+            setSelectedDate(null)
+        }
+    }, [scheduleViewStatus, selectedSchedules.length])
+
     const scheduleViewOpen = scheduleViewStatus === 'loading'
         || scheduleViewStatus === 'error'
         || selectedSchedules.length > 0
