@@ -24,6 +24,9 @@ import PinDropIcon from '@mui/icons-material/PinDrop'
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk'
 import InsertPhotoIcon from '@mui/icons-material/InsertPhoto'
+import InstagramIcon from '@mui/icons-material/Instagram'
+import ForumIcon from '@mui/icons-material/Forum'
+import LinkIcon from '@mui/icons-material/Link'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -138,6 +141,39 @@ function MarkerView({
 
         window.open(url, '_blank')
     }
+
+    const redirectToSocialMediaOriginalLink = () => {
+        let url = marker.social_media_link
+        if (!/^https?:\/\//i.test(url)) {
+            url = 'http://' + url
+        }
+
+        window.open(url, '_blank')
+    }
+
+    const getSocialPlatform = (rawLink) => {
+        const value = `${rawLink || ''}`.trim()
+        if (!value) return null
+
+        let host = ''
+        try {
+            const withProtocol = /^https?:\/\//i.test(value) ? value : `https://${value}`
+            host = new URL(withProtocol).hostname.toLowerCase()
+        } catch (_) {
+            return 'generic'
+        }
+
+        if (host.includes('instagram.com')) return 'instagram'
+        if (host.includes('threads.net')) return 'threads'
+        return 'generic'
+    }
+
+    const socialPlatform = getSocialPlatform(marker?.social_media_link)
+    const socialIcon = socialPlatform === 'instagram'
+        ? <InstagramIcon />
+        : socialPlatform === 'threads'
+            ? <ForumIcon />
+            : <LinkIcon />
 
     const redirectToGoogleMap = () => {
         const latlon = `${marker.latitude},${marker.longitude}`
@@ -270,21 +306,39 @@ function MarkerView({
                                         </Grid>
                                     )}
                                     <Grid item xs={12} md={12} lg={12}>
-                                        {marker.need_booking ? (
-                                            <>
-                                                <LocalPhoneIcon sx={{
-                                                    verticalAlign: 'middle',
-                                                    display: 'inline-block',
-                                                }} /> Required booking
-                                            </>
-                                        ) : (
-                                            <>
-                                                <DirectionsWalkIcon sx={{
-                                                    verticalAlign: 'middle',
-                                                    display: 'inline-block',
-                                                }} /> Can Walk-in
-                                            </>
-                                        )}
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Box sx={{ flex: 1 }}>
+                                                {marker.need_booking ? (
+                                                    <>
+                                                        <LocalPhoneIcon sx={{
+                                                            verticalAlign: 'middle',
+                                                            display: 'inline-block',
+                                                        }} /> Required booking
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <DirectionsWalkIcon sx={{
+                                                            verticalAlign: 'middle',
+                                                            display: 'inline-block',
+                                                        }} /> Can Walk-in
+                                                    </>
+                                                )}
+                                            </Box>
+                                            {marker.social_media_link && (
+                                                <IconButton
+                                                    onClick={redirectToSocialMediaOriginalLink}
+                                                    sx={{
+                                                        width: 42,
+                                                        height: 42,
+                                                        border: '1px solid',
+                                                        borderColor: 'divider',
+                                                        borderRadius: 1,
+                                                    }}
+                                                >
+                                                    {socialIcon}
+                                                </IconButton>
+                                            )}
+                                        </Box>
                                     </Grid>
                                    
                                     {marker.link && (
