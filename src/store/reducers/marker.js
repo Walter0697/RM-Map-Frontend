@@ -23,8 +23,8 @@ export default function markerReducer(state = {
             }
         }
         case constants.ADD_MARKER: {
-            const result = state.markers || []
-            let marker = maphelper.converts.fillVariableForMarker(action.marker)
+            const result = [...(state.markers || [])]
+            const marker = maphelper.converts.fillVariableForMarker(action.marker)
             result.push(marker)
             return {
                 ...state,
@@ -42,9 +42,13 @@ export default function markerReducer(state = {
             }
         }
         case constants.EDIT_MARKER: {
-            const result = state.markers || []
-            let index = result.findIndex(s => s.id === action.marker.id)
-            result[index] = action.marker
+            const result = [...(state.markers || [])]
+            const index = result.findIndex(s => s.id === action.marker.id)
+            if (index >= 0) {
+                result[index] = maphelper.converts.fillVariableForMarker(action.marker)
+            } else if (action.marker) {
+                result.push(maphelper.converts.fillVariableForMarker(action.marker))
+            }
             return {
                 ...state,
                 markers: result

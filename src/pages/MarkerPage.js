@@ -143,9 +143,8 @@ function MarkerPage({
         })
         ;(markers || []).forEach((marker) => {
             if (!marker?.id) return
-            if (!dedupe[marker.id]) {
-                dedupe[marker.id] = marker
-            }
+            // Prefer Redux-edited markers over paged query snapshot values.
+            dedupe[marker.id] = marker
         })
         return Object.values(dedupe)
     }, [markerSource, markers])
@@ -266,8 +265,8 @@ function MarkerPage({
     // }, [eventtypes])
 
     const setSelectedById = (id) => {
-        const selected = markerSource.find(s => s.id === id)
-            || (markers || []).find(s => s.id === id)
+        const selected = (markers || []).find(s => s.id === id)
+            || markerSource.find(s => s.id === id)
         if (selected) {
             setSelected(selected)
             setSelectedMarkerId(selected.id)
@@ -295,7 +294,8 @@ function MarkerPage({
     const onViewportSelectionUpdate = (marker) => {
         if (marker) {
             if (selectedMarkerId && marker.id === selectedMarkerId) {
-                setSelected(marker)
+                const freshMarker = (markers || []).find((item) => item.id === marker.id) || marker
+                setSelected(freshMarker)
             }
         }
     }

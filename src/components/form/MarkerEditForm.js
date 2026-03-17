@@ -37,6 +37,9 @@ import ImageIcon from '@mui/icons-material/Image'
 import RiceBowlIcon from '@mui/icons-material/RiceBowl'
 import StorefrontIcon from '@mui/icons-material/Storefront'
 import RamenDiningIcon from '@mui/icons-material/RamenDining'
+import InstagramIcon from '@mui/icons-material/Instagram'
+import ForumIcon from '@mui/icons-material/Forum'
+import LinkIcon from '@mui/icons-material/Link'
 
 import useObject from '../../hooks/useObject'
 
@@ -100,6 +103,7 @@ function MarkerEditForm({
 
     const [ alertMessage, setAlertMessage ] = useState(null)
 
+
     // menu for website
     const [ anchorEl, setAnchorEl ] = useState(null)
     const menuOpen = Boolean(anchorEl)
@@ -142,6 +146,28 @@ function MarkerEditForm({
         return `${backend.IMAGE_LINK}${raw}`
     }
 
+    const detectSocialPlatform = (rawLink) => {
+        const value = `${rawLink || ''}`.trim()
+        if (!value) return 'generic'
+
+        try {
+            const withProtocol = /^https?:\/\//i.test(value) ? value : `https://${value}`
+            const host = new URL(withProtocol).hostname.toLowerCase()
+            if (host.includes('instagram.com')) return 'instagram'
+            if (host.includes('threads.net')) return 'threads'
+            return 'generic'
+        } catch (_) {
+            return 'generic'
+        }
+    }
+
+    const socialPlatform = detectSocialPlatform(formValue.social_media_link)
+    const socialIcon = socialPlatform === 'instagram'
+        ? <InstagramIcon />
+        : socialPlatform === 'threads'
+            ? <ForumIcon />
+            : <LinkIcon />
+
     useEffect(() => {
         if (!marker) return
 
@@ -155,7 +181,7 @@ function MarkerEditForm({
         setFormValue('label', marker.label)
         setFormValue('address', marker.address)
         setFormValue('link', marker.link)
-        setFormValue('social_media_link', marker.social_media_link)
+        setFormValue('social_media_link', marker.social_media_link || '')
         setFormValue('type', marker.type)
         setFormValue('description', marker.description)
         setFormValue('estimate_time', marker.estimate_time)
@@ -340,6 +366,7 @@ function MarkerEditForm({
             type: formValue.type,
             address: formValue.address,
             link: formValue.link,
+            social_media_link: formValue.social_media_link,
             image_link: (formValue.imageLink && formValue.imageLink.type === 'weblink') ? formValue.imageLink.value : null,
             image_upload: (formValue.imageLink && formValue.imageLink.type === 'upload') ? formValue.imageLink.value : null,
             no_image: formValue.imageLink ? false : true,   // since we will preset existing now, null value should be deleting the image
@@ -352,8 +379,14 @@ function MarkerEditForm({
             from_time: from,
             restaurant_id: restaurant_id,
             remove_restaurant: shouldRemoveRestaurantData,
-            social_media_link: formValue.social_media_link,
         }})
+    }
+
+    const onFormKeyDownHandler = (e) => {
+        // Prevent accidental dialog submit from Enter on single-line inputs.
+        if (e.key === 'Enter' && e.target?.tagName !== 'TEXTAREA') {
+            e.preventDefault()
+        }
     }
 
     const restaurantInfoMessage = useMemo(() => {
@@ -419,7 +452,7 @@ function MarkerEditForm({
                 clearAlertMessage={() => setAlertMessage(null)}
                 footerStart={footerLatLon}
             >
-                <Stack spacing={2}>
+                <Stack spacing={2} onKeyDown={onFormKeyDownHandler}>
                     <TextField
                         variant='outlined'
                         fullWidth
@@ -977,15 +1010,6 @@ function MarkerEditForm({
                     </Box>
                     ) : null}
                     <Stack spacing={0}>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            label='social media link'
-                            value={formValue.social_media_link}
-                            onChange={(e) => onValueChangeHandler('social_media_link', e.target.value)}
-                            error={!!error.social_media_link}
-                            helperText={error.social_media_link}
-                        />
                         <Box sx={{ display: 'flex' }}>
                             <Box sx={{ flex: 9 }}>
                                 <TextField
@@ -1063,6 +1087,35 @@ function MarkerEditForm({
                             </MenuItem>
                         </Menu>
                     </Stack>
+                    <Box sx={{ display: 'flex' }}>
+                        <Box sx={{ flex: 9 }}>
+                            <TextField
+                                variant='outlined'
+                                fullWidth
+                                label='social media original link'
+                                value={formValue.social_media_link}
+                                onChange={(e) => onValueChangeHandler('social_media_link', e.target.value)}
+                            />
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                            <Button
+                                variant='outlined'
+                                disabled
+                                fullWidth
+                                sx={{
+                                    minWidth: 0,
+                                    height: 56,
+                                    marginTop: 0,
+                                    alignSelf: 'flex-start',
+                                    borderLeft: 0,
+                                    borderTopLeftRadius: 0,
+                                    borderBottomLeftRadius: 0,
+                                }}
+                            >
+                                {socialIcon}
+                            </Button>
+                        </Box>
+                    </Box>
                     <TextField
                         variant='outlined'
                         fullWidth
