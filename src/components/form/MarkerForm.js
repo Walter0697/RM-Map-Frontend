@@ -1125,6 +1125,14 @@ function MarkerForm({
                     <TextField
                         variant='outlined'
                         fullWidth
+                        label='social media original link'
+                        value={formValue.social_media_link}
+                        onChange={(e) => onValueChangeHandler('social_media_link', e.target.value)}
+                        helperText='Optional. Keep this separate from website.'
+                    />
+                    <TextField
+                        variant='outlined'
+                        fullWidth
                         label='description'
                         multiline
                         minRows={3}
