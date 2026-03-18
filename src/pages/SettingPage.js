@@ -3,6 +3,19 @@ import { connect } from 'react-redux'
 import Base from './Base'
 
 import { useQuery, useLazyQuery } from '@apollo/client'
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    Typography,
+} from '@mui/material'
+import AppleIcon from '@mui/icons-material/Apple'
+import AltRouteIcon from '@mui/icons-material/AltRoute'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 
 import TopBar from '../components/topbar/TopBar'
 import SettingList from '../components/list/SettingList'
@@ -68,6 +81,8 @@ function SettingPage({
     const [ isPreviewDisplayPinFormOpen, setPreviewDisplayPinFormOpen ] = useState(false)
     const [ isReminderTimeFormOpen, setReminderTimeFormOpen ] = useState(false)
     const [ isReleaseNoteOpen, setReleaseNoteOpen ] = useState(false)
+    const [ isShortcutDialogOpen, setShortcutDialogOpen ] = useState(false)
+    const [ isShortcutHelpDialogOpen, setShortcutHelpDialogOpen ] = useState(false)
 
     // selected open item
     const [ updatingPreferredPin, setPreferredPin ] = useState(null)
@@ -245,11 +260,31 @@ function SettingPage({
     const openIOSShortcutInstall = () => {
         const validatedURL = validateIOSShortcutInstallURL(iosShortcutInstallURL)
         if (!validatedURL) return
+        setShortcutDialogOpen(true)
+    }
+
+    const closeIOSShortcutInstallDialog = () => {
+        setShortcutDialogOpen(false)
+    }
+
+    const openIOSShortcutHelpDialog = () => {
+        setShortcutDialogOpen(false)
+        setShortcutHelpDialogOpen(true)
+    }
+
+    const closeIOSShortcutHelpDialog = () => {
+        setShortcutHelpDialogOpen(false)
+    }
+
+    const confirmIOSShortcutInstall = () => {
+        const validatedURL = validateIOSShortcutInstallURL(iosShortcutInstallURL)
+        if (!validatedURL) return
 
         const opened = window.open(validatedURL, '_blank', 'noopener,noreferrer')
         if (opened) {
             opened.opener = null
         }
+        setShortcutDialogOpen(false)
     }
 
     const openTalkToRoroadBot = () => {
@@ -449,6 +484,137 @@ function SettingPage({
                 currentTime={reminderTime}
                 onUpdated={onReminderTimeUpdated}
             />
+            <Dialog
+                fullWidth
+                maxWidth='sm'
+                open={isShortcutDialogOpen}
+                onClose={closeIOSShortcutInstallDialog}
+            >
+                <DialogTitle>Social Media Shortcut (iOS)</DialogTitle>
+                <DialogContent sx={{ display: 'flex', justifyContent: 'center', position: 'relative', pb: 4 }}>
+                    <Button
+                        size='large'
+                        variant='outlined'
+                        aria-label='Download shortcut'
+                        onClick={confirmIOSShortcutInstall}
+                        sx={{
+                            py: 0,
+                            width: 160,
+                            height: 160,
+                            minWidth: 160,
+                            minHeight: 160,
+                            borderRadius: 1,
+                            display: 'flex',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <span
+                            style={{
+                                display: 'inline-flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                            }}
+                        >
+                            <span
+                                style={{
+                                    position: 'relative',
+                                    display: 'inline-flex',
+                                    width: '88px',
+                                    height: '88px',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <AltRouteIcon style={{ fontSize: '76px' }} />
+                                <AppleIcon
+                                    style={{
+                                        fontSize: '28px',
+                                        position: 'absolute',
+                                        left: '2px',
+                                        bottom: '2px',
+                                        background: '#fff',
+                                        borderRadius: '999px',
+                                        padding: '2px',
+                                    }}
+                                />
+                            </span>
+                            <span
+                                style={{
+                                    fontSize: '11px',
+                                    lineHeight: 1,
+                                    letterSpacing: '0.08em',
+                                    textTransform: 'uppercase',
+                                }}
+                            >
+                                install
+                            </span>
+                        </span>
+                    </Button>
+                    <IconButton
+                        aria-label='Open shortcut usage guide'
+                        onClick={openIOSShortcutHelpDialog}
+                        size='small'
+                        sx={{
+                            position: 'absolute',
+                            right: '10px',
+                            bottom: '8px',
+                            color: '#7c8794',
+                        }}
+                    >
+                        <HelpOutlineIcon sx={{ fontSize: 22 }} />
+                    </IconButton>
+                </DialogContent>
+            </Dialog>
+            <Dialog
+                fullWidth
+                maxWidth='md'
+                open={isShortcutHelpDialogOpen}
+                onClose={closeIOSShortcutHelpDialog}
+            >
+                <DialogTitle>How to Use the Shortcut</DialogTitle>
+                <DialogContent dividers>
+                    <Box sx={{ display: 'grid', gap: 2 }}>
+                        <Box sx={{ display: 'grid', gap: 1 }}>
+                            <Box
+                                component='img'
+                                src='/assets/shortcut-guide/step1.jpg'
+                                alt='Step 1: open share options'
+                                sx={{ width: '100%', borderRadius: 1.5, border: '1px solid #d9e2ec' }}
+                            />
+                            <Typography variant='body2' color='text.secondary'>
+                                In Instagram or Threads, tap the post&apos;s share button. You should see this menu; choose &quot;Share to...&quot;.
+                            </Typography>
+                        </Box>
+                        <Box sx={{ display: 'grid', gap: 1 }}>
+                            <Box
+                                component='img'
+                                src='/assets/shortcut-guide/step2.jpg'
+                                alt='Step 2: select Roroad Analyze'
+                                sx={{ width: '100%', borderRadius: 1.5, border: '1px solid #d9e2ec' }}
+                            />
+                            <Typography variant='body2' color='text.secondary'>
+                                Then tap &quot;Roroad Analyze&quot;. If you do not see it, tap &quot;View More&quot; first. You can also favorite the shortcut so it appears pinned here.
+                            </Typography>
+                        </Box>
+                        <Box sx={{ display: 'grid', gap: 1 }}>
+                            <Box
+                                component='img'
+                                src='/assets/shortcut-guide/step3.jpg'
+                                alt='Step 3: send auto-filled Telegram message'
+                                sx={{ width: '100%', borderRadius: 1.5, border: '1px solid #d9e2ec' }}
+                            />
+                            <Typography variant='body2' color='text.secondary'>
+                                Next, the Telegram chat opens automatically with all your information filled in. Just tap &quot;Send&quot; and you are done.
+                            </Typography>
+                        </Box>
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeIOSShortcutHelpDialog}>Close</Button>
+                </DialogActions>
+            </Dialog>
         </Base>
     )
 }
