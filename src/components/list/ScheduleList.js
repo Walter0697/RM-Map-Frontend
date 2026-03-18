@@ -1,19 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { Virtuoso } from 'react-virtuoso'
-import {
-    useSpring,
-    config,
-    animated,
-} from '@react-spring/web'
 import backend from '../../constant/backend'
 import { 
     Grid,
     Button,
 } from '@mui/material'
-
-import useBoop from '../../hooks/useBoop'
 
 import WrapperBox from '../wrapper/WrapperBox'
 
@@ -209,15 +201,8 @@ function TodayList({
     eventtypes,
     onClickHandler,
 }) {
-    const [ isBlinking, setBlink ] = useBoop(500)
     const [ bigImageMarkers, setBigMarkers ] = useState([]) // select two markers to display it big
     const [ smallDisplayMarkers, setSmallMarkers ] = useState([])
-
-    const { x } = useSpring({
-        config: config.gentle,
-        from: { x: 0 },
-        x: isBlinking ? 0 : 1,
-    })
 
     useEffect(() => {
         let timer = null
@@ -274,11 +259,8 @@ function TodayList({
                 }
             })
 
-            setBlink()
-            setTimeout(() => {
-                setBigMarkers(displayList)
-                setSmallMarkers(smallList)
-            }, 500)
+            setBigMarkers(displayList)
+            setSmallMarkers(smallList)
         }  
     }
 
@@ -303,9 +285,8 @@ function TodayList({
         const primaryDisplayList = bigImageMarkers.length > 0 ? bigImageMarkers : (list || []).slice(0, 2)
         const secondaryDisplayList = smallDisplayMarkers.length > 0 ? smallDisplayMarkers : (list || []).slice(2, 8)
         return (
-            <animated.div
+            <div
                 style={{
-                    opacity: x,
                     width: '100%',
                 }}
             >
@@ -457,7 +438,7 @@ function TodayList({
                         </div>
                     ))}
                 </Grid>
-            </animated.div>
+            </div>
         )
     }
 
@@ -679,10 +660,15 @@ function ScheduleList({
                 setRefreshUI('refreshing')
                 onRefreshTop()
             }
+
+            const remaining = (scrollerEl.scrollHeight || 0) - ((scrollerEl.scrollTop || 0) + (scrollerEl.clientHeight || 0))
+            if (remaining <= 160 && hasMore && !loadingMore && onReachEnd) {
+                onReachEnd()
+            }
         }
         scrollerEl.addEventListener('scroll', onScroll, { passive: true })
         return () => scrollerEl.removeEventListener('scroll', onScroll)
-    }, [scrollerEl, onRefreshTop, loadingMore, refreshing])
+    }, [scrollerEl, onRefreshTop, loadingMore, refreshing, hasMore, onReachEnd])
 
     useEffect(() => {
         if (refreshing) {
@@ -729,21 +715,15 @@ function ScheduleList({
                 >
                     Refreshing list...
                 </div>
-                <Virtuoso
-                    style={{ height: '100%', width: '100%' }}
-                    data={listRows}
-                    scrollerRef={setScrollerEl}
-                    endReached={() => {
-                        if (!hasMore || loadingMore || !onReachEnd) return
-                        onReachEnd()
-                    }}
-                    components={{
-                        Footer: () => footerContent,
-                    }}
-                    itemContent={(_, row) => {
+                <div
+                    ref={setScrollerEl}
+                    style={{ height: '100%', width: '100%', overflowY: 'auto', overflowX: 'hidden' }}
+                >
+                    {listRows.map((row, index) => {
                         if (row.kind === 'today') {
                             return (
                                 <WrapperBox
+                                    key='today-row'
                                     height={400}
                                     marginBottom={'20px'}
                                 >
@@ -758,20 +738,24 @@ function ScheduleList({
                         }
                         if (row.kind === 'header') {
                             return (
-                                <div style={{
-                                    height: '50px',
-                                    width: '100%',
-                                    color: '#455295',
-                                    fontWeight: '500',
-                                    fontSize: '20px',
-                                    paddingLeft: '5%',
-                                }}>
+                                <div
+                                    key='upcoming-header'
+                                    style={{
+                                        height: '50px',
+                                        width: '100%',
+                                        color: '#455295',
+                                        fontWeight: '500',
+                                        fontSize: '20px',
+                                        paddingLeft: '5%',
+                                    }}
+                                >
                                     {row.label}
                                 </div>
                             )
                         }
                         return (
                             <WrapperBox
+                                key={`schedule-row-${row.dayKey || index}`}
                                 height={150}
                                 marginBottom={'6px'}
                             >
@@ -783,8 +767,9 @@ function ScheduleList({
                                 />
                             </WrapperBox>
                         )
-                    }}
-                />
+                    })}
+                    {footerContent}
+                </div>
             </div>
         </>
     )

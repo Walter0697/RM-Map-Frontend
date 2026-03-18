@@ -243,25 +243,11 @@ function SchedulePage({
 
     const onScheduleRemoved = useCallback((removedScheduleId) => {
         if (!removedScheduleId) return
-        setSchedules((previous) => {
-            const next = (previous || []).filter((item) => item.id !== removedScheduleId)
-            if (next.length === 0) {
-                setSelectedDate(null)
-                setActiveScheduleId(null)
-                setScheduleViewStatus('empty')
-                setScheduleViewError('')
-                return []
-            }
-            const activeStillExists = next.some((item) => item.id === activeScheduleId)
-            if (!activeStillExists) {
-                setActiveScheduleId(next[0].id)
-            }
-            setScheduleViewStatus('success')
-            setScheduleViewError('')
-            return next
-        })
+
+        // Always close detail after deletion to avoid stale deep-link state loops.
+        closeScheduleView()
         pagedScheduleController.refresh()
-    }, [activeScheduleId, pagedScheduleController])
+    }, [closeScheduleView, pagedScheduleController])
 
     React.useEffect(() => {
         const pendingDeepLinkId = pendingDeepLink?.resourceType === deepLinkScript.resources.schedule
@@ -273,6 +259,15 @@ function SchedulePage({
 
         resolveScheduleById(targetScheduleId, { forceListContext: true })
     }, [routeScheduleId, pendingDeepLink, resolveScheduleById])
+
+    React.useEffect(() => {
+        if (scheduleViewStatus === 'success' && selectedSchedules.length === 0) {
+            setScheduleViewStatus('idle')
+            setScheduleViewError('')
+            setActiveScheduleId(null)
+            setSelectedDate(null)
+        }
+    }, [scheduleViewStatus, selectedSchedules.length])
 
     const scheduleViewOpen = scheduleViewStatus === 'loading'
         || scheduleViewStatus === 'error'

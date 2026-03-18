@@ -920,6 +920,16 @@ function ScheduleView({
     useEffect(() => {
         if (removeData) {
             if (deletingId !== -1) {
+                // Hard refresh after delete to avoid nested update loops in schedule page state.
+                if (typeof window !== 'undefined' && window.location) {
+                    if (window.location.pathname !== '/schedule') {
+                        window.location.assign('/schedule')
+                    } else {
+                        window.location.reload()
+                    }
+                    return
+                }
+                // Fallback for non-browser environments.
                 dispatch(actions.updateMarkerStatus(removeData.removeSchedule))
                 dispatch(actions.removeSchedule(deletingId))
                 if (onScheduleRemoved) {
