@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { useHistory } from 'react-router-dom'
+import { useHistory, useLocation } from 'react-router-dom'
 import Base from './Base'
 
 import {
@@ -18,6 +18,53 @@ import {
 
 import TopBar from '../components/topbar/TopBar'
 import backend from '../constant/backend'
+
+const demoTravelPlans = [
+    {
+        id: 9001,
+        title: 'Japan Spring Week',
+        description: 'Tokyo and Kyoto highlights for first-time visit.',
+        start_date: '2026-04-10',
+        end_date: '2026-04-16',
+        status: 'draft',
+        daily_plans: [
+            {
+                id: 9101,
+                day_index: 1,
+                local_date: '2026-04-10',
+                summary: 'Arrive in Tokyo and check in near Asakusa.',
+                details: 'Evening walk around Senso-ji and nearby food street.',
+                schedule_id: 501,
+            },
+            {
+                id: 9102,
+                day_index: 2,
+                local_date: '2026-04-11',
+                summary: 'Shibuya and Harajuku day.',
+                details: 'Meiji Jingu in morning, Shibuya crossing in evening.',
+                schedule_id: null,
+            },
+        ],
+    },
+    {
+        id: 9002,
+        title: 'Hong Kong Weekend',
+        description: '2-day city break covering Kowloon and Central.',
+        start_date: '2026-05-02',
+        end_date: '2026-05-03',
+        status: 'active',
+        daily_plans: [
+            {
+                id: 9201,
+                day_index: 1,
+                local_date: '2026-05-02',
+                summary: 'Victoria Peak and Central district.',
+                details: 'Peak Tram ride plus ferry at sunset.',
+                schedule_id: 777,
+            },
+        ],
+    },
+]
 
 function formatPlanPeriod(startDate, endDate) {
     if (!startDate && !endDate) {
@@ -39,6 +86,7 @@ function TravelPlanPage({
     jwt,
 }) {
     const history = useHistory()
+    const location = useLocation()
     const [ travelPlans, setTravelPlans ] = useState([])
     const [ travelPlansLoading, setTravelPlansLoading ] = useState(false)
     const [ travelPlansError, setTravelPlansError ] = useState('')
@@ -46,8 +94,23 @@ function TravelPlanPage({
     const [ planDetail, setPlanDetail ] = useState(null)
     const [ planDetailLoading, setPlanDetailLoading ] = useState(false)
     const [ planDetailError, setPlanDetailError ] = useState('')
+    const isDemoMode = new URLSearchParams(location.search).get('demo') === '1'
 
     useEffect(() => {
+        if (isDemoMode) {
+            const items = demoTravelPlans.map((item) => ({
+                id: item.id,
+                title: item.title,
+                start_date: item.start_date,
+                end_date: item.end_date,
+                status: item.status,
+            }))
+            setTravelPlans(items)
+            setTravelPlansError('')
+            setTravelPlansLoading(false)
+            return
+        }
+
         const fetchTravelPlans = async () => {
             if (!jwt) {
                 setTravelPlans([])
@@ -77,9 +140,31 @@ function TravelPlanPage({
         }
 
         fetchTravelPlans()
-    }, [jwt])
+    }, [jwt, isDemoMode])
 
     const openPlanDetailDialog = async (planId) => {
+        if (isDemoMode) {
+            const matched = demoTravelPlans.find((item) => Number(item.id) === Number(planId))
+            if (!matched) {
+                setPlanDetailError('Unable to load plan details')
+                setPlanDetailOpen(true)
+                return
+            }
+            setPlanDetail({
+                id: matched.id,
+                title: matched.title,
+                description: matched.description,
+                start_date: matched.start_date,
+                end_date: matched.end_date,
+                status: matched.status,
+                daily_plans: matched.daily_plans,
+            })
+            setPlanDetailError('')
+            setPlanDetailLoading(false)
+            setPlanDetailOpen(true)
+            return
+        }
+
         if (!jwt) return
         setPlanDetail(null)
         setPlanDetailError('')
