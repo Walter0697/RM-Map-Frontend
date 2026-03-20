@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import Base from './Base'
 
 import {
@@ -17,54 +17,9 @@ import {
 } from '@mui/material'
 
 import TopBar from '../components/topbar/TopBar'
+import BottomUpTrail from '../components/animatein/BottomUpTrail'
+import WrapperBox from '../components/wrapper/WrapperBox'
 import backend from '../constant/backend'
-
-const demoTravelPlans = [
-    {
-        id: 9001,
-        title: 'Japan Spring Week',
-        description: 'Tokyo and Kyoto highlights for first-time visit.',
-        start_date: '2026-04-10',
-        end_date: '2026-04-16',
-        status: 'draft',
-        daily_plans: [
-            {
-                id: 9101,
-                day_index: 1,
-                local_date: '2026-04-10',
-                summary: 'Arrive in Tokyo and check in near Asakusa.',
-                details: 'Evening walk around Senso-ji and nearby food street.',
-                schedule_id: 501,
-            },
-            {
-                id: 9102,
-                day_index: 2,
-                local_date: '2026-04-11',
-                summary: 'Shibuya and Harajuku day.',
-                details: 'Meiji Jingu in morning, Shibuya crossing in evening.',
-                schedule_id: null,
-            },
-        ],
-    },
-    {
-        id: 9002,
-        title: 'Hong Kong Weekend',
-        description: '2-day city break covering Kowloon and Central.',
-        start_date: '2026-05-02',
-        end_date: '2026-05-03',
-        status: 'active',
-        daily_plans: [
-            {
-                id: 9201,
-                day_index: 1,
-                local_date: '2026-05-02',
-                summary: 'Victoria Peak and Central district.',
-                details: 'Peak Tram ride plus ferry at sunset.',
-                schedule_id: 777,
-            },
-        ],
-    },
-]
 
 function formatPlanPeriod(startDate, endDate) {
     if (!startDate && !endDate) {
@@ -86,7 +41,6 @@ function TravelPlanPage({
     jwt,
 }) {
     const history = useHistory()
-    const location = useLocation()
     const [ travelPlans, setTravelPlans ] = useState([])
     const [ travelPlansLoading, setTravelPlansLoading ] = useState(false)
     const [ travelPlansError, setTravelPlansError ] = useState('')
@@ -94,23 +48,8 @@ function TravelPlanPage({
     const [ planDetail, setPlanDetail ] = useState(null)
     const [ planDetailLoading, setPlanDetailLoading ] = useState(false)
     const [ planDetailError, setPlanDetailError ] = useState('')
-    const isDemoMode = new URLSearchParams(location.search).get('demo') === '1'
 
     useEffect(() => {
-        if (isDemoMode) {
-            const items = demoTravelPlans.map((item) => ({
-                id: item.id,
-                title: item.title,
-                start_date: item.start_date,
-                end_date: item.end_date,
-                status: item.status,
-            }))
-            setTravelPlans(items)
-            setTravelPlansError('')
-            setTravelPlansLoading(false)
-            return
-        }
-
         const fetchTravelPlans = async () => {
             if (!jwt) {
                 setTravelPlans([])
@@ -140,31 +79,9 @@ function TravelPlanPage({
         }
 
         fetchTravelPlans()
-    }, [jwt, isDemoMode])
+    }, [jwt])
 
     const openPlanDetailDialog = async (planId) => {
-        if (isDemoMode) {
-            const matched = demoTravelPlans.find((item) => Number(item.id) === Number(planId))
-            if (!matched) {
-                setPlanDetailError('Unable to load plan details')
-                setPlanDetailOpen(true)
-                return
-            }
-            setPlanDetail({
-                id: matched.id,
-                title: matched.title,
-                description: matched.description,
-                start_date: matched.start_date,
-                end_date: matched.end_date,
-                status: matched.status,
-                daily_plans: matched.daily_plans,
-            })
-            setPlanDetailError('')
-            setPlanDetailLoading(false)
-            setPlanDetailOpen(true)
-            return
-        }
-
         if (!jwt) return
         setPlanDetail(null)
         setPlanDetailError('')
@@ -196,9 +113,14 @@ function TravelPlanPage({
         setPlanDetailLoading(false)
     }
 
-    const openSchedulePage = (scheduleId) => {
+    const openSchedulePage = (scheduleId, scheduleDate) => {
         if (!scheduleId) return
-        history.replace(`/schedules/${scheduleId}`)
+        const normalizedDate = `${scheduleDate || ''}`.trim()
+        if (normalizedDate) {
+            history.replace(`/schedule?schedule-date=${encodeURIComponent(normalizedDate)}`)
+            return
+        }
+        history.replace('/schedule')
     }
 
     return (
@@ -207,21 +129,20 @@ function TravelPlanPage({
                 onBackHandler={() => history.replace('/setting')}
                 label='Saved Travel Plans'
             />
-            <Box
-                sx={{
-                    px: 2,
-                    py: 2,
-                    mt: 2,
-                    borderRadius: 2,
-                    backgroundColor: '#f7f9fb',
-                    border: '1px solid #e1e8f0',
-                    mx: 2,
+            <div
+                style={{
+                    position: 'absolute',
+                    height: '80%',
+                    width: '95%',
+                    paddingLeft: '5%',
+                    paddingTop: '20px',
+                    overflow: 'auto',
                 }}
             >
                 {travelPlansLoading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '32px' }}>
                         <CircularProgress size={24} />
-                    </Box>
+                    </div>
                 ) : travelPlansError ? (
                     <Typography color='error'>{travelPlansError}</Typography>
                 ) : travelPlans.length === 0 ? (
@@ -229,39 +150,70 @@ function TravelPlanPage({
                         You have no saved travel plans yet.
                     </Typography>
                 ) : (
-                    travelPlans.map((plan) => (
-                        <Box
-                            key={plan.id}
-                            sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'flex-start',
-                                gap: 2,
-                                py: 2,
-                                borderBottom: '1px solid #e1e8f0',
-                                '&:last-child': {
-                                    borderBottom: 'none',
-                                },
-                            }}
-                        >
-                            <Box sx={{ flex: 1 }}>
-                                <Typography variant='subtitle1'>
-                                    {plan.title || 'Untitled plan'}
-                                </Typography>
-                                <Stack direction='row' spacing={1} alignItems='center' sx={{ mt: 0.5 }}>
-                                    <Chip label={plan.status || 'draft'} size='small' />
-                                    <Typography variant='body2' color='text.secondary'>
-                                        {formatPlanPeriod(plan.start_date, plan.end_date)}
-                                    </Typography>
-                                </Stack>
-                            </Box>
-                            <Button size='small' variant='outlined' onClick={() => openPlanDetailDialog(plan.id)}>
-                                View details
-                            </Button>
-                        </Box>
-                    ))
+                    <BottomUpTrail>
+                        {travelPlans.map((plan) => (
+                            <WrapperBox
+                                key={plan.id}
+                                minHeight={'96px'}
+                                height={'auto'}
+                                marginBottom='12px'
+                            >
+                                <Button
+                                    variant='contained'
+                                    size='large'
+                                    style={{
+                                        backgroundColor: '#48acdb',
+                                        borderRadius: '5px',
+                                        width: '100%',
+                                        boxShadow: '2px 2px 6px',
+                                        textTransform: 'none',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '12px',
+                                        gap: '10px',
+                                    }}
+                                    onClick={() => openPlanDetailDialog(plan.id)}
+                                >
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0 }}>
+                                        <div
+                                            style={{
+                                                color: '#1f2f6f',
+                                                fontSize: '18px',
+                                                fontWeight: 700,
+                                                maxWidth: '100%',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap',
+                                            }}
+                                        >
+                                            {plan.title || 'Untitled plan'}
+                                        </div>
+                                        <Stack direction='row' spacing={1} alignItems='center' sx={{ mt: 0.5 }}>
+                                            <Chip label={plan.status || 'draft'} size='small' />
+                                            <Typography variant='body2' sx={{ color: '#1f2f6f' }}>
+                                                {formatPlanPeriod(plan.start_date, plan.end_date)}
+                                            </Typography>
+                                        </Stack>
+                                    </div>
+                                    <span
+                                        style={{
+                                            border: '1px solid #1f2f6f',
+                                            color: '#1f2f6f',
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: '4px',
+                                            padding: '4px 8px',
+                                            fontSize: '12px',
+                                            fontWeight: 500,
+                                        }}
+                                    >
+                                        View details
+                                    </span>
+                                </Button>
+                            </WrapperBox>
+                        ))}
+                    </BottomUpTrail>
                 )}
-            </Box>
+            </div>
             <Dialog
                 fullWidth
                 maxWidth='sm'
@@ -319,7 +271,7 @@ function TravelPlanPage({
                                                     size='small'
                                                     variant='text'
                                                     sx={{ mt: 1, px: 0 }}
-                                                    onClick={() => openSchedulePage(daily.schedule_id)}
+                                                    onClick={() => openSchedulePage(daily.schedule_id, daily.local_date)}
                                                 >
                                                     Open linked schedule
                                                 </Button>
