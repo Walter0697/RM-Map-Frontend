@@ -14,6 +14,7 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt'   // filter
 import AvTimerIcon from '@mui/icons-material/AvTimer'       // expired marker
 import FlagIcon from '@mui/icons-material/Flag'             // previous marker
 import MovieIcon from '@mui/icons-material/Movie'           // watched movie
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff'
 
 import FlightIcon from '@mui/icons-material/Flight'         // country map      
 import TrainIcon from '@mui/icons-material/Train'           // station
@@ -200,6 +201,17 @@ function BottomBar({
                     parentRoute={'/setting'}
                     path={location.pathname}
                     activeIcon={<MovieIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
+        if (location.pathname === '/travel-plans') {
+            return (
+                <SubBarIcon
+                    route={'/travel-plans'}
+                    parentRoute={'/setting'}
+                    path={location.pathname}
+                    activeIcon={<FlightTakeoffIcon sx={{ color: activeColor }} fontSize='inherit' />}
                     setPath={changeTab}
                 />
             )

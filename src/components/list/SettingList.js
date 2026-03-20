@@ -16,13 +16,14 @@ import GoogleCalendarConnectionButton from './settings/GoogleCalendarConnectionB
 import ReminderTimeButton from './settings/ReminderTimeButton'
 import TalkToRoroadBotButton from './settings/TalkToRoroadBotButton'
 import SocialMediaPostShortcutButton from './settings/SocialMediaPostShortcutButton'
+import TravelPlansButton from './settings/TravelPlansButton'
 
 import WrapperBox from '../wrapper/WrapperBox'
 import SectionHeader from './settings/SectionHeader'
 
 import TagIcon from '@mui/icons-material/Tag'
 import MapIcon from '@mui/icons-material/Map'
-import TheatersIcon from '@mui/icons-material/Theaters'
+import ListAltIcon from '@mui/icons-material/ListAlt'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone'
 import SmartToyIcon from '@mui/icons-material/SmartToy'
@@ -51,6 +52,7 @@ function SettingList({
   openReminderTimeForm,
   openTalkToRoroadBot,
   showTalkToRoroadBot,
+  openSavedTravelPlans,
 }) {
   const history = useHistory()
 
@@ -239,9 +241,17 @@ function SettingList({
           marginBottom={'15px'}
         >
           <SectionHeader
-            title={'Movies'}
-            icon={<TheatersIcon />}
+            title={'List'}
+            icon={<ListAltIcon />}
           />
+        </WrapperBox>
+        <WrapperBox
+            height={30}
+            marginBottom={'15px'}
+        >
+            <TravelPlansButton
+                onClickHandler={openSavedTravelPlans}
+            />
         </WrapperBox>
         <WrapperBox
             height={30}
