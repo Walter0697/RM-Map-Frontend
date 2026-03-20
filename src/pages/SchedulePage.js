@@ -29,6 +29,8 @@ function SchedulePage({
     const history = useHistory()
     const location = useLocation()
     const deepLinkMatch = useRouteMatch('/schedules/:schedule_id')
+    const searchParams = new URLSearchParams(location.search)
+    const queryScheduleDate = (searchParams.get('schedule-date') || '').trim()
 
     const [ selectedSchedules, setSchedules ] = useState([])
     const [ selectedDate, setSelectedDate ] = useState(null)
@@ -214,6 +216,65 @@ function SchedulePage({
         toScheduleListContext,
     ])
 
+    const resolveSchedulesByDate = useCallback(async (dateText) => {
+        const normalizedDate = `${dateText}`.trim()
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(normalizedDate)) {
+            setDeepLinkOpenFailed()
+            return
+        }
+        const targetDate = dayjs(normalizedDate)
+        if (!targetDate.isValid() || targetDate.format('YYYY-MM-DD') !== normalizedDate) {
+            setDeepLinkOpenFailed()
+            return
+        }
+
+        const dateKey = targetDate.format('YYYY-MM-DD')
+        const fromExisting = (scheduleItems || []).filter((item) => dayjs(item.selected_date).format('YYYY-MM-DD') === dateKey)
+        if (fromExisting.length > 0) {
+            setScheduleView(fromExisting, dateKey, { activeScheduleId: fromExisting[0]?.id || null })
+            return
+        }
+
+        try {
+            let cursor = null
+            let hasMore = true
+
+            while (hasMore) {
+                const response = await listPagedScheduleGQL({
+                    variables: {
+                        time: dayjs().format('YYYY-MM-DD'),
+                        limit: 30,
+                        cursor,
+                    },
+                })
+
+                const payload = response?.data?.pagedschedules || {}
+                const items = payload.items || []
+                const sameDateItems = items.filter((item) => dayjs(item.selected_date).format('YYYY-MM-DD') === dateKey)
+                if (sameDateItems.length > 0) {
+                    setScheduleView(sameDateItems, dateKey, { activeScheduleId: sameDateItems[0]?.id || null })
+                    return
+                }
+
+                if (!payload.next_cursor) {
+                    setDeepLinkOpenFailed()
+                    return
+                }
+
+                cursor = payload.next_cursor
+                hasMore = !!cursor
+            }
+        } catch (error) {
+            setScheduleViewError('Failed to load schedule details. Please retry.')
+            setScheduleViewStatus('error')
+        }
+    }, [
+        scheduleItems,
+        listPagedScheduleGQL,
+        setScheduleView,
+        setDeepLinkOpenFailed,
+    ])
+
     const refreshActiveSchedule = useCallback(() => {
         if (!activeScheduleId) return
 
@@ -259,6 +320,15 @@ function SchedulePage({
 
         resolveScheduleById(targetScheduleId, { forceListContext: true })
     }, [routeScheduleId, pendingDeepLink, resolveScheduleById])
+
+    React.useEffect(() => {
+        if (!queryScheduleDate) return
+        if (routeScheduleId) return
+        if (pendingDeepLink?.resourceType === deepLinkScript.resources.schedule) return
+
+        resolveSchedulesByDate(queryScheduleDate)
+        history.replace('/schedule')
+    }, [queryScheduleDate, routeScheduleId, pendingDeepLink, resolveSchedulesByDate, history])
 
     React.useEffect(() => {
         if (scheduleViewStatus === 'success' && selectedSchedules.length === 0) {

@@ -22,6 +22,7 @@ import FavouriteMoviePage from './pages/FavouriteMoviePage'
 import StationPage from './pages/StationPage'
 import CountryPage from './pages/CountryPage'
 import WatchedMoviePage from './pages/WatchedMoviePage'
+import TravelPlanPage from './pages/TravelPlanPage'
 
 import MarkerFilterPage from './pages/MarkerFilterPage'
 
@@ -61,6 +62,7 @@ function App() {
             <Route path='/station' component={StationPage} />
             <Route path='/country' component={CountryPage} />
             <Route path='/watchedmovies' component={WatchedMoviePage} />
+            <Route path='/travel-plans' component={TravelPlanPage} />
 
             <Route path='/filter' component={MarkerFilterPage} />
 
