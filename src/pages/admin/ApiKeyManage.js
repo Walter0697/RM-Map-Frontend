@@ -30,7 +30,7 @@ import AdminPageShell from '../../components/admin/AdminPageShell'
 import backend from '../../constant/backend'
 import httpScript from '../../scripts/http'
 
-const availableScopes = [
+const defaultAvailableScopes = [
     'markers:read',
     'markers:write',
     'schedules:read',
@@ -56,6 +56,7 @@ function ApiKeyManage({ jwt }) {
     const [ errorMessage, setErrorMessage ] = useState('')
     const [ healthErrorMessage, setHealthErrorMessage ] = useState('')
     const [ authHealth, setAuthHealth ] = useState(null)
+    const [ availableScopes, setAvailableScopes ] = useState(defaultAvailableScopes)
 
     const [ form, setForm ] = useState({
         name: '',
@@ -63,7 +64,7 @@ function ApiKeyManage({ jwt }) {
         relation_id: '',
         service_account_id: '',
         expires_at: '',
-        scopes: ['markers:read'],
+        scopes: [defaultAvailableScopes[0]],
     })
     const [ serviceAccountForm, setServiceAccountForm ] = useState({
         name: '',
@@ -181,13 +182,26 @@ function ApiKeyManage({ jwt }) {
             const body = await resp.json()
             const fetchedRelations = Array.isArray(body.relations) ? body.relations : []
             const fetchedServiceAccounts = Array.isArray(body.service_accounts) ? body.service_accounts : []
+            const backendScopes = Array.isArray(body.available_scopes)
+                ? body.available_scopes
+                : (Array.isArray(body.scopes) ? body.scopes : [])
+            const normalizedScopes = Array.from(new Set(backendScopes
+                .map((scope) => (typeof scope === 'string' ? scope.trim() : ''))
+                .filter(Boolean)))
+            const nextAvailableScopes = normalizedScopes.length > 0 ? normalizedScopes : defaultAvailableScopes
             setRelations(fetchedRelations)
             setServiceAccounts(fetchedServiceAccounts)
+            setAvailableScopes(nextAvailableScopes)
 
             setForm((prev) => ({
                 ...prev,
                 relation_id: prev.relation_id || (fetchedRelations[0] ? String(fetchedRelations[0].id) : ''),
                 service_account_id: prev.service_account_id || (fetchedServiceAccounts[0] ? String(fetchedServiceAccounts[0].id) : ''),
+                scopes: (() => {
+                    const filteredScopes = prev.scopes.filter((scope) => nextAvailableScopes.includes(scope))
+                    if (filteredScopes.length > 0) return filteredScopes
+                    return nextAvailableScopes[0] ? [nextAvailableScopes[0]] : []
+                })(),
             }))
             setServiceAccountForm((prev) => ({
                 ...prev,
