@@ -729,14 +729,6 @@ function ScheduleItem({
                     )}
                 </div>
             </div>
-
-            {item.marker && item.marker.restaurant && (
-                <div style={{ marginTop: '10px' }}>
-                    <RestaurantCard
-                        restaurant={item.marker.restaurant}
-                    />
-                </div>
-            )}
             {item.movie && (
                 <div style={{ marginTop: '8px', fontSize: '13px', color: '#455295' }}>
                     Movie: {item.movie.label}
@@ -744,7 +736,6 @@ function ScheduleItem({
             )}
             {markerId && (
                 <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <Chip size='small' variant='outlined' label={`Marker ID: ${markerId}`} />
                     <Tooltip title='Open Marker In List View'>
                         <IconButton
                             size='small'
@@ -755,6 +746,13 @@ function ScheduleItem({
                             <PlaceOutlinedIcon fontSize='small' />
                         </IconButton>
                     </Tooltip>
+                </div>
+            )}
+            {item.marker && item.marker.restaurant && (
+                <div style={{ marginTop: '10px' }}>
+                    <RestaurantCard
+                        restaurant={item.marker.restaurant}
+                    />
                 </div>
             )}
             <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
