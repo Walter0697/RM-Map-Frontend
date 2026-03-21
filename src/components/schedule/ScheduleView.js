@@ -38,6 +38,7 @@ import OpacityIcon from '@mui/icons-material/Opacity'
 import SensorsIcon from '@mui/icons-material/Sensors'
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined'
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined'
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -46,6 +47,7 @@ import RestaurantCard from '../card/RestaurantCard'
 
 import constants from '../../constant'
 import actions from '../../store/actions'
+import deepLinkScript from '../../scripts/deepLink'
 import graphql from '../../graphql'
 
 import dayjs from 'dayjs'
@@ -405,6 +407,24 @@ const toScheduleImageSrc = (item, eventtypes = []) => {
     return `${base}/${normalized}`
 }
 
+const resolveScheduleMarkerId = (item) => {
+    const candidates = [
+        item?.marker?.id,
+        item?.marker_id,
+        item?.markerId,
+        item?.selected_marker?.id,
+        item?.selected_marker_id,
+        item?.selectedMarkerId,
+    ]
+    for (let i = 0; i < candidates.length; i++) {
+        const parsed = Number(candidates[i])
+        if (Number.isInteger(parsed) && parsed > 0) {
+            return parsed
+        }
+    }
+    return null
+}
+
 function ScheduleItem({
     item,
     nextItem,
@@ -417,6 +437,7 @@ function ScheduleItem({
     isToday,
     onEditClick,
     onDeleteClick,
+    onOpenMarkerClick,
     onRoutePreviewClick,
     routePreviewLoading,
 }) {
@@ -506,6 +527,7 @@ function ScheduleItem({
         : (fallbackGapMinutes === null ? 'N/A' : formatMinutesCompact(fallbackGapMinutes))
     const lineHeight = 70
     const descriptionText = item?.description || item?.marker?.description || ''
+    const markerId = resolveScheduleMarkerId(item)
 
     const explanationText = (() => {
         if (!transition || transition.status === 'unavailable') {
@@ -627,6 +649,7 @@ function ScheduleItem({
                     gap: '12px',
                     width: '100%',
                     alignItems: 'stretch',
+                    position: 'relative',
                 }}
             >
                 <div style={{ width: '118px', minWidth: '118px' }}>
@@ -706,18 +729,36 @@ function ScheduleItem({
                         </div>
                     )}
                 </div>
+                {markerId && (
+                    <Tooltip title='Open Marker In List View'>
+                        <IconButton
+                            size='small'
+                            aria-label={`open marker ${markerId}`}
+                            onClick={() => onOpenMarkerClick && onOpenMarkerClick(markerId)}
+                            sx={{
+                                border: '1px solid #b8cbe4',
+                                borderRadius: '8px',
+                                backgroundColor: '#ffffff',
+                                position: 'absolute',
+                                right: '2px',
+                                bottom: '2px',
+                            }}
+                        >
+                            <PlaceOutlinedIcon fontSize='small' />
+                        </IconButton>
+                    </Tooltip>
+                )}
             </div>
-
+            {item.movie && (
+                <div style={{ marginTop: '8px', fontSize: '13px', color: '#455295' }}>
+                    Movie: {item.movie.label}
+                </div>
+            )}
             {item.marker && item.marker.restaurant && (
                 <div style={{ marginTop: '10px' }}>
                     <RestaurantCard
                         restaurant={item.marker.restaurant}
                     />
-                </div>
-            )}
-            {item.movie && (
-                <div style={{ marginTop: '8px', fontSize: '13px', color: '#455295' }}>
-                    Movie: {item.movie.label}
                 </div>
             )}
             <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
@@ -998,6 +1039,19 @@ function ScheduleView({
         if (!window.confirm(`Do you want to remove ${schedule.label}`)) return
         setDeleting(schedule.id)
         removeScheduleGQL({ variables: { id: schedule.id } })
+    }
+
+    const onOpenMarkerClickHandler = (markerId) => {
+        if (!markerId) return
+        const markerIntent = {
+            resourceType: deepLinkScript.resources.marker,
+            id: `${markerId}`,
+        }
+        dispatch(actions.setDeepLinkIntent({
+            ...markerIntent,
+            path: deepLinkScript.buildPath(markerIntent),
+        }))
+        history.push(`/markers/${markerId}`)
     }
 
     useEffect(() => {
@@ -1740,6 +1794,7 @@ function ScheduleView({
                                                 isToday={isToday}
                                                 onEditClick={onEditClickHandler}
                                                 onDeleteClick={onDeleteClickHandler}
+                                                onOpenMarkerClick={onOpenMarkerClickHandler}
                                                 onRoutePreviewClick={onOpenRoutePreview}
                                                 routePreviewLoading={routePreviewLoading}
                                             />
