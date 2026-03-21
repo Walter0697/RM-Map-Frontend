@@ -187,7 +187,7 @@ describe('ScheduleView layout contracts', () => {
         container.remove()
     })
 
-    test('renders open marker action when marker id exists and routes to marker page', () => {
+    test('renders open marker action when marker id exists and routes to marker list view', () => {
         const store = configureStore({ reducer: rootReducer })
         const today = dayjs().format('YYYY-MM-DD')
         const schedules = [
@@ -238,7 +238,7 @@ describe('ScheduleView layout contracts', () => {
             markerButton.dispatchEvent(new MouseEvent('click', { bubbles: true }))
         })
 
-        expect(mockHistoryPush).toHaveBeenCalledWith('/marker/15')
+        expect(mockHistoryPush).toHaveBeenCalledWith('/markers/15')
 
         act(() => {
             root.unmount()
