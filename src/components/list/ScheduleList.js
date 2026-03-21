@@ -718,7 +718,14 @@ function ScheduleList({
                 </div>
                 <div
                     ref={setScrollerEl}
-                    style={{ height: '100%', width: '100%', overflowY: 'auto', overflowX: 'hidden' }}
+                    style={{
+                        height: '100%',
+                        width: '100%',
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        boxSizing: 'border-box',
+                        paddingBottom: '96px',
+                    }}
                 >
                     {listRows.map((row, index) => {
                         if (row.kind === 'today') {
