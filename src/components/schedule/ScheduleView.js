@@ -649,6 +649,7 @@ function ScheduleItem({
                     gap: '12px',
                     width: '100%',
                     alignItems: 'stretch',
+                    position: 'relative',
                 }}
             >
                 <div style={{ width: '118px', minWidth: '118px' }}>
@@ -728,24 +729,29 @@ function ScheduleItem({
                         </div>
                     )}
                 </div>
-            </div>
-            {item.movie && (
-                <div style={{ marginTop: '8px', fontSize: '13px', color: '#455295' }}>
-                    Movie: {item.movie.label}
-                </div>
-            )}
-            {markerId && (
-                <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                {markerId && (
                     <Tooltip title='Open Marker In List View'>
                         <IconButton
                             size='small'
                             aria-label={`open marker ${markerId}`}
                             onClick={() => onOpenMarkerClick && onOpenMarkerClick(markerId)}
-                            sx={{ border: '1px solid #b8cbe4', borderRadius: '8px' }}
+                            sx={{
+                                border: '1px solid #b8cbe4',
+                                borderRadius: '8px',
+                                backgroundColor: '#ffffff',
+                                position: 'absolute',
+                                right: '2px',
+                                bottom: '2px',
+                            }}
                         >
                             <PlaceOutlinedIcon fontSize='small' />
                         </IconButton>
                     </Tooltip>
+                )}
+            </div>
+            {item.movie && (
+                <div style={{ marginTop: '8px', fontSize: '13px', color: '#455295' }}>
+                    Movie: {item.movie.label}
                 </div>
             )}
             {item.marker && item.marker.restaurant && (
