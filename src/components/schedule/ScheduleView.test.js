@@ -238,7 +238,7 @@ describe('ScheduleView layout contracts', () => {
             markerButton.dispatchEvent(new MouseEvent('click', { bubbles: true }))
         })
 
-        expect(mockHistoryPush).toHaveBeenCalledWith('/markers/list')
+        expect(mockHistoryPush).toHaveBeenCalledWith('/markers/15')
 
         act(() => {
             root.unmount()

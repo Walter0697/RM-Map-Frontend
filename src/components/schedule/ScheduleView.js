@@ -1047,7 +1047,7 @@ function ScheduleView({
             ...markerIntent,
             path: deepLinkScript.buildPath(markerIntent),
         }))
-        history.push('/markers/list')
+        history.push(`/markers/${markerId}`)
     }
 
     useEffect(() => {
