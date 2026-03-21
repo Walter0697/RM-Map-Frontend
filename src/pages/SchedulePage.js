@@ -311,24 +311,18 @@ function SchedulePage({
     }, [closeScheduleView, pagedScheduleController])
 
     React.useEffect(() => {
-        const pendingDeepLinkId = pendingDeepLink?.resourceType === deepLinkScript.resources.schedule
-            ? deepLinkScript.parsePositiveIntId(pendingDeepLink.id)
-            : null
+        if (!routeScheduleId) return
 
-        const targetScheduleId = routeScheduleId || pendingDeepLinkId
-        if (!targetScheduleId) return
-
-        resolveScheduleById(targetScheduleId, { forceListContext: true })
-    }, [routeScheduleId, pendingDeepLink, resolveScheduleById])
+        resolveScheduleById(routeScheduleId, { forceListContext: true })
+    }, [routeScheduleId, resolveScheduleById])
 
     React.useEffect(() => {
         if (!queryScheduleDate) return
         if (routeScheduleId) return
-        if (pendingDeepLink?.resourceType === deepLinkScript.resources.schedule) return
 
         resolveSchedulesByDate(queryScheduleDate)
         history.replace('/schedule')
-    }, [queryScheduleDate, routeScheduleId, pendingDeepLink, resolveSchedulesByDate, history])
+    }, [queryScheduleDate, routeScheduleId, resolveSchedulesByDate, history])
 
     React.useEffect(() => {
         if (scheduleViewStatus === 'success' && selectedSchedules.length === 0) {
