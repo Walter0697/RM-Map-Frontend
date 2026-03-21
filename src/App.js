@@ -47,6 +47,7 @@ function App() {
             <Route exact path='/login/oidc' component={OIDCLoginPage} />
             <Route path='/login' component={Login} />
             <Route path='/search' component={SearchPage} />
+            <Route exact path='/marker/:marker_id' component={MarkerPage} />
             <Route exact path='/markers/:marker_id' component={MarkerPage} />
             <Route path='/markers' component={MarkerPage} />
             <Route path='/home' component={HomePage} />

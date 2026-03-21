@@ -405,6 +405,24 @@ const toScheduleImageSrc = (item, eventtypes = []) => {
     return `${base}/${normalized}`
 }
 
+const resolveScheduleMarkerId = (item) => {
+    const candidates = [
+        item?.marker?.id,
+        item?.marker_id,
+        item?.markerId,
+        item?.selected_marker?.id,
+        item?.selected_marker_id,
+        item?.selectedMarkerId,
+    ]
+    for (let i = 0; i < candidates.length; i++) {
+        const parsed = Number(candidates[i])
+        if (Number.isInteger(parsed) && parsed > 0) {
+            return parsed
+        }
+    }
+    return null
+}
+
 function ScheduleItem({
     item,
     nextItem,
@@ -417,6 +435,7 @@ function ScheduleItem({
     isToday,
     onEditClick,
     onDeleteClick,
+    onOpenMarkerClick,
     onRoutePreviewClick,
     routePreviewLoading,
 }) {
@@ -506,6 +525,7 @@ function ScheduleItem({
         : (fallbackGapMinutes === null ? 'N/A' : formatMinutesCompact(fallbackGapMinutes))
     const lineHeight = 70
     const descriptionText = item?.description || item?.marker?.description || ''
+    const markerId = resolveScheduleMarkerId(item)
 
     const explanationText = (() => {
         if (!transition || transition.status === 'unavailable') {
@@ -718,6 +738,20 @@ function ScheduleItem({
             {item.movie && (
                 <div style={{ marginTop: '8px', fontSize: '13px', color: '#455295' }}>
                     Movie: {item.movie.label}
+                </div>
+            )}
+            {markerId && (
+                <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <Chip size='small' variant='outlined' label={`Marker ID: ${markerId}`} />
+                    <Button
+                        size='small'
+                        variant='outlined'
+                        startIcon={<LinkIcon fontSize='small' />}
+                        aria-label={`open marker ${markerId}`}
+                        onClick={() => onOpenMarkerClick && onOpenMarkerClick(markerId)}
+                    >
+                        Open Marker
+                    </Button>
                 </div>
             )}
             <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
@@ -998,6 +1032,11 @@ function ScheduleView({
         if (!window.confirm(`Do you want to remove ${schedule.label}`)) return
         setDeleting(schedule.id)
         removeScheduleGQL({ variables: { id: schedule.id } })
+    }
+
+    const onOpenMarkerClickHandler = (markerId) => {
+        if (!markerId) return
+        history.push(`/marker/${markerId}`)
     }
 
     useEffect(() => {
@@ -1740,6 +1779,7 @@ function ScheduleView({
                                                 isToday={isToday}
                                                 onEditClick={onEditClickHandler}
                                                 onDeleteClick={onDeleteClickHandler}
+                                                onOpenMarkerClick={onOpenMarkerClickHandler}
                                                 onRoutePreviewClick={onOpenRoutePreview}
                                                 routePreviewLoading={routePreviewLoading}
                                             />

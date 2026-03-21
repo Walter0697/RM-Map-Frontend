@@ -7,11 +7,23 @@ import dayjs from 'dayjs'
 
 import ScheduleView from './ScheduleView'
 
+const mockHistoryPush = jest.fn()
+
 jest.mock('@apollo/client', () => {
     const actual = jest.requireActual('@apollo/client')
     return {
         ...actual,
         useMutation: () => [jest.fn(), { data: null, loading: false, error: null }],
+    }
+})
+
+jest.mock('react-router-dom', () => {
+    const actual = jest.requireActual('react-router-dom')
+    return {
+        ...actual,
+        useHistory: () => ({
+            push: mockHistoryPush,
+        }),
     }
 })
 
@@ -22,6 +34,10 @@ function rootReducer(state = { auth: { jwt: '' } }, action) {
 }
 
 describe('ScheduleView layout contracts', () => {
+    beforeEach(() => {
+        mockHistoryPush.mockReset()
+    })
+
     test('renders schedule content and arrived action for today', () => {
         const store = configureStore({ reducer: rootReducer })
         const today = dayjs().format('YYYY-MM-DD')
@@ -164,6 +180,65 @@ describe('ScheduleView layout contracts', () => {
 
         const syncCall = fetchMock.mock.calls.find((call) => String(call[0]).includes('/calendar/schedules/2/sync-now'))
         expect(syncCall).toBeTruthy()
+
+        act(() => {
+            root.unmount()
+        })
+        container.remove()
+    })
+
+    test('renders open marker action when marker id exists and routes to marker page', () => {
+        const store = configureStore({ reducer: rootReducer })
+        const today = dayjs().format('YYYY-MM-DD')
+        const schedules = [
+            {
+                id: 3,
+                selected_date: `${today}T10:00:00Z`,
+                status: '',
+                image_path: '/test3.png',
+                label: 'Marker Route Item',
+                description: 'Has marker id',
+                marker: {
+                    id: 15,
+                    label: 'Marker 15',
+                    address: 'Address 15',
+                    restaurant: null,
+                },
+            },
+        ]
+
+        const container = document.createElement('div')
+        document.body.appendChild(container)
+        const root = createRoot(container)
+
+        act(() => {
+            root.render(
+                <Provider store={store}>
+                    <ScheduleView
+                        open={true}
+                        handleClose={() => {}}
+                        schedules={schedules}
+                        selected_date={today}
+                        activeScheduleId={3}
+                        fetchStatus='success'
+                        fetchError=''
+                        onRetry={() => {}}
+                        onRefresh={() => {}}
+                        openArriveForm={() => {}}
+                        openEditForm={() => {}}
+                    />
+                </Provider>
+            )
+        })
+
+        const markerButton = document.querySelector('button[aria-label="open marker 15"]')
+        expect(markerButton).toBeTruthy()
+
+        act(() => {
+            markerButton.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+        })
+
+        expect(mockHistoryPush).toHaveBeenCalledWith('/marker/15')
 
         act(() => {
             root.unmount()
