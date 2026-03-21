@@ -35,6 +35,10 @@ function StationMap({
     const [ activeImage, setActiveImage ] = useState(mapImage || '')
     const [ previousImage, setPreviousImage ] = useState(null)
     const [ activeOpacity, setActiveOpacity ] = useState(1)
+    const [ activeImageDimension, setActiveImageDimension ] = useState({
+        width: dimension.width,
+        height: dimension.height,
+    })
 
     useEffect(() => {
         const onResize = () => {
@@ -75,28 +79,38 @@ function StationMap({
         }
     ), [])
 
+    const renderDimension = useMemo(() => {
+        const width = Number(activeImageDimension?.width) || Number(dimension.width) || 1
+        const height = Number(activeImageDimension?.height) || Number(dimension.height) || 1
+        return { width, height }
+    }, [activeImageDimension, dimension])
+
     const expectedWidth = useMemo(() => {
         const viewportWidth = Math.max(320, viewport.width || 320)
         const viewportHeight = Math.max(480, viewport.height || 480)
         const horizontalRatio = isMobile ? 0.94 : 0.9
         const maxHeightRatio = isMobile ? 0.44 : 0.5
         const naturalWidth = Math.min(viewportWidth * horizontalRatio, 1200)
-        const naturalHeight = naturalWidth * (dimension.height / dimension.width)
+        const naturalHeight = naturalWidth * (renderDimension.height / renderDimension.width)
         const maxHeight = viewportHeight * maxHeightRatio
 
         if (naturalHeight <= maxHeight) {
             return naturalWidth
         }
-        return maxHeight * (dimension.width / dimension.height)
-    }, [dimension, isMobile, viewport])
+        return maxHeight * (renderDimension.width / renderDimension.height)
+    }, [renderDimension, isMobile, viewport])
 
     const expectedHeight = useMemo(() => (
-        expectedWidth * (dimension.height / dimension.width)
-    ), [dimension, expectedWidth])
+        expectedWidth * (renderDimension.height / renderDimension.width)
+    ), [renderDimension, expectedWidth])
 
-    const ratio = useMemo(() => {
-        return expectedWidth / dimension.width
-    }, [expectedWidth, dimension])
+    const ratioX = useMemo(() => (
+        expectedWidth / renderDimension.width
+    ), [expectedWidth, renderDimension])
+
+    const ratioY = useMemo(() => (
+        expectedHeight / renderDimension.height
+    ), [expectedHeight, renderDimension])
 
     const onUpdate = useCallback(({ x, y, scale }) => {
         const element = elementRef.current
@@ -107,7 +121,15 @@ function StationMap({
         }
     }, [])
 
-    const onActiveImageLoaded = () => {
+    const onActiveImageLoaded = (event) => {
+        const img = event?.target
+        if (img?.naturalWidth && img?.naturalHeight) {
+            setActiveImageDimension({
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+            })
+        }
+
         // Force a frame boundary so cached-image loads still animate visibly.
         window.requestAnimationFrame(() => {
             setActiveOpacity(1)
@@ -177,7 +199,8 @@ function StationMap({
                         <StationButton
                             key={index}
                             position={{ x: station.photo_x, y: station.photo_y}}
-                            ratio={ratio}
+                            ratioX={ratioX}
+                            ratioY={ratioY}
                             size={5}
                             active={station.active}
                             value={station.identifier}
