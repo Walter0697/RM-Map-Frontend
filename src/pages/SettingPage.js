@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
+import { useHistory } from 'react-router-dom'
 import Base from './Base'
 
 import { useQuery, useLazyQuery } from '@apollo/client'
@@ -101,6 +102,7 @@ function SettingPage({
     const [ calendarProviderStatus, setCalendarProviderStatus ] = useState('')
     const [ calendarProviderLoading, setCalendarProviderLoading ] = useState(false)
     const [ calendarProviderActionLoading, setCalendarProviderActionLoading ] = useState(false)
+    const history = useHistory()
 
     // graphql request
     const { data: preferenceData, loading: preferenceLoading, error: preferenceError } = useQuery(graphql.users.preference, { errorPolicy: 'all', fetchPolicy: 'no-cache' })
@@ -320,6 +322,10 @@ function SettingPage({
         }
     }
 
+    const openSavedTravelPlans = () => {
+        history.replace('/travel-plans')
+    }
+
     const openPreferredPinForm = (pin) => {
         setPreferredPin(pin)
         setPreferredPinFormOpen(true)
@@ -453,6 +459,7 @@ function SettingPage({
                 openReminderTimeForm={openReminderTimeForm}
                 openTalkToRoroadBot={openTalkToRoroadBot}
                 showTalkToRoroadBot={!!validateTelegramBotURL(telegramBotURL)}
+                openSavedTravelPlans={openSavedTravelPlans}
             />
             <RelationSearchForm
                 open={isRelationFormOpen}
