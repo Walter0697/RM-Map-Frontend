@@ -38,6 +38,7 @@ import OpacityIcon from '@mui/icons-material/Opacity'
 import SensorsIcon from '@mui/icons-material/Sensors'
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined'
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined'
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined'
 
 import useBoop from '../../hooks/useBoop'
 
@@ -46,6 +47,7 @@ import RestaurantCard from '../card/RestaurantCard'
 
 import constants from '../../constant'
 import actions from '../../store/actions'
+import deepLinkScript from '../../scripts/deepLink'
 import graphql from '../../graphql'
 
 import dayjs from 'dayjs'
@@ -743,15 +745,16 @@ function ScheduleItem({
             {markerId && (
                 <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <Chip size='small' variant='outlined' label={`Marker ID: ${markerId}`} />
-                    <Button
-                        size='small'
-                        variant='outlined'
-                        startIcon={<LinkIcon fontSize='small' />}
-                        aria-label={`open marker ${markerId}`}
-                        onClick={() => onOpenMarkerClick && onOpenMarkerClick(markerId)}
-                    >
-                        Open Marker
-                    </Button>
+                    <Tooltip title='Open Marker In List View'>
+                        <IconButton
+                            size='small'
+                            aria-label={`open marker ${markerId}`}
+                            onClick={() => onOpenMarkerClick && onOpenMarkerClick(markerId)}
+                            sx={{ border: '1px solid #b8cbe4', borderRadius: '8px' }}
+                        >
+                            <PlaceOutlinedIcon fontSize='small' />
+                        </IconButton>
+                    </Tooltip>
                 </div>
             )}
             <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
@@ -1036,7 +1039,15 @@ function ScheduleView({
 
     const onOpenMarkerClickHandler = (markerId) => {
         if (!markerId) return
-        history.push(`/marker/${markerId}`)
+        const markerIntent = {
+            resourceType: deepLinkScript.resources.marker,
+            id: `${markerId}`,
+        }
+        dispatch(actions.setDeepLinkIntent({
+            ...markerIntent,
+            path: deepLinkScript.buildPath(markerIntent),
+        }))
+        history.push('/markers/list')
     }
 
     useEffect(() => {
