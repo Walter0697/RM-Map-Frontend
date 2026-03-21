@@ -195,19 +195,6 @@ function TravelPlanPage({
                                             </Typography>
                                         </Stack>
                                     </div>
-                                    <span
-                                        style={{
-                                            border: '1px solid #1f2f6f',
-                                            color: '#1f2f6f',
-                                            backgroundColor: '#ffffff',
-                                            borderRadius: '4px',
-                                            padding: '4px 8px',
-                                            fontSize: '12px',
-                                            fontWeight: 500,
-                                        }}
-                                    >
-                                        View details
-                                    </span>
                                 </Button>
                             </WrapperBox>
                         ))}
