@@ -35,14 +35,29 @@ const getPersistedDeepLinkState = () => {
   }
 }
 
+const getPersistedStationState = () => {
+  const showInMap = readJSON(localStorage.getItem('rm_station_show_in_map'))
+  if (!showInMap || typeof showInMap !== 'object') return {}
+  return {
+    station: {
+      showInMap: {
+        searchMap: Boolean(showInMap.searchMap),
+        markerMap: Boolean(showInMap.markerMap),
+      },
+    },
+  }
+}
+
 if (process.env.REACT_APP_ENV === 'development') {
   const persistedAuthState = getPersistedAuthState()
   const persistedDeepLinkState = getPersistedDeepLinkState()
+  const persistedStationState = getPersistedStationState()
   const devState = readJSON(localStorage.getItem('reduxState'), {})
   const defaultValues = {
     ...devState,
     ...persistedAuthState,
     ...persistedDeepLinkState,
+    ...persistedStationState,
   }
 
   const showDevTools = process.env.REACT_APP_ENV === 'development'
@@ -57,6 +72,7 @@ if (process.env.REACT_APP_ENV === 'development') {
   store = createStore(combinedReducers, {
     ...getPersistedAuthState(),
     ...getPersistedDeepLinkState(),
+    ...getPersistedStationState(),
   })
 }
 
@@ -74,6 +90,12 @@ store.subscribe(() => {
   } else {
     sessionStorage.removeItem('rm_deeplink_intent')
   }
+
+  const showInMap = state?.station?.showInMap || {}
+  localStorage.setItem('rm_station_show_in_map', JSON.stringify({
+    searchMap: Boolean(showInMap.searchMap),
+    markerMap: Boolean(showInMap.markerMap),
+  }))
 })
 
 export default store
