@@ -76,6 +76,7 @@ function SettingPage({
     dispatch,
     jwt,
 }) {
+    const history = useHistory()
     // form open state
     const [ isRelationFormOpen, setRelationFormOpen ] = useState(false)
     const [ isPreferredPinFormOpen, setPreferredPinFormOpen ] = useState(false)
@@ -102,7 +103,6 @@ function SettingPage({
     const [ calendarProviderStatus, setCalendarProviderStatus ] = useState('')
     const [ calendarProviderLoading, setCalendarProviderLoading ] = useState(false)
     const [ calendarProviderActionLoading, setCalendarProviderActionLoading ] = useState(false)
-    const history = useHistory()
 
     // graphql request
     const { data: preferenceData, loading: preferenceLoading, error: preferenceError } = useQuery(graphql.users.preference, { errorPolicy: 'all', fetchPolicy: 'no-cache' })

@@ -14,6 +14,7 @@ import MarkerPage from './pages/MarkerPage'
 import HomePage from './pages/HomePage'
 import SchedulePage from './pages/SchedulePage'
 import SettingPage from './pages/SettingPage'
+import TravelPlansPage from './pages/TravelPlansPage'
 
 import PreviousMarkerPage from './pages/PreviousMarkerPage'
 import ExpiredMarkerPage from './pages/ExpiredMarkerPage'
@@ -22,7 +23,6 @@ import FavouriteMoviePage from './pages/FavouriteMoviePage'
 import StationPage from './pages/StationPage'
 import CountryPage from './pages/CountryPage'
 import WatchedMoviePage from './pages/WatchedMoviePage'
-import TravelPlanPage from './pages/TravelPlanPage'
 
 import MarkerFilterPage from './pages/MarkerFilterPage'
 
@@ -55,6 +55,7 @@ function App() {
             <Route exact path='/schedules/:schedule_id' component={SchedulePage} />
             <Route path='/schedule' component={SchedulePage} />
             <Route path='/setting' component={SettingPage} />
+            <Route path='/travel-plans' component={TravelPlansPage} />
 
             <Route path='/previous' component={PreviousMarkerPage} />
             <Route path='/expired' component={ExpiredMarkerPage} />
@@ -63,7 +64,6 @@ function App() {
             <Route path='/station' component={StationPage} />
             <Route path='/country' component={CountryPage} />
             <Route path='/watchedmovies' component={WatchedMoviePage} />
-            <Route path='/travel-plans' component={TravelPlanPage} />
 
             <Route path='/filter' component={MarkerFilterPage} />
 
