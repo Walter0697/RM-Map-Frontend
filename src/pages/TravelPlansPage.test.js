@@ -48,12 +48,19 @@ describe('TravelPlansPage', () => {
             .mockImplementationOnce(() => jsonResponse({
                 items: [{ id: 1, title: 'Tokyo Plan', start_date: '2026-03-20', end_date: '2026-03-25' }],
             }))
+            .mockImplementationOnce(() => jsonResponse({
+                id: 1,
+                title: 'Tokyo Plan',
+                daily_plans: [],
+            }))
             .mockImplementationOnce(() => jsonResponse({ deleted: true, entity: 'travel_plan', id: 1 }))
             .mockImplementationOnce(() => jsonResponse({ items: [] }))
 
         setup()
 
         await waitFor(() => expect(screen.getByText('Tokyo Plan')).toBeInTheDocument())
+        fireEvent.click(screen.getByText('Tokyo Plan'))
+        await waitFor(() => expect(screen.getByText('No items.')).toBeInTheDocument())
         fireEvent.click(screen.getByText('Delete Plan'))
 
         await waitFor(() => {
@@ -89,9 +96,9 @@ describe('TravelPlansPage', () => {
         setup()
 
         await waitFor(() => expect(screen.getByText('Kyoto Plan')).toBeInTheDocument())
-        fireEvent.click(screen.getByText('Load Items'))
+        fireEvent.click(screen.getByText('Kyoto Plan'))
 
-        await waitFor(() => expect(screen.getByText('Day 1: Arashiyama walk')).toBeInTheDocument())
+        await waitFor(() => expect(screen.getByText('Day 1 · 2026-04-01')).toBeInTheDocument())
         fireEvent.click(screen.getByText('Delete Item'))
 
         await waitFor(() => {
