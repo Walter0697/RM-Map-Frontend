@@ -23,7 +23,7 @@ import SectionHeader from './settings/SectionHeader'
 
 import TagIcon from '@mui/icons-material/Tag'
 import MapIcon from '@mui/icons-material/Map'
-import TheatersIcon from '@mui/icons-material/Theaters'
+import ListAltIcon from '@mui/icons-material/ListAlt'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone'
 import SmartToyIcon from '@mui/icons-material/SmartToy'
@@ -52,7 +52,7 @@ function SettingList({
   openReminderTimeForm,
   openTalkToRoroadBot,
   showTalkToRoroadBot,
-  openTravelPlans,
+  openSavedTravelPlans,
 }) {
   const history = useHistory()
 
@@ -70,10 +70,6 @@ function SettingList({
 
   const onWatchedMovieListClick = () => {
     history.replace('/watchedmovies')
-  }
-
-  const onTravelPlansClick = () => {
-    openTravelPlans()
   }
 
   return (
@@ -245,26 +241,17 @@ function SettingList({
           marginBottom={'15px'}
         >
           <SectionHeader
-            title={'Travel'}
-            icon={<MapIcon />}
+            title={'List'}
+            icon={<ListAltIcon />}
           />
         </WrapperBox>
         <WrapperBox
             height={30}
-            marginBottom={'30px'}
+            marginBottom={'15px'}
         >
             <TravelPlansButton
-                onClickHandler={onTravelPlansClick}
+                onClickHandler={openSavedTravelPlans}
             />
-        </WrapperBox>
-        <WrapperBox
-          height={50}
-          marginBottom={'15px'}
-        >
-          <SectionHeader
-            title={'Movies'}
-            icon={<TheatersIcon />}
-          />
         </WrapperBox>
         <WrapperBox
             height={30}

@@ -144,6 +144,23 @@ test('list-open action wiring remains stable with dialog lifecycle controls', as
     })
 })
 
+test('plain schedule route does not auto-open from pending deep link intent', async () => {
+    const { lazyFn } = setup({
+        route: '/schedule',
+        pendingDeepLink: {
+            resourceType: 'schedule',
+            id: '2',
+            path: '/schedules/2',
+        },
+        scheduleItems: [baseSchedule],
+    })
+
+    await waitFor(() => {
+        expect(screen.getByText('open:no')).toBeInTheDocument()
+    })
+    expect(lazyFn).not.toHaveBeenCalled()
+})
+
 test('deep-link-open lifecycle parity supports close retry and refresh', async () => {
     setup({ route: '/schedules/2', scheduleItems: [baseSchedule] })
 

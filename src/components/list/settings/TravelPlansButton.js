@@ -1,7 +1,5 @@
 import React from 'react'
-import {
-    Button
-} from '@mui/material'
+import { Button } from '@mui/material'
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff'
 
 function TravelPlansButton({
@@ -18,10 +16,18 @@ function TravelPlansButton({
                 boxShadow: '2px 2px 6px',
                 textTransform: 'none',
                 color: '#1c76d2',
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '10px',
+                paddingLeft: '12px',
+                paddingRight: '12px',
             }}
             onClick={onClickHandler}
         >
-            <FlightTakeoffIcon sx={{ marginRight: '15px' }} /> Travel Plans
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <FlightTakeoffIcon />
+                Saved Travel Plans
+            </span>
         </Button>
     )
 }

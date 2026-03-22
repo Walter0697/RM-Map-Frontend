@@ -103,6 +103,7 @@ function SettingPage({
     const [ calendarProviderStatus, setCalendarProviderStatus ] = useState('')
     const [ calendarProviderLoading, setCalendarProviderLoading ] = useState(false)
     const [ calendarProviderActionLoading, setCalendarProviderActionLoading ] = useState(false)
+    const history = useHistory()
 
     // graphql request
     const { data: preferenceData, loading: preferenceLoading, error: preferenceError } = useQuery(graphql.users.preference, { errorPolicy: 'all', fetchPolicy: 'no-cache' })
@@ -299,10 +300,6 @@ function SettingPage({
         }
     }
 
-    const openTravelPlans = () => {
-        history.replace('/travel-plans')
-    }
-
     const openGoogleCalendarConnect = () => {
         const target = backend.withBasePath(`calendar/google/connect?token=${encodeURIComponent(jwt || '')}`)
         window.location.href = target
@@ -324,6 +321,10 @@ function SettingPage({
         } finally {
             setCalendarProviderActionLoading(false)
         }
+    }
+
+    const openSavedTravelPlans = () => {
+        history.replace('/travel-plans')
     }
 
     const openPreferredPinForm = (pin) => {
@@ -459,7 +460,7 @@ function SettingPage({
                 openReminderTimeForm={openReminderTimeForm}
                 openTalkToRoroadBot={openTalkToRoroadBot}
                 showTalkToRoroadBot={!!validateTelegramBotURL(telegramBotURL)}
-                openTravelPlans={openTravelPlans}
+                openSavedTravelPlans={openSavedTravelPlans}
             />
             <RelationSearchForm
                 open={isRelationFormOpen}

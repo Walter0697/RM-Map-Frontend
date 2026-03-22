@@ -3,19 +3,20 @@ import React, { useMemo } from 'react'
 function StationButton({
     position,
     size,
-    ratio, 
+    ratioX,
+    ratioY,
     active,
     value,
     onClickHandler,
 }) {
 
     const top = useMemo(() => {
-        return (position.y * ratio) - size / 2
-    }, [position, size, ratio])
+        return (position.y * ratioY) - size / 2
+    }, [position, size, ratioY])
 
     const left = useMemo(() => {
-        return (position.x * ratio) - size / 2
-    }, [position, size, ratio])
+        return (position.x * ratioX) - size / 2
+    }, [position, size, ratioX])
     
     if (active) {
         return (
