@@ -21,6 +21,7 @@ import {
     Typography,
 } from '@mui/material'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
+import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import DeleteIcon from '@mui/icons-material/Delete'
 import DownloadIcon from '@mui/icons-material/Download'
@@ -40,6 +41,7 @@ const defaultDimension = {
     width: 2000,
     height: 1322,
 }
+const mapMinZoom = 0.2
 
 const createLineDraft = () => ({
     id: 0,
@@ -116,6 +118,7 @@ function TrainStationManage({ jwt }) {
     const imageRef = useRef(null)
     const mapContentRef = useRef(null)
     const pinchZoomRef = useRef(null)
+    const transformRef = useRef({ x: 0, y: 0, scale: 1 })
     const uploadRef = useRef(null)
     const importRef = useRef(null)
     const [ imageMetric, setImageMetric ] = useState({
@@ -165,7 +168,14 @@ function TrainStationManage({ jwt }) {
     const onZoomUpdate = ({ x, y, scale }) => {
         const element = mapContentRef.current
         if (!element) return
+        transformRef.current = { x, y, scale }
         element.style.setProperty('transform', makeTransformValue({ x, y, scale }))
+    }
+
+    const resetMapView = () => {
+        if (!pinchZoomRef.current) return
+        pinchZoomRef.current.scaleTo({ x: 0, y: 0, scale: 1 })
+        transformRef.current = { x: 0, y: 0, scale: 1 }
     }
 
     const normalizeCatalogFromStations = (stationList) => {
@@ -305,9 +315,7 @@ function TrainStationManage({ jwt }) {
     }, [])
 
     useEffect(() => {
-        if (pinchZoomRef.current) {
-            pinchZoomRef.current.scaleTo({ x: 0, y: 0, scale: 1 })
-        }
+        resetMapView()
     }, [currentMap])
 
     const getMapCoordinates = (clientX, clientY) => {
@@ -894,6 +902,8 @@ function TrainStationManage({ jwt }) {
                             <QuickPinchZoom
                                 ref={pinchZoomRef}
                                 draggableUnzoomed={false}
+                                minZoom={mapMinZoom}
+                                zoomOutFactor={mapMinZoom}
                                 onUpdate={onZoomUpdate}
                             >
                                 <div
@@ -933,6 +943,30 @@ function TrainStationManage({ jwt }) {
                                     })}
                                 </div>
                             </QuickPinchZoom>
+                            <IconButton
+                                aria-label='Reset map view'
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    resetMapView()
+                                }}
+                                size='small'
+                                sx={{
+                                    position: 'absolute',
+                                    right: 12,
+                                    bottom: 12,
+                                    width: 36,
+                                    height: 36,
+                                    border: '1px solid #d1deec',
+                                    backgroundColor: '#ffffff',
+                                    color: '#123',
+                                    zIndex: 3,
+                                    '&:hover': {
+                                        backgroundColor: '#f2f7fc',
+                                    },
+                                }}
+                            >
+                                <CenterFocusStrongIcon fontSize='small' />
+                            </IconButton>
                         </Box>
                     </Stack>
                 </CardContent>
