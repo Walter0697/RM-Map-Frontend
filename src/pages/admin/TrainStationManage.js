@@ -508,6 +508,41 @@ function TrainStationManage({ jwt }) {
         }
     }
 
+    const onDeleteStation = async () => {
+        if (!stationDraft || !currentMap) return
+        const identifier = (stationDraft.identifier || '').trim()
+        if (!identifier) return
+
+        const isPersistedStation = stations.some((item) => item.identifier === identifier)
+        if (!window.confirm(`Delete station ${identifier}?`)) return
+
+        if (!isPersistedStation) {
+            setSelectedStation(null)
+            setStationDraft(null)
+            setOriginalDraft(null)
+            setStationLineItems([])
+            setAlertMessage('Draft removed')
+            triggerAlert()
+            return
+        }
+
+        setErrorMessage('')
+        try {
+            const resp = await authorizedFetch(`admin/stations/${encodeURIComponent(currentMap)}/${encodeURIComponent(identifier)}`, {
+                method: 'DELETE',
+            })
+            if (!resp.ok) {
+                setErrorMessage(`Failed to delete station: ${await parseError(resp)}`)
+                return
+            }
+            setAlertMessage('Station deleted')
+            triggerAlert()
+            await loadMapData(currentMap)
+        } catch (e) {
+            setErrorMessage(`Failed to delete station: ${e.message}`)
+        }
+    }
+
     const onExportJSON = async () => {
         if (!currentMap) return
         setErrorMessage('')
@@ -1049,6 +1084,9 @@ function TrainStationManage({ jwt }) {
                             </Button>
                             <Button className='admin-action-button' variant='outlined' startIcon={<UndoIcon />} disabled={!originalDraft} onClick={resetStationDraft}>
                                 Cancel Changes
+                            </Button>
+                            <Button className='admin-action-button' variant='outlined' color='error' startIcon={<DeleteIcon />} disabled={!stationDraft || !currentMap} onClick={onDeleteStation}>
+                                Delete Station
                             </Button>
                         </Stack>
                     </Stack>
