@@ -11,6 +11,7 @@ import ReleaseNoteButton from './settings/ReleaseNoteButton'
 import PreviousMarkerButton from './settings/PreviousMarkerButton'
 import ExpiredMarkerButton from './settings/ExpiredMarkerButton'
 import WatchedMovieListButton from './settings/WatchedMovieListButton'
+import TravelPlansButton from './settings/TravelPlansButton'
 import PreviewDisplayPinButton from './settings/PreviewDisplayPinButton'
 import GoogleCalendarConnectionButton from './settings/GoogleCalendarConnectionButton'
 import ReminderTimeButton from './settings/ReminderTimeButton'
@@ -51,6 +52,7 @@ function SettingList({
   openReminderTimeForm,
   openTalkToRoroadBot,
   showTalkToRoroadBot,
+  openTravelPlans,
 }) {
   const history = useHistory()
 
@@ -68,6 +70,10 @@ function SettingList({
 
   const onWatchedMovieListClick = () => {
     history.replace('/watchedmovies')
+  }
+
+  const onTravelPlansClick = () => {
+    openTravelPlans()
   }
 
   return (
@@ -233,6 +239,23 @@ function SettingList({
             reminderTime={reminderTime}
             onClickHandler={openReminderTimeForm}
           />
+        </WrapperBox>
+        <WrapperBox
+          height={50}
+          marginBottom={'15px'}
+        >
+          <SectionHeader
+            title={'Travel'}
+            icon={<MapIcon />}
+          />
+        </WrapperBox>
+        <WrapperBox
+            height={30}
+            marginBottom={'30px'}
+        >
+            <TravelPlansButton
+                onClickHandler={onTravelPlansClick}
+            />
         </WrapperBox>
         <WrapperBox
           height={50}

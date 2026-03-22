@@ -37,6 +37,12 @@
   - Auth/API key: `${REACT_APP_BACKEND_BASE_URL}/auth`
   - Image links: `${REACT_APP_BACKEND_BASE_URL}`
 
+### Travel Plan Delete UX
+- New settings entry: `Travel Plans` opens `/travel-plans`.
+- Each plan includes a `Delete Plan` action with confirmation prompt.
+- Each daily item includes a `Delete Item` action with confirmation prompt.
+- After either delete action succeeds, UI refreshes list/detail so soft-deleted records disappear from active view.
+
 ### Security Note for TomTom Key
 - Even if stored in GitHub Secrets, this key is embedded into the browser bundle at build time.
 - Treat it as managed public configuration, not a confidential secret.

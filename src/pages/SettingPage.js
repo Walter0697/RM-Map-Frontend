@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
+import { useHistory } from 'react-router-dom'
 import Base from './Base'
 
 import { useQuery, useLazyQuery } from '@apollo/client'
@@ -75,6 +76,7 @@ function SettingPage({
     dispatch,
     jwt,
 }) {
+    const history = useHistory()
     // form open state
     const [ isRelationFormOpen, setRelationFormOpen ] = useState(false)
     const [ isPreferredPinFormOpen, setPreferredPinFormOpen ] = useState(false)
@@ -297,6 +299,10 @@ function SettingPage({
         }
     }
 
+    const openTravelPlans = () => {
+        history.replace('/travel-plans')
+    }
+
     const openGoogleCalendarConnect = () => {
         const target = backend.withBasePath(`calendar/google/connect?token=${encodeURIComponent(jwt || '')}`)
         window.location.href = target
@@ -453,6 +459,7 @@ function SettingPage({
                 openReminderTimeForm={openReminderTimeForm}
                 openTalkToRoroadBot={openTalkToRoroadBot}
                 showTalkToRoroadBot={!!validateTelegramBotURL(telegramBotURL)}
+                openTravelPlans={openTravelPlans}
             />
             <RelationSearchForm
                 open={isRelationFormOpen}
