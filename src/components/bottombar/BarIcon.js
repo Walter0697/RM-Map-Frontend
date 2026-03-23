@@ -1,7 +1,7 @@
 import React from 'react'
 import {
     useTransition,
-    animated
+    animated,
 } from '@react-spring/web'
 
 import IconButton from '@mui/material/IconButton'
@@ -15,12 +15,12 @@ function BarIcon({
 }) {
 
     const transitions = useTransition(path, {
-        from: { size: 0, opacity: 0 },
-        enter: { size: 1, opacity: 1 },
-        leave: { size: 0, opacity: 0 },
+        from: { scale: 0.96, opacity: 0 },
+        enter: { scale: 1, opacity: 1 },
+        leave: { scale: 0.96, opacity: 0 },
         config: {
             tension: 293,
-            friction: 15
+            friction: 15,
         },
     })
 
@@ -28,19 +28,16 @@ function BarIcon({
         setPath(route)
     }
 
-    return transitions(({ size, opacity }, item) => 
+    return transitions(({ scale, opacity }, item) =>
         (item.includes(route)) ? (
             <animated.div
                 style={{
                     position: 'absolute',
-                    scale: size.to({
-                        range: [0, 0.5, 1],
-                        output: [1, 3, 2],
-                    }),
-                    opacity: opacity.to({
-                        range: [0, 1],
-                        output: [0, 1],
-                    }),
+                    top: '50%',
+                    left: '50%',
+                    transform: scale.to((value) => `translate3d(-50%, -50%, 0) scale(${value})`),
+                    opacity,
+                    willChange: 'transform, opacity',
                 }}
             >
                 <IconButton size='large'>
@@ -51,15 +48,18 @@ function BarIcon({
             <animated.div
                 style={{
                     position: 'absolute',
-                    opacity: opacity.to({
-                        range: [0, 1],
-                        output: [0, 1],
-                    }),
+                    top: '50%',
+                    left: '50%',
+                    transform: scale.to((value) => `translate3d(-50%, -50%, 0) scale(${value})`),
+                    opacity,
+                    willChange: 'transform, opacity',
                 }}
             >
-                <IconButton size='large'
-                    onClick={() => redirectTo()}>
-                        {inactiveIcon}
+                <IconButton
+                    size='large'
+                    onClick={() => redirectTo()}
+                >
+                    {inactiveIcon}
                 </IconButton>
             </animated.div>
         )
