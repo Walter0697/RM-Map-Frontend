@@ -297,6 +297,7 @@ function TodayList({
     const [ smallDisplayMarkers, setSmallMarkers ] = useState([])
     const [ contentOpacity, setContentOpacity ] = useState(1)
     const cycleTimerRef = useRef(null)
+    const fadeDurationMs = 1000
 
     const primaryDisplayList = useMemo(() => (
         bigImageMarkers.length > 0 ? bigImageMarkers : (list || []).slice(0, 2)
@@ -327,7 +328,7 @@ function TodayList({
                 window.requestAnimationFrame(() => {
                     setContentOpacity(1)
                 })
-            }, 180)
+            }, fadeDurationMs)
         }
 
         if (filteredList.length > 2) {
@@ -402,7 +403,7 @@ function TodayList({
                 style={{
                     width: '100%',
                     opacity: contentOpacity,
-                    transition: 'opacity 1000ms ease-in-out',
+                    transition: `opacity ${fadeDurationMs}ms ease-in-out`,
                     willChange: 'opacity',
                 }}
             >
