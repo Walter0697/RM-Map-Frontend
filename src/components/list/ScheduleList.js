@@ -402,7 +402,7 @@ function TodayList({
                 style={{
                     width: '100%',
                     opacity: contentOpacity,
-                    transition: 'opacity 650ms ease-in-out',
+                    transition: 'opacity 1000ms ease-in-out',
                     willChange: 'opacity',
                 }}
             >
