@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { connect } from 'react-redux'
+import { useTransition, animated, easings } from '@react-spring/web'
 import backend from '../../constant/backend'
 import { 
     Grid,
@@ -76,6 +77,97 @@ const toScheduleImageSrc = (rawPath) => {
     }
 
     return `${base}/${normalized}`
+}
+
+function CrossfadeScheduleImage({
+    item,
+    eventtypes,
+    boxHeight,
+    boxWidth,
+    borderRadius,
+    imageWidth = '100%',
+    imageHeight = '100%',
+}) {
+    const nextSrc = useMemo(() => {
+        if (!item) return ''
+        return toScheduleImageSrc(getScheduleImagePath(item, eventtypes))
+    }, [item, eventtypes])
+
+    const [ currentSrc, setCurrentSrc ] = useState(nextSrc)
+    const [ previousSrc, setPreviousSrc ] = useState('')
+    const [ isAnimating, setIsAnimating ] = useState(false)
+
+    useEffect(() => {
+        if (!nextSrc || nextSrc === currentSrc) return
+
+        setPreviousSrc(currentSrc || '')
+        setCurrentSrc(nextSrc)
+        setIsAnimating(true)
+
+        const frame = window.requestAnimationFrame(() => {
+            setIsAnimating(false)
+        })
+        const cleanupTimer = window.setTimeout(() => {
+            setPreviousSrc('')
+        }, 360)
+
+        return () => {
+            window.cancelAnimationFrame(frame)
+            window.clearTimeout(cleanupTimer)
+        }
+    }, [nextSrc, currentSrc])
+
+    return (
+        <div
+            style={{
+                width: boxWidth,
+                maxWidth: boxWidth,
+                height: boxHeight,
+                borderRadius,
+                backgroundColor: 'transparent',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                overflow: 'hidden',
+                position: 'relative',
+            }}
+        >
+            {previousSrc ? (
+                <img
+                    src={previousSrc}
+                    style={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: imageWidth,
+                        height: imageHeight,
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        objectFit: 'contain',
+                        opacity: isAnimating ? 1 : 0,
+                        transition: 'opacity 320ms ease-in-out',
+                        pointerEvents: 'none',
+                    }}
+                />
+            ) : null}
+            {currentSrc ? (
+                <img
+                    src={currentSrc}
+                    style={{
+                        position: previousSrc ? 'absolute' : 'static',
+                        inset: previousSrc ? 0 : 'auto',
+                        width: imageWidth,
+                        height: imageHeight,
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        objectFit: 'contain',
+                        opacity: previousSrc ? (isAnimating ? 0 : 1) : 1,
+                        transition: previousSrc ? 'opacity 320ms ease-in-out' : 'none',
+                        pointerEvents: 'none',
+                    }}
+                />
+            ) : null}
+        </div>
+    )
 }
 
 function ScheduleItem({
@@ -164,29 +256,15 @@ function ScheduleItem({
                                 marginRight: '8px',
                             }}
                         >
-                            <div
-                                style={{
-                                    height: '50px',
-                                    width: '50px',
-                                    overflow: 'hidden',
-                                    borderRadius: '5px',
-                                    backgroundColor: 'transparent',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <img
-                                    width='50px'
-                                    height='50px'
-                                    src={toScheduleImageSrc(sche.image_path)}
-                                    style={{
-                                        maxHeight: '100%',
-                                        maxWidth: '100%',
-                                        objectFit: 'contain',
-                                    }}
-                                />
-                            </div>
+                            <CrossfadeScheduleImage
+                                item={sche}
+                                eventtypes={eventtypes}
+                                boxHeight='50px'
+                                boxWidth='50px'
+                                borderRadius='5px'
+                                imageWidth='50px'
+                                imageHeight='50px'
+                            />
                         </div>
                     ))}
                 </Grid>
@@ -203,6 +281,16 @@ function TodayList({
 }) {
     const [ bigImageMarkers, setBigMarkers ] = useState([]) // select two markers to display it big
     const [ smallDisplayMarkers, setSmallMarkers ] = useState([])
+    const [ contentOpacity, setContentOpacity ] = useState(1)
+    const cycleTimerRef = useRef(null)
+    const fadeDurationMs = 1000
+
+    const primaryDisplayList = useMemo(() => (
+        bigImageMarkers.length > 0 ? bigImageMarkers : (list || []).slice(0, 2)
+    ), [bigImageMarkers, list])
+    const secondaryDisplayList = useMemo(() => (
+        smallDisplayMarkers.length > 0 ? smallDisplayMarkers : (list || []).slice(2, 8)
+    ), [smallDisplayMarkers, list])
 
     useEffect(() => {
         let timer = null
@@ -219,15 +307,29 @@ function TodayList({
             .filter(Boolean)
         setRandomBigImageMarker(filteredList)
 
+        const runAnimatedCycle = () => {
+            setContentOpacity(0)
+            cycleTimerRef.current = window.setTimeout(() => {
+                setRandomBigImageMarker(filteredList)
+                window.requestAnimationFrame(() => {
+                    setContentOpacity(1)
+                })
+            }, fadeDurationMs)
+        }
+
         if (filteredList.length > 2) {
             timer = window.setInterval(() => {
-                setRandomBigImageMarker(filteredList)
+                runAnimatedCycle()
             }, 5000)
         }
 
         return () => {
             if (timer) {
                 window.clearInterval(timer)
+            }
+            if (cycleTimerRef.current) {
+                window.clearTimeout(cycleTimerRef.current)
+                cycleTimerRef.current = null
             }
         }
     }, [imageList, list, eventtypes])
@@ -282,12 +384,13 @@ function TodayList({
                 </Grid>
             )
         }
-        const primaryDisplayList = bigImageMarkers.length > 0 ? bigImageMarkers : (list || []).slice(0, 2)
-        const secondaryDisplayList = smallDisplayMarkers.length > 0 ? smallDisplayMarkers : (list || []).slice(2, 8)
         return (
             <div
                 style={{
                     width: '100%',
+                    opacity: contentOpacity,
+                    transition: `opacity ${fadeDurationMs}ms ease-in-out`,
+                    willChange: 'opacity',
                 }}
             >
                 <Grid 
@@ -319,26 +422,13 @@ function TodayList({
                                         alignItems: 'flex-start',
                                     }}>
                                         {getScheduleImagePath(primaryDisplayList[0], eventtypes) && (
-                                            <div style={{
-                                                width: '100%',
-                                                maxWidth: '100%',
-                                                height: '136px',
-                                                borderRadius: '8px',
-                                                backgroundColor: 'transparent',
-                                                display: 'flex',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                overflow: 'hidden',
-                                            }}>
-                                                <img
-                                                    src={toScheduleImageSrc(getScheduleImagePath(primaryDisplayList[0], eventtypes))}
-                                                    style={{
-                                                        maxHeight: '100%',
-                                                        maxWidth: '100%',
-                                                        objectFit: 'contain',
-                                                    }}
-                                                />
-                                            </div>
+                                            <CrossfadeScheduleImage
+                                                item={primaryDisplayList[0]}
+                                                eventtypes={eventtypes}
+                                                boxHeight='136px'
+                                                boxWidth='100%'
+                                                borderRadius='8px'
+                                            />
                                         )}
                                     </div>
                                     <div style={{ marginTop: '10px', fontSize: '13px', textAlign: 'left', paddingRight: '10px' }}>
@@ -368,26 +458,13 @@ function TodayList({
                                         alignItems: 'flex-start',
                                     }}>
                                         {getScheduleImagePath(primaryDisplayList[1], eventtypes) && (
-                                            <div style={{
-                                                width: '100%',
-                                                maxWidth: '100%',
-                                                height: '136px',
-                                                borderRadius: '8px',
-                                                backgroundColor: 'transparent',
-                                                display: 'flex',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                overflow: 'hidden',
-                                            }}>
-                                                <img 
-                                                    src={toScheduleImageSrc(getScheduleImagePath(primaryDisplayList[1], eventtypes))}
-                                                    style={{
-                                                        maxHeight: '100%',
-                                                        maxWidth: '100%',
-                                                        objectFit: 'contain',
-                                                    }}
-                                                />
-                                            </div>
+                                            <CrossfadeScheduleImage
+                                                item={primaryDisplayList[1]}
+                                                eventtypes={eventtypes}
+                                                boxHeight='136px'
+                                                boxWidth='100%'
+                                                borderRadius='8px'
+                                            />
                                         )}
                                     </div>
                                     <div style={{ marginTop: '10px', fontSize: '13px', textAlign: 'left', paddingRight: '10px' }}>
@@ -420,21 +497,15 @@ function TodayList({
                                 marginRight: '15px',
                             }}
                         >
-                            <div
-                                style={{
-                                    height: '50px',
-                                    width: '50px',
-                                    overflow: 'hidden',
-                                    borderRadius: '5px',
-                                }}
-                            >
-                                <img 
-                                    width='50px'
-                                    height='50px'
-                                    src={toScheduleImageSrc(getScheduleImagePath(sche, eventtypes))}
-                                    style={{ objectFit: 'contain' }}
-                                />
-                            </div>
+                            <CrossfadeScheduleImage
+                                item={sche}
+                                eventtypes={eventtypes}
+                                boxHeight='50px'
+                                boxWidth='50px'
+                                borderRadius='5px'
+                                imageWidth='50px'
+                                imageHeight='50px'
+                            />
                         </div>
                     ))}
                 </Grid>
@@ -630,6 +701,18 @@ function ScheduleList({
         return rows
     }, [upcoming_schedules])
 
+    const rowTransitions = useTransition(listRows, {
+        keys: (row) => row.rowId,
+        from: { opacity: 0 },
+        enter: { opacity: 1 },
+        leave: { opacity: 0 },
+        trail: 55,
+        config: {
+            duration: 280,
+            easing: easings.easeInOutCubic,
+        },
+    })
+
     const footerContent = useMemo(() => {
         if (loadingMore) return <div style={{ paddingBottom: '16px' }}>Loading more schedules...</div>
         if (loadingError) {
@@ -727,53 +810,74 @@ function ScheduleList({
                         paddingBottom: '96px',
                     }}
                 >
-                    {listRows.map((row, index) => {
+                    {rowTransitions((style, row, _, index) => {
                         if (row.kind === 'today') {
                             return (
-                                <WrapperBox
-                                    key='today-row'
-                                    height={400}
-                                    marginBottom={'20px'}
+                                <animated.div
+                                    style={{
+                                        opacity: style.opacity,
+                                        willChange: 'opacity',
+                                    }}
                                 >
-                                    <TodayList
-                                        list={today_schedules}
-                                        imageList={today_schedules_with_image}
-                                        eventtypes={eventtypes}
-                                        onClickHandler={openScheduleView}
-                                    />
-                                </WrapperBox>
+                                    <WrapperBox
+                                        key='today-row'
+                                        height={400}
+                                        marginBottom={'20px'}
+                                    >
+                                        <TodayList
+                                            list={today_schedules}
+                                            imageList={today_schedules_with_image}
+                                            eventtypes={eventtypes}
+                                            onClickHandler={openScheduleView}
+                                        />
+                                    </WrapperBox>
+                                </animated.div>
                             )
                         }
                         if (row.kind === 'header') {
                             return (
-                                <div
-                                    key='upcoming-header'
+                                <animated.div
                                     style={{
-                                        height: '50px',
-                                        width: '100%',
-                                        color: '#455295',
-                                        fontWeight: '500',
-                                        fontSize: '20px',
-                                        paddingLeft: '5%',
+                                        opacity: style.opacity,
+                                        willChange: 'opacity',
                                     }}
                                 >
-                                    {row.label}
-                                </div>
+                                    <div
+                                        key='upcoming-header'
+                                        style={{
+                                            height: '50px',
+                                            width: '100%',
+                                            color: '#455295',
+                                            fontWeight: '500',
+                                            fontSize: '20px',
+                                            paddingLeft: '5%',
+                                        }}
+                                    >
+                                        {row.label}
+                                    </div>
+                                </animated.div>
                             )
                         }
                         return (
-                            <WrapperBox
-                                key={`schedule-row-${row.dayKey || index}`}
-                                height={150}
-                                marginBottom={'6px'}
+                            <animated.div
+                                style={{
+                                    opacity: style.opacity,
+                                    willChange: 'opacity',
+                                }}
                             >
-                                <ScheduleItem
-                                    item={row.items}
-                                    selected_date={row.date}
-                                    eventtypes={eventtypes}
-                                    onClickHandler={(items) => openScheduleView(items, row.dayKey)}
-                                />
-                            </WrapperBox>
+                                <WrapperBox
+                                    key={`schedule-row-${row.dayKey || index}`}
+                                    height={150}
+                                    marginBottom={'6px'}
+                                >
+                                    <ScheduleItem
+                                        item={row.items}
+                                        selected_date={row.date}
+                                        eventtypes={eventtypes}
+                                        onClickHandler={(items) => openScheduleView(items, row.dayKey)}
+                                    />
+                                </WrapperBox>
+                            </animated.div>
                         )
                     })}
                     {footerContent}
