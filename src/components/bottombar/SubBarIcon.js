@@ -15,12 +15,11 @@ function SubBarIcon({
 }) {
 
     const transitions = useTransition(path, {
-        from: { scale: 0.96, opacity: 0 },
+        from: { scale: 0.86, opacity: 0 },
         enter: { scale: 1, opacity: 1 },
-        leave: { scale: 0.96, opacity: 0 },
+        leave: { scale: 0.86, opacity: 0 },
         config: {
-            tension: 293,
-            friction: 15,
+            duration: 220,
         },
     })
 
