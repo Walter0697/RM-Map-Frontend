@@ -633,12 +633,12 @@ function ScheduleList({
 
     const rowTransitions = useTransition(listRows, {
         keys: (row) => row.rowId,
-        from: { opacity: 0, y: 16 },
-        enter: { opacity: 1, y: 0 },
-        leave: { opacity: 0, y: -10 },
+        from: { opacity: 0 },
+        enter: { opacity: 1 },
+        leave: { opacity: 0 },
         trail: 55,
         config: {
-            duration: 240,
+            duration: 280,
         },
     })
 
@@ -745,8 +745,7 @@ function ScheduleList({
                                 <animated.div
                                     style={{
                                         opacity: style.opacity,
-                                        transform: style.y.to((y) => `translate3d(0, ${y}px, 0)`),
-                                        willChange: 'transform, opacity',
+                                        willChange: 'opacity',
                                     }}
                                 >
                                     <WrapperBox
@@ -769,8 +768,7 @@ function ScheduleList({
                                 <animated.div
                                     style={{
                                         opacity: style.opacity,
-                                        transform: style.y.to((y) => `translate3d(0, ${y}px, 0)`),
-                                        willChange: 'transform, opacity',
+                                        willChange: 'opacity',
                                     }}
                                 >
                                     <div
@@ -793,8 +791,7 @@ function ScheduleList({
                             <animated.div
                                 style={{
                                     opacity: style.opacity,
-                                    transform: style.y.to((y) => `translate3d(0, ${y}px, 0)`),
-                                    willChange: 'transform, opacity',
+                                    willChange: 'opacity',
                                 }}
                             >
                                 <WrapperBox
