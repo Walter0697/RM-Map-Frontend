@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { connect } from 'react-redux'
+import { useTransition, animated } from '@react-spring/web'
 import backend from '../../constant/backend'
 import { 
     Grid,
@@ -630,6 +631,17 @@ function ScheduleList({
         return rows
     }, [upcoming_schedules])
 
+    const rowTransitions = useTransition(listRows, {
+        keys: (row) => row.rowId,
+        from: { opacity: 0, y: 16 },
+        enter: { opacity: 1, y: 0 },
+        leave: { opacity: 0, y: -10 },
+        trail: 55,
+        config: {
+            duration: 240,
+        },
+    })
+
     const footerContent = useMemo(() => {
         if (loadingMore) return <div style={{ paddingBottom: '16px' }}>Loading more schedules...</div>
         if (loadingError) {
@@ -727,53 +739,77 @@ function ScheduleList({
                         paddingBottom: '96px',
                     }}
                 >
-                    {listRows.map((row, index) => {
+                    {rowTransitions((style, row, _, index) => {
                         if (row.kind === 'today') {
                             return (
-                                <WrapperBox
-                                    key='today-row'
-                                    height={400}
-                                    marginBottom={'20px'}
+                                <animated.div
+                                    style={{
+                                        opacity: style.opacity,
+                                        transform: style.y.to((y) => `translate3d(0, ${y}px, 0)`),
+                                        willChange: 'transform, opacity',
+                                    }}
                                 >
-                                    <TodayList
-                                        list={today_schedules}
-                                        imageList={today_schedules_with_image}
-                                        eventtypes={eventtypes}
-                                        onClickHandler={openScheduleView}
-                                    />
-                                </WrapperBox>
+                                    <WrapperBox
+                                        key='today-row'
+                                        height={400}
+                                        marginBottom={'20px'}
+                                    >
+                                        <TodayList
+                                            list={today_schedules}
+                                            imageList={today_schedules_with_image}
+                                            eventtypes={eventtypes}
+                                            onClickHandler={openScheduleView}
+                                        />
+                                    </WrapperBox>
+                                </animated.div>
                             )
                         }
                         if (row.kind === 'header') {
                             return (
-                                <div
-                                    key='upcoming-header'
+                                <animated.div
                                     style={{
-                                        height: '50px',
-                                        width: '100%',
-                                        color: '#455295',
-                                        fontWeight: '500',
-                                        fontSize: '20px',
-                                        paddingLeft: '5%',
+                                        opacity: style.opacity,
+                                        transform: style.y.to((y) => `translate3d(0, ${y}px, 0)`),
+                                        willChange: 'transform, opacity',
                                     }}
                                 >
-                                    {row.label}
-                                </div>
+                                    <div
+                                        key='upcoming-header'
+                                        style={{
+                                            height: '50px',
+                                            width: '100%',
+                                            color: '#455295',
+                                            fontWeight: '500',
+                                            fontSize: '20px',
+                                            paddingLeft: '5%',
+                                        }}
+                                    >
+                                        {row.label}
+                                    </div>
+                                </animated.div>
                             )
                         }
                         return (
-                            <WrapperBox
-                                key={`schedule-row-${row.dayKey || index}`}
-                                height={150}
-                                marginBottom={'6px'}
+                            <animated.div
+                                style={{
+                                    opacity: style.opacity,
+                                    transform: style.y.to((y) => `translate3d(0, ${y}px, 0)`),
+                                    willChange: 'transform, opacity',
+                                }}
                             >
-                                <ScheduleItem
-                                    item={row.items}
-                                    selected_date={row.date}
-                                    eventtypes={eventtypes}
-                                    onClickHandler={(items) => openScheduleView(items, row.dayKey)}
-                                />
-                            </WrapperBox>
+                                <WrapperBox
+                                    key={`schedule-row-${row.dayKey || index}`}
+                                    height={150}
+                                    marginBottom={'6px'}
+                                >
+                                    <ScheduleItem
+                                        item={row.items}
+                                        selected_date={row.date}
+                                        eventtypes={eventtypes}
+                                        onClickHandler={(items) => openScheduleView(items, row.dayKey)}
+                                    />
+                                </WrapperBox>
+                            </animated.div>
                         )
                     })}
                     {footerContent}
