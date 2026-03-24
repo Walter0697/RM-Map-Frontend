@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { useTransition, animated } from '@react-spring/web'
+import { useTransition, useSpring, animated, easings } from '@react-spring/web'
 import backend from '../../constant/backend'
 import { 
     Grid,
@@ -205,6 +205,36 @@ function TodayList({
     const [ bigImageMarkers, setBigMarkers ] = useState([]) // select two markers to display it big
     const [ smallDisplayMarkers, setSmallMarkers ] = useState([])
 
+    const primaryDisplayList = useMemo(() => (
+        bigImageMarkers.length > 0 ? bigImageMarkers : (list || []).slice(0, 2)
+    ), [bigImageMarkers, list])
+    const secondaryDisplayList = useMemo(() => (
+        smallDisplayMarkers.length > 0 ? smallDisplayMarkers : (list || []).slice(2, 8)
+    ), [smallDisplayMarkers, list])
+
+    const todayContentAnimationKey = useMemo(() => {
+        const primaryKey = primaryDisplayList.map((item) => (
+            `${item?.id || item?.label || ''}-${getScheduleImagePath(item, eventtypes)}`
+        )).join('|')
+        const secondaryKey = secondaryDisplayList.map((item) => (
+            `${item?.id || item?.label || ''}-${getScheduleImagePath(item, eventtypes)}`
+        )).join('|')
+        return `${primaryKey}::${secondaryKey}`
+    }, [primaryDisplayList, secondaryDisplayList, eventtypes])
+
+    const todayContentFade = useSpring({
+        from: { opacity: 1 },
+        to: async (next) => {
+            await next({ opacity: 0 })
+            await next({ opacity: 1 })
+        },
+        reset: true,
+        config: {
+            duration: 320,
+            easing: easings.easeInOutCubic,
+        },
+    }, [todayContentAnimationKey])
+
     useEffect(() => {
         let timer = null
         const baseList = (imageList && imageList.length > 0 ? imageList : list) || []
@@ -283,14 +313,8 @@ function TodayList({
                 </Grid>
             )
         }
-        const primaryDisplayList = bigImageMarkers.length > 0 ? bigImageMarkers : (list || []).slice(0, 2)
-        const secondaryDisplayList = smallDisplayMarkers.length > 0 ? smallDisplayMarkers : (list || []).slice(2, 8)
         return (
-            <div
-                style={{
-                    width: '100%',
-                }}
-            >
+            <animated.div style={{ width: '100%', opacity: todayContentFade.opacity, willChange: 'opacity' }}>
                 <Grid 
                     item xs={12}
                     fullWidth
@@ -439,7 +463,7 @@ function TodayList({
                         </div>
                     ))}
                 </Grid>
-            </div>
+            </animated.div>
         )
     }
 
@@ -639,6 +663,7 @@ function ScheduleList({
         trail: 55,
         config: {
             duration: 280,
+            easing: easings.easeInOutCubic,
         },
     })
 
