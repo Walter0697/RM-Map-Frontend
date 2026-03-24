@@ -295,6 +295,8 @@ function TodayList({
 }) {
     const [ bigImageMarkers, setBigMarkers ] = useState([]) // select two markers to display it big
     const [ smallDisplayMarkers, setSmallMarkers ] = useState([])
+    const [ contentOpacity, setContentOpacity ] = useState(1)
+    const cycleTimerRef = useRef(null)
 
     const primaryDisplayList = useMemo(() => (
         bigImageMarkers.length > 0 ? bigImageMarkers : (list || []).slice(0, 2)
@@ -318,15 +320,29 @@ function TodayList({
             .filter(Boolean)
         setRandomBigImageMarker(filteredList)
 
+        const runAnimatedCycle = () => {
+            setContentOpacity(0)
+            cycleTimerRef.current = window.setTimeout(() => {
+                setRandomBigImageMarker(filteredList)
+                window.requestAnimationFrame(() => {
+                    setContentOpacity(1)
+                })
+            }, 180)
+        }
+
         if (filteredList.length > 2) {
             timer = window.setInterval(() => {
-                setRandomBigImageMarker(filteredList)
+                runAnimatedCycle()
             }, 5000)
         }
 
         return () => {
             if (timer) {
                 window.clearInterval(timer)
+            }
+            if (cycleTimerRef.current) {
+                window.clearTimeout(cycleTimerRef.current)
+                cycleTimerRef.current = null
             }
         }
     }, [imageList, list, eventtypes])
@@ -382,7 +398,14 @@ function TodayList({
             )
         }
         return (
-            <div style={{ width: '100%' }}>
+            <div
+                style={{
+                    width: '100%',
+                    opacity: contentOpacity,
+                    transition: 'opacity 360ms ease-in-out',
+                    willChange: 'opacity',
+                }}
+            >
                 <Grid 
                     item xs={12}
                     fullWidth
