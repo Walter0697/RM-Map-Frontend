@@ -256,29 +256,15 @@ function ScheduleItem({
                                 marginRight: '8px',
                             }}
                         >
-                            <div
-                                style={{
-                                    height: '50px',
-                                    width: '50px',
-                                    overflow: 'hidden',
-                                    borderRadius: '5px',
-                                    backgroundColor: 'transparent',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <img
-                                    width='50px'
-                                    height='50px'
-                                    src={toScheduleImageSrc(sche.image_path)}
-                                    style={{
-                                        maxHeight: '100%',
-                                        maxWidth: '100%',
-                                        objectFit: 'contain',
-                                    }}
-                                />
-                            </div>
+                            <CrossfadeScheduleImage
+                                item={sche}
+                                eventtypes={eventtypes}
+                                boxHeight='50px'
+                                boxWidth='50px'
+                                borderRadius='5px'
+                                imageWidth='50px'
+                                imageHeight='50px'
+                            />
                         </div>
                     ))}
                 </Grid>

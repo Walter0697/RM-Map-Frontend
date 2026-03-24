@@ -1,8 +1,4 @@
-import React, { useState, useMemo } from 'react'
-import {
-    useSpring,
-    animated,
-} from '@react-spring/web'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import {
     Grid,
     Button,
@@ -16,21 +12,44 @@ function TodaySchedule({
     list,   // an array of string containning image link
     onClickHandler,
 }) {
-    const [flip, set] = useState(false)
+    const [displayOffset, setDisplayOffset] = useState(0)
+    const [contentOpacity, setContentOpacity] = useState(1)
+    const cycleTimerRef = useRef(null)
+    const fadeDurationMs = 1000
 
-    const { scroll } = useSpring({
-        config: {
-            mass: 50,
-            tension: 280,
-            friction: 300,
-        },
-        scroll: (list.length - 1) * 50,
-        from: { scroll: 0 },
-        reset: true,
-        reverse: flip,
-        delay: 150,
-        onRest: () => set(!flip),
-     })
+    useEffect(() => {
+        if (!Array.isArray(list) || list.length <= 1) {
+            setDisplayOffset(0)
+            return
+        }
+
+        const intervalId = window.setInterval(() => {
+            setContentOpacity(0)
+            cycleTimerRef.current = window.setTimeout(() => {
+                setDisplayOffset((prev) => (prev + 1) % list.length)
+                window.requestAnimationFrame(() => {
+                    setContentOpacity(1)
+                })
+            }, fadeDurationMs)
+        }, 5000)
+
+        return () => {
+            window.clearInterval(intervalId)
+            if (cycleTimerRef.current) {
+                window.clearTimeout(cycleTimerRef.current)
+                cycleTimerRef.current = null
+            }
+        }
+    }, [list, fadeDurationMs])
+
+    const rotatedList = useMemo(() => {
+        if (!Array.isArray(list) || list.length === 0) return []
+        if (displayOffset === 0) return list
+        return [
+            ...list.slice(displayOffset),
+            ...list.slice(0, displayOffset),
+        ]
+    }, [list, displayOffset])
 
     return (
         <Button
@@ -61,17 +80,19 @@ function TodaySchedule({
                         paddingLeft: '8px',
                     }}
                 >
-                    <animated.div
+                    <div
                         style={{
                             height: '60px',
                             width: '100%',
                             display: 'flex',
                             overflowX: 'auto',
                             overflowY: 'hidden',
+                            opacity: contentOpacity,
+                            transition: `opacity ${fadeDurationMs}ms ease-in-out`,
+                            willChange: 'opacity',
                         }}
-                        scrollLeft={scroll}
                     >
-                        {list.map((schedule, index) => (
+                        {rotatedList.map((schedule, index) => (
                             <div 
                                 key={index}
                                 style={{
@@ -92,7 +113,7 @@ function TodaySchedule({
                                 />
                             </div>
                         ))}
-                    </animated.div>
+                    </div>
                     
                 </Grid>
             </Grid>
