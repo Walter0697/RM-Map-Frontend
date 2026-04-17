@@ -1,0 +1,15 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" rx="36" fill="#EEF9FF"/>
+  <rect x="74" y="74" width="1052" height="572" rx="28" fill="white" stroke="#BEE2F5" stroke-width="4"/>
+  <text x="132" y="164" fill="#0F172A" font-family="Arial, sans-serif" font-size="38" font-weight="700">Pick an External Browser</text>
+  <text x="132" y="214" fill="#475569" font-family="Arial, sans-serif" font-size="28">Step 4</text>
+  <rect x="132" y="280" width="936" height="264" rx="24" fill="#F8FBFD" stroke="#D7EBF5" stroke-width="3"/>
+  <rect x="176" y="326" width="220" height="42" rx="21" fill="#EEF8FC" stroke="#B7E3F8" stroke-width="3"/>
+  <rect x="176" y="386" width="220" height="42" rx="21" fill="#EEF8FC" stroke="#B7E3F8" stroke-width="3"/>
+  <rect x="176" y="446" width="220" height="42" rx="21" fill="#229ED9"/>
+  <text x="214" y="355" fill="#0F172A" font-family="Arial, sans-serif" font-size="24">Safari</text>
+  <text x="214" y="415" fill="#0F172A" font-family="Arial, sans-serif" font-size="24">Chrome</text>
+  <text x="196" y="475" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="700">External Browser</text>
+  <text x="476" y="370" fill="#0F172A" font-family="Arial, sans-serif" font-size="28" font-weight="700">Use the browser you prefer</text>
+  <text x="476" y="418" fill="#475569" font-family="Arial, sans-serif" font-size="22">Links will open outside Telegram after this change.</text>
+</svg>

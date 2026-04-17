@@ -1,0 +1,14 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" rx="36" fill="#F4FBFF"/>
+  <rect x="74" y="74" width="1052" height="572" rx="28" fill="white" stroke="#CBE8F7" stroke-width="4"/>
+  <text x="132" y="164" fill="#0F172A" font-family="Arial, sans-serif" font-size="38" font-weight="700">Open Links In</text>
+  <text x="132" y="214" fill="#475569" font-family="Arial, sans-serif" font-size="28">Step 3</text>
+  <rect x="132" y="280" width="936" height="264" rx="24" fill="#F8FBFD" stroke="#D7EBF5" stroke-width="3"/>
+  <rect x="176" y="334" width="280" height="44" rx="12" fill="#D6EEF9"/>
+  <rect x="176" y="398" width="380" height="28" rx="14" fill="#D6EEF9"/>
+  <rect x="176" y="442" width="300" height="28" rx="14" fill="#D6EEF9"/>
+  <rect x="664" y="322" width="304" height="148" rx="24" fill="#EEF8FC" stroke="#B7E3F8" stroke-width="3"/>
+  <rect x="704" y="368" width="224" height="46" rx="23" fill="#229ED9"/>
+  <text x="734" y="398" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="700">Browser</text>
+  <text x="704" y="444" fill="#475569" font-family="Arial, sans-serif" font-size="20">Choose how Telegram opens links.</text>
+</svg>
