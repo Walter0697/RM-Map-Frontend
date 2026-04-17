@@ -712,9 +712,24 @@ function SettingPage({
                             bottom: '8px',
                             color: '#7c8794',
                         }}
-                    >
+                        >
                         <HelpOutlineIcon sx={{ fontSize: 22 }} />
                     </IconButton>
+                    <Typography
+                        variant='caption'
+                        sx={{
+                            position: 'absolute',
+                            right: '42px',
+                            bottom: '11px',
+                            color: '#7c8794',
+                            fontSize: '11px',
+                            letterSpacing: '0.02em',
+                            whiteSpace: 'nowrap',
+                            pointerEvents: 'none',
+                        }}
+                    >
+                        Setup telegram to use Safari
+                    </Typography>
                 </DialogContent>
             </Dialog>
             <Dialog
