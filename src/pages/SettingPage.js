@@ -685,7 +685,7 @@ function SettingPage({
                             <Box sx={{ display: 'grid', gap: 1 }}>
                                 <Box
                                     component='img'
-                                    src='/assets/telegram-guide/step1.svg'
+                                    src='/assets/telegram-guide/step1.jpg'
                                     alt='Step 1: open Telegram settings'
                                     sx={{ width: '100%', borderRadius: 1.5, border: '1px solid #d9e2ec' }}
                                 />
@@ -696,7 +696,7 @@ function SettingPage({
                             <Box sx={{ display: 'grid', gap: 1 }}>
                                 <Box
                                     component='img'
-                                    src='/assets/telegram-guide/step2.svg'
+                                    src='/assets/telegram-guide/step2.jpg'
                                     alt='Step 2: open data and storage'
                                     sx={{ width: '100%', borderRadius: 1.5, border: '1px solid #d9e2ec' }}
                                 />
@@ -707,7 +707,7 @@ function SettingPage({
                             <Box sx={{ display: 'grid', gap: 1 }}>
                                 <Box
                                     component='img'
-                                    src='/assets/telegram-guide/step3.svg'
+                                    src='/assets/telegram-guide/step3.jpg'
                                     alt='Step 3: open links in browser settings'
                                     sx={{ width: '100%', borderRadius: 1.5, border: '1px solid #d9e2ec' }}
                                 />
@@ -718,7 +718,7 @@ function SettingPage({
                             <Box sx={{ display: 'grid', gap: 1 }}>
                                 <Box
                                     component='img'
-                                    src='/assets/telegram-guide/step4.svg'
+                                    src='/assets/telegram-guide/step4.jpg'
                                     alt='Step 4: choose an external browser'
                                     sx={{ width: '100%', borderRadius: 1.5, border: '1px solid #d9e2ec' }}
                                 />
