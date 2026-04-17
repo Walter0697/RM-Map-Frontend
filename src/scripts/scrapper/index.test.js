@@ -6,11 +6,6 @@ describe('scrapper provider detection', () => {
         expect(scrapper.validate(content)).toBe('openrice')
     })
 
-    test('detects yelp links', () => {
-        const content = 'hello https://www.yelp.com/biz/north-york-cafe world'
-        expect(scrapper.validate(content)).toBe('yelp')
-    })
-
     test('detects tabelog links', () => {
         const content = 'hello https://tabelog.com/tokyo/A1304/A130401/13000001/ world'
         expect(scrapper.validate(content)).toBe('tabelog')

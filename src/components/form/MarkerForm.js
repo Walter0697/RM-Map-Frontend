@@ -35,7 +35,6 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 import CategoryIcon from '@mui/icons-material/Category'
 import ImageIcon from '@mui/icons-material/Image'
 import RiceBowlIcon from '@mui/icons-material/RiceBowl'
-import StorefrontIcon from '@mui/icons-material/Storefront'
 import RamenDiningIcon from '@mui/icons-material/RamenDining'
 
 import useObject from '../../hooks/useObject'
@@ -1107,12 +1106,6 @@ function MarkerForm({
                                     <RiceBowlIcon fontSize='small' />
                                 </ListItemIcon>
                                 <ListItemText>Openrice</ListItemText>
-                            </MenuItem>
-                            <MenuItem onClick={() => onScrapperClick('yelp')}>
-                                <ListItemIcon>
-                                    <StorefrontIcon fontSize='small' />
-                                </ListItemIcon>
-                                <ListItemText>Yelp</ListItemText>
                             </MenuItem>
                             <MenuItem onClick={() => onScrapperClick('tabelog')}>
                                 <ListItemIcon>
