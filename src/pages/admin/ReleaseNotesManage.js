@@ -370,7 +370,7 @@ function ReleaseNotesManage({ jwt }) {
             return
         }
         if (!isVersionValid) {
-            setErrorMessage('Version must be valid semantic version (for example 2.9.5).')
+            setErrorMessage('Version must be valid semantic version (for example 3.0.0).')
             return
         }
         if (!isVersionAllowed) {
@@ -600,7 +600,7 @@ function ReleaseNotesManage({ jwt }) {
                                     label='Version'
                                     value={version}
                                     onChange={(event) => setVersion(event.target.value)}
-                                    placeholder='2.9.5'
+                                    placeholder='3.0.0'
                                     disabled={!isExistingNote}
                                     error={version.trim() !== '' && !isVersionAllowed}
                                     helperText={version.trim() !== '' && !isVersionAllowed
