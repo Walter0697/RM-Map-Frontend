@@ -86,6 +86,7 @@ function SettingPage({
     const [ isReleaseNoteOpen, setReleaseNoteOpen ] = useState(false)
     const [ isShortcutDialogOpen, setShortcutDialogOpen ] = useState(false)
     const [ isShortcutHelpDialogOpen, setShortcutHelpDialogOpen ] = useState(false)
+    const [ isTelegramDialogOpen, setTelegramDialogOpen ] = useState(false)
     const [ isTelegramGuideDialogOpen, setTelegramGuideDialogOpen ] = useState(false)
 
     // selected open item
@@ -294,11 +295,20 @@ function SettingPage({
     const openTalkToRoroadBot = () => {
         const validatedURL = validateTelegramBotURL(telegramBotURL)
         if (!validatedURL) return
-        setTelegramGuideDialogOpen(true)
+        setTelegramDialogOpen(true)
     }
 
     const closeTelegramGuideDialog = () => {
         setTelegramGuideDialogOpen(false)
+    }
+
+    const closeTelegramDialog = () => {
+        setTelegramDialogOpen(false)
+    }
+
+    const openTelegramGuideDialog = () => {
+        setTelegramDialogOpen(false)
+        setTelegramGuideDialogOpen(true)
     }
 
     const confirmTalkToRoroadBot = () => {
@@ -309,7 +319,7 @@ function SettingPage({
         if (opened) {
             opened.opener = null
         }
-        setTelegramGuideDialogOpen(false)
+        setTelegramDialogOpen(false)
     }
 
     const openGoogleCalendarConnect = () => {
@@ -637,6 +647,78 @@ function SettingPage({
             </Dialog>
             <Dialog
                 fullWidth
+                maxWidth='sm'
+                open={isTelegramDialogOpen}
+                onClose={closeTelegramDialog}
+            >
+                <DialogTitle>Telegram Bot (iOS)</DialogTitle>
+                <DialogContent sx={{ display: 'flex', justifyContent: 'center', position: 'relative', pb: 4 }}>
+                    <Button
+                        size='large'
+                        variant='outlined'
+                        aria-label='Open Telegram Bot'
+                        onClick={confirmTalkToRoroadBot}
+                        sx={{
+                            py: 0,
+                            width: 160,
+                            height: 160,
+                            minWidth: 160,
+                            minHeight: 160,
+                            borderRadius: 1,
+                            display: 'flex',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <span
+                            style={{
+                                display: 'inline-flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                            }}
+                        >
+                            <span
+                                style={{
+                                    position: 'relative',
+                                    display: 'inline-flex',
+                                    width: '88px',
+                                    height: '88px',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <TelegramIcon style={{ fontSize: '76px' }} />
+                            </span>
+                            <span
+                                style={{
+                                    fontSize: '11px',
+                                    lineHeight: 1,
+                                    letterSpacing: '0.08em',
+                                    textTransform: 'uppercase',
+                                }}
+                            >
+                                open
+                            </span>
+                        </span>
+                    </Button>
+                    <IconButton
+                        aria-label='Open Telegram usage guide'
+                        onClick={openTelegramGuideDialog}
+                        size='small'
+                        sx={{
+                            position: 'absolute',
+                            right: '10px',
+                            bottom: '8px',
+                            color: '#7c8794',
+                        }}
+                    >
+                        <HelpOutlineIcon sx={{ fontSize: 22 }} />
+                    </IconButton>
+                </DialogContent>
+            </Dialog>
+            <Dialog
+                fullWidth
                 maxWidth='md'
                 open={isTelegramGuideDialogOpen}
                 onClose={closeTelegramGuideDialog}
@@ -646,40 +728,20 @@ function SettingPage({
                     <Box sx={{ display: 'grid', gap: 2.5 }}>
                         <Box
                             sx={{
-                                display: 'flex',
-                                flexDirection: { xs: 'column', sm: 'row' },
-                                alignItems: { xs: 'stretch', sm: 'center' },
-                                justifyContent: 'space-between',
-                                gap: 2,
+                                display: 'grid',
+                                gap: 1,
                                 p: 2,
                                 borderRadius: 2,
                                 background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
                                 border: '1px solid #bae6fd',
                             }}
                         >
-                            <Box sx={{ display: 'grid', gap: 0.75 }}>
-                                <Typography variant='h6' sx={{ fontWeight: 700 }}>
-                                    Ready to open RoroadBot?
-                                </Typography>
-                                <Typography variant='body2' color='text.secondary'>
-                                    First change Telegram&apos;s link behavior so external links open in your browser instead of the in-app view.
-                                </Typography>
-                            </Box>
-                            <Button
-                                variant='contained'
-                                size='large'
-                                startIcon={<TelegramIcon />}
-                                onClick={confirmTalkToRoroadBot}
-                                sx={{
-                                    whiteSpace: 'nowrap',
-                                    backgroundColor: '#229ed9',
-                                    '&:hover': {
-                                        backgroundColor: '#1c8bc2',
-                                    },
-                                }}
-                            >
-                                Open Telegram Bot
-                            </Button>
+                            <Typography variant='h6' sx={{ fontWeight: 700 }}>
+                                Why this matters
+                            </Typography>
+                            <Typography variant='body2' color='text.secondary'>
+                                Telegram&apos;s in-app browser can keep links trapped inside the app, which makes handoff to Safari or Chrome less reliable and can interfere with how RoroadMap opens shared links. Set Telegram to open links in an external browser first so the bot flow behaves consistently.
+                            </Typography>
                         </Box>
                         <Box sx={{ display: 'grid', gap: 2 }}>
                             <Box sx={{ display: 'grid', gap: 1 }}>
