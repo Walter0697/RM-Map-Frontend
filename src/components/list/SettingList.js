@@ -12,6 +12,7 @@ import PreviousMarkerButton from './settings/PreviousMarkerButton'
 import ExpiredMarkerButton from './settings/ExpiredMarkerButton'
 import WatchedMovieListButton from './settings/WatchedMovieListButton'
 import TravelPlansButton from './settings/TravelPlansButton'
+import RecipeButton from './settings/RecipeButton'
 import PreviewDisplayPinButton from './settings/PreviewDisplayPinButton'
 import GoogleCalendarConnectionButton from './settings/GoogleCalendarConnectionButton'
 import ReminderTimeButton from './settings/ReminderTimeButton'
@@ -53,6 +54,7 @@ function SettingList({
   openTalkToRoroadBot,
   showTalkToRoroadBot,
   openSavedTravelPlans,
+  openRecipeBook,
 }) {
   const history = useHistory()
 
@@ -244,6 +246,14 @@ function SettingList({
             title={'List'}
             icon={<ListAltIcon />}
           />
+        </WrapperBox>
+        <WrapperBox
+            height={30}
+            marginBottom={'15px'}
+        >
+            <RecipeButton
+                onClickHandler={openRecipeBook}
+            />
         </WrapperBox>
         <WrapperBox
             height={30}

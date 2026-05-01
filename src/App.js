@@ -15,6 +15,7 @@ import HomePage from './pages/HomePage'
 import SchedulePage from './pages/SchedulePage'
 import SettingPage from './pages/SettingPage'
 import TravelPlansPage from './pages/TravelPlansPage'
+import RecipePage from './pages/RecipePage'
 
 import PreviousMarkerPage from './pages/PreviousMarkerPage'
 import ExpiredMarkerPage from './pages/ExpiredMarkerPage'
@@ -56,6 +57,7 @@ function App() {
             <Route path='/schedule' component={SchedulePage} />
             <Route path='/setting' component={SettingPage} />
             <Route path='/travel-plans' component={TravelPlansPage} />
+            <Route path='/recipes' component={RecipePage} />
 
             <Route path='/previous' component={PreviousMarkerPage} />
             <Route path='/expired' component={ExpiredMarkerPage} />

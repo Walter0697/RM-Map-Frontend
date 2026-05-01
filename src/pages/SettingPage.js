@@ -349,6 +349,10 @@ function SettingPage({
         history.replace('/travel-plans')
     }
 
+    const openRecipeBook = () => {
+        history.replace('/recipes')
+    }
+
     const openPreferredPinForm = (pin) => {
         setPreferredPin(pin)
         setPreferredPinFormOpen(true)
@@ -483,6 +487,7 @@ function SettingPage({
                 openTalkToRoroadBot={openTalkToRoroadBot}
                 showTalkToRoroadBot={!!validateTelegramBotURL(telegramBotURL)}
                 openSavedTravelPlans={openSavedTravelPlans}
+                openRecipeBook={openRecipeBook}
             />
             <RelationSearchForm
                 open={isRelationFormOpen}
