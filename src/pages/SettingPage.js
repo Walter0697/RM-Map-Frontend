@@ -349,7 +349,7 @@ function SettingPage({
         history.replace('/travel-plans')
     }
 
-    const openRecipeBook = () => {
+    const openSavedRecipes = () => {
         history.replace('/recipes')
     }
 
@@ -487,7 +487,7 @@ function SettingPage({
                 openTalkToRoroadBot={openTalkToRoroadBot}
                 showTalkToRoroadBot={!!validateTelegramBotURL(telegramBotURL)}
                 openSavedTravelPlans={openSavedTravelPlans}
-                openRecipeBook={openRecipeBook}
+                openSavedRecipes={openSavedRecipes}
             />
             <RelationSearchForm
                 open={isRelationFormOpen}

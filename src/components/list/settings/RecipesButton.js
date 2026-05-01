@@ -1,8 +1,8 @@
 import React from 'react'
 import { Button } from '@mui/material'
-import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu'
+import MenuBookIcon from '@mui/icons-material/MenuBook'
 
-function RecipeButton({
+function RecipesButton({
     onClickHandler,
 }) {
     return (
@@ -10,12 +10,12 @@ function RecipeButton({
             variant='contained'
             size='large'
             style={{
-                backgroundColor: '#9fe1c7',
+                backgroundColor: '#48acdb',
                 height: '100%',
                 width: '100%',
                 boxShadow: '2px 2px 6px',
                 textTransform: 'none',
-                color: '#216b4b',
+                color: '#1c76d2',
                 display: 'flex',
                 justifyContent: 'center',
                 gap: '10px',
@@ -25,11 +25,11 @@ function RecipeButton({
             onClick={onClickHandler}
         >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <RestaurantMenuIcon />
-                Recipe Book
+                <MenuBookIcon />
+                Saved Recipes
             </span>
         </Button>
     )
 }
 
-export default RecipeButton
+export default RecipesButton
