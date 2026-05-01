@@ -1,16 +1,21 @@
 .bottomnav {
     width: 100%;
+    min-height: 72px;
     height: 10%;
     display: flex;
     justify-content: center;
     align-items: center;
     position: fixed;
     bottom: 0;
-    border-top: 1px solid rgb(230, 230, 230);
-    background-color: #b2d2a4;
+    border-top: 1px solid rgba(226, 232, 240, 0.95);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 250, 252, 0.98) 100%);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.08);
+    padding: 6px 0 calc(env(safe-area-inset-bottom, 0px) + 6px);
+    z-index: 20;
 }
 .bntab {
-    width: 25%;
+    width: 20%;
     height: 100%;
     display: flex;
     justify-content: center;

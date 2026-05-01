@@ -8,6 +8,7 @@ import IconButton from '@mui/material/IconButton'
 
 function SubBarIcon({
     activeIcon,
+    activeBackgroundColor,
     parentRoute,
     route,
     path,
@@ -42,6 +43,10 @@ function SubBarIcon({
                 <IconButton
                     size='large'
                     onClick={() => redirectTo()}
+                    sx={{
+                        backgroundColor: activeBackgroundColor,
+                        boxShadow: `0 10px 24px ${activeBackgroundColor}55`,
+                    }}
                 >
                     {activeIcon}
                 </IconButton>

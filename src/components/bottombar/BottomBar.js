@@ -1,32 +1,64 @@
 import React, { useRef, useMemo } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
-import SearchIcon from '@mui/icons-material/Search'
-import MapIcon from '@mui/icons-material/Map'
-import HomeIcon from '@mui/icons-material/Home'
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
-import SettingsIcon from '@mui/icons-material/Settings'
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
+import ExploreRoundedIcon from '@mui/icons-material/ExploreRounded'
+import CottageRoundedIcon from '@mui/icons-material/CottageRounded'
+import EventRoundedIcon from '@mui/icons-material/EventRounded'
+import PaletteRoundedIcon from '@mui/icons-material/PaletteRounded'
 
-import TheatersIcon from '@mui/icons-material/Theaters'     // movie
-import StarIcon from '@mui/icons-material/Star'             // favourite movie
-import FilterAltIcon from '@mui/icons-material/FilterAlt'   // filter
+import LocalMoviesRoundedIcon from '@mui/icons-material/LocalMoviesRounded'
+import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
+import TuneRoundedIcon from '@mui/icons-material/TuneRounded'
 
-import AvTimerIcon from '@mui/icons-material/AvTimer'       // expired marker
-import FlagIcon from '@mui/icons-material/Flag'             // previous marker
-import MovieIcon from '@mui/icons-material/Movie'           // watched movie
-import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff'
+import HourglassTopRoundedIcon from '@mui/icons-material/HourglassTopRounded'
+import FlagRoundedIcon from '@mui/icons-material/FlagRounded'
+import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded'
+import ConnectingAirportsRoundedIcon from '@mui/icons-material/ConnectingAirportsRounded'
 
-import FlightIcon from '@mui/icons-material/Flight'         // country map      
-import TrainIcon from '@mui/icons-material/Train'           // station
+import PublicRoundedIcon from '@mui/icons-material/PublicRounded'
+import TrainRoundedIcon from '@mui/icons-material/TrainRounded'
 
 import BarIcon from './BarIcon'
 import SubBarIcon from './SubBarIcon'
-
-import constants from '../../constant'
 import styles from '../../styles/bottom.module.css'
 
-const inactiveColor = constants.colors.barInactiveColor
-const activeColor = constants.colors.barActiveColor
+const tabPalette = {
+    search: {
+        activeColor: '#ffffff',
+        activeBackgroundColor: '#f97316',
+        inactiveColor: '#c2410c',
+        inactiveBackgroundColor: '#ffedd5',
+    },
+    marker: {
+        activeColor: '#ffffff',
+        activeBackgroundColor: '#0f766e',
+        inactiveColor: '#0f766e',
+        inactiveBackgroundColor: '#ccfbf1',
+    },
+    home: {
+        activeColor: '#ffffff',
+        activeBackgroundColor: '#2563eb',
+        inactiveColor: '#1d4ed8',
+        inactiveBackgroundColor: '#dbeafe',
+    },
+    schedule: {
+        activeColor: '#ffffff',
+        activeBackgroundColor: '#7c3aed',
+        inactiveColor: '#6d28d9',
+        inactiveBackgroundColor: '#ede9fe',
+    },
+    setting: {
+        activeColor: '#ffffff',
+        activeBackgroundColor: '#db2777',
+        inactiveColor: '#be185d',
+        inactiveBackgroundColor: '#fce7f3',
+    },
+}
+
+const renderIcon = (IconComponent, color) => (
+    <IconComponent sx={{ color }} fontSize='inherit' />
+)
 
 function BottomBar({
     onChangeClick,
@@ -51,7 +83,8 @@ function BottomBar({
                     route={'/movies'}
                     parentRoute={'/search'}
                     path={location.pathname}
-                    activeIcon={<TheatersIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    activeIcon={renderIcon(LocalMoviesRoundedIcon, tabPalette.search.activeColor)}
+                    activeBackgroundColor={tabPalette.search.activeBackgroundColor}
                     setPath={changeTab}
                 />
             )
@@ -62,7 +95,8 @@ function BottomBar({
                     route={'/favmovies'}
                     parentRoute={'/search'}
                     path={location.pathname}
-                    activeIcon={<StarIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    activeIcon={renderIcon(FavoriteRoundedIcon, tabPalette.search.activeColor)}
+                    activeBackgroundColor={tabPalette.search.activeBackgroundColor}
                     setPath={changeTab}
                 />
             )
@@ -72,8 +106,10 @@ function BottomBar({
             <BarIcon
                 route={'/search'}
                 path={location.pathname}
-                activeIcon={<SearchIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                inactiveIcon={<SearchIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                activeIcon={renderIcon(SearchRoundedIcon, tabPalette.search.activeColor)}
+                inactiveIcon={renderIcon(SearchRoundedIcon, tabPalette.search.inactiveColor)}
+                activeBackgroundColor={tabPalette.search.activeBackgroundColor}
+                inactiveBackgroundColor={tabPalette.search.inactiveBackgroundColor}
                 setPath={changeTab}
             />
         )
@@ -86,7 +122,8 @@ function BottomBar({
                     route={'/filter'}
                     parentRoute={'/markers'}
                     path={location.pathname}
-                    activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    activeIcon={renderIcon(TuneRoundedIcon, tabPalette.marker.activeColor)}
+                    activeBackgroundColor={tabPalette.marker.activeBackgroundColor}
                     setPath={changeTab}
                 />
             )
@@ -96,8 +133,10 @@ function BottomBar({
             <BarIcon
                 route={'/markers'}
                 path={location.pathname}
-                activeIcon={<MapIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                inactiveIcon={<MapIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                activeIcon={renderIcon(ExploreRoundedIcon, tabPalette.marker.activeColor)}
+                inactiveIcon={renderIcon(ExploreRoundedIcon, tabPalette.marker.inactiveColor)}
+                activeBackgroundColor={tabPalette.marker.activeBackgroundColor}
+                inactiveBackgroundColor={tabPalette.marker.inactiveBackgroundColor}
                 setPath={changeTab}
             />
         )
@@ -110,7 +149,8 @@ function BottomBar({
                     route={'/station'}
                     parentRoute={'/home'}
                     path={location.pathname}
-                    activeIcon={<TrainIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    activeIcon={renderIcon(TrainRoundedIcon, tabPalette.home.activeColor)}
+                    activeBackgroundColor={tabPalette.home.activeBackgroundColor}
                     setPath={changeTab}
                 />
             )
@@ -121,7 +161,8 @@ function BottomBar({
                     route={'/country'}
                     parentRoute={'/home'}
                     path={location.pathname}
-                    activeIcon={<FlightIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    activeIcon={renderIcon(PublicRoundedIcon, tabPalette.home.activeColor)}
+                    activeBackgroundColor={tabPalette.home.activeBackgroundColor}
                     setPath={changeTab}
                 />
             )
@@ -130,8 +171,10 @@ function BottomBar({
             <BarIcon
                 route={'/home'}
                 path={location.pathname}
-                activeIcon={<HomeIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                inactiveIcon={<HomeIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                activeIcon={renderIcon(CottageRoundedIcon, tabPalette.home.activeColor)}
+                inactiveIcon={renderIcon(CottageRoundedIcon, tabPalette.home.inactiveColor)}
+                activeBackgroundColor={tabPalette.home.activeBackgroundColor}
+                inactiveBackgroundColor={tabPalette.home.inactiveBackgroundColor}
                 setPath={changeTab}
             />
         )
@@ -142,12 +185,14 @@ function BottomBar({
             <BarIcon
                 route={'/schedule'}
                 path={location.pathname}
-                activeIcon={<CalendarTodayIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                inactiveIcon={<CalendarTodayIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                activeIcon={renderIcon(EventRoundedIcon, tabPalette.schedule.activeColor)}
+                inactiveIcon={renderIcon(EventRoundedIcon, tabPalette.schedule.inactiveColor)}
+                activeBackgroundColor={tabPalette.schedule.activeBackgroundColor}
+                inactiveBackgroundColor={tabPalette.schedule.inactiveBackgroundColor}
                 setPath={changeTab}
             />
         )
-    }, [])
+    }, [location.pathname])
 
     const SettingButton = useMemo(() => {
         if (location.pathname === '/previous') {
@@ -156,7 +201,8 @@ function BottomBar({
                     route={'/previous'}
                     parentRoute={'/setting'}
                     path={location.pathname}
-                    activeIcon={<FlagIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    activeIcon={renderIcon(FlagRoundedIcon, tabPalette.setting.activeColor)}
+                    activeBackgroundColor={tabPalette.setting.activeBackgroundColor}
                     setPath={changeTab}
                 />
             )
@@ -167,7 +213,8 @@ function BottomBar({
                     route={'/filter'}
                     parentRoute={'/previous'}
                     path={location.pathname}
-                    activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    activeIcon={renderIcon(TuneRoundedIcon, tabPalette.setting.activeColor)}
+                    activeBackgroundColor={tabPalette.setting.activeBackgroundColor}
                     setPath={changeTab}
                 />
             )
@@ -178,7 +225,8 @@ function BottomBar({
                     route={'/expired'}
                     parentRoute={'/setting'}
                     path={location.pathname}
-                    activeIcon={<AvTimerIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    activeIcon={renderIcon(HourglassTopRoundedIcon, tabPalette.setting.activeColor)}
+                    activeBackgroundColor={tabPalette.setting.activeBackgroundColor}
                     setPath={changeTab}
                 />
             )
@@ -189,7 +237,8 @@ function BottomBar({
                     route={'/filter'}
                     parentRoute={'/expired'}
                     path={location.pathname}
-                    activeIcon={<FilterAltIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    activeIcon={renderIcon(TuneRoundedIcon, tabPalette.setting.activeColor)}
+                    activeBackgroundColor={tabPalette.setting.activeBackgroundColor}
                     setPath={changeTab}
                 />
             )
@@ -200,7 +249,8 @@ function BottomBar({
                     route={'/watchedmovies'}
                     parentRoute={'/setting'}
                     path={location.pathname}
-                    activeIcon={<MovieIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    activeIcon={renderIcon(HistoryRoundedIcon, tabPalette.setting.activeColor)}
+                    activeBackgroundColor={tabPalette.setting.activeBackgroundColor}
                     setPath={changeTab}
                 />
             )
@@ -211,7 +261,8 @@ function BottomBar({
                     route={'/travel-plans'}
                     parentRoute={'/setting'}
                     path={location.pathname}
-                    activeIcon={<FlightTakeoffIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    activeIcon={renderIcon(ConnectingAirportsRoundedIcon, tabPalette.setting.activeColor)}
+                    activeBackgroundColor={tabPalette.setting.activeBackgroundColor}
                     setPath={changeTab}
                 />
             )
@@ -221,12 +272,14 @@ function BottomBar({
             <BarIcon
                 route={'/setting'}
                 path={location.pathname}
-                activeIcon={<SettingsIcon sx={{ color: activeColor }} fontSize='inherit' />}
-                inactiveIcon={<SettingsIcon sx={{ color: inactiveColor }} fontSize='inherit' />}
+                activeIcon={renderIcon(PaletteRoundedIcon, tabPalette.setting.activeColor)}
+                inactiveIcon={renderIcon(PaletteRoundedIcon, tabPalette.setting.inactiveColor)}
+                activeBackgroundColor={tabPalette.setting.activeBackgroundColor}
+                inactiveBackgroundColor={tabPalette.setting.inactiveBackgroundColor}
                 setPath={changeTab}
             />
         )
-    }, [])
+    }, [location.pathname])
 
     return (
         <div className={styles.bottomnav}>

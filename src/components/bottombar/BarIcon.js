@@ -9,6 +9,8 @@ import IconButton from '@mui/material/IconButton'
 function BarIcon({
     activeIcon,
     inactiveIcon,
+    activeBackgroundColor,
+    inactiveBackgroundColor,
     route,
     path,
     setPath,
@@ -39,7 +41,13 @@ function BarIcon({
                     willChange: 'transform, opacity',
                 }}
             >
-                <IconButton size='large'>
+                <IconButton
+                    size='large'
+                    sx={{
+                        backgroundColor: activeBackgroundColor,
+                        boxShadow: `0 10px 24px ${activeBackgroundColor}55`,
+                    }}
+                >
                     {activeIcon}
                 </IconButton>
             </animated.div>
@@ -57,6 +65,10 @@ function BarIcon({
                 <IconButton
                     size='large'
                     onClick={() => redirectTo()}
+                    sx={{
+                        backgroundColor: inactiveBackgroundColor,
+                        boxShadow: '0 8px 18px rgba(15, 23, 42, 0.08)',
+                    }}
                 >
                     {inactiveIcon}
                 </IconButton>
