@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM --platform=$BUILDPLATFORM node:20-alpine AS build-stage
+FROM --platform=$BUILDPLATFORM node:26-alpine AS build-stage
 WORKDIR /app
 ARG REACT_APP_BACKEND_BASE_URL
 
