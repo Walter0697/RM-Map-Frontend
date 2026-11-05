@@ -1,5 +1,5 @@
 export const buildSocialMediaShortcutLaunchURL = (setupURL) => (
-    `shortcuts://run-shortcut?name=${encodeURIComponent('Roroadmap Social Analysis')}&input=text&text=${encodeURIComponent(setupURL)}`
+    `shortcuts://run-shortcut?name=${encodeURIComponent('Send To Tubemin')}&input=text&text=${encodeURIComponent(setupURL)}`
 )
 
 export const requestSocialMediaShortcutSetup = async (fetchImpl, setupURL, jwt) => {

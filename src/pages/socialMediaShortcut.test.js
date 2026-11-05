@@ -8,7 +8,7 @@ describe('social media Shortcut setup', () => {
         const launchURL = buildSocialMediaShortcutLaunchURL('https://api.example.test/api/shortcut/setup/token with spaces')
 
         expect(launchURL).toBe(
-            'shortcuts://run-shortcut?name=Roroadmap%20Social%20Analysis&input=text&text=https%3A%2F%2Fapi.example.test%2Fapi%2Fshortcut%2Fsetup%2Ftoken%20with%20spaces',
+            'shortcuts://run-shortcut?name=Send%20To%20Tubemin&input=text&text=https%3A%2F%2Fapi.example.test%2Fapi%2Fshortcut%2Fsetup%2Ftoken%20with%20spaces',
         )
     })
 

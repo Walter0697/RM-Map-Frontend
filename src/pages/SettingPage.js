@@ -269,7 +269,7 @@ function SettingPage({
                 setup.download_url,
                 jwt,
             )
-            const file = new File([blob], 'Roroadmap Social Analysis.shortcut', {
+            const file = new File([blob], 'Send To Tubemin.shortcut', {
                 type: 'application/octet-stream',
             })
             if (navigator.share && navigator.canShare?.({ files: [file] })) {
@@ -647,7 +647,7 @@ function SettingPage({
                                 sx={{ width: '100%', borderRadius: 1.5, border: '1px solid #d9e2ec' }}
                             />
                             <Typography variant='body2' color='text.secondary'>
-                                Then tap &quot;Roroadmap Social Analysis&quot;. If you do not see it, tap &quot;View More&quot; first. You can also favorite the Shortcut so it appears pinned here.
+                                Then tap &quot;Send To Tubemin&quot;. If you do not see it, tap &quot;View More&quot; first. You can also favorite the Shortcut so it appears pinned here.
                             </Typography>
                         </Box>
                         <Box sx={{ display: 'grid', gap: 1 }}>
