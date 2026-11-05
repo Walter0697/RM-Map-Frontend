@@ -31,25 +31,11 @@ import constants from '../constant'
 import backend from '../constant/backend'
 import actions from '../store/actions'
 import graphql from '../graphql'
-
-function validateIOSShortcutInstallURL(rawURL) {
-    if (!rawURL || typeof rawURL !== 'string') return ''
-    const trimmed = rawURL.trim()
-    if (!trimmed) return ''
-
-    try {
-        const parsed = new URL(trimmed)
-        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-            return ''
-        }
-        if (!parsed.hostname) {
-            return ''
-        }
-        return trimmed
-    } catch (error) {
-        return ''
-    }
-}
+import {
+    buildSocialMediaShortcutLaunchURL,
+    downloadSocialMediaShortcut,
+    requestSocialMediaShortcutSetup,
+} from './socialMediaShortcut'
 
 function validateTelegramBotURL(rawURL) {
     if (!rawURL || typeof rawURL !== 'string') return ''
@@ -86,6 +72,8 @@ function SettingPage({
     const [ isReleaseNoteOpen, setReleaseNoteOpen ] = useState(false)
     const [ isShortcutDialogOpen, setShortcutDialogOpen ] = useState(false)
     const [ isShortcutHelpDialogOpen, setShortcutHelpDialogOpen ] = useState(false)
+    const [ shortcutInstallLoading, setShortcutInstallLoading ] = useState(false)
+    const [ shortcutInstallError, setShortcutInstallError ] = useState('')
     const [ isTelegramDialogOpen, setTelegramDialogOpen ] = useState(false)
     const [ isTelegramGuideDialogOpen, setTelegramGuideDialogOpen ] = useState(false)
 
@@ -100,7 +88,6 @@ function SettingPage({
         pin_label: '',
         pin_image_path: '',
     })
-    const [ iosShortcutInstallURL, setIOSShortcutInstallURL ] = useState('')
     const [ telegramBotURL, setTelegramBotURL ] = useState('')
     const [ reminderTime, setReminderTime ] = useState('09:00')
     const [ calendarProviderStatus, setCalendarProviderStatus ] = useState('')
@@ -211,22 +198,9 @@ function SettingPage({
                     setTelegramBotURL('')
                 }
 
-                const shortcutResponse = await fetch(backend.withBasePath('settings/ios-shortcut-install-url'), {
-                    method: 'GET',
-                    headers: {
-                        Authorization: jwt,
-                    },
-                })
-                if (shortcutResponse.ok) {
-                    const shortcutData = await shortcutResponse.json()
-                    setIOSShortcutInstallURL(validateIOSShortcutInstallURL(shortcutData?.ios_shortcut_install_url))
-                } else {
-                    setIOSShortcutInstallURL('')
-                }
             } catch {
                 setReminderTime('09:00')
                 setTelegramBotURL('')
-                setIOSShortcutInstallURL('')
             }
         }
 
@@ -263,8 +237,7 @@ function SettingPage({
     }, [jwt])
 
     const openIOSShortcutInstall = () => {
-        const validatedURL = validateIOSShortcutInstallURL(iosShortcutInstallURL)
-        if (!validatedURL) return
+        setShortcutInstallError('')
         setShortcutDialogOpen(true)
     }
 
@@ -281,15 +254,43 @@ function SettingPage({
         setShortcutHelpDialogOpen(false)
     }
 
-    const confirmIOSShortcutInstall = () => {
-        const validatedURL = validateIOSShortcutInstallURL(iosShortcutInstallURL)
-        if (!validatedURL) return
-
-        const opened = window.open(validatedURL, '_blank', 'noopener,noreferrer')
-        if (opened) {
-            opened.opener = null
+    const confirmIOSShortcutInstall = async () => {
+        if (!jwt || shortcutInstallLoading) return
+        setShortcutInstallLoading(true)
+        setShortcutInstallError('')
+        try {
+            const setup = await requestSocialMediaShortcutSetup(
+                fetch,
+                backend.withBasePath('settings/ios-shortcut/setup'),
+                jwt,
+            )
+            const blob = await downloadSocialMediaShortcut(
+                fetch,
+                setup.download_url,
+                jwt,
+            )
+            const file = new File([blob], 'Roroadmap Social Analysis.shortcut', {
+                type: 'application/octet-stream',
+            })
+            if (navigator.share && navigator.canShare?.({ files: [file] })) {
+                await navigator.share({ title: 'Roroadmap Social Analysis', files: [file] })
+            } else {
+                const objectURL = URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = objectURL
+                link.download = file.name
+                link.click()
+                setTimeout(() => URL.revokeObjectURL(objectURL), 1000)
+            }
+            window.location.href = buildSocialMediaShortcutLaunchURL(setup.setup_url)
+            setShortcutDialogOpen(false)
+        } catch (error) {
+            if (error?.name !== 'AbortError') {
+                setShortcutInstallError(error?.message || 'Could not install the Roroadmap Shortcut.')
+            }
+        } finally {
+            setShortcutInstallLoading(false)
         }
-        setShortcutDialogOpen(false)
     }
 
     const openTalkToRoroadBot = () => {
@@ -471,7 +472,7 @@ function SettingPage({
                 previewPinLabel={previewDisplayPin.pin_label}
                 previewPinImagePath={previewDisplayPin.pin_image_path}
                 openPreviewDisplayPinForm={openPreviewDisplayPinForm}
-                showIOSShortcutInstallCTA={!!validateIOSShortcutInstallURL(iosShortcutInstallURL)}
+                showIOSShortcutInstallCTA={!!jwt}
                 openIOSShortcutInstall={openIOSShortcutInstall}
                 showCalendarConnectionCTA={true}
                 isGoogleCalendarConnected={calendarProviderStatus === 'active'}
@@ -522,11 +523,12 @@ function SettingPage({
             >
                 <DialogTitle>Social Media Shortcut (iOS)</DialogTitle>
                 <DialogContent sx={{ display: 'flex', justifyContent: 'center', position: 'relative', pb: 4 }}>
-                    <Button
+                        <Button
                         size='large'
                         variant='outlined'
                         aria-label='Download shortcut'
                         onClick={confirmIOSShortcutInstall}
+                        disabled={shortcutInstallLoading}
                         sx={{
                             py: 0,
                             width: 160,
@@ -578,10 +580,15 @@ function SettingPage({
                                     textTransform: 'uppercase',
                                 }}
                             >
-                                install
+                            {shortcutInstallLoading ? 'preparing' : 'install'}
                             </span>
                         </span>
                     </Button>
+                    {shortcutInstallError ? (
+                        <Typography color='error' variant='body2' sx={{ position: 'absolute', left: 16, right: 16, bottom: 42, textAlign: 'center' }}>
+                            {shortcutInstallError}
+                        </Typography>
+                    ) : null}
                     <IconButton
                         aria-label='Open shortcut usage guide'
                         onClick={openIOSShortcutHelpDialog}
@@ -640,7 +647,7 @@ function SettingPage({
                                 sx={{ width: '100%', borderRadius: 1.5, border: '1px solid #d9e2ec' }}
                             />
                             <Typography variant='body2' color='text.secondary'>
-                                Then tap &quot;Roroad Analyze&quot;. If you do not see it, tap &quot;View More&quot; first. You can also favorite the shortcut so it appears pinned here.
+                                Then tap &quot;Roroadmap Social Analysis&quot;. If you do not see it, tap &quot;View More&quot; first. You can also favorite the Shortcut so it appears pinned here.
                             </Typography>
                         </Box>
                         <Box sx={{ display: 'grid', gap: 1 }}>
@@ -651,7 +658,7 @@ function SettingPage({
                                 sx={{ width: '100%', borderRadius: 1.5, border: '1px solid #d9e2ec' }}
                             />
                             <Typography variant='body2' color='text.secondary'>
-                                Next, the Telegram chat opens automatically with all your information filled in. Just tap &quot;Send&quot; and you are done.
+                                The Shortcut sends the URL to Roroadmap and shows &quot;Feature requested — analysing.&quot; The marker will appear in Roroadmap after processing completes.
                             </Typography>
                         </Box>
                     </Box>
