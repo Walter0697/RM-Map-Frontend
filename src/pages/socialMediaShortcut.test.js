@@ -4,11 +4,9 @@ import {
 } from './socialMediaShortcut'
 
 describe('social media Shortcut setup', () => {
-    test('builds a URL-scheme launch with the one-time setup URL', () => {
-        const launchURL = buildSocialMediaShortcutLaunchURL('https://api.example.test/api/shortcut/setup/token with spaces')
-
-        expect(launchURL).toBe(
-            'shortcuts://run-shortcut?name=Send%20To%20Tubemin&input=text&text=https%3A%2F%2Fapi.example.test%2Fapi%2Fshortcut%2Fsetup%2Ftoken%20with%20spaces',
+    test('builds the one-time configuration launch URL with the final shortcut name', () => {
+        expect(buildSocialMediaShortcutLaunchURL('http://host/api/shortcut/setup/token')).toBe(
+            'shortcuts://run-shortcut?name=Roroadmap%20Analyze&input=text&text=http%3A%2F%2Fhost%2Fapi%2Fshortcut%2Fsetup%2Ftoken',
         )
     })
 

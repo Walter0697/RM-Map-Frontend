@@ -28,7 +28,7 @@ function SocialMediaPostShortcutButton({
         >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                 <CampaignIcon />
-                Social Media Shortcut (iOS)
+                Install Roroadmap Analyze Shortcut
             </span>
         </Button>
     )

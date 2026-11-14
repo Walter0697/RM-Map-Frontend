@@ -26,7 +26,7 @@ function IOSShortcutInstallButton({
         >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                 <AppleIcon />
-                Install iOS Shortcut
+                Install Telegram Shortcut (iOS) (Legacy)
             </span>
         </Button>
     )
