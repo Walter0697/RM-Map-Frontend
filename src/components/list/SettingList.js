@@ -19,6 +19,7 @@ import TalkToRoroadBotButton from './settings/TalkToRoroadBotButton'
 import SocialMediaPostShortcutButton from './settings/SocialMediaPostShortcutButton'
 import IOSShortcutInstallButton from './settings/IOSShortcutInstallButton'
 import APIKeyListButton from './settings/APIKeyListButton'
+import PendingSocialAnalysisButton from './settings/PendingSocialAnalysisButton'
 
 import WrapperBox from '../wrapper/WrapperBox'
 import SectionHeader from './settings/SectionHeader'
@@ -49,6 +50,8 @@ function SettingList({
   showLegacyIOSShortcutCTA,
   openLegacyIOSShortcutInstall,
   openAPIKeyList,
+  pendingSocialAnalysisCount,
+  openPendingSocialAnalysis,
   showCalendarConnectionCTA,
   isGoogleCalendarConnected,
   isGoogleCalendarLoading,
@@ -213,8 +216,17 @@ function SettingList({
               marginBottom={'15px'}
             >
               <SectionHeader
-                title={'API Manage'}
+                title={'Roroad Analyze'}
                 icon={<VpnKeyIcon />}
+              />
+            </WrapperBox>
+            <WrapperBox
+              height={30}
+              marginBottom={'15px'}
+            >
+              <PendingSocialAnalysisButton
+                count={pendingSocialAnalysisCount}
+                onClickHandler={openPendingSocialAnalysis}
               />
             </WrapperBox>
             <WrapperBox

@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { connect } from 'react-redux'
+import { useHistory } from 'react-router-dom'
 import Base from './Base'
 
 import useBoop from '../hooks/useBoop'
@@ -9,8 +11,12 @@ import ScheduleArriveForm from '../components/schedule/ScheduleArriveForm'
 import AutoHideAlert from '../components/AutoHideAlert'
 import MarkerView from '../components/marker/MarkerView'
 import ScheduleForm from '../components/form/ScheduleForm'
+import backend from '../constant/backend'
+import { fetchPendingSocialMediaAnalysis } from './socialMediaPending'
 
-function HomePage() {
+function HomePage({ jwt }) {
+    const history = useHistory()
+    const [pendingCount, setPendingCount] = useState(0)
     // selected schedules
     const [ selectedSchedules, setSchedules ] = useState([])
     const [ updateAlert, confirmUpdated ] = useBoop(3000)
@@ -23,6 +29,13 @@ function HomePage() {
     // if the selected marker is set to be schedule
     const [ scheduleFormOpen, setScheduleFormOpen ] = useState(false)
     const [ createAlert, confirmCreated ] = useBoop(3000)
+
+    useEffect(() => {
+        if (!jwt) return
+        fetchPendingSocialMediaAnalysis(fetch, backend.BACKEND_BASE_URL, jwt)
+            .then((payload) => setPendingCount(payload.count))
+            .catch(() => setPendingCount(0))
+    }, [jwt])
 
     const openScheduleStatusForm = () => {
         if (selectedSchedules && selectedSchedules.length !== 0) {
@@ -51,7 +64,7 @@ function HomePage() {
                     position: 'relative',
                 }}
             >
-                <HomeTop />
+                <HomeTop pendingCount={pendingCount} onPendingClick={() => history.push('/pending-social-analysis')} />
                 <HomeList
                     yesterdaySchedules={selectedSchedules}
                     setYesterdaySchedules={setSchedules}
@@ -96,4 +109,4 @@ function HomePage() {
     )
 }
 
-export default HomePage
+export default connect((state) => ({ jwt: state.auth.jwt }))(HomePage)

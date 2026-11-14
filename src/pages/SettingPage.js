@@ -22,6 +22,7 @@ import AppleIcon from '@mui/icons-material/Apple'
 import AltRouteIcon from '@mui/icons-material/AltRoute'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import TelegramIcon from '@mui/icons-material/Telegram'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 
 import TopBar from '../components/topbar/TopBar'
 import SettingList from '../components/list/SettingList'
@@ -43,6 +44,7 @@ import {
     fetchSocialMediaAPIKeys,
     revokeSocialMediaAPIKey,
 } from './socialMediaAPIKeys'
+import { fetchPendingSocialMediaAnalysis } from './socialMediaPending'
 
 function validateTelegramBotURL(rawURL) {
     if (!rawURL || typeof rawURL !== 'string') return ''
@@ -103,6 +105,7 @@ function SettingPage({
     const [ apiKeysLoading, setAPIKeysLoading ] = useState(false)
     const [ apiKeysError, setAPIKeysError ] = useState('')
     const [ revokingAPIKeyID, setRevokingAPIKeyID ] = useState(null)
+    const [ pendingSocialAnalysisCount, setPendingSocialAnalysisCount ] = useState(0)
     const [ shortcutInstallLoading, setShortcutInstallLoading ] = useState(false)
     const [ shortcutInstallError, setShortcutInstallError ] = useState('')
     const [ shortcutSetupURL, setShortcutSetupURL ] = useState('')
@@ -280,6 +283,15 @@ function SettingPage({
     }
 
     const closeAPIKeyList = () => setAPIKeyListDialogOpen(false)
+
+    const openPendingSocialAnalysis = () => history.push('/pending-social-analysis')
+
+    useEffect(() => {
+        if (!jwt) return
+        fetchPendingSocialMediaAnalysis(fetch, backend.BACKEND_BASE_URL, jwt)
+            .then((payload) => setPendingSocialAnalysisCount(payload.count))
+            .catch(() => setPendingSocialAnalysisCount(0))
+    }, [jwt])
 
     const revokeAPIKey = async (id) => {
         if (!window.confirm('Revoke this Analyze Shortcut API key? The installed Shortcut will stop working.')) return
@@ -562,6 +574,8 @@ function SettingPage({
                 showLegacyIOSShortcutCTA={!!iosShortcutInstallURL}
                 openLegacyIOSShortcutInstall={openLegacyIOSShortcutInstall}
                 openAPIKeyList={openAPIKeyList}
+                pendingSocialAnalysisCount={pendingSocialAnalysisCount}
+                openPendingSocialAnalysis={openPendingSocialAnalysis}
                 showCalendarConnectionCTA={true}
                 isGoogleCalendarConnected={calendarProviderStatus === 'active'}
                 isGoogleCalendarLoading={calendarProviderLoading || calendarProviderActionLoading}
@@ -621,14 +635,14 @@ function SettingPage({
                         <List disablePadding>
                             {apiKeys.map((item) => (
                                 <ListItem key={item.id} divider secondaryAction={
-                                    <Button
+                                    <IconButton
                                         color='error'
-                                        size='small'
+                                        aria-label={item.status === 'active' ? `Revoke ${item.name || 'API key'}` : 'API key revoked'}
                                         onClick={() => revokeAPIKey(item.id)}
                                         disabled={item.status !== 'active' || revokingAPIKeyID === item.id}
                                     >
-                                        {revokingAPIKeyID === item.id ? 'Revoking…' : item.status === 'active' ? 'Revoke' : 'Revoked'}
-                                    </Button>
+                                        {revokingAPIKeyID === item.id ? <CircularProgress size={18} /> : <DeleteOutlineIcon />}
+                                    </IconButton>
                                 }>
                                     <ListItemText
                                         primary={item.name || 'Analyze Shortcut'}
