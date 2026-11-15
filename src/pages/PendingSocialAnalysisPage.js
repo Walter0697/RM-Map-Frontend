@@ -4,23 +4,15 @@ import { useHistory } from 'react-router-dom'
 import {
     Alert,
     Box,
-    Button,
     CircularProgress,
     List,
-    ListItem,
-    ListItemText,
     Typography,
 } from '@mui/material'
 import TopBar from '../components/topbar/TopBar'
 import Base from './Base'
+import PendingSocialAnalysisItem from '../components/list/listitem/PendingSocialAnalysisItem'
 import backend from '../constant/backend'
 import { fetchPendingSocialMediaAnalysis, updatePendingSocialMediaAnalysis } from './socialMediaPending'
-
-function resultSummary(result) {
-    if (!result || typeof result !== 'object') return 'The agent needs your review before this can become a marker.'
-    const location = result.location?.address || result.location?.name
-    return [result.description, location, result.marker_type].filter(Boolean).join(' · ') || 'The agent needs your review before this can become a marker.'
-}
 
 function PendingSocialAnalysisPage({ jwt }) {
     const history = useHistory()
@@ -64,18 +56,15 @@ function PendingSocialAnalysisPage({ jwt }) {
                 {error ? <Alert severity='error' sx={{ mb: 2 }}>{error}</Alert> : null}
                 {loading ? <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress /></Box> : null}
                 {!loading && items.length === 0 ? <Typography color='text.secondary'>No pending markers.</Typography> : null}
-                <List disablePadding>
+                <List disablePadding sx={{ display: 'grid', gap: 2 }}>
                     {items.map((item) => (
-                        <ListItem key={item.job_id} divider sx={{ display: 'block', py: 2 }}>
-                            <ListItemText
-                                primary={item.result?.location?.name || item.result?.description || 'Pending marker'}
-                                secondary={<><span>{resultSummary(item.result)}</span><br /><a href={item.source_url} target='_blank' rel='noreferrer'>Open source post</a></>}
-                            />
-                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, pt: 1 }}>
-                                <Button color='error' onClick={() => update(item, 'reject')} disabled={workingID === item.job_id}>Not good</Button>
-                                <Button variant='contained' onClick={() => update(item, 'approve')} disabled={workingID === item.job_id}>Good, add marker</Button>
-                            </Box>
-                        </ListItem>
+                        <PendingSocialAnalysisItem
+                            key={item.job_id}
+                            item={item}
+                            onReject={() => update(item, 'reject')}
+                            onApprove={() => update(item, 'approve')}
+                            working={workingID === item.job_id}
+                        />
                     ))}
                 </List>
             </Box>

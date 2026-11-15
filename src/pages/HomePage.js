@@ -64,8 +64,10 @@ function HomePage({ jwt }) {
                     position: 'relative',
                 }}
             >
-                <HomeTop pendingCount={pendingCount} onPendingClick={() => history.push('/pending-social-analysis')} />
+                <HomeTop />
                 <HomeList
+                    pendingSocialAnalysisCount={pendingCount}
+                    openPendingSocialAnalysis={() => history.push('/pending-social-analysis')}
                     yesterdaySchedules={selectedSchedules}
                     setYesterdaySchedules={setSchedules}
                     openYesterdayStatusForm={openScheduleStatusForm}
