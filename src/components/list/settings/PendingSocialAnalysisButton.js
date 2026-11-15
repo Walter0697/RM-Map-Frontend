@@ -1,5 +1,5 @@
 import React from 'react'
-import { Badge, Button } from '@mui/material'
+import { Button } from '@mui/material'
 import FactCheckIcon from '@mui/icons-material/FactCheck'
 
 function PendingSocialAnalysisButton({ onClickHandler, count = 0 }) {
@@ -20,10 +20,29 @@ function PendingSocialAnalysisButton({ onClickHandler, count = 0 }) {
             }}
             onClick={onClickHandler}
         >
-            <Badge color='error' badgeContent={count > 0 ? count : 0} invisible={count === 0}>
-                <FactCheckIcon />
-            </Badge>
+            <FactCheckIcon />
             Pending Markers
+            {count > 0 ? (
+                <span
+                    aria-label={`${count} pending markers`}
+                    style={{
+                        marginLeft: 'auto',
+                        minWidth: '24px',
+                        height: '24px',
+                        padding: '0 6px',
+                        borderRadius: '999px',
+                        backgroundColor: '#d32f2f',
+                        color: 'white',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 700,
+                        lineHeight: 1,
+                    }}
+                >
+                    {count}
+                </span>
+            ) : null}
         </Button>
     )
 }

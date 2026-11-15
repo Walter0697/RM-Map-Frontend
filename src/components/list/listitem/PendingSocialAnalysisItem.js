@@ -12,7 +12,7 @@ function resolveImageURL(value) {
     return `${backend.IMAGE_LINK}/${imageURL}`
 }
 
-function PendingSocialAnalysisItem({ item, onApprove, onReject, working }) {
+function PendingSocialAnalysisItem({ item, onClick, onApprove, onReject, working }) {
     const [imageFailed, setImageFailed] = useState(false)
     const result = item?.result || {}
     const location = result.location || {}
@@ -30,7 +30,14 @@ function PendingSocialAnalysisItem({ item, onApprove, onReject, working }) {
                 boxShadow: '2px 2px 6px',
                 padding: '12px',
                 boxSizing: 'border-box',
+                cursor: 'pointer',
             }}
+            onClick={onClick}
+            onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') onClick(event)
+            }}
+            role='button'
+            tabIndex={0}
         >
             <div style={{ display: 'flex', minWidth: 0, alignItems: 'stretch' }}>
                 <div style={{ width: '34%', minWidth: '96px', maxWidth: '130px', minHeight: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '6px', background: '#d9e6f3' }}>
@@ -52,9 +59,9 @@ function PendingSocialAnalysisItem({ item, onApprove, onReject, working }) {
                 </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
-                <Button size='small' color='error' variant='outlined' onClick={onReject} disabled={working}>Not good</Button>
-                <Button size='small' variant='contained' onClick={onApprove} disabled={working}>Good, add marker</Button>
-                <Button size='small' href={item.source_url} target='_blank' rel='noreferrer' endIcon={<OpenInNewIcon />} sx={{ color: '#071c8d' }}>Source</Button>
+                <Button size='small' color='error' variant='outlined' onClick={(event) => { event.stopPropagation(); onReject() }} disabled={working}>Not good</Button>
+                <Button size='small' variant='contained' onClick={(event) => { event.stopPropagation(); onApprove() }} disabled={working}>Good, add marker</Button>
+                <Button size='small' href={item.source_url} target='_blank' rel='noreferrer' endIcon={<OpenInNewIcon />} onClick={(event) => event.stopPropagation()} sx={{ color: '#071c8d' }}>Source</Button>
             </div>
         </div>
     )
