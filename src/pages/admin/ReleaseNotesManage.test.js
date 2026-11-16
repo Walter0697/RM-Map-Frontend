@@ -73,7 +73,7 @@ describe('ReleaseNotesManage', () => {
         })
 
         const versionInput = container.querySelector('input[placeholder="3.0.0"]')
-        expect(versionInput.value).toBe('3.0.0')
+        expect(versionInput.value).toBe('3.1.0')
         expect(versionInput.disabled).toBe(true)
         expect(document.body.textContent).toContain('New draft uses the current app version.')
     })

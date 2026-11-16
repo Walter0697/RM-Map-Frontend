@@ -12,3 +12,13 @@ export const requestSocialMediaShortcutSetup = async (fetchImpl, setupURL, jwt) 
     }
     return response.json()
 }
+
+export const getSocialMediaShortcutSetupURL = async (fetchImpl, setupURL, jwt, cachedSetupURL = '') => {
+    if (cachedSetupURL) return cachedSetupURL
+
+    const setup = await requestSocialMediaShortcutSetup(fetchImpl, setupURL, jwt)
+    if (!setup?.setup_url) {
+        throw new Error('Shortcut configuration URL was not returned.')
+    }
+    return setup.setup_url
+}
