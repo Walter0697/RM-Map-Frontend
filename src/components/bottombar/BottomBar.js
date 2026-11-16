@@ -6,6 +6,7 @@ import MapIcon from '@mui/icons-material/Map'
 import HomeIcon from '@mui/icons-material/Home'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import SettingsIcon from '@mui/icons-material/Settings'
+import FactCheckIcon from '@mui/icons-material/FactCheck'
 
 import TheatersIcon from '@mui/icons-material/Theaters'     // movie
 import StarIcon from '@mui/icons-material/Star'             // favourite movie
@@ -150,6 +151,17 @@ function BottomBar({
     }, [])
 
     const SettingButton = useMemo(() => {
+        if (location.pathname === '/pending-social-analysis') {
+            return (
+                <SubBarIcon
+                    route={'/pending-social-analysis'}
+                    parentRoute={'/setting'}
+                    path={location.pathname}
+                    activeIcon={<FactCheckIcon sx={{ color: activeColor }} fontSize='inherit' />}
+                    setPath={changeTab}
+                />
+            )
+        }
         if (location.pathname === '/previous') {
             return (
                 <SubBarIcon 
@@ -226,7 +238,7 @@ function BottomBar({
                 setPath={changeTab}
             />
         )
-    }, [])
+    }, [location.pathname])
 
     return (
         <div className={styles.bottomnav}>

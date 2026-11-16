@@ -23,6 +23,7 @@ import FavouriteMoviePage from './pages/FavouriteMoviePage'
 import StationPage from './pages/StationPage'
 import CountryPage from './pages/CountryPage'
 import WatchedMoviePage from './pages/WatchedMoviePage'
+import PendingSocialAnalysisPage from './pages/PendingSocialAnalysisPage'
 
 import MarkerFilterPage from './pages/MarkerFilterPage'
 
@@ -55,6 +56,7 @@ function App() {
             <Route exact path='/schedules/:schedule_id' component={SchedulePage} />
             <Route path='/schedule' component={SchedulePage} />
             <Route path='/setting' component={SettingPage} />
+            <Route exact path='/pending-social-analysis' component={PendingSocialAnalysisPage} />
             <Route path='/travel-plans' component={TravelPlansPage} />
 
             <Route path='/previous' component={PreviousMarkerPage} />

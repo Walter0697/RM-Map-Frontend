@@ -17,6 +17,9 @@ import GoogleCalendarConnectionButton from './settings/GoogleCalendarConnectionB
 import ReminderTimeButton from './settings/ReminderTimeButton'
 import TalkToRoroadBotButton from './settings/TalkToRoroadBotButton'
 import SocialMediaPostShortcutButton from './settings/SocialMediaPostShortcutButton'
+import IOSShortcutInstallButton from './settings/IOSShortcutInstallButton'
+import APIKeyListButton from './settings/APIKeyListButton'
+import PendingSocialAnalysisButton from './settings/PendingSocialAnalysisButton'
 
 import WrapperBox from '../wrapper/WrapperBox'
 import SectionHeader from './settings/SectionHeader'
@@ -27,6 +30,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone'
 import SmartToyIcon from '@mui/icons-material/SmartToy'
+import VpnKeyIcon from '@mui/icons-material/VpnKey'
 
 import * as serviceWorkerRegistration from '../../serviceWorkerRegistration'
 
@@ -43,6 +47,11 @@ function SettingList({
   openPreviewDisplayPinForm,
   showIOSShortcutInstallCTA,
   openIOSShortcutInstall,
+  showLegacyIOSShortcutCTA,
+  openLegacyIOSShortcutInstall,
+  openAPIKeyList,
+  pendingSocialAnalysisCount,
+  openPendingSocialAnalysis,
   showCalendarConnectionCTA,
   isGoogleCalendarConnected,
   isGoogleCalendarLoading,
@@ -200,6 +209,44 @@ function SettingList({
             ) : null}
           </>
         ) : null}
+        {showIOSShortcutInstallCTA ? (
+          <>
+            <WrapperBox
+              height={50}
+              marginBottom={'15px'}
+            >
+              <SectionHeader
+                title={'Roroad Analyze'}
+                icon={<VpnKeyIcon />}
+              />
+            </WrapperBox>
+            <WrapperBox
+              height={30}
+              marginBottom={'15px'}
+            >
+              <PendingSocialAnalysisButton
+                count={pendingSocialAnalysisCount}
+                onClickHandler={openPendingSocialAnalysis}
+              />
+            </WrapperBox>
+            <WrapperBox
+              height={30}
+              marginBottom={'15px'}
+            >
+              <SocialMediaPostShortcutButton
+                onClickHandler={openIOSShortcutInstall}
+              />
+            </WrapperBox>
+            <WrapperBox
+              height={30}
+              marginBottom={'30px'}
+            >
+              <APIKeyListButton
+                onClickHandler={openAPIKeyList}
+              />
+            </WrapperBox>
+          </>
+        ) : null}
         <WrapperBox
           height={50}
           marginBottom={'15px'}
@@ -222,20 +269,21 @@ function SettingList({
           height={30}
           marginBottom={'15px'}
         >
-          <SocialMediaPostShortcutButton
-            onClickHandler={openIOSShortcutInstall}
-            disabled={!showIOSShortcutInstallCTA}
-          />
-        </WrapperBox>
-        <WrapperBox
-          height={30}
-          marginBottom={'30px'}
-        >
           <ReminderTimeButton
             reminderTime={reminderTime}
             onClickHandler={openReminderTimeForm}
           />
         </WrapperBox>
+        {showLegacyIOSShortcutCTA ? (
+          <WrapperBox
+            height={30}
+            marginBottom={'30px'}
+          >
+            <IOSShortcutInstallButton
+              onClickHandler={openLegacyIOSShortcutInstall}
+            />
+          </WrapperBox>
+        ) : null}
         <WrapperBox
           height={50}
           marginBottom={'15px'}

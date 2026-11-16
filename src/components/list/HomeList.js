@@ -10,6 +10,7 @@ import { useLazyQuery } from '@apollo/client'
 import dayjs from 'dayjs'
 
 import MapIcon from '@mui/icons-material/Map'
+import FactCheckIcon from '@mui/icons-material/FactCheck'
 
 import RandomFadeIn from '../wrapper/RandomFadeIn'
 import WrapperBox from '../wrapper/WrapperBox'
@@ -38,6 +39,8 @@ function HomeList({
     schedules,
     eventtypes,
     dispatch,
+    pendingSocialAnalysisCount,
+    openPendingSocialAnalysis,
 }) {
     const history = useHistory()
 
@@ -106,6 +109,21 @@ function HomeList({
                             onClickHandler={() => setAnimateRedirectTo('/markers')}
                         />
                     </WrapperBox>
+                    {pendingSocialAnalysisCount > 0 && (
+                        <WrapperBox
+                            height={80}
+                            marginBottom={'15px'}
+                        >
+                            <HomeButtonBase
+                                width={'100%'}
+                                label={`Pending Markers (${pendingSocialAnalysisCount})`}
+                                fontSize={'20px'}
+                                iconScale={'4'}
+                                icon={<FactCheckIcon sx={{ color: constants.colors.HomeButtonIcon}} />}
+                                onClickHandler={openPendingSocialAnalysis}
+                            />
+                        </WrapperBox>
+                    )}
                     <WrapperBox
                         height={80}
                         marginBottom={'15px'}

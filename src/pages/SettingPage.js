@@ -12,12 +12,17 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
+    List,
+    ListItem,
+    ListItemText,
+    CircularProgress,
     Typography,
 } from '@mui/material'
 import AppleIcon from '@mui/icons-material/Apple'
 import AltRouteIcon from '@mui/icons-material/AltRoute'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import TelegramIcon from '@mui/icons-material/Telegram'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 
 import TopBar from '../components/topbar/TopBar'
 import SettingList from '../components/list/SettingList'
@@ -31,8 +36,17 @@ import constants from '../constant'
 import backend from '../constant/backend'
 import actions from '../store/actions'
 import graphql from '../graphql'
+import {
+    buildSocialMediaShortcutLaunchURL,
+    requestSocialMediaShortcutSetup,
+} from './socialMediaShortcut'
+import {
+    fetchSocialMediaAPIKeys,
+    revokeSocialMediaAPIKey,
+} from './socialMediaAPIKeys'
+import { fetchPendingSocialMediaAnalysis } from './socialMediaPending'
 
-function validateIOSShortcutInstallURL(rawURL) {
+function validateTelegramBotURL(rawURL) {
     if (!rawURL || typeof rawURL !== 'string') return ''
     const trimmed = rawURL.trim()
     if (!trimmed) return ''
@@ -51,7 +65,7 @@ function validateIOSShortcutInstallURL(rawURL) {
     }
 }
 
-function validateTelegramBotURL(rawURL) {
+function validateIOSShortcutInstallURL(rawURL) {
     if (!rawURL || typeof rawURL !== 'string') return ''
     const trimmed = rawURL.trim()
     if (!trimmed) return ''
@@ -86,6 +100,16 @@ function SettingPage({
     const [ isReleaseNoteOpen, setReleaseNoteOpen ] = useState(false)
     const [ isShortcutDialogOpen, setShortcutDialogOpen ] = useState(false)
     const [ isShortcutHelpDialogOpen, setShortcutHelpDialogOpen ] = useState(false)
+    const [ isAPIKeyListDialogOpen, setAPIKeyListDialogOpen ] = useState(false)
+    const [ apiKeys, setAPIKeys ] = useState([])
+    const [ apiKeysLoading, setAPIKeysLoading ] = useState(false)
+    const [ apiKeysError, setAPIKeysError ] = useState('')
+    const [ revokingAPIKeyID, setRevokingAPIKeyID ] = useState(null)
+    const [ pendingSocialAnalysisCount, setPendingSocialAnalysisCount ] = useState(0)
+    const [ shortcutInstallLoading, setShortcutInstallLoading ] = useState(false)
+    const [ shortcutInstallError, setShortcutInstallError ] = useState('')
+    const [ shortcutSetupURL, setShortcutSetupURL ] = useState('')
+    const [ shortcutDownloadURL, setShortcutDownloadURL ] = useState('')
     const [ isTelegramDialogOpen, setTelegramDialogOpen ] = useState(false)
     const [ isTelegramGuideDialogOpen, setTelegramGuideDialogOpen ] = useState(false)
 
@@ -223,6 +247,7 @@ function SettingPage({
                 } else {
                     setIOSShortcutInstallURL('')
                 }
+
             } catch {
                 setReminderTime('09:00')
                 setTelegramBotURL('')
@@ -232,6 +257,55 @@ function SettingPage({
 
         fetchSettingsConfig()
     }, [jwt])
+
+    const openLegacyIOSShortcutInstall = () => {
+        const validatedURL = validateIOSShortcutInstallURL(iosShortcutInstallURL)
+        if (!validatedURL) return
+
+        const opened = window.open(validatedURL, '_blank', 'noopener,noreferrer')
+        if (opened) {
+            opened.opener = null
+        }
+    }
+
+    const openAPIKeyList = async () => {
+        setAPIKeyListDialogOpen(true)
+        setAPIKeysLoading(true)
+        setAPIKeysError('')
+        try {
+            const items = await fetchSocialMediaAPIKeys(fetch, backend.BACKEND_BASE_URL, jwt)
+            setAPIKeys(items)
+        } catch (error) {
+            setAPIKeysError(error.message)
+        } finally {
+            setAPIKeysLoading(false)
+        }
+    }
+
+    const closeAPIKeyList = () => setAPIKeyListDialogOpen(false)
+
+    const openPendingSocialAnalysis = () => history.push('/pending-social-analysis')
+
+    useEffect(() => {
+        if (!jwt) return
+        fetchPendingSocialMediaAnalysis(fetch, backend.BACKEND_BASE_URL, jwt)
+            .then((payload) => setPendingSocialAnalysisCount(payload.count))
+            .catch(() => setPendingSocialAnalysisCount(0))
+    }, [jwt])
+
+    const revokeAPIKey = async (id) => {
+        if (!window.confirm('Revoke this Analyze Shortcut API key? The installed Shortcut will stop working.')) return
+        setRevokingAPIKeyID(id)
+        setAPIKeysError('')
+        try {
+            await revokeSocialMediaAPIKey(fetch, backend.BACKEND_BASE_URL, jwt, id)
+            setAPIKeys((current) => current.map((item) => item.id === id ? { ...item, status: 'revoked' } : item))
+        } catch (error) {
+            setAPIKeysError(error.message)
+        } finally {
+            setRevokingAPIKeyID(null)
+        }
+    }
 
     useEffect(() => {
         const fetchCalendarProviderStatus = async () => {
@@ -263,8 +337,9 @@ function SettingPage({
     }, [jwt])
 
     const openIOSShortcutInstall = () => {
-        const validatedURL = validateIOSShortcutInstallURL(iosShortcutInstallURL)
-        if (!validatedURL) return
+        setShortcutInstallError('')
+        setShortcutSetupURL('')
+        setShortcutDownloadURL('')
         setShortcutDialogOpen(true)
     }
 
@@ -281,15 +356,38 @@ function SettingPage({
         setShortcutHelpDialogOpen(false)
     }
 
-    const confirmIOSShortcutInstall = () => {
-        const validatedURL = validateIOSShortcutInstallURL(iosShortcutInstallURL)
-        if (!validatedURL) return
-
-        const opened = window.open(validatedURL, '_blank', 'noopener,noreferrer')
-        if (opened) {
-            opened.opener = null
+    const prepareIOSShortcutInstall = async () => {
+        if (!jwt || shortcutInstallLoading) return
+        setShortcutInstallLoading(true)
+        setShortcutInstallError('')
+        try {
+            const setup = await requestSocialMediaShortcutSetup(
+                fetch,
+                backend.withBasePath('settings/ios-shortcut/setup'),
+                jwt,
+            )
+            setShortcutSetupURL(setup.setup_url || '')
+            setShortcutDownloadURL(setup.download_url || '')
+            if (!setup.download_url) {
+                throw new Error('Shortcut download URL was not returned.')
+            }
+            const link = document.createElement('a')
+            link.href = setup.download_url
+            link.download = 'Roroadmap Analyze.shortcut'
+            link.rel = 'noopener'
+            link.click()
+        } catch (error) {
+            if (error?.name !== 'AbortError') {
+                setShortcutInstallError(error?.message || 'Could not install the Roroadmap Shortcut.')
+            }
+        } finally {
+            setShortcutInstallLoading(false)
         }
-        setShortcutDialogOpen(false)
+    }
+
+    const configureIOSShortcut = () => {
+        if (!shortcutSetupURL) return
+        window.location.assign(buildSocialMediaShortcutLaunchURL(shortcutSetupURL))
     }
 
     const openTalkToRoroadBot = () => {
@@ -471,8 +569,13 @@ function SettingPage({
                 previewPinLabel={previewDisplayPin.pin_label}
                 previewPinImagePath={previewDisplayPin.pin_image_path}
                 openPreviewDisplayPinForm={openPreviewDisplayPinForm}
-                showIOSShortcutInstallCTA={!!validateIOSShortcutInstallURL(iosShortcutInstallURL)}
+                showIOSShortcutInstallCTA={!!jwt}
                 openIOSShortcutInstall={openIOSShortcutInstall}
+                showLegacyIOSShortcutCTA={!!iosShortcutInstallURL}
+                openLegacyIOSShortcutInstall={openLegacyIOSShortcutInstall}
+                openAPIKeyList={openAPIKeyList}
+                pendingSocialAnalysisCount={pendingSocialAnalysisCount}
+                openPendingSocialAnalysis={openPendingSocialAnalysis}
                 showCalendarConnectionCTA={true}
                 isGoogleCalendarConnected={calendarProviderStatus === 'active'}
                 isGoogleCalendarLoading={calendarProviderLoading || calendarProviderActionLoading}
@@ -517,16 +620,67 @@ function SettingPage({
             <Dialog
                 fullWidth
                 maxWidth='sm'
+                open={isAPIKeyListDialogOpen}
+                onClose={closeAPIKeyList}
+            >
+                <DialogTitle>Analyze Shortcut API Keys</DialogTitle>
+                <DialogContent dividers>
+                    {apiKeysLoading ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}><CircularProgress size={28} /></Box>
+                    ) : apiKeysError ? (
+                        <Typography color='error'>{apiKeysError}</Typography>
+                    ) : apiKeys.length === 0 ? (
+                        <Typography color='text.secondary'>No Analyze Shortcut API keys have been created.</Typography>
+                    ) : (
+                        <List disablePadding>
+                            {apiKeys.map((item) => (
+                                <ListItem key={item.id} divider secondaryAction={
+                                    <IconButton
+                                        color='error'
+                                        aria-label={item.status === 'active' ? `Revoke ${item.name || 'API key'}` : 'API key revoked'}
+                                        onClick={() => revokeAPIKey(item.id)}
+                                        disabled={item.status !== 'active' || revokingAPIKeyID === item.id}
+                                    >
+                                        {revokingAPIKeyID === item.id ? <CircularProgress size={18} /> : <DeleteOutlineIcon />}
+                                    </IconButton>
+                                }>
+                                    <ListItemText
+                                        primary={item.name || 'Analyze Shortcut'}
+                                        secondary={`Created ${item.created_at ? new Date(item.created_at).toLocaleString() : 'unknown'} · Last used ${item.last_used_at ? new Date(item.last_used_at).toLocaleString() : 'Never'}`}
+                                    />
+                                </ListItem>
+                            ))}
+                        </List>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeAPIKeyList}>Close</Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog
+                fullWidth
+                maxWidth='sm'
                 open={isShortcutDialogOpen}
                 onClose={closeIOSShortcutInstallDialog}
             >
-                <DialogTitle>Social Media Shortcut (iOS)</DialogTitle>
-                <DialogContent sx={{ display: 'flex', justifyContent: 'center', position: 'relative', pb: 4 }}>
-                    <Button
+                <DialogTitle>Set Up Roroadmap Analyze</DialogTitle>
+                <DialogContent sx={{ display: 'grid', gap: 2, position: 'relative', pb: 4 }}>
+                    <Typography variant='body2' color='text.secondary'>
+                        Install the shortcut once, then configure it so it can remember the Roroadmap domain and API key for future sharing.
+                    </Typography>
+                    <Typography variant='body2'>
+                        <strong>1.</strong> Download <strong>Roroadmap Analyze.shortcut</strong>, open it from Files, and add it to the Shortcuts app.
+                    </Typography>
+                    <Typography variant='body2'>
+                        <strong>2.</strong> After adding it, tap Configure below to register this Roroadmap account on your iPhone.
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Button
                         size='large'
                         variant='outlined'
                         aria-label='Download shortcut'
-                        onClick={confirmIOSShortcutInstall}
+                        onClick={prepareIOSShortcutInstall}
+                        disabled={shortcutInstallLoading}
                         sx={{
                             py: 0,
                             width: 160,
@@ -578,10 +732,24 @@ function SettingPage({
                                     textTransform: 'uppercase',
                                 }}
                             >
-                                install
+                            {shortcutInstallLoading ? 'preparing' : shortcutDownloadURL ? 'download again' : 'download'}
                             </span>
                         </span>
                     </Button>
+                    </Box>
+                    <Button
+                        fullWidth
+                        variant='contained'
+                        onClick={configureIOSShortcut}
+                        disabled={!shortcutSetupURL || shortcutInstallLoading}
+                    >
+                        Configure Roroadmap Analyze
+                    </Button>
+                    {shortcutInstallError ? (
+                        <Typography color='error' variant='body2' sx={{ textAlign: 'center' }}>
+                            {shortcutInstallError}
+                        </Typography>
+                    ) : null}
                     <IconButton
                         aria-label='Open shortcut usage guide'
                         onClick={openIOSShortcutHelpDialog}
@@ -608,7 +776,7 @@ function SettingPage({
                             pointerEvents: 'none',
                         }}
                     >
-                        how to use from Ig/Threads
+                        use from Instagram/Threads
                     </Typography>
                 </DialogContent>
             </Dialog>
@@ -618,7 +786,7 @@ function SettingPage({
                 open={isShortcutHelpDialogOpen}
                 onClose={closeIOSShortcutHelpDialog}
             >
-                <DialogTitle>How to Use the Shortcut</DialogTitle>
+                <DialogTitle>How to Use Roroadmap Analyze</DialogTitle>
                 <DialogContent dividers>
                     <Box sx={{ display: 'grid', gap: 2 }}>
                         <Box sx={{ display: 'grid', gap: 1 }}>
@@ -636,11 +804,11 @@ function SettingPage({
                             <Box
                                 component='img'
                                 src='/assets/shortcut-guide/step2.jpg'
-                                alt='Step 2: select Roroad Analyze'
+                                alt='Step 2: select Analyze'
                                 sx={{ width: '100%', borderRadius: 1.5, border: '1px solid #d9e2ec' }}
                             />
                             <Typography variant='body2' color='text.secondary'>
-                                Then tap &quot;Roroad Analyze&quot;. If you do not see it, tap &quot;View More&quot; first. You can also favorite the shortcut so it appears pinned here.
+                                Then tap &quot;Roroadmap Analyze&quot;. If you do not see it, tap &quot;View More&quot; first. You can also favorite the Shortcut so it appears pinned here.
                             </Typography>
                         </Box>
                         <Box sx={{ display: 'grid', gap: 1 }}>
@@ -651,7 +819,7 @@ function SettingPage({
                                 sx={{ width: '100%', borderRadius: 1.5, border: '1px solid #d9e2ec' }}
                             />
                             <Typography variant='body2' color='text.secondary'>
-                                Next, the Telegram chat opens automatically with all your information filled in. Just tap &quot;Send&quot; and you are done.
+                                The Shortcut sends the URL to Roroadmap and shows &quot;Feature requested — analysing.&quot; The marker will appear in Roroadmap after processing completes.
                             </Typography>
                         </Box>
                     </Box>

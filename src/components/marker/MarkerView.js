@@ -9,6 +9,7 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    DialogActions,
     Box,
     Slide,
 } from '@mui/material'
@@ -38,6 +39,13 @@ import RestaurantCard from '../card/RestaurantCard'
 import MarkerDescription from './MarkerDescription'
 import MarkerShareView from './MarkerShareView'
 
+function resolveMarkerImageLink(value) {
+    const imageLink = `${value || ''}`.trim()
+    if (!imageLink) return ''
+    if (/^https?:\/\//i.test(imageLink)) return imageLink
+    return `${backend.IMAGE_LINK}${imageLink.startsWith('/') ? imageLink : `/${imageLink}`}`
+}
+
 import generic from '../../scripts/generic'
 import actions from '../../store/actions'
 import graphql from '../../graphql'
@@ -54,6 +62,7 @@ function MarkerView({
     editMarker,
     eventtypes,
     noStar,
+    pendingActions,
     dispatch,
 }) {
     const history = useHistory()
@@ -268,7 +277,7 @@ function MarkerView({
                                 <Grid container spacing={2} style={{
                                     overflow: 'hidden'
                                 }}>
-                                    { marker.image_link && (
+                                    { marker.image_link ? (
                                         <Grid item xs={12} md={12} lg={12}>
                                             <img
                                                 width='100%'
@@ -277,10 +286,19 @@ function MarkerView({
                                                     objectFit: 'contain',
                                                     borderRadius: '8px',
                                                 }}
-                                                src={backend.IMAGE_LINK + marker.image_link}                                            
+                                                src={resolveMarkerImageLink(marker.image_link)}
                                             />
                                         </Grid>
-                                    )}
+                                    ) : typeIcon ? (
+                                        <Grid item xs={12} md={12} lg={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+                                            <img
+                                                width='100%'
+                                                style={{ maxHeight: '30vh', objectFit: 'contain', borderRadius: '8px' }}
+                                                src={typeIcon}
+                                                alt='Marker category'
+                                            />
+                                        </Grid>
+                                    ) : null}
                                     <Grid item xs={12} md={12} lg={12}>
                                         <span 
                                             style={{
@@ -454,6 +472,7 @@ function MarkerView({
                                 </Grid>
                             </DialogContentText>
                         </DialogContent>
+                        {pendingActions ? <DialogActions>{pendingActions}</DialogActions> : null}
                         {(markerDisplayId !== undefined && markerDisplayId !== null) && (
                             <Box
                                 data-testid='marker-view-id-badge'

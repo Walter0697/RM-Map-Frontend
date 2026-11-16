@@ -52,10 +52,12 @@ function LocationPreview({
 
         if (marker?.type === 'marker') {
             // find the type icon from the list to get the icon path
-            const currentType = eventtypes.find(s => s.value === marker.item.type)
-            setIcon(backend.IMAGE_LINK + currentType.icon_path)
+            const currentType = eventtypes?.find(s => s.value === marker?.item?.type)
+            setIcon(currentType?.icon_path ? backend.IMAGE_LINK + currentType.icon_path : null)
+        } else {
+            setIcon(null)
         }
-    }, [marker])
+    }, [marker, eventtypes])
 
     const showMarkerView = () => {
         if (marker && marker.type === 'marker') {
