@@ -5,7 +5,7 @@ export function buildPendingMarkerItem(item) {
     const result = item?.result || {}
     const location = result.location || {}
     return {
-        id: item?.job_id,
+        id: null,
         label: location.name || result.description || 'Pending marker',
         address: location.address || 'Location needs confirmation',
         description: result.description || 'The agent needs your review before this can become a marker.',
