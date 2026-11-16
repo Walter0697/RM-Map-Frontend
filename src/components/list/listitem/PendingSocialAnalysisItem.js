@@ -12,11 +12,12 @@ function resolveImageURL(value) {
     return `${backend.IMAGE_LINK}/${imageURL}`
 }
 
-function PendingSocialAnalysisItem({ item, onClick, onApprove, onReject, working }) {
+function PendingSocialAnalysisItem({ item, typeIcon, onClick, onApprove, onReject, working }) {
     const [imageFailed, setImageFailed] = useState(false)
     const result = item?.result || {}
     const location = result.location || {}
     const imageURL = resolveImageURL(result.image_url)
+    const categoryIconURL = typeIcon ? `${backend.IMAGE_LINK}${typeIcon.startsWith('/') ? typeIcon : `/${typeIcon}`}` : ''
     const title = location.name || result.description || 'Pending marker'
     const description = result.description || 'The agent needs your review before this can become a marker.'
 
@@ -43,6 +44,8 @@ function PendingSocialAnalysisItem({ item, onClick, onApprove, onReject, working
                 <div style={{ width: '34%', minWidth: '96px', maxWidth: '130px', minHeight: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '6px', background: '#d9e6f3' }}>
                     {imageURL && !imageFailed ? (
                         <img src={imageURL} alt='' onError={() => setImageFailed(true)} style={{ width: '100%', height: '96px', objectFit: 'cover' }} />
+                    ) : categoryIconURL ? (
+                        <img src={categoryIconURL} alt='' style={{ maxHeight: '84px', maxWidth: '92%', objectFit: 'contain' }} />
                     ) : <FactCheckIcon sx={{ fontSize: 56, color: '#1f76bd' }} />}
                 </div>
                 <div style={{ paddingLeft: '12px', minWidth: 0, flex: 1 }}>

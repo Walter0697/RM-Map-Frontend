@@ -8,6 +8,7 @@ function PendingSocialAnalysisButton({ onClickHandler, count = 0 }) {
             variant='contained'
             size='large'
             style={{
+                position: 'relative',
                 backgroundColor: '#48acdb',
                 height: '100%',
                 width: '100%',
@@ -26,7 +27,10 @@ function PendingSocialAnalysisButton({ onClickHandler, count = 0 }) {
                 <span
                     aria-label={`${count} pending markers`}
                     style={{
-                        marginLeft: 'auto',
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
                         minWidth: '24px',
                         height: '24px',
                         padding: '0 6px',

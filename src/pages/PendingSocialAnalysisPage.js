@@ -21,7 +21,7 @@ import PendingSocialAnalysisItem from '../components/list/listitem/PendingSocial
 import backend from '../constant/backend'
 import { fetchPendingSocialMediaAnalysis, updatePendingSocialMediaAnalysis } from './socialMediaPending'
 
-function PendingSocialAnalysisPage({ jwt }) {
+function PendingSocialAnalysisPage({ jwt, eventtypes }) {
     const history = useHistory()
     const [items, setItems] = useState([])
     const [loading, setLoading] = useState(true)
@@ -66,14 +66,21 @@ function PendingSocialAnalysisPage({ jwt }) {
                 {!loading && items.length === 0 ? <Typography color='text.secondary'>No pending markers.</Typography> : null}
                 <List disablePadding sx={{ display: 'grid', gap: 2 }}>
                     {items.map((item) => (
+                        (() => {
+                            const markerType = item.result?.marker_type || ''
+                            const typeIcon = eventtypes.find((eventtype) => eventtype.value === markerType)?.icon_path || ''
+                            return (
                         <PendingSocialAnalysisItem
                             key={item.job_id}
                             item={item}
+                            typeIcon={typeIcon}
                             onClick={() => setSelectedItem(item)}
                             onReject={() => update(item, 'reject')}
                             onApprove={() => update(item, 'approve')}
                             working={workingID === item.job_id}
                         />
+                            )
+                        })()
                     ))}
                 </List>
             </Box>
@@ -100,4 +107,4 @@ function PendingSocialAnalysisPage({ jwt }) {
     )
 }
 
-export default connect((state) => ({ jwt: state.auth.jwt }))(PendingSocialAnalysisPage)
+export default connect((state) => ({ jwt: state.auth.jwt, eventtypes: state.marker.eventtypes || [] }))(PendingSocialAnalysisPage)
