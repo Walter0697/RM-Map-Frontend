@@ -1,3 +1,7 @@
+export function getPendingSocialMediaAnalysisJobID(search) {
+    return new URLSearchParams(search || '').get('job_id') || ''
+}
+
 export async function fetchPendingSocialMediaAnalysis(fetchImpl, baseURL, jwt) {
     const response = await fetchImpl(`${baseURL}/settings/social-media-analysis/pending`, {
         method: 'GET',
