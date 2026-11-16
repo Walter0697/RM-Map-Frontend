@@ -11,6 +11,13 @@ import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
 import ImageHeadText from '../../wrapper/ImageHeadText'
 import constant from '../../../scripts/constant'
 
+function resolveImageLink(value) {
+    const imageLink = `${value || ''}`.trim()
+    if (!imageLink) return `${backend.IMAGE_LINK}`
+    if (/^https?:\/\//i.test(imageLink)) return imageLink
+    return `${backend.IMAGE_LINK}${imageLink.startsWith('/') ? imageLink : `/${imageLink}`}`
+}
+
 function MarkerItem({
     item,
     typeIcon,
@@ -85,7 +92,7 @@ function MarkerItem({
                             objectFit: 'cover',
                             borderRadius: '6px',
                         }}
-                        src={backend.IMAGE_LINK + item.image_link}
+                        src={resolveImageLink(item.image_link)}
                         onError={onImageFailedToLoad}
                     />
                 </div>
@@ -108,7 +115,7 @@ function MarkerItem({
                             maxWidth: '92%',
                             objectFit: 'contain',
                         }}
-                        src={backend.IMAGE_LINK + typeIcon}
+                        src={resolveImageLink(typeIcon)}
                     />
                 </div>
             )}

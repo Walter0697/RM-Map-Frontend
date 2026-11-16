@@ -17,7 +17,8 @@ import {
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import TopBar from '../components/topbar/TopBar'
 import Base from './Base'
-import PendingSocialAnalysisItem from '../components/list/listitem/PendingSocialAnalysisItem'
+import PendingSocialAnalysisItem, { buildPendingMarkerItem } from '../components/list/listitem/PendingSocialAnalysisItem'
+import MarkerItem from '../components/list/listitem/MarkerItem'
 import backend from '../constant/backend'
 import { fetchPendingSocialMediaAnalysis, updatePendingSocialMediaAnalysis } from './socialMediaPending'
 
@@ -28,6 +29,10 @@ function PendingSocialAnalysisPage({ jwt, eventtypes }) {
     const [error, setError] = useState('')
     const [workingID, setWorkingID] = useState('')
     const [selectedItem, setSelectedItem] = useState(null)
+
+    const selectedTypeIcon = selectedItem
+        ? eventtypes.find((eventtype) => eventtype.value === (selectedItem.result?.marker_type || ''))?.icon_path || ''
+        : ''
 
     const load = useCallback(async () => {
         setLoading(true)
@@ -87,6 +92,7 @@ function PendingSocialAnalysisPage({ jwt, eventtypes }) {
             <Dialog fullWidth maxWidth='sm' open={!!selectedItem} onClose={() => setSelectedItem(null)}>
                 <DialogTitle>{selectedItem?.result?.location?.name || selectedItem?.result?.description || 'Pending marker details'}</DialogTitle>
                 <DialogContent dividers>
+                    {selectedItem ? <MarkerItem item={buildPendingMarkerItem(selectedItem)} typeIcon={selectedTypeIcon} onClickHandler={() => {}} /> : null}
                     <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
                         Review the extracted information before adding it to the map.
                     </Typography>
