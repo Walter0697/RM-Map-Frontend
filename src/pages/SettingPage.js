@@ -38,6 +38,7 @@ import actions from '../store/actions'
 import graphql from '../graphql'
 import {
     buildSocialMediaShortcutLaunchURL,
+    getSocialMediaShortcutSetupURL,
     requestSocialMediaShortcutSetup,
 } from './socialMediaShortcut'
 import {
@@ -385,9 +386,26 @@ function SettingPage({
         }
     }
 
-    const configureIOSShortcut = () => {
-        if (!shortcutSetupURL) return
-        window.location.assign(buildSocialMediaShortcutLaunchURL(shortcutSetupURL))
+    const configureIOSShortcut = async () => {
+        if (!jwt || shortcutInstallLoading) return
+        setShortcutInstallLoading(true)
+        setShortcutInstallError('')
+        try {
+            const setupURL = await getSocialMediaShortcutSetupURL(
+                fetch,
+                backend.withBasePath('settings/ios-shortcut/setup'),
+                jwt,
+                shortcutSetupURL,
+            )
+            setShortcutSetupURL(setupURL)
+            window.location.assign(buildSocialMediaShortcutLaunchURL(setupURL))
+        } catch (error) {
+            if (error?.name !== 'AbortError') {
+                setShortcutInstallError(error?.message || 'Could not configure the Roroadmap Shortcut.')
+            }
+        } finally {
+            setShortcutInstallLoading(false)
+        }
     }
 
     const openTalkToRoroadBot = () => {
@@ -674,24 +692,16 @@ function SettingPage({
                     <Typography variant='body2'>
                         <strong>2.</strong> After adding it, tap Configure below to register this Roroadmap account on your iPhone.
                     </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Box sx={{ display: 'grid', gap: 1.5 }}>
                         <Button
-                        size='large'
-                        variant='outlined'
-                        aria-label='Download shortcut'
-                        onClick={prepareIOSShortcutInstall}
-                        disabled={shortcutInstallLoading}
-                        sx={{
-                            py: 0,
-                            width: 160,
-                            height: 160,
-                            minWidth: 160,
-                            minHeight: 160,
-                            borderRadius: 1,
-                            display: 'flex',
-                            justifyContent: 'center',
-                        }}
-                    >
+                            fullWidth
+                            size='large'
+                            variant='contained'
+                            aria-label='Download shortcut'
+                            onClick={prepareIOSShortcutInstall}
+                            disabled={shortcutInstallLoading}
+                            sx={{ minHeight: 52 }}
+                        >
                         <span
                             style={{
                                 display: 'inline-flex',
@@ -703,24 +713,24 @@ function SettingPage({
                         >
                             <span
                                 style={{
-                                    position: 'relative',
-                                    display: 'inline-flex',
-                                    width: '88px',
-                                    height: '88px',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                <AltRouteIcon style={{ fontSize: '76px' }} />
+                                position: 'relative',
+                                display: 'inline-flex',
+                                width: '32px',
+                                height: '32px',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <AltRouteIcon style={{ fontSize: '32px' }} />
                                 <AppleIcon
                                     style={{
-                                        fontSize: '28px',
+                                        fontSize: '16px',
                                         position: 'absolute',
                                         left: '2px',
                                         bottom: '2px',
                                         background: '#fff',
                                         borderRadius: '999px',
-                                        padding: '2px',
+                                    padding: '1px',
                                     }}
                                 />
                             </span>
@@ -735,16 +745,18 @@ function SettingPage({
                             {shortcutInstallLoading ? 'preparing' : shortcutDownloadURL ? 'download again' : 'download'}
                             </span>
                         </span>
-                    </Button>
+                        </Button>
+                        <Button
+                            fullWidth
+                            size='large'
+                            variant='contained'
+                            onClick={configureIOSShortcut}
+                            disabled={shortcutInstallLoading}
+                            sx={{ minHeight: 52 }}
+                        >
+                            Configure Roroadmap Analyze
+                        </Button>
                     </Box>
-                    <Button
-                        fullWidth
-                        variant='contained'
-                        onClick={configureIOSShortcut}
-                        disabled={!shortcutSetupURL || shortcutInstallLoading}
-                    >
-                        Configure Roroadmap Analyze
-                    </Button>
                     {shortcutInstallError ? (
                         <Typography color='error' variant='body2' sx={{ textAlign: 'center' }}>
                             {shortcutInstallError}

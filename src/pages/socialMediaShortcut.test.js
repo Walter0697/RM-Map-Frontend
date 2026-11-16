@@ -1,5 +1,6 @@
 import {
     buildSocialMediaShortcutLaunchURL,
+    getSocialMediaShortcutSetupURL,
     requestSocialMediaShortcutSetup,
 } from './socialMediaShortcut'
 
@@ -35,5 +36,19 @@ describe('social media Shortcut setup', () => {
 
         await expect(requestSocialMediaShortcutSetup(fetchImpl, '/settings/ios-shortcut/setup', 'jwt-token'))
             .rejects.toThrow('Could not prepare the Roroadmap Shortcut.')
+    })
+
+    test('requests a fresh setup URL when no cached URL is available', async () => {
+        const fetchImpl = jest.fn(async () => ({
+            ok: true,
+            json: async () => ({ setup_url: 'https://api.example.test/api/shortcut/setup/fresh-token' }),
+        }))
+
+        await expect(getSocialMediaShortcutSetupURL(
+            fetchImpl,
+            '/settings/ios-shortcut/setup',
+            'jwt-token',
+            '',
+        )).resolves.toBe('https://api.example.test/api/shortcut/setup/fresh-token')
     })
 })
