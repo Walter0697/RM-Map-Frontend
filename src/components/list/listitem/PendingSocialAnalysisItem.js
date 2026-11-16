@@ -1,6 +1,4 @@
 import React from 'react'
-import { Button } from '@mui/material'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import MarkerItem from './MarkerItem'
 
 export function buildPendingMarkerItem(item) {
@@ -19,20 +17,13 @@ export function buildPendingMarkerItem(item) {
     }
 }
 
-function PendingSocialAnalysisItem({ item, typeIcon, onClick, onApprove, onReject, working }) {
+function PendingSocialAnalysisItem({ item, typeIcon, onClick }) {
     return (
-        <div>
-            <MarkerItem
-                item={buildPendingMarkerItem(item)}
-                typeIcon={typeIcon}
-                onClickHandler={onClick}
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
-                <Button size='small' color='error' variant='outlined' onClick={onReject} disabled={working}>Not good</Button>
-                <Button size='small' variant='contained' onClick={onApprove} disabled={working}>Good, add marker</Button>
-                <Button size='small' href={item.source_url} target='_blank' rel='noreferrer' endIcon={<OpenInNewIcon />} sx={{ color: '#071c8d' }}>Source</Button>
-            </div>
-        </div>
+        <MarkerItem
+            item={buildPendingMarkerItem(item)}
+            typeIcon={typeIcon}
+            onClickHandler={onClick}
+        />
     )
 }
 
