@@ -48,6 +48,14 @@ function registerValidSW(swUrl, config) {
   navigator.serviceWorker
     .register(swUrl)
     .then((registration) => {
+      let reloadedForUpdate = false
+
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloadedForUpdate) return
+        reloadedForUpdate = true
+        window.location.reload()
+      })
+
       registration.onupdatefound = () => {
         const installingWorker = registration.installing
         if (installingWorker == null) {
@@ -56,10 +64,9 @@ function registerValidSW(swUrl, config) {
         installingWorker.onstatechange = () => {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
-              // At this point, the updated precached content has been fetched,
-              // but the previous service worker will still serve the older
-              // content until all client tabs are closed.
-              // Execute callback
+              // Activate the new worker immediately so an open PWA does not
+              // keep serving the previous application bundle indefinitely.
+              installingWorker.postMessage({ type: 'SKIP_WAITING' })
               if (config && config.onUpdate) {
                 config.onUpdate(registration)
               }
