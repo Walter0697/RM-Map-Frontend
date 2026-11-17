@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { connect } from 'react-redux'
-import { useHistory } from 'react-router-dom'
+import { useHistory, useLocation } from 'react-router-dom'
 import {
     Alert,
     Box,
@@ -14,10 +14,11 @@ import Base from './Base'
 import PendingSocialAnalysisItem, { buildPendingMarkerItem } from '../components/list/listitem/PendingSocialAnalysisItem'
 import MarkerView from '../components/marker/MarkerView'
 import backend from '../constant/backend'
-import { fetchPendingSocialMediaAnalysis, updatePendingSocialMediaAnalysis } from './socialMediaPending'
+import { fetchPendingSocialMediaAnalysis, getPendingSocialMediaAnalysisJobID, updatePendingSocialMediaAnalysis } from './socialMediaPending'
 
 function PendingSocialAnalysisPage({ jwt, eventtypes }) {
     const history = useHistory()
+    const location = useLocation()
     const [items, setItems] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -46,6 +47,14 @@ function PendingSocialAnalysisPage({ jwt, eventtypes }) {
     }, [jwt])
 
     useEffect(() => { load() }, [load])
+
+    useEffect(() => {
+        if (loading) return
+        const jobID = getPendingSocialMediaAnalysisJobID(location.search)
+        if (!jobID) return
+        const matchingItem = items.find((item) => item.job_id === jobID)
+        if (matchingItem) setSelectedItem(matchingItem)
+    }, [items, loading, location.search])
 
     const update = async (item, action) => {
         setWorkingID(item.job_id)
