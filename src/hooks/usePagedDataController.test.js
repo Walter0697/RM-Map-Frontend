@@ -14,6 +14,7 @@ function Harness({ fetchPage }) {
     return (
         <div>
             <div data-testid='count'>{controller.items.length}</div>
+            <div data-testid='ids'>{controller.items.map(item => item.id).join(',')}</div>
             <div data-testid='next'>{controller.nextCursor || ''}</div>
             <div data-testid='error'>{controller.error ? 'yes' : 'no'}</div>
             <button onClick={() => controller.refresh()}>refresh</button>
@@ -51,6 +52,29 @@ describe('usePagedDataController', () => {
         fireEvent.click(screen.getByText('loadMore'))
         await waitFor(() => expect(screen.getByTestId('count').textContent).toBe('3'))
         expect(screen.getByTestId('next').textContent).toBe('')
+    })
+
+    test('keeps marker pages ordered newest first', async () => {
+        const fetchPage = jest.fn(async (cursor) => {
+            if (!cursor) {
+                return {
+                    items: [{ id: 5 }, { id: 4 }],
+                    nextCursor: '4',
+                }
+            }
+            return {
+                items: [{ id: 3 }, { id: 2 }],
+                nextCursor: null,
+            }
+        })
+
+        render(<Harness fetchPage={fetchPage} />)
+
+        fireEvent.click(screen.getByText('refresh'))
+        await waitFor(() => expect(screen.getByTestId('ids').textContent).toBe('5,4'))
+
+        fireEvent.click(screen.getByText('loadMore'))
+        await waitFor(() => expect(screen.getByTestId('ids').textContent).toBe('5,4,3,2'))
     })
 
     test('handles empty states', async () => {

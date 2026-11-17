@@ -54,8 +54,8 @@ function usePagedDataController({
             merged.push(item)
         })
         merged.sort((a, b) => {
-            if ((a?.id || 0) < (b?.id || 0)) return -1
-            if ((a?.id || 0) > (b?.id || 0)) return 1
+            if ((a?.id || 0) < (b?.id || 0)) return 1
+            if ((a?.id || 0) > (b?.id || 0)) return -1
             return 0
         })
         return merged
