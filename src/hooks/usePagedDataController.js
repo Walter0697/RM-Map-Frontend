@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { buildPagedCacheKey, writePagedCache, readPagedCache } from '../scripts/pagedCache'
+import { sortMarkersLatestFirst } from '../scripts/markerOrder'
 import telemetry from '../scripts/telemetry'
 
 const DEFAULT_TTL_MS = 5 * 60 * 1000
@@ -53,12 +54,7 @@ function usePagedDataController({
             dedupe[id] = true
             merged.push(item)
         })
-        merged.sort((a, b) => {
-            if ((a?.id || 0) < (b?.id || 0)) return 1
-            if ((a?.id || 0) > (b?.id || 0)) return -1
-            return 0
-        })
-        return merged
+        return sortMarkersLatestFirst(merged)
     }, [])
 
     const execute = useCallback(async (cursor = '', replace = false) => {

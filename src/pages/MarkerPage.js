@@ -28,6 +28,7 @@ import AutoHideAlert from '../components/AutoHideAlert'
 import CountrySelect from '../components/map/mappart/countryselect/CountrySelect'
 
 import search from '../scripts/search'
+import { sortMarkersLatestFirst } from '../scripts/markerOrder'
 
 import styles from '../styles/list.module.css'
 import graphql from '../graphql'
@@ -146,7 +147,7 @@ function MarkerPage({
             // Prefer Redux-edited markers over paged query snapshot values.
             dedupe[marker.id] = marker
         })
-        return Object.values(dedupe)
+        return sortMarkersLatestFirst(Object.values(dedupe))
     }, [markerSource, markers])
 
     const filteredMarkers = useMemo(() => {
