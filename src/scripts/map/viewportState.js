@@ -1,6 +1,6 @@
 const getMarkerId = (marker) => marker?.id ?? marker?.marker_id ?? marker?.markerId ?? null
 
-const deriveViewportCountrySelection = (markers = [], fallbackCountryCode = 'HK') => {
+const deriveViewportCountrySelection = (markers = [], fallbackCountryCode = 'CA') => {
     const counts = {}
     markers.forEach((marker) => {
         const countryCode = marker?.country_code

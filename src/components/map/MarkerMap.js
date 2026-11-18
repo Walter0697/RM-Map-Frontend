@@ -413,7 +413,7 @@ function MarkerMap({
         if (!viewportMarkers || viewportMarkers.length === 0) return
         const nextCountry = viewportState.deriveViewportCountrySelection(
             viewportMarkers,
-            filtercountry?.countryCode || 'HK',
+            filtercountry?.countryCode || 'CA',
         )
         if (!nextCountry) return
         if (viewportState.isSameFilterCountry(filtercountry, nextCountry)) return

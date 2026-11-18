@@ -8,7 +8,7 @@ export default function markerReducer(state = {
     countrycodes: [],
     countryparts: [],
     filtercountry: {
-        countryCode: 'HK',
+        countryCode: 'CA',
         countryPart: {
             type: 'all',
         },
