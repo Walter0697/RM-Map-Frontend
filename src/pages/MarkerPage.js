@@ -205,7 +205,7 @@ function MarkerPage({
                     return
                 }
 
-                const selectedCountryCode = selected.country_code || filtercountry?.countryCode || 'HK'
+                const selectedCountryCode = selected.country_code || filtercountry?.countryCode || 'CA'
                 const selectedParts = countryparts?.[selectedCountryCode] || []
                 const selectedPart = selected.country_part
                 const countryPart = (selectedPart && selectedParts.includes(selectedPart))
