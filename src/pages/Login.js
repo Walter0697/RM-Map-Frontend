@@ -27,6 +27,7 @@ import backend from '../constant/backend'
 import httpScript from '../scripts/http'
 import deepLinkScript from '../scripts/deepLink'
 import { consumeTerminalUnauthorizedMessage } from '../scripts/authSession'
+import { establishMcpBrowserSession } from '../scripts/mcpSession'
 
 import styles from '../styles/login.module.css'
 
@@ -89,9 +90,10 @@ function Login({ jwt, pendingDeepLink, dispatch }) {
         const callbackUsername = callbackParams.username
         if (callbackToken && callbackUsername) {
             dispatch(actions.login(callbackToken, callbackUsername))
+            establishMcpBrowserSession(authBackend, callbackToken)
             window.history.replaceState({}, document.title, '/login')
         }
-    }, [dispatch, callbackParams])
+    }, [authBackend, dispatch, callbackParams])
 
     useEffect(() => {
         const message = consumeTerminalUnauthorizedMessage()
@@ -145,11 +147,12 @@ function Login({ jwt, pendingDeepLink, dispatch }) {
             // set time out for switching page
             timer = window.setTimeout(() => {
                 //history.replace('/home')
+                establishMcpBrowserSession(authBackend, loginResult.jwt)
                 dispatch(actions.login(loginResult.jwt, loginResult.username))
             }, 500)
         }
         return () => { timer && window.clearTimeout(timer) }
-    }, [loginState, loginResult])
+    }, [authBackend, loginState, loginResult])
 
     // make sure that animation and information both ended before going to successful page
     useEffect(() => {
