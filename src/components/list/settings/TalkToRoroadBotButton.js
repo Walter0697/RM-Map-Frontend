@@ -28,7 +28,7 @@ function TalkToRoroadBotButton({
         >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                 <TelegramIcon />
-                Talk to RoroadBot
+                Add RoroadBot to contact list
             </span>
         </Button>
     )
