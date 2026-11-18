@@ -14,10 +14,8 @@ import WatchedMovieListButton from './settings/WatchedMovieListButton'
 import TravelPlansButton from './settings/TravelPlansButton'
 import PreviewDisplayPinButton from './settings/PreviewDisplayPinButton'
 import GoogleCalendarConnectionButton from './settings/GoogleCalendarConnectionButton'
-import ReminderTimeButton from './settings/ReminderTimeButton'
 import TalkToRoroadBotButton from './settings/TalkToRoroadBotButton'
 import SocialMediaPostShortcutButton from './settings/SocialMediaPostShortcutButton'
-import IOSShortcutInstallButton from './settings/IOSShortcutInstallButton'
 import APIKeyListButton from './settings/APIKeyListButton'
 import PendingSocialAnalysisButton from './settings/PendingSocialAnalysisButton'
 
@@ -29,7 +27,6 @@ import MapIcon from '@mui/icons-material/Map'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone'
-import SmartToyIcon from '@mui/icons-material/SmartToy'
 import VpnKeyIcon from '@mui/icons-material/VpnKey'
 
 import * as serviceWorkerRegistration from '../../serviceWorkerRegistration'
@@ -47,8 +44,6 @@ function SettingList({
   openPreviewDisplayPinForm,
   showIOSShortcutInstallCTA,
   openIOSShortcutInstall,
-  showLegacyIOSShortcutCTA,
-  openLegacyIOSShortcutInstall,
   openAPIKeyList,
   pendingSocialAnalysisCount,
   openPendingSocialAnalysis,
@@ -57,8 +52,6 @@ function SettingList({
   isGoogleCalendarLoading,
   openGoogleCalendarConnect,
   disconnectGoogleCalendar,
-  reminderTime,
-  openReminderTimeForm,
   openTalkToRoroadBot,
   showTalkToRoroadBot,
   openSavedTravelPlans,
@@ -209,7 +202,7 @@ function SettingList({
             ) : null}
           </>
         ) : null}
-        {showIOSShortcutInstallCTA ? (
+        {showIOSShortcutInstallCTA || showTalkToRoroadBot ? (
           <>
             <WrapperBox
               height={50}
@@ -239,50 +232,22 @@ function SettingList({
             </WrapperBox>
             <WrapperBox
               height={30}
-              marginBottom={'30px'}
+              marginBottom={'15px'}
             >
               <APIKeyListButton
                 onClickHandler={openAPIKeyList}
               />
             </WrapperBox>
+            <WrapperBox
+              height={30}
+              marginBottom={'30px'}
+            >
+              <TalkToRoroadBotButton
+                onClickHandler={openTalkToRoroadBot}
+                disabled={!showTalkToRoroadBot}
+              />
+            </WrapperBox>
           </>
-        ) : null}
-        <WrapperBox
-          height={50}
-          marginBottom={'15px'}
-        >
-          <SectionHeader
-            title={'RoroadBot'}
-            icon={<SmartToyIcon />}
-          />
-        </WrapperBox>
-        <WrapperBox
-          height={30}
-          marginBottom={'15px'}
-        >
-          <TalkToRoroadBotButton
-            onClickHandler={openTalkToRoroadBot}
-            disabled={!showTalkToRoroadBot}
-          />
-        </WrapperBox>
-        <WrapperBox
-          height={30}
-          marginBottom={'15px'}
-        >
-          <ReminderTimeButton
-            reminderTime={reminderTime}
-            onClickHandler={openReminderTimeForm}
-          />
-        </WrapperBox>
-        {showLegacyIOSShortcutCTA ? (
-          <WrapperBox
-            height={30}
-            marginBottom={'30px'}
-          >
-            <IOSShortcutInstallButton
-              onClickHandler={openLegacyIOSShortcutInstall}
-            />
-          </WrapperBox>
         ) : null}
         <WrapperBox
           height={50}
